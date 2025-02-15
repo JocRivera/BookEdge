@@ -1,0 +1,82 @@
+.Nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 0.5rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.logo-nav {
+  flex: 0 1 auto; /* El logo solo ocupará el espacio necesario */
+}
+
+.logo-nav img {
+  height: 50px;
+  width: auto;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra el menú */
+  flex-grow: 1; /* Se asegura de que el menú ocupe el espacio disponible */
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link-login {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  justify-content: flex-end; /* Alinea los enlaces a la derecha */
+}
+
+.link {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: #007bff;
+}
+
+.btn-link {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.login {
+  background-color: #007bff;
+  color: white;
+}
+
+.login:hover {
+  background-color: #0056b3;
+}
+
+.register {
+  background-color: #28a745;
+  color: white;
+}
+
+.register:hover {
+  background-color: #218838;
+}

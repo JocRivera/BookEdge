@@ -1,0 +1,57 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Allan:wght@400;700&family=Henny+Penny&family=Jersey+15&family=Oleo+Script:wght@400;700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.auth-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    padding: 0.1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: rgb(71, 134, 168);
+    border-radius: 10px;
+}
+
+.auth-content {
+    display: flex;
+    align-items: center;
+    gap: 60rem;
+}
+
+.title-logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fefefe;
+    margin: 0;
+    font-family: "Henny Penny", serif;
+    
+}
+
+.log-aut img {
+    height: 50px; 
+    width: auto;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .auth-content {
+        gap: 0;
+    }
+
+    .title-logo {
+        font-size: 1.5rem;
+    }
+
+    .log-aut img {
+        height: 40px;
+    }
+}
