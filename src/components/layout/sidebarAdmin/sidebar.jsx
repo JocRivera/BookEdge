@@ -5,6 +5,7 @@ import { MdDashboard, MdBedroomParent, MdCabin, MdPeople } from "react-icons/md"
 import { IoMdArrowDropdownCircle, IoMdArrowDropupCircle } from "react-icons/io";
 import logoDev from "../../../assets/LogoAzul.png";
 import './sidebar.css';
+import { FaServicestack } from "react-icons/fa";
 
 export default function Sidebar() {
   const [openSubmenuId, setOpenSubmenuId] = useState(null);
@@ -47,8 +48,14 @@ export default function Sidebar() {
       text: "Comodidades",
       link: "/admin/accommodations",
     },
+    {
+      id: 5,
+      name: <FaServicestack size={20} />,
+      text: "Servicios",
+      link: "/admin/services",
+    }
   ];
-  
+
   const toggleSubmenu = (id) => {
     setOpenSubmenuId(openSubmenuId === id ? null : id);
   };
@@ -70,8 +77,8 @@ export default function Sidebar() {
                 {item.name}
                 <span>{item.text}</span>
                 <span className="arrow">
-                  {openSubmenuId === item.id ? 
-                    <IoMdArrowDropupCircle size={20} /> : 
+                  {openSubmenuId === item.id ?
+                    <IoMdArrowDropupCircle size={20} /> :
                     <IoMdArrowDropdownCircle size={20} />
                   }
                 </span>

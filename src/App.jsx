@@ -7,6 +7,7 @@ import RecoveryPassword from "./components/features/componentAuth/recoveryPasswo
 import Emailcode from "./components/features/componentAuth/Emailcode";
 import AdminLayout from "./components/layout/sidebarAdmin/adminLayout";
 import CreateClientes from "./components/features/componentClients/createClientes";
+import CreateServices from "./components/features/componentService/createServices";
 import ComponentConfort from "./components/features/componentConfort/componentConfort";
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="clients" element={<CreateClientes />} />
           <Route path="accommodations" element={<ComponentConfort />} />
+          <Route path="services" element={<CreateServices />} />
         </Route>
       </Routes>
     </BrowserRouter>
