@@ -6,6 +6,7 @@ import { IoMdArrowDropdownCircle, IoMdArrowDropupCircle } from "react-icons/io";
 import logoDev from "../../../assets/LogoAzul.png";
 import './sidebar.css';
 import { FaServicestack } from "react-icons/fa";
+import { SettingsIcon } from "lucide-react";
 
 export default function Sidebar() {
   const [openSubmenuId, setOpenSubmenuId] = useState(null);
@@ -53,6 +54,12 @@ export default function Sidebar() {
       name: <FaServicestack size={20} />,
       text: "Servicios",
       link: "/admin/services",
+    },
+    {
+      id: 6,
+      name: <SettingsIcon size={20} />,
+      text: "configuracion",
+      link: "/admin/config ",
     }
   ];
 

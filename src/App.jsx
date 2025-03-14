@@ -9,7 +9,7 @@ import AdminLayout from "./components/layout/sidebarAdmin/adminLayout";
 import CreateClientes from "./components/features/componentClients/createClientes";
 import CreateServices from "./components/features/componentService/createServices";
 import ComponentConfort from "./components/features/componentConfort/componentConfort";
-
+import CreateConfig from "./components/features/componenetConfig/createConfig";
 export default function App() {
   return (
     <BrowserRouter>
@@ -28,6 +28,7 @@ export default function App() {
           <Route path="clients" element={<CreateClientes />} />
           <Route path="accommodations" element={<ComponentConfort />} />
           <Route path="services" element={<CreateServices />} />
+          <Route path="config" element={<CreateConfig />} />
         </Route>
       </Routes>
     </BrowserRouter>

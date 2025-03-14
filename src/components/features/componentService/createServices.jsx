@@ -51,8 +51,8 @@ export default function CreateServices() {
                         <th>Id</th>
                         <th>Nombre Completo</th>
                         <th>Tipo de documento</th>
-                        <th>Número de documento</th>
-                        <th>Número de celular</th>
+                        <th>Precio</th>
+                        <th>Status</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
