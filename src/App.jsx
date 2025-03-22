@@ -6,7 +6,7 @@ import RegisterForm from "./components/features/componentAuth/register";
 import RecoveryPassword from "./components/features/componentAuth/recoveryPassword";
 import Emailcode from "./components/features/componentAuth/Emailcode";
 import AdminLayout from "./components/layout/sidebarAdmin/adminLayout";
-import CreateClientes from "./components/features/componentClients/createClientes";
+import TableUser from "./components/features/componentClients/tableClients";
 import ComponentConfort from "./components/features/componentConfort/componentConfort";
 
 export default function App() {
@@ -24,10 +24,11 @@ export default function App() {
 
         {/* Rutas administrativas */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route path="clients" element={<CreateClientes />} />
+          <Route path="clients" element={<TableUser />} />
           <Route path="accommodations" element={<ComponentConfort />} />
         </Route>
       </Routes>
+      
     </BrowserRouter>
   );
 }

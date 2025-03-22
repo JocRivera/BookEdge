@@ -11,9 +11,7 @@ export default function RegisterForm() {
         <form className="register-form">
           <h2 className="title">Crear cuenta en BookEdge</h2>
           <p className="description">
-            Completa tus datos para comenzar a explorar nuestra biblioteca
-            digital.
-          </p>
+            Completa tus datos para comenzar nuestra hosteria.          </p>
 
           <div className="form-grid">
             <div className="form-column">
