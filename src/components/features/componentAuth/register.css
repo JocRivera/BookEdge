@@ -10,6 +10,8 @@
 
 .register-form {
   background: white;
+  display: flex;
+  flex-direction: column;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -38,6 +40,7 @@
   gap: 2rem;
   margin-bottom: 1.5rem;
 }
+
 
 /* En pantallas pequeñas, las columnas se apilan */
 @media (max-width: 768px) {

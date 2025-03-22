@@ -1,102 +1,159 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { IoBedSharp } from "react-icons/io5";
-import { MdDashboard, MdBedroomParent, MdCabin, MdPeople } from "react-icons/md";
-import { IoMdArrowDropdownCircle, IoMdArrowDropupCircle } from "react-icons/io";
-import logoDev from "../../../assets/LogoAzul.png";
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { IoBedSharp } from 'react-icons/io5';
+import { MdDashboard, MdBedroomParent, MdCabin, MdPeople } from 'react-icons/md';
+import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
 import './sidebar.css';
 
-export default function Sidebar() {
-  const [openSubmenuId, setOpenSubmenuId] = useState(null);
+const Sidebar = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [activeSubMenu, setActiveSubMenu] = useState('');
+  const menuRef = useRef(null);
 
-  const menuItems = [
-    {
-      id: 1,
-      name: <MdDashboard size={20} />,
-      text: "Dashboard",
-      link: "/admin/dashboard",
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+    // Propagar el estado del sidebar al componente padre
+    const event = new CustomEvent('sidebarToggle', { detail: { collapsed: !collapsed } });
+    document.dispatchEvent(event);
+    
+    // Cerrar submenús al colapsar
+    if (!collapsed) {
+      setActiveSubMenu('');
+    }
+  };
+
+  const toggleSubMenu = (menuName, e) => {
+    e.preventDefault(); // Prevenir el comportamiento predeterminado
+    e.stopPropagation(); // Prevenir que el clic se propague
+    
+   
+      setActiveSubMenu(activeSubMenu === menuName ? '' : menuName);
+    
+  };
+
+  // Cierra el submenú si se hace clic fuera de él
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveSubMenu('');
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  // Datos del submenú para habitaciones
+  const habitacionesSubmenu = [
+    { 
+      path: "/admin/cabins", 
+      icon: <MdCabin />, 
+      text: "Cabañas" 
     },
-    {
-      id: 2,
-      name: <MdPeople size={20} />,
-      text: "Clientes",
-      link: "/admin/clients",
-    },
-    {
-      id: 3,
-      name: <MdBedroomParent size={20} />,
-      text: "Habitaciones",
-      submenu: [
-        {
-          id: 61,
-          name: <MdCabin size={20} />,
-          text: "Cabañas",
-          link: "/admin/cabins",
-        },
-        {
-          id: 62,
-          name: <IoBedSharp size={20} />,
-          text: "Habitaciones",
-          link: "/admin/rooms",
-        },
-      ],
-    },
-    {
-      id: 4,
-      name: <MdCabin size={20} />,
-      text: "Comodidades",
-      link: "/admin/accommodations",
-    },
+    { 
+      path: "/admin/rooms", 
+      icon: <IoBedSharp />, 
+      text: "Habitaciones" 
+    }
   ];
-  
-  const toggleSubmenu = (id) => {
-    setOpenSubmenuId(openSubmenuId === id ? null : id);
+
+  // Calcular la posición del submenú basado en el elemento padre
+  const calculateSubmenuPosition = (e) => {
+    if (!collapsed) return;
+    
+    const menuItem = e.currentTarget.closest('.menu-item');
+    if (menuItem) {
+      const rect = menuItem.getBoundingClientRect();
+      const submenu = menuItem.querySelector('.submenu.stacked-buttons');
+      
+      if (submenu) {
+        submenu.style.top = `${rect.top}px`;
+      }
+    }
   };
 
   return (
-    <aside className="sidebar">
+    <div className={`sidebar ${collapsed ? 'collapsed' : ''}`} ref={menuRef}>
       <div className="sidebar-header">
-        <img src={logoDev} alt="" />
-        <h2 className="sidebar-title">BookEdge</h2>
+        <div className="logo">
+          <div className="logo-icon">B</div>
+          <span className="logo-text">BookEdge</span>
+        </div>
+        <button className="toggle-btn" onClick={toggleSidebar}>
+          {collapsed ? '→' : '←'}
+        </button>
       </div>
-      <ul className="sidebar-menu">
-        {menuItems.map((item) => (
-          <li key={item.id} className="sidebar-item">
-            {item.submenu ? (
-              <div
-                className="sidebar-link"
-                onClick={() => toggleSubmenu(item.id)}
-              >
-                {item.name}
-                <span>{item.text}</span>
-                <span className="arrow">
-                  {openSubmenuId === item.id ? 
-                    <IoMdArrowDropupCircle size={20} /> : 
-                    <IoMdArrowDropdownCircle size={20} />
-                  }
-                </span>
-              </div>
-            ) : (
-              <Link to={item.link} className="sidebar-link">
-                {item.name}
-                <span>{item.text}</span>
-              </Link>
+      
+      <div className="sidebar-content">
+        <ul className="menu-list">
+          <li className="menu-item">
+            <Link to="/admin/dashboard">
+              <span className="menu-icon"><MdDashboard /></span>
+              <span className="menu-text">Dashboard</span>
+            </Link>
+          </li>
+          
+          <li className="menu-item">
+            <Link to="/admin/clients">
+              <span className="menu-icon"><MdPeople /></span>
+              <span className="menu-text">Clientes</span>
+            </Link>
+          </li>
+          
+          <li className={`menu-item ${activeSubMenu === 'habitaciones' ? 'active' : ''}`}>
+            <div 
+              className="menu-header" 
+              onClick={(e) => {
+                toggleSubMenu('habitaciones', e);
+                calculateSubmenuPosition(e);
+              }}
+            >
+              <span className="menu-icon"><MdBedroomParent /></span>
+              <span className="menu-text">Habitaciones</span>
+              <span className="menu-arrow">
+                {activeSubMenu === 'habitaciones' ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}
+              </span>
+            </div>
+            
+            {/* Mostrar submenú normal cuando no está colapsado */}
+            {!collapsed && (
+              <ul className={`submenu ${activeSubMenu === 'habitaciones' ? 'open' : ''}`}>
+                {habitacionesSubmenu.map((item, index) => (
+                  <li key={index}>
+                    <Link to={item.path}>
+                      <span className="menu-icon">{item.icon}</span>
+                      <span className="menu-text">{item.text}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             )}
-            {item.submenu && openSubmenuId === item.id && (
-              <ul className="sidebar-submenu show">
-                {item.submenu.map((subItem) => (
-                  <li key={subItem.id}>
-                    <Link to={subItem.link}>
-                      {subItem.name}
-                      <span>{subItem.text}</span>
+            
+            {/* Mostrar botones apilados cuando está colapsado */}
+            {collapsed && (
+              <ul className={`submenu stacked-buttons ${activeSubMenu === 'habitaciones' ? 'open' : ''}`}>
+                {habitacionesSubmenu.map((item, index) => (
+                  <li key={index} style={{"--item-index": index}}>
+                    <Link to={item.path}>
+                      <span className="menu-icon">{item.icon}</span>
+                      <span className="menu-text">{item.text}</span>
                     </Link>
                   </li>
                 ))}
               </ul>
             )}
           </li>
-        ))}
-      </ul>
-    </aside>
+          
+          <li className="menu-item">
+            <Link to="/admin/accommodations">
+              <span className="menu-icon"><MdCabin /></span>
+              <span className="menu-text">Comodidades</span>
+            </Link>
+          </li>
+        </ul>
+      </div>
+    </div>
   );
-}
+};
+
+export default Sidebar;
