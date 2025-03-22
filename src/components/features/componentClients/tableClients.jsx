@@ -8,7 +8,9 @@ import {
 } from "../../../services/usersService";
 import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import FormUser from "./formClients";
-import Pagination from "../../common/Paginator/Pagination"
+import Pagination from "../../common/Paginator/Pagination";
+import { CiSearch } from "react-icons/ci";
+import Switch from "../../common/Switch/Switch";
 
 function TableUser() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,7 +39,7 @@ function TableUser() {
       status: "Inactivo",
     },
     {
-      id: 1,
+      id: 3,
       name: "Juan Pérez",
       identificationType: "DNI",
       identification: "12345678",
@@ -48,7 +50,7 @@ function TableUser() {
       status: "Activo",
     },
     {
-      id: 2,
+      id: 4,
       name: "María López",
       identificationType: "Pasaporte",
       identification: "A987654",
@@ -59,7 +61,7 @@ function TableUser() {
       status: "Inactivo",
     },
     {
-      id: 1,
+      id: 5,
       name: "Juan Pérez",
       identificationType: "DNI",
       identification: "12345678",
@@ -70,7 +72,7 @@ function TableUser() {
       status: "Activo",
     },
     {
-      id: 2,
+      id: 6,
       name: "María López",
       identificationType: "Pasaporte",
       identification: "A987654",
@@ -81,7 +83,7 @@ function TableUser() {
       status: "Inactivo",
     },
     {
-      id: 1,
+      id: 7,
       name: "Juan Pérez",
       identificationType: "DNI",
       identification: "12345678",
@@ -92,7 +94,7 @@ function TableUser() {
       status: "Activo",
     },
     {
-      id: 2,
+      id: 8,
       name: "María López",
       identificationType: "Pasaporte",
       identification: "A987654",
@@ -103,7 +105,7 @@ function TableUser() {
       status: "Inactivo",
     },
     {
-      id: 1,
+      id: 9,
       name: "Juan Pérez",
       identificationType: "DNI",
       identification: "12345678",
@@ -114,7 +116,7 @@ function TableUser() {
       status: "Activo",
     },
     {
-      id: 2,
+      id: 10,
       name: "María López",
       identificationType: "Pasaporte",
       identification: "A987654",
@@ -124,9 +126,30 @@ function TableUser() {
       rol: "Empleado",
       status: "Inactivo",
     },
-    
   ]);
-  
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filtrar primero
+  const filtrarDatos = users.filter((user) =>
+    Object.values(user).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Paginación después de filtrar
+  const itemsPerPage = 6;
+  const [currentPage, setCurrentPage] = useState(0);
+  const offset = currentPage * itemsPerPage;
+  const currentItems = filtrarDatos.slice(offset, offset + itemsPerPage);
+  const pageCount = Math.ceil(filtrarDatos.length / itemsPerPage);
+
+  const handlePageClick = ({ selected }) => setCurrentPage(selected);
+
+  // Resetear paginación al buscar
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm]);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -176,14 +199,20 @@ function TableUser() {
     }
   };
 
-  const itemsPerPage = 6;
-  const [currentPage, setCurrentPage] = useState(0);
-  const offset = currentPage * itemsPerPage;
-  const currentItems = users.slice(offset, offset + itemsPerPage);
-  const pageCount = Math.ceil(users.length / itemsPerPage);
-
-  const handlePageClick = ({ selected }) => {
-    setCurrentPage(selected);
+  const handleToggleStatus = async (id) => {
+    try {
+      const userToUpdate = users.find((user) => user.id === id);
+      const newStatus =
+        userToUpdate.status === "Activo" ? "Inactivo" : "Activo";
+      await updateUser(id, { ...userToUpdate, status: newStatus });
+      setUsers(
+        users.map((user) =>
+          user.id === id ? { ...user, status: newStatus } : user
+        )
+      );
+    } catch (error) {
+      console.error("Error al cambiar el estado del usuario:", error);
+    }
   };
 
   return (
@@ -191,7 +220,16 @@ function TableUser() {
       <div className="title-container">
         <h2 className="table-title">Tabla de Usuarios</h2>
       </div>
-      <div className="title-container">
+      <div className="container-search">
+        <CiSearch className="search-icon" />
+
+        <input
+          type="text"
+          className="search"
+          value={searchTerm}
+          placeholder="Buscar usuario..."
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         <CustomButton variant="primary" icon="add" onClick={handleAdd}>
           Agregar Usuario
         </CustomButton>
@@ -213,7 +251,7 @@ function TableUser() {
             </tr>
           </thead>
           <tbody className="table-body">
-           {currentItems.map((user, index) => (  // ✅ Ahora muestra solo los datos paginados
+            {currentItems.map((user, index) => (
               <tr
                 key={user.id}
                 className={index % 2 === 0 ? "table-row-even" : "table-row-odd"}
@@ -227,16 +265,28 @@ function TableUser() {
                 <td className="table-cell">{user.address}</td>
                 <td className="table-cell">{user.rol}</td>
                 <td className="table-cell">
-                  <span
-                    className={
-                      user.status === "Activo"
-                        ? "status-active"
-                        : "status-inactive"
-                    }
-                  >
-                    {user.status}
-                  </span>
+                  <Switch
+                    isOn={user.status === "Activo"}
+                    handleToggle={(id) => {
+                      console.log(`Cambiar estado del usuario ${id}`);
+                      setUsers(
+                        users.map((user) =>
+                          user.id === id
+                            ? {
+                                ...user,
+                                status:
+                                  user.status === "Activo"
+                                    ? "Inactivo"
+                                    : "Activo",
+                              }
+                            : user
+                        )
+                      );
+                    }}
+                    id={user.id}
+                  />
                 </td>
+
                 <td className="table-cell">
                   <ActionButtons
                     onEdit={() => handleEdit(user.id)}
