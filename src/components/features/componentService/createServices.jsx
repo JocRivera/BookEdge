@@ -97,7 +97,20 @@ export default function CreateServices() {
                                 <td className="table-cell">
                                     <Switch
                                         isOn={service.status === 'Activo'}
-                                        handleToggle={() => console.log('Cambiar estado del servicio')}
+                                        id={service.id}
+                                        handleToggle={(id) => {
+                                            setServices(
+                                                services.map((service) =>
+                                                    service.id === id
+                                                        ? {
+                                                            ...service,
+                                                            status: service.status === 'Activo' ? 'Inactivo' : 'Activo',
+                                                        }
+                                                        : service
+                                                )
+                                            );
+                                        }
+                                        }
                                     />
                                 </td>
                                 <td className="table-cell">
