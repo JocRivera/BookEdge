@@ -1,6 +1,7 @@
 // FormularioModal.jsx
 import React, { useState, useEffect } from "react";
 import "./createClientes.css";
+import Switch from "../../common/Switch/Switch"
 
 const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
   const [formData, setFormData] = useState({
@@ -147,17 +148,16 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
               
               <div className="form-group">
                 <label htmlFor="status">Estado</label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Seleccione un estado</option>
-                  <option value="Activo">Activo</option>
-                  <option value="Inactivo">Inactivo</option>
-                </select>
+                <Switch
+                isOn={formData.status=== 'Activo'}
+                handleToggle={()=>
+                  setFormData((prevState)=>({
+                    ...prevState,
+                    status: prevState.status ==='Activo'? "Inactivo": "Activo"
+                  }))
+                }
+                id="status"
+                />
               </div>
             </div>
             

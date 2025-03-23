@@ -301,7 +301,6 @@ function TableUser() {
         <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
       </div>
 
-      {/* Modal de formulario */}
       <FormUser
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -9,7 +9,8 @@ import AdminLayout from "./components/layout/sidebarAdmin/adminLayout";
 import TableUser from "./components/features/componentClients/tableClients";
 import CreateServices from "./components/features/componentService/createServices";
 import ComponentConfort from "./components/features/componentConfort/componentConfort";
-import CreateConfig from "./components/features/componenetConfig/createConfig";
+import CreateConfig from "./components/features/componenetConfig/createConfig";import CabinsPage from "./components/features/componentCabins/CardCabin"
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -29,6 +30,8 @@ export default function App() {
           <Route path="accommodations" element={<ComponentConfort />} />
           <Route path="services" element={<CreateServices />} />
           <Route path="config" element={<CreateConfig />} />
+          <Route path="cabins" element={<CabinsPage />} />
+
         </Route>
       </Routes>
       
