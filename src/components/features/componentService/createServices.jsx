@@ -67,11 +67,11 @@ export default function CreateServices() {
                     type="text"
                     className="search"
                     value={searchTerm}
-                    placeholder="Buscar usuario..."
+                    placeholder="Buscar servicio..."
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <CustomButton variant="primary" icon="add" onClick={handleAdd}>
-                    Agregar Usuario
+                    Agregar Servicio
                 </CustomButton>
             </div>
 
