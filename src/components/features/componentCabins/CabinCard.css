@@ -1,0 +1,203 @@
+:root {
+  /* Colores principales */
+  --color-background: #f9fafb;
+  --color-white: #ffffff;
+  --color-primary: #4299e1;
+  --color-primary-dark: #3a7bc8;
+  --color-primary-light: #dbeafe;
+  --color-primary-hover: #ebf8ff;
+
+  /* Colores de texto */
+  --color-text-dark: #2d3748;
+  --color-text-normal: #4a5568;
+  --color-text-light: #777;
+  --color-text-primary: #1e3a8a;
+
+  /* Colores de bordes */
+  --color-border: #e2e8f0;
+  --color-shadow-light: rgba(0, 0, 0, 0.05);
+  --color-shadow-medium: rgba(0, 0, 0, 0.06);
+  --color-shadow-dark: rgba(0, 0, 0, 0.1);
+
+  /* Colores de estado */
+  --color-active-bg: #dcfce7;
+  --color-active-text: #166534;
+  --color-inactive-bg: #fee2e2;
+  --color-inactive-text: #991b1b;
+  --color-maintenance-bg: #fef3c7;
+  --color-maintenance-text: #b45309;
+}
+
+.cabin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  gap: 2rem;
+  margin-top: 60px;
+  background-color: var(--color-background);
+}
+
+.cabin-title-of {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--color-text-dark);
+  width: 100%;
+  position: relative;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cabin-title-of::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 22%;
+  height: 4px;
+  background-color: var(--color-primary);
+  border-radius: 2px;
+}
+.cabin-card {
+  width: 100%;
+  max-width: 350px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px var(--color-shadow-dark),
+    0 4px 6px -2px var(--color-shadow-medium);
+  background-color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cabin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 20px -3px var(--color-shadow-dark),
+    0 8px 10px -2px var(--color-shadow-medium);
+}
+
+.cabin-figure {
+  margin: 0;
+  width: 350px;
+  height: 350px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cabin-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.cabin-card:hover .cabin-image {
+  transform: scale(1.05);
+}
+
+.cabin-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.cabin-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.cabin-description {
+  color: var(--color-text-normal);
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+.cabin-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.amenity-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--color-primary-light);
+  color: var(--color-text-primary);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  position: absolute;
+  top: -12px;
+  right: 1.5rem;
+}
+
+.status-En-Servicio {
+  background-color: var(--color-active-bg);
+  color: var(--color-active-text);
+}
+
+.status-Fuera-de-Servicio {
+  background-color: var(--color-inactive-bg);
+  color: var(--color-inactive-text);
+}
+
+.status-Mantenimiento {
+  background-color: var(--color-maintenance-bg);
+  color: var(--color-maintenance-text);
+}
+
+.cabin-footer {
+  padding: 0.75rem 1rem;
+  background-color: var(--color-primary-light);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cabin-footer button {
+  transition: all 0.2s ease;
+}
+
+.cabin-footer button:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* Estilos responsivos */
+@media (min-width: 768px) {
+  .cabin-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .cabin-container > h2 {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .cabin-card {
+    max-width: 100%;
+  }
+}
