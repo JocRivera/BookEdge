@@ -1,64 +1,141 @@
 .custom-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .custom-button:hover {
-    opacity: 0.9;
-  }
-  
-  .custom-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-  }
-  
-  .custom-button.primary {
-    background-color: #3b82f6;
-    color: white;
-  }
-  
-  .custom-button.secondary {
-    background-color: #6b7280;
-    color: white;
-  }
-  
-  .custom-button.success {
-    background-color: #10b981;
-    color: white;
-  }
-  
-  .custom-button.danger {
-    background-color: #ef4444;
-    color: white;
-  }
-  
-  .custom-button.warning {
-    background-color: #f59e0b;
-    color: white;
-  }
-  
-  /* Estilo para botones de solo icono */
-  .custom-button.icon-only {
-    padding: 8px;
-    border-radius: 4px;
-  }
-  
-  /* Contenedor de botones de acciones */
-  .action-buttons {
-    display: flex;
-    gap: 8px;
-  }
-  
-  .button-icon {
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-button:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-button:focus {
+  outline: none; 
+}
+
+.custom-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-button:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-button:focus {
+  outline: none; /* Elimina el outline predeterminado */
+}
+
+.custom-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Sombra azul suave */
+}
+
+.custom-button.primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.custom-button.secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.custom-button.success {
+  background-color: #10b981;
+  color: white;
+}
+
+.custom-button.danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.custom-button.warning {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.custom-button.icon-only {
+  padding: 6px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.button-icon {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.custom-button.primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.custom-button.secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.custom-button.success {
+  background-color: #10b981;
+  color: white;
+}
+
+.custom-button.danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.custom-button.warning {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.custom-button.icon-only {
+  padding: 6px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.button-icon {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}

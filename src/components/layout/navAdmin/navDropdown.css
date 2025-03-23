@@ -1,0 +1,300 @@
+@import url('https://fonts.googleapis.com/css2?family=Allan:wght@400;700&family=Courgette&family=Henny+Penny&family=Jersey+15&family=Oleo+Script:wght@400;700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+.nav-header {
+    height: 60px;
+    background: #ffffff;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 90;
+    padding: 0 24px 0 274px; /* Ajustar margen izquierdo para el sidebar */
+    border-bottom: 4px solid rgb(5, 5, 5);
+  }
+  
+  .nav-header.sidebar-collapsed {
+    padding-left: 89px;
+  }
+  
+  .nav-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  .nav-left {
+    display: flex;
+    align-items: center;
+  }
+  
+  
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  /* Botón con icono */
+  .nav-icon-button {
+    background: transparent;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  
+  .nav-icon-button:hover {
+    background: rgba(79, 180, 255, 0.1);
+    color: #4FB4FF;
+    transform: translateY(-2px);
+  }
+  
+  .nav-icon {
+    font-size: 22px;
+  }
+  
+
+  
+  /* Estilos para el dropdown de usuario */
+  .user-dropdown {
+    position: relative;
+  }
+  
+  .user-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 40px;
+    transition: all 0.3s ease;
+  }
+  
+  .user-dropdown-toggle:hover, 
+  .user-dropdown-toggle.active {
+    background: rgba(79, 180, 255, 0.1);
+  }
+  
+  .user-avatar, 
+  .user-avatar-initials {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #4FB4FF;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .user-name {
+    font-weight: 500;
+    color: #333;
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .dropdown-arrow {
+    position: relative;
+    width: 10px;
+    height: 10px;
+  }
+  
+  .dropdown-arrow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #555;
+    border-bottom: 2px solid #555;
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform 0.3s ease;
+  }
+  
+  .user-dropdown-toggle.active .dropdown-arrow::after {
+    transform: translateY(-30%) rotate(-135deg);
+  }
+  
+  /* Menú desplegable */
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 280px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 100;
+    animation: dropdownFadeIn 0.25s ease-out forwards;
+    transform-origin: top right;
+  }
+  
+  @keyframes dropdownFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Cabecera del menú desplegable */
+  .dropdown-header {
+    padding: 20px;
+    background: linear-gradient(to right, rgba(79, 180, 255, 0.1), rgba(73, 162, 230, 0.2));
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .user-avatar-large {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #4FB4FF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .avatar-initials-large {
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  
+  .user-details h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .user-details p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+  }
+  
+  /* Contenido del menú desplegable */
+  .dropdown-content {
+    padding: 10px 0;
+  }
+  
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    gap: 12px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+  }
+  
+  .dropdown-item:hover {
+    background: rgba(79, 180, 255, 0.08);
+    color: #4FB4FF;
+  }
+  
+  .dropdown-item:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(79, 180, 255, 0.2) 0%, transparent 70%);
+    opacity: 0.5;
+    z-index: -1;
+  }
+  
+  .dropdown-item-icon {
+    font-size: 20px;
+    color: #555;
+    transition: all 0.2s ease;
+  }
+  
+  .dropdown-item:hover .dropdown-item-icon {
+    color: #4FB4FF;
+    transform: scale(1.1);
+  }
+  
+  .dropdown-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.06);
+    margin: 8px 0;
+  }
+  
+  .logout-item {
+    color: #FF4F4F;
+  }
+  
+  .logout-item .dropdown-item-icon {
+    color: #FF4F4F;
+  }
+  
+  .logout-item:hover {
+    background: rgba(255, 79, 79, 0.08);
+    color: #FF4F4F;
+  }
+  
+  .logout-item:hover::after {
+    background: radial-gradient(circle at center, rgba(255, 79, 79, 0.2) 0%, transparent 70%);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .nav-header {
+      padding-left: 80px;
+    }
+    
+    .nav-header.sidebar-collapsed {
+      padding-left: 24px;
+    }
+    
+    .user-name {
+      display: none;
+    }
+  }

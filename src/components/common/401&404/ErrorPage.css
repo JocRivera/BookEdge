@@ -1,0 +1,305 @@
+/* Estilos compartidos */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+.error-page {
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  background: #121212;
+  color: white;
+}
+
+.error-code {
+  font-size: 12rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, #ff00cc, #3333ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(255, 0, 204, 0.5);
+  margin-bottom: 0;
+}
+
+.error-title {
+  font-size: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.error-message {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  text-align: center;
+}
+
+.error-button {
+  background: linear-gradient(45deg, #ff00cc, #3333ff);
+  border: none;
+  color: white;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.error-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(255, 0, 204, 0.4);
+}
+
+.error-button:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #3333ff, #ff00cc);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.error-button:hover:before {
+  left: 0;
+}
+
+.error-button.animate {
+  animation: pulseButton 0.5s forwards;
+}
+
+@keyframes pulseButton {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* Estilo específico para la página 404 */
+.parallax-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease-out;
+  z-index: 2;
+}
+
+.error-characters {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.character {
+  position: absolute;
+  font-size: 5rem;
+  transition: transform 0.1s ease-out;
+}
+
+.ghost {
+  top: 20%;
+  left: 10%;
+  animation: float 6s infinite alternate;
+}
+
+.alien {
+  top: 30%;
+  right: 15%;
+  animation: float 8s infinite alternate-reverse;
+}
+
+.robot {
+  bottom: 20%;
+  left: 20%;
+  animation: float 7s infinite alternate;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-20px); }
+}
+
+.stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.stars:before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(1px 1px at 25px 5px, white, transparent),
+    radial-gradient(1px 1px at 50px 25px, white, transparent),
+    radial-gradient(1px 1px at 125px 20px, white, transparent),
+    radial-gradient(1.5px 1.5px at 50px 75px, white, transparent),
+    radial-gradient(2px 2px at 175px 15px, white, transparent),
+    radial-gradient(2.5px 2.5px at 200px 50px, white, transparent),
+    radial-gradient(1px 1px at 225px 100px, white, transparent),
+    radial-gradient(1.5px 1.5px at 300px 30px, white, transparent);
+  background-repeat: repeat;
+  background-size: 350px 150px;
+  animation: starMove 60s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes starMove {
+  0% { background-position: 0 0; }
+  100% { background-position: -350px 150px; }
+}
+
+/* Estilo específico para la página 401 */
+.error-401 {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.security-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(255, 0, 204, 0.3);
+  z-index: 2;
+}
+
+.lock-container {
+  position: relative;
+  margin-bottom: 1rem;
+  transition: transform 0.2s ease-out;
+}
+
+.lock {
+  font-size: 6rem;
+  filter: drop-shadow(0 0 10px #ff00cc);
+}
+
+.lock-shadow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -30%);
+  width: 60px;
+  height: 20px;
+  background: rgba(255, 0, 204, 0.4);
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+.lock-container.shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.security-tape {
+  position: absolute;
+  height: 30px;
+  width: 120%;
+  background: repeating-linear-gradient(
+    45deg,
+    #ff00cc,
+    #ff00cc 10px,
+    #3333ff 10px,
+    #3333ff 20px
+  );
+  z-index: -1;
+}
+
+.security-tape.left {
+  top: 20%;
+  transform: rotate(-15deg);
+}
+
+.security-tape.right {
+  bottom: 20%;
+  transform: rotate(15deg);
+}
+
+.login-button {
+  background: linear-gradient(45deg, #ff00cc, #ff6600);
+}
+
+.login-button:hover {
+  box-shadow: 0 10px 20px rgba(255, 102, 0, 0.4);
+}
+
+.login-button:before {
+  background: linear-gradient(45deg, #ff6600, #ff00cc);
+}
+
+.shield {
+  position: absolute;
+  font-size: 8rem;
+  opacity: 0.2;
+  filter: grayscale(0.5);
+}
+
+.shield.left {
+  left: 5%;
+  top: 40%;
+  transform: rotate(-20deg);
+  animation: pulse 4s infinite alternate;
+}
+
+.shield.right {
+  right: 5%;
+  top: 40%;
+  transform: rotate(20deg);
+  animation: pulse 4s infinite alternate-reverse;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.1; transform: rotate(-20deg) scale(0.9); }
+  100% { opacity: 0.3; transform: rotate(-20deg) scale(1.1); }
+}
+
+.laser-beams {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.laser-beams:before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent 98px,
+    rgba(255, 0, 204, 0.1) 98px,
+    rgba(255, 0, 204, 0.1) 100px
+  );
+  animation: laserScan 5s linear infinite;
+}
+
+@keyframes laserScan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
