@@ -78,7 +78,7 @@ function CardCabin() {
             <p className="cabin-description">{cabin.description}</p>
 
             <ul className="cabin-amenities">
-              <li className="amenity-item">👥 {cabin.capacity} personas</li>
+              <li className="amenity-item"> {cabin.capacity} personas</li>
               {cabin.Comforts?.map((comfort) => (
                 <li key={comfort.idComfort} className="amenity-item">
                   {comfort.name}
