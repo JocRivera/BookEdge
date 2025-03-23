@@ -7,8 +7,9 @@ import RecoveryPassword from "./components/features/componentAuth/recoveryPasswo
 import Emailcode from "./components/features/componentAuth/Emailcode";
 import AdminLayout from "./components/layout/sidebarAdmin/adminLayout";
 import TableUser from "./components/features/componentClients/tableClients";
+import CreateServices from "./components/features/componentService/createServices";
 import ComponentConfort from "./components/features/componentConfort/componentConfort";
-import CabinsPage from "./components/features/componentCabins/CardCabin"
+import CreateConfig from "./components/features/componenetConfig/createConfig";import CabinsPage from "./components/features/componentCabins/CardCabin"
 
 export default function App() {
   return (
@@ -27,6 +28,8 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="clients" element={<TableUser />} />
           <Route path="accommodations" element={<ComponentConfort />} />
+          <Route path="services" element={<CreateServices />} />
+          <Route path="config" element={<CreateConfig />} />
           <Route path="cabins" element={<CabinsPage />} />
 
         </Route>
