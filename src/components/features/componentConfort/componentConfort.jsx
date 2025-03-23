@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import Pagination from "../../common/Paginator/Pagination";
-import "./componentConfort.css"
+import "./componentConfort.css";
 import { CiSearch } from "react-icons/ci";
+import FormConfort from "./formConfort";
 
 function ComponentConfort() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentComfort, setCurrentComfort] = useState(null);
   const [comforts, setComforts] = useState([
     {
@@ -36,10 +38,13 @@ function ComponentConfort() {
 
   const handleAdd = () => {
     setCurrentComfort(null);
+    setIsModalOpen(true);
   };
 
   const handleEdit = (id) => {
-    alert("Comodidad editada", id);
+    const comfortToEdit = comforts.find((comfort) => comfort.id === id);
+    setCurrentComfort(comfortToEdit);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (id) => {
@@ -74,39 +79,54 @@ function ComponentConfort() {
             </tr>
           </thead>
           <tbody className="comfort-table-body">
-            {currentItems.map((comfort, index) => (
-              <tr
-                key={comfort.id}
-                className={
-                  index % 2 === 0
-                    ? "comfort-table-row-even"
-                    : "comfort-table-row-odd"
-                }
-              >
-                <td className="comfort-table-cell">{comfort.id}</td>
-                <td className="comfort-table-cell">{comfort.name}</td>
-                <td className="comfort-table-cell">
-                  <span
-                    className={
-                      comfort.status === "Activo"
-                        ? "status-active"
-                        : "status-inactive"
-                    }
-                  >
-                    {comfort.status}
-                  </span>
-                </td>
-                <td className="comfort-table-cell">
-                  <ActionButtons
-                    onEdit={() => handleEdit(comfort.id)}
-                    onDelete={() => handleDelete(comfort.id)}
-                  />
+            {currentItems.length > 0 ? (
+              currentItems.map((comfort, index) => (
+                <tr
+                  key={comfort.id}
+                  className={
+                    index % 2 === 0
+                      ? "comfort-table-row-even"
+                      : "comfort-table-row-odd"
+                  }
+                >
+                  <td className="comfort-table-cell">{comfort.id}</td>
+                  <td className="comfort-table-cell">{comfort.name}</td>
+                  <td className="comfort-table-cell">
+                    <span
+                      className={
+                        comfort.status === "Activo"
+                          ? "status-active"
+                          : "status-inactive"
+                      }
+                    >
+                      {comfort.status}
+                    </span>
+                  </td>
+                  <td className="comfort-table-cell">
+                    <ActionButtons
+                      onEdit={() => handleEdit(comfort.id)}
+                      onDelete={() => handleDelete(comfort.id)}
+                    />
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="no-results">
+                  No se encontraron resultados
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+
+        <FormConfort
+          isOpen={isModalOpen}
+          comfortData={currentComfort}
+          onClose={() => setIsModalOpen(false)}
+          onSave={() => setIsModalOpen(false)}
+        />
       </div>
     </div>
   );
