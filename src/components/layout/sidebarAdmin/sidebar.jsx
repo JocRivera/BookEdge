@@ -6,6 +6,7 @@ import {
   MdBedroomParent,
   MdCabin,
   MdPeople,
+  MdHotelClass,
 } from "react-icons/md";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import "./sidebar.css";
@@ -109,10 +110,18 @@ const Sidebar = () => {
             </Link>
           </li>
 
+          <li className="menu-item">
+            <Link to="/admin/services">
+              <span className="menu-icon">
+                <MdHotelClass />
+              </span>
+              <span className="menu-text">Servicios</span>
+            </Link>
+          </li>
+
           <li
-            className={`menu-item ${
-              activeSubMenu === "habitaciones" ? "active" : ""
-            }`}
+            className={`menu-item ${activeSubMenu === "habitaciones" ? "active" : ""
+              }`}
           >
             <div
               className="menu-header"
@@ -137,9 +146,8 @@ const Sidebar = () => {
             {/* Mostrar submenú normal cuando no está colapsado */}
             {!collapsed && (
               <ul
-                className={`submenu ${
-                  activeSubMenu === "habitaciones" ? "open" : ""
-                }`}
+                className={`submenu ${activeSubMenu === "habitaciones" ? "open" : ""
+                  }`}
               >
                 {habitacionesSubmenu.map((item, index) => (
                   <li key={index}>
@@ -155,9 +163,8 @@ const Sidebar = () => {
             {/* Mostrar botones apilados cuando está colapsado */}
             {collapsed && (
               <ul
-                className={`submenu stacked-buttons ${
-                  activeSubMenu === "habitaciones" ? "open" : ""
-                }`}
+                className={`submenu stacked-buttons ${activeSubMenu === "habitaciones" ? "open" : ""
+                  }`}
               >
                 {habitacionesSubmenu.map((item, index) => (
                   <li key={index} style={{ "--item-index": index }}>
@@ -179,6 +186,16 @@ const Sidebar = () => {
               <span className="menu-text">Comodidades</span>
             </Link>
           </li>
+
+          <li className="menu-item">
+            <Link to="/admin/config">
+              <span className="menu-icon">
+                <MdHotelClass />
+              </span>
+              <span className="menu-text">Configuracion</span>
+            </Link>
+          </li>
+
         </ul>
       </div>
     </div>
