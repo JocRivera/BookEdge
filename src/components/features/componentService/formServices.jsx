@@ -42,19 +42,22 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                             <div className='form-group'>
                                 <label htmlFor="">Nombre servicio</label>
                                 <input type="text" name="name" id="name" required
-                                    defaultValue={formData.name}
+                                    value={formData.name}
+                                    onChange={handleChange}
                                 />
                             </div>
                             <div className='form-group'>
                                 <label htmlFor="">Descripción</label>
                                 <textarea required placeholder="Agrega una descripción..." name="Description" id="Description"
-                                    defaultValue={formData.Description}
+                                    value={formData.Description}
+                                    onChange={handleChange}
                                 />
                             </div>
                             <div className='form-group'>
                                 <label htmlFor="">Precio</label>
                                 <input required type="number" name="Price" id="Price"
-                                    defaultValue={formData.Price}
+                                    value={formData.Price}
+                                    onChange={handleChange}
                                 />
                             </div>
                             <div className="form-group">
