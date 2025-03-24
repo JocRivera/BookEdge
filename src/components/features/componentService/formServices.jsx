@@ -41,15 +41,21 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                         <div className='form-grid'>
                             <div className='form-group'>
                                 <label htmlFor="">Nombre servicio</label>
-                                <input type="text" name="name" id="name" />
+                                <input type="text" name="name" id="name" required
+                                    defaultValue={formData.name}
+                                />
                             </div>
                             <div className='form-group'>
                                 <label htmlFor="">Descripción</label>
-                                <input type="text" name="Description" id="Description" />
+                                <textarea required placeholder="Agrega una descripción..." name="Description" id="Description"
+                                    defaultValue={formData.Description}
+                                />
                             </div>
                             <div className='form-group'>
                                 <label htmlFor="">Precio</label>
-                                <input type="text" name="Price" id="Price" />
+                                <input required type="number" name="Price" id="Price"
+                                    defaultValue={formData.Price}
+                                />
                             </div>
                             <div className="form-group">
                                 <label htmlFor="status">Estado</label>

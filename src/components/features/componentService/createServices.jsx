@@ -15,16 +15,16 @@ export default function CreateServices() {
         {
             id: 1,
             name: 'Cena Romantica',
-            description: 'Cena Romantica para dos personas',
-            price: 500,
-            status: 'Activo',
+            Description: 'Cena Romantica para dos personas',
+            Price: 500,
+            StatusServices: 'Activo',
         },
         {
             id: 2,
             name: 'Masaje Relajante',
-            description: 'Masaje relajante para dos personas',
-            price: 700,
-            status: 'Activo',
+            Description: 'Masaje relajante para dos personas',
+            Price: 700,
+            StatusServices: 'Activo',
         }
 
     ]);
@@ -50,7 +50,9 @@ export default function CreateServices() {
     };
 
     const handleEdit = (id) => {
-        console.log('Editar', id);
+        const service = services.find((service) => service.id === id);
+        setCurrentService(service);
+        setIsModalOpen(true);
     }
     const handleDelete = (id) => {
         console.log('Eliminar', id);
@@ -81,9 +83,9 @@ export default function CreateServices() {
                         <tr>
                             <th>Id</th>
                             <th>Nombre Completo</th>
-                            <th>Tipo de documento</th>
+                            <th>Descripcion</th>
                             <th>Precio</th>
-                            <th>Status</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -92,11 +94,11 @@ export default function CreateServices() {
                             <tr key={service.id}>
                                 <td className="table-cell">{service.id}</td>
                                 <td className="table-cell">{service.name}</td>
-                                <td className="table-cell">{service.description}</td>
-                                <td className="table-cell">{service.price}</td>
+                                <td className="table-cell">{service.Description}</td>
+                                <td className="table-cell">{service.Price}</td>
                                 <td className="table-cell">
                                     <Switch
-                                        isOn={service.status === 'Activo'}
+                                        isOn={service.StatusServices === 'Activo'}
                                         id={service.id}
                                         handleToggle={(id) => {
                                             setServices(
@@ -104,7 +106,7 @@ export default function CreateServices() {
                                                     service.id === id
                                                         ? {
                                                             ...service,
-                                                            status: service.status === 'Activo' ? 'Inactivo' : 'Activo',
+                                                            StatusServices: service.StatusServices === 'Activo' ? 'Inactivo' : 'Activo',
                                                         }
                                                         : service
                                                 )
