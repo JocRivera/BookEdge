@@ -4,9 +4,11 @@ import { CustomButton, ActionButtons } from '../../common/Button/customButton';
 import { CiSearch } from "react-icons/ci";
 import Switch from "../../common/Switch/Switch";
 import Pagination from "../../common/Paginator/Pagination";
+import FormService from './formServices';
 
 export default function CreateServices() {
     const [currentService, setCurrentService] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [services, setServices] = useState([
 
@@ -46,9 +48,7 @@ export default function CreateServices() {
         setCurrentService(null);
         setIsModalOpen(true);
     };
-    const handleView = (id) => {
-        console.log('Ver', id);
-    }
+
     const handleEdit = (id) => {
         console.log('Editar', id);
     }
@@ -115,7 +115,6 @@ export default function CreateServices() {
                                 </td>
                                 <td className="table-cell">
                                     <ActionButtons
-                                        onView={() => handleView(service.id)}
                                         onEdit={() => handleEdit(service.id)}
                                         onDelete={() => handleDelete(service.id)}
                                     />
@@ -126,6 +125,20 @@ export default function CreateServices() {
                 </table>
                 <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
             </div>
+            <FormService
+                service={currentService}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={(service) => {
+                    if (currentService) {
+                        setServices(
+                            services.map((s) => (s.id === service.id ? service : s))
+                        );
+                    } else {
+                        setServices([...services, { ...service, id: services.length + 1 }]);
+                    }
+                }}
+            />
 
         </div>
     );
