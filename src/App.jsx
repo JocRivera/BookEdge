@@ -9,7 +9,9 @@ import AdminLayout from "./components/layout/sidebarAdmin/adminLayout";
 import TableUser from "./components/features/componentClients/tableClients";
 import CreateServices from "./components/features/componentService/createServices";
 import ComponentConfort from "./components/features/componentConfort/componentConfort";
-import CreateConfig from "./components/features/componenetConfig/createConfig";import CabinsPage from "./components/features/componentCabins/CardCabin"
+import CreateConfig from "./components/features/componenetConfig/createConfig";
+import CabinsPage from "./components/features/componentCabins/CardCabin";
+import TableReservations from "./components/features/componentReservations/tableReservations";
 
 export default function App() {
   return (
@@ -31,6 +33,8 @@ export default function App() {
           <Route path="services" element={<CreateServices />} />
           <Route path="config" element={<CreateConfig />} />
           <Route path="cabins" element={<CabinsPage />} />
+          <Route path="reservations" element={<TableReservations />} />
+          
 
         </Route>
       </Routes>

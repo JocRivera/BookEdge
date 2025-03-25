@@ -7,6 +7,11 @@ import {
   MdCabin,
   MdPeople,
   MdHotelClass,
+  MdListAlt,
+  MdPayment,
+  MdCalendarToday, 
+  MdKeyboardArrowDown,
+  MdKeyboardArrowRight
 } from "react-icons/md";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import "./sidebar.css";
@@ -62,7 +67,24 @@ const Sidebar = () => {
       text: "Habitaciones",
     },
   ];
-
+  //Datos del submenu para reservas
+  const reservasSubmenu = [
+    {
+      path: "/admin/reservations",
+      icon: <MdListAlt />,
+      text: "Lista de Reservas"
+    },
+    {
+      path: "/admin/companions",
+      icon: <MdPeople />,
+      text: "Acompañantes"
+    },
+    {
+      path: "/admin/payments",
+      icon: <MdPayment />,
+      text: "Pagos"
+    }
+  ];
   // Calcular la posición del submenú basado en el elemento padre
   const calculateSubmenuPosition = (e) => {
     if (!collapsed) return;
@@ -195,7 +217,63 @@ const Sidebar = () => {
               <span className="menu-text">Configuracion</span>
             </Link>
           </li>
+          
+          <li className={`menu-item ${activeSubMenu === "reservas" ? "active" : ""}`}>
+            <div
+              className="menu-header"
+              onClick={(e) => {
+                toggleSubMenu("reservas", e);
+                calculateSubmenuPosition(e);
+              }}
+            >
+              <span className="menu-icon">
+                <MdCalendarToday />
+              </span>
+              <span className="menu-text">Reservas</span>
+              <span className="menu-arrow">
+                {activeSubMenu === "reservas" ? (
+                  <MdKeyboardArrowDown />
+                ) : (
+                  <MdKeyboardArrowRight />
+                )}
+              </span>
+            </div>
 
+            {!collapsed && (
+              <ul className={`submenu ${activeSubMenu === "reservas" ? "open" : ""}`}>
+                {reservasSubmenu.map((item, index) => (
+                  <li key={index}>
+                    <Link to={item.path}>
+                      <span className="menu-icon">{item.icon}</span>
+                      <span className="menu-text">{item.text}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {collapsed && (
+              <ul className={`submenu stacked-buttons ${activeSubMenu === "reservas" ? "open" : ""}`}>
+                {reservasSubmenu.map((item, index) => (
+                  <li key={index} style={{ "--item-index": index }}>
+                    <Link to={item.path}>
+                      <span className="menu-icon">{item.icon}</span>
+                      <span className="menu-text">{item.text}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+
+          <li className="menu-item">
+            <Link to="/admin/config">
+              <span className="menu-icon">
+                <MdHotelClass />
+              </span>
+              <span className="menu-text">Configuración</span>
+            </Link>
+          </li>
         </ul>
       </div>
     </div>
