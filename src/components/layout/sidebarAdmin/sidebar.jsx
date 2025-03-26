@@ -1,48 +1,42 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { IoBedSharp } from "react-icons/io5";
-import {
-  MdDashboard,
-  MdBedroomParent,
-  MdCabin,
-  MdPeople,
-  MdHotelClass,
-  MdListAlt,
-  MdPayment,
-  MdCalendarToday, 
-  MdKeyboardArrowDown,
-  MdKeyboardArrowRight
-} from "react-icons/md";
-import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  LuLayoutDashboard, 
+  LuUsers, 
+  LuBedDouble, 
+  LuHotel, 
+  LuSettings, 
+  LuCalendar, 
+  LuChevronDown, 
+  LuChevronRight,
+  LuBookmark
+} from "react-icons/lu";
 import "./sidebar.css";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState("");
   const menuRef = useRef(null);
+  const location = useLocation();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
-    // Propagar el estado del sidebar al componente padre
     const event = new CustomEvent("sidebarToggle", {
       detail: { collapsed: !collapsed },
     });
     document.dispatchEvent(event);
 
-    // Cerrar submenús al colapsar
     if (!collapsed) {
       setActiveSubMenu("");
     }
   };
 
   const toggleSubMenu = (menuName, e) => {
-    e.preventDefault(); // Prevenir el comportamiento predeterminado
-    e.stopPropagation(); // Prevenir que el clic se propague
-
+    e.preventDefault();
+    e.stopPropagation();
     setActiveSubMenu(activeSubMenu === menuName ? "" : menuName);
   };
 
-  // Cierra el submenú si se hace clic fuera de él
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -54,38 +48,37 @@ const Sidebar = () => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // Datos del submenú para habitaciones
-  const habitacionesSubmenu = [
+  const roomsSubmenu = [
     {
       path: "/admin/cabins",
-      icon: <MdCabin />,
+      icon: <LuHotel />,
       text: "Cabañas",
     },
     {
       path: "/admin/rooms",
-      icon: <IoBedSharp />,
+      icon: <LuBedDouble />,
       text: "Habitaciones",
     },
   ];
-  //Datos del submenu para reservas
-  const reservasSubmenu = [
+
+  const bookingsSubmenu = [
     {
       path: "/admin/reservations",
-      icon: <MdListAlt />,
+      icon: <LuBookmark />,
       text: "Lista de Reservas"
     },
     {
       path: "/admin/companions",
-      icon: <MdPeople />,
+      icon: <LuUsers />,
       text: "Acompañantes"
     },
     {
       path: "/admin/payments",
-      icon: <MdPayment />,
+      icon: <LuCalendar />,
       text: "Pagos"
     }
   ];
-  // Calcular la posición del submenú basado en el elemento padre
+
   const calculateSubmenuPosition = (e) => {
     if (!collapsed) return;
 
@@ -100,80 +93,78 @@ const Sidebar = () => {
     }
   };
 
+  const isActiveRoute = (path) => {
+    return location.pathname === path;
+  };
+
+  const isRouteInSubmenu = (submenu) => {
+    return submenu.some(item => isActiveRoute(item.path));
+  };
+
   return (
     <div className={`sidebar ${collapsed ? "collapsed" : ""}`} ref={menuRef}>
       <div className="sidebar-header">
         <div className="logo">
           <div className="logo-icon">B</div>
-          <span className="logo-text">BookEdge</span>
+          {!collapsed && <span className="logo-text">BookEdge</span>}
         </div>
         <button className="toggle-btn" onClick={toggleSidebar}>
           {collapsed ? "→" : "←"}
         </button>
       </div>
 
-      <div className="sidebar-content">
+      <nav className="sidebar-content">
         <ul className="menu-list">
-          <li className="menu-item">
+          <li className={`menu-item ${isActiveRoute("/admin/dashboard") ? "active" : ""}`}>
             <Link to="/admin/dashboard">
-              <span className="menu-icon ">
-                <MdDashboard />
+              <span className="menu-icon">
+                <LuLayoutDashboard />
               </span>
               <span className="menu-text">Dashboard</span>
             </Link>
           </li>
 
-          <li className="menu-item">
+          <li className={`menu-item ${isActiveRoute("/admin/clients") ? "active" : ""}`}>
             <Link to="/admin/clients">
               <span className="menu-icon">
-                <MdPeople />
+                <LuUsers />
               </span>
               <span className="menu-text">Clientes</span>
             </Link>
           </li>
 
-          <li className="menu-item">
-            <Link to="/admin/services">
-              <span className="menu-icon">
-                <MdHotelClass />
-              </span>
-              <span className="menu-text">Servicios</span>
-            </Link>
-          </li>
-
           <li
-            className={`menu-item ${activeSubMenu === "habitaciones" ? "active" : ""
-              }`}
+            className={`menu-item ${
+              activeSubMenu === "rooms" || isRouteInSubmenu(roomsSubmenu) ? "active" : ""
+            }`}
           >
             <div
               className="menu-header"
               onClick={(e) => {
-                toggleSubMenu("habitaciones", e);
+                toggleSubMenu("rooms", e);
                 calculateSubmenuPosition(e);
               }}
             >
               <span className="menu-icon">
-                <MdBedroomParent />
+                <LuBedDouble />
               </span>
               <span className="menu-text">Habitaciones</span>
               <span className="menu-arrow">
-                {activeSubMenu === "habitaciones" ? (
-                  <IoMdArrowDropup />
+                {activeSubMenu === "rooms" ? (
+                  <LuChevronDown />
                 ) : (
-                  <IoMdArrowDropdown />
+                  <LuChevronRight />
                 )}
               </span>
             </div>
 
-            {/* Mostrar submenú normal cuando no está colapsado */}
             {!collapsed && (
               <ul
-                className={`submenu ${activeSubMenu === "habitaciones" ? "open" : ""
-                  }`}
+                className={`submenu ${activeSubMenu === "rooms" ? "open" : ""}`}
               >
-                {habitacionesSubmenu.map((item, index) => (
-                  <li key={index}>
-                    <Link to={item.path}>
+                {roomsSubmenu.map((item, index) => (
+                  <li key={index} className={isActiveRoute(item.path) ? "active" : ""}>
+                    <Link to={item.path} className={isActiveRoute(item.path) ? "active" : ""}>
                       <span className="menu-icon">{item.icon}</span>
                       <span className="menu-text">{item.text}</span>
                     </Link>
@@ -182,15 +173,22 @@ const Sidebar = () => {
               </ul>
             )}
 
-            {/* Mostrar botones apilados cuando está colapsado */}
             {collapsed && (
               <ul
-                className={`submenu stacked-buttons ${activeSubMenu === "habitaciones" ? "open" : ""
-                  }`}
+                className={`submenu stacked-buttons ${
+                  activeSubMenu === "rooms" ? "open" : ""
+                }`}
               >
-                {habitacionesSubmenu.map((item, index) => (
-                  <li key={index} style={{ "--item-index": index }}>
-                    <Link to={item.path}>
+                {roomsSubmenu.map((item, index) => (
+                  <li 
+                    key={index} 
+                    style={{ "--item-index": index }}
+                    className={isActiveRoute(item.path) ? "active" : ""}
+                  >
+                    <Link 
+                      to={item.path} 
+                      className={isActiveRoute(item.path) ? "active" : ""}
+                    >
                       <span className="menu-icon">{item.icon}</span>
                       <span className="menu-text">{item.text}</span>
                     </Link>
@@ -200,50 +198,55 @@ const Sidebar = () => {
             )}
           </li>
 
-          <li className="menu-item">
+          <li className={`menu-item ${isActiveRoute("/admin/accommodations") ? "active" : ""}`}>
             <Link to="/admin/accommodations">
               <span className="menu-icon">
-                <MdCabin />
+                <LuHotel />
               </span>
               <span className="menu-text">Comodidades</span>
             </Link>
           </li>
 
-          <li className="menu-item">
-            <Link to="/admin/config">
-              <span className="menu-icon">
-                <MdBuild/>
-              </span>
-              <span className="menu-text">Configuracion</span>
-            </Link>
-          </li>
-          
-          <li className={`menu-item ${activeSubMenu === "reservas" ? "active" : ""}`}>
+          <li
+            className={`menu-item ${
+              activeSubMenu === "bookings" || isRouteInSubmenu(bookingsSubmenu) ? "active" : ""
+            }`}
+          >
             <div
               className="menu-header"
               onClick={(e) => {
-                toggleSubMenu("reservas", e);
+                toggleSubMenu("bookings", e);
                 calculateSubmenuPosition(e);
               }}
             >
               <span className="menu-icon">
-                <MdCalendarToday />
+                <LuCalendar />
               </span>
               <span className="menu-text">Reservas</span>
               <span className="menu-arrow">
-                {activeSubMenu === "reservas" ? (
-                  <MdKeyboardArrowDown />
+                {activeSubMenu === "bookings" ? (
+                  <LuChevronDown />
                 ) : (
-                  <MdKeyboardArrowRight />
+                  <LuChevronRight />
                 )}
               </span>
             </div>
 
             {!collapsed && (
-              <ul className={`submenu ${activeSubMenu === "reservas" ? "open" : ""}`}>
-                {reservasSubmenu.map((item, index) => (
-                  <li key={index}>
-                    <Link to={item.path}>
+              <ul
+                className={`submenu ${
+                  activeSubMenu === "bookings" ? "open" : ""
+                }`}
+              >
+                {bookingsSubmenu.map((item, index) => (
+                  <li 
+                    key={index} 
+                    className={isActiveRoute(item.path) ? "active" : ""}
+                  >
+                    <Link 
+                      to={item.path} 
+                      className={isActiveRoute(item.path) ? "active" : ""}
+                    >
                       <span className="menu-icon">{item.icon}</span>
                       <span className="menu-text">{item.text}</span>
                     </Link>
@@ -253,10 +256,21 @@ const Sidebar = () => {
             )}
 
             {collapsed && (
-              <ul className={`submenu stacked-buttons ${activeSubMenu === "reservas" ? "open" : ""}`}>
-                {reservasSubmenu.map((item, index) => (
-                  <li key={index} style={{ "--item-index": index }}>
-                    <Link to={item.path}>
+              <ul
+                className={`submenu stacked-buttons ${
+                  activeSubMenu === "bookings" ? "open" : ""
+                }`}
+              >
+                {bookingsSubmenu.map((item, index) => (
+                  <li 
+                    key={index} 
+                    style={{ "--item-index": index }}
+                    className={isActiveRoute(item.path) ? "active" : ""}
+                  >
+                    <Link 
+                      to={item.path} 
+                      className={isActiveRoute(item.path) ? "active" : ""}
+                    >
                       <span className="menu-icon">{item.icon}</span>
                       <span className="menu-text">{item.text}</span>
                     </Link>
@@ -266,16 +280,16 @@ const Sidebar = () => {
             )}
           </li>
 
-          <li className="menu-item">
+          <li className={`menu-item ${isActiveRoute("/admin/config") ? "active" : ""}`}>
             <Link to="/admin/config">
               <span className="menu-icon">
-                <MdHotelClass />
+                <LuSettings />
               </span>
               <span className="menu-text">Configuración</span>
             </Link>
           </li>
         </ul>
-      </div>
+      </nav>
     </div>
   );
 };
