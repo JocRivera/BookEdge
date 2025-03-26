@@ -212,7 +212,7 @@ const Sidebar = () => {
           <li className="menu-item">
             <Link to="/admin/config">
               <span className="menu-icon">
-                <MdHotelClass />
+                <MdBuild/>
               </span>
               <span className="menu-text">Configuracion</span>
             </Link>
