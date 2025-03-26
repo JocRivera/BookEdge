@@ -1,25 +1,31 @@
-// FormularioModal.jsx
 import React, { useState, useEffect } from "react";
 import "./createClientes.css";
 import Switch from "../../common/Switch/Switch"
 
 const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
-  const [formData, setFormData] = useState({
+  // Estado inicial como una constante separada para mayor claridad
+  const initialFormData = {
     name: "",
     identificationType: "",
     identification: "",
     email: "",
     cellphone: "",
     address: "",
-    rol: "Administrador",
+    rol: "",
     status: "Activo"
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
 
   useEffect(() => {
+    // Si se proporciona userData, establece los datos del formulario a los de ese usuario
     if (userData) {
       setFormData(userData);
+    } else {
+      // Si no hay userData (nuevo usuario), restablece al estado inicial
+      setFormData(initialFormData);
     }
-  }, [userData]);
+  }, [userData, isOpen]); // Añadir isOpen para restablecer cuando se abre el modal
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -149,14 +155,14 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
               <div className="form-group">
                 <label htmlFor="status">Estado</label>
                 <Switch
-                isOn={formData.status=== 'Activo'}
-                handleToggle={()=>
-                  setFormData((prevState)=>({
-                    ...prevState,
-                    status: prevState.status ==='Activo'? "Inactivo": "Activo"
-                  }))
-                }
-                id="status"
+                  isOn={formData.status === 'Activo'}
+                  handleToggle={() =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      status: prevState.status === 'Activo' ? "Inactivo" : "Activo"
+                    }))
+                  }
+                  id="status"
                 />
               </div>
             </div>

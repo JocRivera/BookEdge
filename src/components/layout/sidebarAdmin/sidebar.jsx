@@ -7,6 +7,7 @@ import {
   MdCabin,
   MdPeople,
   MdHotelClass,
+  MdBuild
 } from "react-icons/md";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import "./sidebar.css";
@@ -190,7 +191,7 @@ const Sidebar = () => {
           <li className="menu-item">
             <Link to="/admin/config">
               <span className="menu-icon">
-                <MdHotelClass />
+                <MdBuild/>
               </span>
               <span className="menu-text">Configuracion</span>
             </Link>
