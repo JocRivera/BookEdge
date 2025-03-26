@@ -326,6 +326,22 @@
   background-color: var(--color-button-cancel-hover);
 }
 
+.error-text {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+input:invalid {
+  border: 1px solid red;
+}
+
+input:focus:invalid {
+  outline: none;
+  border-color: red;
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
