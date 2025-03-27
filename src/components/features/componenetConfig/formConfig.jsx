@@ -21,6 +21,9 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
             { uid: "AdminModule", name: "Dashboard", activo: true },
             { uid: "UserModule", name: "Users", activo: false },
             { uid: "PlainsModule", name: "Planes", activo: true },
+            { uid: "ReservaModule", name: "Reserva", activo: false },
+            { uid: "AlojamientosModule", name: "Alojamientos", activo: true },
+
         ]);
     }, []);
     const handleChange = (e) => {
@@ -59,15 +62,20 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                     onChange={handleChange}
                                 />
                             </div>
-                            {permission.map((permiso) => (
-                                <div className='form-group' key={permiso.uid}>
-                                    <label htmlFor="">{permiso.name}</label>
-                                    <input type="checkbox" name={permiso.uid} id={permiso.uid}
-                                        value={formData[permiso.uid]}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            ))}
+                            <div className="permissions-list">
+                                {permission.map((permiso) => (
+                                    <label key={permiso.uid} >
+                                        <input
+                                            type="checkbox"
+                                            name={permiso.uid}
+                                            id={permiso.uid}
+                                            checked={formData[permiso.uid] || false}
+                                            onChange={handleChange}
+                                        />
+                                        <span>{permiso.name}</span>
+                                    </label>
+                                ))}
+                            </div>
                             <div className="form-group">
                                 <label htmlFor="status">Estado</label>
                                 <Switch
