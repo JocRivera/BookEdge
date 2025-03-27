@@ -63,11 +63,11 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                             <div className="form-group">
                                 <label htmlFor="status">Estado</label>
                                 <Switch
-                                    isOn={formData.StatusServices === 'Activo'}
+                                    isOn={formData.StatusServices === true}
                                     handleToggle={() =>
                                         setFormData((prevState) => ({
                                             ...prevState,
-                                            StatusServices: prevState.StatusServices === 'Activo' ? "Inactivo" : "Activo"
+                                            StatusServices: prevState.StatusServices === true ? false : true
                                         }))
                                     }
                                     id="StatusServices"
