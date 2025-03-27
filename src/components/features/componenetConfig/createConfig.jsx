@@ -1,28 +1,39 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import "./createConfig.css"
 import { CustomButton, ActionButtons } from "../../common/Button/customButton"
 import { CiSearch } from "react-icons/ci"
 import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
-import FormConfig from "./formConfig";
+import FormConfig from "./formConfig";import {getRoles, postRoles} from "../../../services/RolesService"
+
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const[isModalOpen,setIsModalOpen]= useState(false)
     const [settings, setSettings] = useState([
-        {
-            id: 1,
-            name: 'Admin',
-            description: 'Rol con acceso a todos los modulos',
-            status: 'Activo',
-        },
-        {
-            id: 2,
-            name: 'User',
-            description: 'Rol con acceso a todos los modulos',
-            status: 'Activo',
-        }
+        // {
+        //     id: 1,
+        //     name: 'Admin',
+        //     description: 'Rol con acceso a todos los modulos',
+        //     status: 'Activo',
+        // },
+        // {
+        //     id: 2,
+        //     name: 'User',
+        //     description: 'Rol con acceso a todos los modulos',
+        //     status: 'Activo',
+        // }
     ]);
+    useEffect(()=>{
+        const fectchConfig = async () => {
+            try{
+                const roles = await getRoles()
+                setSettings(roles)
+            }catch(error){
+                console.log(error)
+            }
+        }
+        fectchConfig()
+    },[])
     const [searchTerm, setSearchTerm] = useState("");
     const filtrarDatos = settings.filter((config) =>
         Object.values(config).some((value) =>
@@ -37,7 +48,7 @@ export default function CreateConfig() {
     const pageCount = Math.ceil(filtrarDatos.length / itemsPerPage);
     const handlePageClick = ({ selected }) => setCurrentPage(selected);
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         setCurrentConfig(null);
         setIsModalOpen(true);
     };
@@ -83,21 +94,21 @@ export default function CreateConfig() {
                     </thead>
                     <tbody className="table-body">
                         {settings.map((config) => (
-                            <tr key={config.id}>
-                                <td className="table-cell">{config.id}</td>
+                            <tr key={config.idRol}>
+                                <td className="table-cell">{config.idRol}</td>
                                 <td className="table-cell">{config.name}</td>
                                 <td className="table-cell">{config.description}</td>
                                 <td className="table-cell">
                                     <Switch
-                                        isOn={config.status === 'Activo'}
-                                        id={config.id}
+                                        isOn={config.status === true}
+                                        id={config.idRol}
                                         handleToggle={(id) => {
                                             setSettings(
                                                 settings.map((config) =>
-                                                    config.id === id
+                                                    config.idRol === id
                                                         ? {
                                                             ...config,
-                                                            status: config.status === 'Activo' ? 'Inactivo' : 'Activo',
+                                                            status: !config.status,
                                                         }
                                                         : config
                                                 )
