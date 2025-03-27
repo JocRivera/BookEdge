@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./createClientes.css";
-import Switch from "../../common/Switch/Switch"
+import Switch from "../../common/Switch/Switch";
+import { getRoles } from "../../../services/RolesService"
 
 const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
   // Estado inicial como una constante separada para mayor claridad
@@ -11,13 +12,26 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
     email: "",
     cellphone: "",
     address: "",
-    rol: "",
-    status: "Activo"
+    idRol: 0,
+    status: true,
+    password: "",
+    eps: "",
+    role: {},
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [rolesData, setRoles] = useState([]);
 
   useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const roles = await getRoles();
+        setRoles(roles);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchRoles();
     // Si se proporciona userData, establece los datos del formulario a los de ese usuario
     if (userData) {
       setFormData(userData);
@@ -29,9 +43,9 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -48,9 +62,11 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
       <div className="modal-container">
         <div className="modal-header">
           <h2>{userData ? "Editar Usuario" : "Registrar Nuevo Usuario"}</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
         </div>
-        
+
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
@@ -66,9 +82,11 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
-                <label htmlFor="identificationType">Tipo de Identificación</label>
+                <label htmlFor="identificationType">
+                  Tipo de Identificación
+                </label>
                 <select
                   id="identificationType"
                   name="identificationType"
@@ -79,11 +97,11 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   <option value="">Seleccione</option>
                   <option value="CC">Cédula de Ciudadanía</option>
                   <option value="CE">Cédula de Extranjería</option>
-                  <option value="TI">Tarjeta de Identidad</option>
-                  <option value="PP">Pasaporte</option>
+                  {/* <option value="TI">Tarjeta de Identidad</option>
+                  <option value="PP">Pasaporte</option> */}
                 </select>
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="identification">Número de Identificación</label>
                 <input
@@ -96,7 +114,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="email">Correo Electrónico</label>
                 <input
@@ -109,7 +127,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="cellphone">Teléfono Celular</label>
                 <input
@@ -122,7 +140,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="address">Dirección</label>
                 <input
@@ -135,13 +153,31 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
+                <label htmlFor="rol">Rol</label>
+                {/* {console.log(rolesData[0].idRol, rolesData[0].name, rolesData)} */}
+                <select
+                  id="rol"
+                  name="rol"
+                  value={formData.role.name}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccione un rol</option>
+                  {rolesData.map((role) => (
+                    <option key={role.idRol} value={role.idRol}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* <div className="form-group">
                 <label htmlFor="rol">Rol</label>
                 <select
                   id="rol"
                   name="rol"
-                  value={formData.rol}
+                  value={formData.idRol}
                   onChange={handleChange}
                   required
                 >
@@ -150,25 +186,28 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   <option value="Editor">Editor</option>
                   <option value="Usuario">Usuario</option>
                 </select>
-              </div>
-              
+              </div> */}
+
               <div className="form-group">
                 <label htmlFor="status">Estado</label>
                 <Switch
-                  isOn={formData.status === 'Activo'}
+                  isOn={formData.status === "Activo"}
                   handleToggle={() =>
                     setFormData((prevState) => ({
                       ...prevState,
-                      status: prevState.status === 'Activo' ? "Inactivo" : "Activo"
+                      status:
+                        prevState.status === "Activo" ? "Inactivo" : "Activo",
                     }))
                   }
                   id="status"
                 />
               </div>
             </div>
-            
+
             <div className="modal-footer">
-              <button type="button" className="cancel-btn" onClick={onClose}>Cancelar</button>
+              <button type="button" className="cancel-btn" onClick={onClose}>
+                Cancelar
+              </button>
               <button type="submit" className="submit-btn">
                 {userData ? "Guardar Cambios" : "Registrar Usuario"}
               </button>

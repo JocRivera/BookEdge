@@ -18,7 +18,6 @@ function FormConfort({ comfortData, onClose, onSave, isOpen }) {
     } else if (isOpen && !comfortData) {
       setFormDataComfort({
         name: "",
-        status: "Activo",
       });
     }
     setErrors({ name: "" }); // Reiniciar errores al abrir el modal

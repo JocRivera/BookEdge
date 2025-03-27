@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/comforts"; // Corrige la URL si es necesario
+const API_URL = "http://localhost:3000/comforts";
 
 export const getComforts = async () => {
   try {
