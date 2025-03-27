@@ -4,9 +4,11 @@ import { CustomButton, ActionButtons } from "../../common/Button/customButton"
 import { CiSearch } from "react-icons/ci"
 import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
-
+import FormConfig from "./formConfig";
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const [settings, setSettings] = useState([
         {
             id: 1,
@@ -117,6 +119,22 @@ export default function CreateConfig() {
                 </table>
                 <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
             </div>
+            <FormConfig
+                setting={currentConfig}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={(formData) => {
+                    if (currentConfig) {
+                        setSettings(
+                            settings.map((config) =>
+                                config.id === currentConfig.id ? { ...config, ...formData } : config
+                            )
+                        );
+                    } else {
+                        setSettings([...settings, { id: settings.length + 1, ...formData }]);
+                    }
+                }}
+            />
         </div>
 
     )
