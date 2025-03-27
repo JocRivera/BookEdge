@@ -6,13 +6,15 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
   // Estado inicial como una constante separada para mayor claridad
   const initialFormData = {
     name: "",
+    eps: "SURA",
+    password: "123456789qweasd",
     identificationType: "",
     identification: "",
     email: "",
     cellphone: "",
     address: "",
-    rol: "",
-    status: "Activo"
+    idRol: 1,
+    status: true
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -79,8 +81,8 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   <option value="">Seleccione</option>
                   <option value="CC">Cédula de Ciudadanía</option>
                   <option value="CE">Cédula de Extranjería</option>
-                  <option value="TI">Tarjeta de Identidad</option>
-                  <option value="PP">Pasaporte</option>
+                  {/* <option value="TI">Tarjeta de Identidad</option>
+                  <option value="PP">Pasaporte</option> */}
                 </select>
               </div>
               
@@ -141,12 +143,12 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                 <select
                   id="rol"
                   name="rol"
-                  value={formData.rol}
-                  onChange={handleChange}
+                  // value={formData.rol}
+                  // onChange={handleChange}
                   required
                 >
                   <option value="">Seleccione un rol</option>
-                  <option value="Administrador">Administrador</option>
+                  <option value="1">Administrador</option>
                   <option value="Editor">Editor</option>
                   <option value="Usuario">Usuario</option>
                 </select>
@@ -155,11 +157,11 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
               <div className="form-group">
                 <label htmlFor="status">Estado</label>
                 <Switch
-                  isOn={formData.status === 'Activo'}
+                  isOn={formData.status === true}
                   handleToggle={() =>
                     setFormData((prevState) => ({
                       ...prevState,
-                      status: prevState.status === 'Activo' ? "Inactivo" : "Activo"
+                      status: prevState.status === true ? false : true
                     }))
                   }
                   id="status"
