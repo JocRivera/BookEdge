@@ -16,116 +16,116 @@ function TableUser() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "Juan Pérez",
-      identificationType: "DNI",
-      identification: "12345678",
-      email: "juan@example.com",
-      cellphone: "987654321",
-      address: "Calle Falsa 123",
-      rol: "Cliente",
-      status: "Activo",
-    },
-    {
-      id: 2,
-      name: "María López",
-      identificationType: "Pasaporte",
-      identification: "A987654",
-      email: "maria@example.com",
-      cellphone: "123456789",
-      address: "Av. Principal 456",
-      rol: "Empleado",
-      status: "Inactivo",
-    },
-    {
-      id: 3,
-      name: "Juan Pérez",
-      identificationType: "DNI",
-      identification: "12345678",
-      email: "juan@example.com",
-      cellphone: "987654321",
-      address: "Calle Falsa 123",
-      rol: "Cliente",
-      status: "Activo",
-    },
-    {
-      id: 4,
-      name: "María López",
-      identificationType: "Pasaporte",
-      identification: "A987654",
-      email: "maria@example.com",
-      cellphone: "123456789",
-      address: "Av. Principal 456",
-      rol: "Empleado",
-      status: "Inactivo",
-    },
-    {
-      id: 5,
-      name: "Juan Pérez",
-      identificationType: "DNI",
-      identification: "12345678",
-      email: "juan@example.com",
-      cellphone: "987654321",
-      address: "Calle Falsa 123",
-      rol: "Cliente",
-      status: "Activo",
-    },
-    {
-      id: 6,
-      name: "María López",
-      identificationType: "Pasaporte",
-      identification: "A987654",
-      email: "maria@example.com",
-      cellphone: "123456789",
-      address: "Av. Principal 456",
-      rol: "Empleado",
-      status: "Inactivo",
-    },
-    {
-      id: 7,
-      name: "Juan Pérez",
-      identificationType: "DNI",
-      identification: "12345678",
-      email: "juan@example.com",
-      cellphone: "987654321",
-      address: "Calle Falsa 123",
-      rol: "Cliente",
-      status: "Activo",
-    },
-    {
-      id: 8,
-      name: "María López",
-      identificationType: "Pasaporte",
-      identification: "A987654",
-      email: "maria@example.com",
-      cellphone: "123456789",
-      address: "Av. Principal 456",
-      rol: "Empleado",
-      status: "Inactivo",
-    },
-    {
-      id: 9,
-      name: "Juan Pérez",
-      identificationType: "DNI",
-      identification: "12345678",
-      email: "juan@example.com",
-      cellphone: "987654321",
-      address: "Calle Falsa 123",
-      rol: "Cliente",
-      status: "Activo",
-    },
-    {
-      id: 10,
-      name: "María López",
-      identificationType: "Pasaporte",
-      identification: "A987654",
-      email: "maria@example.com",
-      cellphone: "123456789",
-      address: "Av. Principal 456",
-      rol: "Empleado",
-      status: "Inactivo",
-    },
+    // {
+    //   id: 1,
+    //   name: "Juan Pérez",
+    //   identificationType: "DNI",
+    //   identification: "12345678",
+    //   email: "juan@example.com",
+    //   cellphone: "987654321",
+    //   address: "Calle Falsa 123",
+    //   rol: "Cliente",
+    //   status: "Activo",
+    // },
+    // {
+    //   id: 2,
+    //   name: "María López",
+    //   identificationType: "Pasaporte",
+    //   identification: "A987654",
+    //   email: "maria@example.com",
+    //   cellphone: "123456789",
+    //   address: "Av. Principal 456",
+    //   rol: "Empleado",
+    //   status: "Inactivo",
+    // },
+    // {
+    //   id: 3,
+    //   name: "Juan Pérez",
+    //   identificationType: "DNI",
+    //   identification: "12345678",
+    //   email: "juan@example.com",
+    //   cellphone: "987654321",
+    //   address: "Calle Falsa 123",
+    //   rol: "Cliente",
+    //   status: "Activo",
+    // },
+    // {
+    //   id: 4,
+    //   name: "María López",
+    //   identificationType: "Pasaporte",
+    //   identification: "A987654",
+    //   email: "maria@example.com",
+    //   cellphone: "123456789",
+    //   address: "Av. Principal 456",
+    //   rol: "Empleado",
+    //   status: "Inactivo",
+    // },
+    // {
+    //   id: 5,
+    //   name: "Juan Pérez",
+    //   identificationType: "DNI",
+    //   identification: "12345678",
+    //   email: "juan@example.com",
+    //   cellphone: "987654321",
+    //   address: "Calle Falsa 123",
+    //   rol: "Cliente",
+    //   status: "Activo",
+    // },
+    // {
+    //   id: 6,
+    //   name: "María López",
+    //   identificationType: "Pasaporte",
+    //   identification: "A987654",
+    //   email: "maria@example.com",
+    //   cellphone: "123456789",
+    //   address: "Av. Principal 456",
+    //   rol: "Empleado",
+    //   status: "Inactivo",
+    // },
+    // {
+    //   id: 7,
+    //   name: "Juan Pérez",
+    //   identificationType: "DNI",
+    //   identification: "12345678",
+    //   email: "juan@example.com",
+    //   cellphone: "987654321",
+    //   address: "Calle Falsa 123",
+    //   rol: "Cliente",
+    //   status: "Activo",
+    // },
+    // {
+    //   id: 8,
+    //   name: "María López",
+    //   identificationType: "Pasaporte",
+    //   identification: "A987654",
+    //   email: "maria@example.com",
+    //   cellphone: "123456789",
+    //   address: "Av. Principal 456",
+    //   rol: "Empleado",
+    //   status: "Inactivo",
+    // },
+    // {
+    //   id: 9,
+    //   name: "Juan Pérez",
+    //   identificationType: "DNI",
+    //   identification: "12345678",
+    //   email: "juan@example.com",
+    //   cellphone: "987654321",
+    //   address: "Calle Falsa 123",
+    //   rol: "Cliente",
+    //   status: "Activo",
+    // },
+    // {
+    //   id: 10,
+    //   name: "María López",
+    //   identificationType: "Pasaporte",
+    //   identification: "A987654",
+    //   email: "maria@example.com",
+    //   cellphone: "123456789",
+    //   address: "Av. Principal 456",
+    //   rol: "Empleado",
+    //   status: "Inactivo",
+    // },
   ]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -185,6 +185,7 @@ function TableUser() {
   };
 
   const handleSaveUser = async (userData) => {
+    console.log(userData)
     try {
       if (userData.id) {
         await updateUser(userData.id, userData);
@@ -253,17 +254,17 @@ function TableUser() {
           <tbody className="table-body">
             {currentItems.map((user, index) => (
               <tr
-                key={user.id}
+                key={user.idUser}
                 className={index % 2 === 0 ? "table-row-even" : "table-row-odd"}
               >
-                <td className="table-cell">{user.id}</td>
+                <td className="table-cell">{user.idUser}</td>
                 <td className="table-cell">{user.name}</td>
                 <td className="table-cell">{user.identificationType}</td>
                 <td className="table-cell">{user.identification}</td>
                 <td className="table-cell">{user.email}</td>
                 <td className="table-cell">{user.cellphone}</td>
                 <td className="table-cell">{user.address}</td>
-                <td className="table-cell">{user.rol}</td>
+                <td className="table-cell">{user.role.name}</td>
                 <td className="table-cell">
                   <Switch
                     isOn={user.status === "Activo"}
