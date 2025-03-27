@@ -1,108 +1,176 @@
 import React, { useState } from "react";
-import { ActionButtons } from "../../common/Button/customButton";
 import "./CabinCard.css";
 import cabaña from "../../../assets/cabaña.jpg";
+import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import { CiSearch } from "react-icons/ci";
+import { MdPerson } from "react-icons/md";
+import Pagination from "../../common/Paginator/Pagination";
 
 function CardCabin() {
+  const [searchTerm, setSearchTerm] = useState("");
   const [cabins, setCabins] = useState([
     {
       id: 1,
       name: "Cabaña Montaña Serena",
       description:
-        "Hermosa cabaña rodeada de naturaleza con vistas espectaculares. Perfecta para descansar y desconectar del bullicio de la ciudad.",
-      capacity: "4",
-      Comforts: [
-        { idComfort: 1, name: "Wi-Fi" },
-        { idComfort: 2, name: "Desayuno" },
-      ],
-      status: "En Servicio",
-      image: cabaña,
-    },
-    {
-      id: 2,
-      name: "Cabaña Bosque Encantado",
-      description:
-        "Acogedora cabaña en medio del bosque, ideal para amantes de la naturaleza.",
-      capacity: "6",
-      Comforts: [
-        { idComfort: 1, name: "Wi-Fi" },
-        { idComfort: 2, name: "Chimenea" },
+        "Hermosa cabaña rodeada de naturaleza con impresionantes vistas panorámicas. Un lugar perfecto para descansar y reconectar.",
+      capacity: "4 personas",
+      comforts: [
+        "Wi-Fi",
+        "Desayuno",
+        "Aire Acondicionado",
+        "Piscina",
+        "TV",
+        "Calefacción",
       ],
       status: "Fuera de Servicio",
       image: cabaña,
     },
     {
-      id: 3,
-      name: "Cabaña Lago Azul",
+      id: 2,
+      name: "Cabaña Valle Escondido",
       description:
-        "Cabaña con vista al lago, perfecta para relajarse y disfrutar del paisaje.",
-      capacity: "8",
-      Comforts: [
-        { idComfort: 1, name: "Wi-Fi" },
-        { idComfort: 2, name: "Jacuzzi" },
-      ],
-      status: "Mantenimiento",
+        "Un refugio tranquilo en medio de la naturaleza. Ideal para escapadas en familia o con amigos.",
+      capacity: "6 personas",
+      comforts: ["Wi-Fi", "Desayuno", "Parrilla"],
+      status: "En Servicio",
+      image: cabaña,
+    },
+    {
+      id: 3,
+      name: "Cabaña Valle Escondido",
+      description:
+        "Un refugio tranquilo en medio de la naturaleza. Ideal para escapadas en familia o con amigos.",
+      capacity: "6 personas",
+      comforts: ["Wi-Fi", "Desayuno", "Parrilla"],
+      status: "En Servicio",
+      image: cabaña,
+    },
+    {
+      id: 4,
+      name: "Cabaña Valle Escondido",
+      description:
+        "Un refugio tranquilo en medio de la naturaleza. Ideal para escapadas en familia o con amigos.",
+      capacity: "6 personas",
+      comforts: ["Wi-Fi", "Desayuno", "Parrilla"],
+      status: "En Servicio",
+      image: cabaña,
+    },
+    {
+      id: 5,
+      name: "Cabaña Valle Escondido",
+      description:
+        "Un refugio tranquilo en medio de la naturaleza. Ideal para escapadas en familia o con amigos.",
+      capacity: "6 personas",
+      comforts: ["Wi-Fi", "Desayuno", "Parrilla"],
+      status: "En Servicio",
       image: cabaña,
     },
   ]);
 
-  const handleEdit = (id) => {
-    console.log("Editando cabaña", id);
-  };
+  const handleAdd = () => console.log("Agregar comodidad");
+  const handleEdit = (id) => console.log("Editar cabaña", id);
+  const handleDelete = (id) => console.log("Eliminar cabaña", id);
+  const handleView = (id) => console.log("Ver detalles de la cabaña", id);
 
-  const handleDelete = (id) => {
-    console.log("Eliminando cabaña", id);
-  };
+  // Filtrado de datos basado en el término de búsqueda
+  const filteredCabins = cabins.filter((cabin) =>
+    Object.values(cabin).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
-  const handleView = (id) => {
-    console.log("Mirando cabaña", id);
-  };
+  // Paginación
+  const itemsPerPage = 3;
+  const [currentPage, setCurrentPage] = useState(0);
+  console.log({
+    totalCabins: cabins.length,
+    currentPage,
+    itemsPerPage,
+  });
+
+  const offset = currentPage * itemsPerPage;
+  const currentItems = filteredCabins.slice(offset, offset + itemsPerPage);
+  const pageCount = Math.ceil(filteredCabins.length / itemsPerPage);
+
+  const handlePageClick = ({ selected }) => setCurrentPage(selected);
 
   return (
-    <section className="cabin-container">
-      <div className="cabin-title-of">
-        <h2>Lista de cabañas</h2>
+    <section className="container-cabins">
+      <div className="title-container">
+        <h1 className="title-cabin">Nuestras Cabañas</h1>
+      </div>
+      <div className="cabin-search">
+        <CiSearch className="search-icon" />
+        <input
+          type="text"
+          className="search"
+          placeholder="Buscar ..."
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <CustomButton variant="primary" icon="add" onClick={handleAdd}>
+          Agregar Comodidad
+        </CustomButton>
       </div>
 
-      {cabins.map((cabin) => (
-        <article key={cabin.id} className="cabin-card">
-          <figure className="cabin-figure">
+      <main className="cabin-list">
+        {currentItems.map((cabin) => (
+          <article key={cabin.id} className="cabin-card">
             <img src={cabin.image} alt={cabin.name} className="cabin-image" />
-          </figure>
 
-          <main className="cabin-content">
-            <header>
-              <h3 className="cabin-title">{cabin.name}</h3>
-            </header>
+            <section className="cabins-details">
+              <header className="cabin-header">
+                <h2>{cabin.name}</h2>
+                <span
+                  className={`cabin-status status-${cabin.status
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")}`}
+                >
+                  {cabin.status}
+                </span>
+              </header>
 
-            <p className="cabin-description">{cabin.description}</p>
+              <p className="cabin-description">{cabin.description}</p>
 
-            <ul className="cabin-amenities">
-              <li className="amenity-item"> {cabin.capacity} personas</li>
-              {cabin.Comforts?.map((comfort) => (
-                <li key={comfort.idComfort} className="amenity-item">
-                  {comfort.name}
-                  {comfort.name}
-                </li>
-              ))}
-            </ul>
+              <div className="cabin-meta">
+                <span className="capacity-info">
+                  <MdPerson className="icon-person" />
+                  <span className="label">Capacidad</span> {cabin.capacity}
+                </span> 
+                <div className="comforts-info">
+                <MdPerson className="icon-person" />
+                <span className="label">Comodidades:</span>
+                </div>
+                <div className="cabin-comforts">
+                  {cabin.comforts.slice(0, 3).map((comfort, index) => (
+                    <span key={index} className="comfort-badge">
+                      {comfort}
+                    </span>
+                  ))}
+                  {cabin.comforts.length > 3 && (
+                    <span className="more-comforts">
+                      +{cabin.comforts.length - 3} más
+                    </span>
+                  )}
+                </div>
+              </div>
 
-            <span
-              className={`status status-${cabin.status.replace(/\s+/g, "-")}`}
-            >
-              {cabin.status}
-            </span>
-          </main>
-
-          <footer className="cabin-footer">
-            <ActionButtons
-              onEdit={() => handleEdit(cabin.id)}
-              onDelete={() => handleDelete(cabin.id)}
-              onView={() => handleView(cabin.id)}
-            />
-          </footer>
-        </article>
-      ))}
+              <footer className="cabin-actions">
+                <ActionButtons
+                  onEdit={() => handleEdit(cabin.id)}
+                  onDelete={() => handleDelete(cabin.id)}
+                  onView={() => handleView(cabin.id)}
+                />
+              </footer>
+            </section>
+          </article>
+        ))}
+      </main>
+      <Pagination
+        pageCount={pageCount}
+        onPageChange={handlePageClick}
+        forcePage={currentPage}
+      />
     </section>
   );
 }
