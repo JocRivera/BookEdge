@@ -163,8 +163,8 @@
 .menu-icon {
   margin-right: 15px;
   font-size: 18px;
-  width: 24px;
-  height: 24px;
+  width: 34px;
+  height: 34px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -173,6 +173,9 @@
   padding: 6px;
   transition: all 0.3s ease;
   color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(10, 10, 10, 0.7);
+
+  
 }
 
 .menu-item:hover .menu-icon {
@@ -336,7 +339,7 @@
 
 .stacked-buttons .menu-icon {
   margin-right: 15px;
-  font-size: 18px;
+  font-size: 28px;
   color: #fff;
   background: rgba(79, 180, 255, 0.15);
 }
