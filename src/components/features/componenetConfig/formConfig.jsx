@@ -33,7 +33,24 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
             [e.target.name]: e.target.value
         }));
     }
-
+    const handlePermissionChange = (e) => {
+        const { value, checked } = e.target;
+        setFormData(prevState => {
+            if (checked) {
+                // Add permission if checked
+                return {
+                    ...prevState,
+                    permissions: [...prevState.permissions, parseInt(value)]
+                };
+            } else {
+                // Remove permission if unchecked
+                return {
+                    ...prevState,
+                    permissions: prevState.permissions.filter(id => id !== parseInt(value))
+                };
+            }
+        });
+    }
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
@@ -67,8 +84,8 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                                 name="permissions"
                                                 value={permiso.idPermission}
                                                 id={permiso.idPermission}
-                                                checked={formData[permission.idPermission] || false}
-                                                onChange={handleChange}
+                                                checked={formData.permissions.includes(permiso.idPermission)}
+                                                onChange={handlePermissionChange}
                                             />
                                             <span>{permiso.name}</span>
                                         </label>
