@@ -1,37 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import "./createConfig.css"
 import Switch from '../../common/Switch/Switch';
-
+import permissionService from '../../../services/PermissionService';
 const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     const [permission, setPermission] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
-        status: false
+        status: false,
+        permissions: []
     });
+    useEffect(() => {
+        const fetchPermissions = async () => {
+            try {
+                const permissions = await permissionService.getPermissions();
+                setPermission(permissions);
+            } catch (error) {
+                console.error("Error fetching permissions:", error);
+            }
+        };
+        fetchPermissions();
+    }, [])
+
     useEffect(() => {
         if (setting) {
             setFormData(setting)
         }
     }, [setting])
-    useEffect(() => {
-        // Ejemplo de carga de permisos iniciales (puedes reemplazar con tu lógica de obtención de datos)
-        setPermission([
-            { uid: "ServiceModule", name: "Services", activo: true },
-            { uid: "ConfigModule", name: "Configuracion", activo: false },
-            { uid: "AdminModule", name: "Dashboard", activo: true },
-            { uid: "UserModule", name: "Users", activo: false },
-            { uid: "PlainsModule", name: "Planes", activo: true },
-            { uid: "ReservaModule", name: "Reserva", activo: false },
-            { uid: "AlojamientosModule", name: "Alojamientos", activo: true },
 
-        ]);
-    }, []);
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
+        setFormData(prevState => ({
+            ...prevState,
             [e.target.name]: e.target.value
-        });
+        }));
     }
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave(formData);
@@ -55,35 +57,32 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                     onChange={handleChange}
                                 />
                             </div>
-                            <div className='form-group'>
-                                <label htmlFor="">Descripción</label>
-                                <textarea required placeholder="Agrega una descripción..." name="Description" id="Description"
-                                    value={formData.Description}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className="permissions-list">
-                                {permission.map((permiso) => (
-                                    <label key={permiso.uid} >
-                                        <input
-                                            type="checkbox"
-                                            name={permiso.uid}
-                                            id={permiso.uid}
-                                            checked={formData[permiso.uid] || false}
-                                            onChange={handleChange}
-                                        />
-                                        <span>{permiso.name}</span>
-                                    </label>
-                                ))}
-                            </div>
+                            <fieldset className="permissions-group">
+                                <legend>Permisos</legend>
+                                <div className="permissions-list">
+                                    {permission.map((permiso) => (
+                                        <label key={permiso.idPermission} >
+                                            <input
+                                                type="checkbox"
+                                                name="permissions"
+                                                value={permiso.idPermission}
+                                                id={permiso.idPermission}
+                                                checked={formData[permission.idPermission] || false}
+                                                onChange={handleChange}
+                                            />
+                                            <span>{permiso.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
                             <div className="form-group">
                                 <label htmlFor="status">Estado</label>
                                 <Switch
-                                    isOn={formData.status === 'Activo'}
+                                    isOn={formData.status === true}
                                     handleToggle={() =>
                                         setFormData((prevState) => ({
                                             ...prevState,
-                                            status: prevState.status === 'Activo' ? "Inactivo" : "Activo"
+                                            status: prevState.status === true ? false : true
                                         }))
                                     }
                                     id="status"

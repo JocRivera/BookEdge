@@ -4,36 +4,24 @@ import { CustomButton, ActionButtons } from "../../common/Button/customButton"
 import { CiSearch } from "react-icons/ci"
 import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
-import FormConfig from "./formConfig";import {getRoles, postRoles} from "../../../services/RolesService"
+import FormConfig from "./formConfig";
+import rolesService from "../../../services/RolesService"
 
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
-    const[isModalOpen,setIsModalOpen]= useState(false)
-    const [settings, setSettings] = useState([
-        // {
-        //     id: 1,
-        //     name: 'Admin',
-        //     description: 'Rol con acceso a todos los modulos',
-        //     status: 'Activo',
-        // },
-        // {
-        //     id: 2,
-        //     name: 'User',
-        //     description: 'Rol con acceso a todos los modulos',
-        //     status: 'Activo',
-        // }
-    ]);
-    useEffect(()=>{
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [settings, setSettings] = useState([]);
+    useEffect(() => {
         const fectchConfig = async () => {
-            try{
-                const roles = await getRoles()
+            try {
+                const roles = await rolesService.getRoles()
                 setSettings(roles)
-            }catch(error){
+            } catch (error) {
                 console.log(error)
             }
         }
         fectchConfig()
-    },[])
+    }, [])
     const [searchTerm, setSearchTerm] = useState("");
     const filtrarDatos = settings.filter((config) =>
         Object.values(config).some((value) =>
@@ -61,6 +49,24 @@ export default function CreateConfig() {
     const handleDelete = (id) => {
         console.log('Eliminar', id);
     }
+    const handleSave = (setting) => {
+        if (currentConfig) {
+            rolesService.updateRole(currentConfig.id, setting).then((res) => {
+                setSettings(settings.map((config) => config.id === currentConfig.id ? { ...config, ...setting } : config))
+            }).catch((error) => {
+                console.log(error)
+            }
+            )
+        }
+        else {
+            rolesService.createRole(setting).then((res) => {
+                setSettings([...settings, { id: settings.length + 1, ...setting }])
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+        console.log('Guardar', setting);
+    }
     return (
         <div className="table-container">
             <div className="title-container">
@@ -86,8 +92,7 @@ export default function CreateConfig() {
                     <thead className="table-header">
                         <tr>
                             <th>Id</th>
-                            <th>Nombre Completo</th>
-                            <th>Descripcion</th>
+                            <th>Nombre</th>
                             <th>Status</th>
                             <th>Acciones</th>
                         </tr>
@@ -97,7 +102,6 @@ export default function CreateConfig() {
                             <tr key={config.idRol}>
                                 <td className="table-cell">{config.idRol}</td>
                                 <td className="table-cell">{config.name}</td>
-                                <td className="table-cell">{config.description}</td>
                                 <td className="table-cell">
                                     <Switch
                                         isOn={config.status === true}
@@ -134,17 +138,7 @@ export default function CreateConfig() {
                 setting={currentConfig}
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSave={(formData) => {
-                    if (currentConfig) {
-                        setSettings(
-                            settings.map((config) =>
-                                config.id === currentConfig.id ? { ...config, ...formData } : config
-                            )
-                        );
-                    } else {
-                        setSettings([...settings, { id: settings.length + 1, ...formData }]);
-                    }
-                }}
+                onSave={handleSave}
             />
         </div>
 

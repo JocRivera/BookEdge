@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./createClientes.css";
 import Switch from "../../common/Switch/Switch";
-import { getRoles } from "../../../services/RolesService"
+import rolesService from "../../../services/RolesService"
 
 const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
   // Estado inicial como una constante separada para mayor claridad
@@ -25,7 +25,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const roles = await getRoles();
+        const roles = await rolesService.getRoles(); // Obtiene los roles desde el servicio
         setRoles(roles);
       } catch (error) {
         console.log(error);

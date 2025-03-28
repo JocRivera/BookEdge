@@ -311,3 +311,17 @@
     font-size: 14px;
     color: var(--color-text-dark);
 }
+
+.permissions-group {
+    border: 1px solid var(--color-button-cancel-border);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.permissions-group legend {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    padding: 0 8px;
+}
