@@ -12,7 +12,7 @@ export default function CreateConfig() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [settings, setSettings] = useState([]);
     useEffect(() => {
-        const fectchConfig = async () => {
+        const fetchConfig = async () => {
             try {
                 const roles = await rolesService.getRoles()
                 setSettings(roles)
@@ -20,7 +20,7 @@ export default function CreateConfig() {
                 console.log(error)
             }
         }
-        fectchConfig()
+        fetchConfig()
     }, [])
     const [searchTerm, setSearchTerm] = useState("");
     const filtrarDatos = settings.filter((config) =>
@@ -46,8 +46,15 @@ export default function CreateConfig() {
     const handleEdit = (id) => {
         console.log('Editar', id);
     }
-    const handleDelete = (id) => {
-        console.log('Eliminar', id);
+    const handleDelete = (idRol) => {
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este rol?");
+        if (confirmDelete) {
+            rolesService.deleteRole(idRol).then(() => {
+                setSettings(settings.filter((config) => config.idRol !== idRol))
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
     }
     const handleSave = (setting) => {
         if (currentConfig) {
@@ -65,7 +72,7 @@ export default function CreateConfig() {
                 console.log(error)
             })
         }
-        console.log('Guardar', setting);
+        console.log(setting);
     }
     return (
         <div className="table-container">
@@ -125,7 +132,7 @@ export default function CreateConfig() {
                                     <ActionButtons
                                         onView={() => handleView(config.id)}
                                         onEdit={() => handleEdit(config.id)}
-                                        onDelete={() => handleDelete(config.id)}
+                                        onDelete={() => handleDelete(config.idRol)}
                                     />
                                 </td>
                             </tr>
