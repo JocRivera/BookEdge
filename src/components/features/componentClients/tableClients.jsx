@@ -185,7 +185,7 @@ function TableUser() {
   };
 
   const handleSaveUser = async (userData) => {
-    console.log(userData);
+    console.log(userData)
     try {
       if (userData.id) {
         await updateUser(userData.id, userData);
@@ -254,17 +254,17 @@ function TableUser() {
           <tbody className="table-body">
             {currentItems.map((user, index) => (
               <tr
-                key={user.id}
+                key={user.idUser}
                 className={index % 2 === 0 ? "table-row-even" : "table-row-odd"}
               >
-                <td className="table-cell">{user.id}</td>
+                <td className="table-cell">{user.idUser}</td>
                 <td className="table-cell">{user.name}</td>
                 <td className="table-cell">{user.identificationType}</td>
                 <td className="table-cell">{user.identification}</td>
                 <td className="table-cell">{user.email}</td>
                 <td className="table-cell">{user.cellphone}</td>
                 <td className="table-cell">{user.address}</td>
-                <td className="table-cell">{user.rol}</td>
+                <td className="table-cell">{user.role.name}</td>
                 <td className="table-cell">
                   <Switch
                     isOn={user.status === "Activo"}

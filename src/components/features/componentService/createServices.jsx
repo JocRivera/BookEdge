@@ -1,32 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "./createService.css";
 import { CustomButton, ActionButtons } from '../../common/Button/customButton';
 import { CiSearch } from "react-icons/ci";
 import Switch from "../../common/Switch/Switch";
 import Pagination from "../../common/Paginator/Pagination";
-
+import FormService from './formServices';
+import serviceService from '../../../services/serviceService';
 export default function CreateServices() {
     const [currentService, setCurrentService] = useState(null);
-
-    const [services, setServices] = useState([
-
-        {
-            id: 1,
-            name: 'Cena Romantica',
-            description: 'Cena Romantica para dos personas',
-            price: 500,
-            status: 'Activo',
-        },
-        {
-            id: 2,
-            name: 'Masaje Relajante',
-            description: 'Masaje relajante para dos personas',
-            price: 700,
-            status: 'Activo',
-        }
-
-    ]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [services, setServices] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        fetchServices();
+    }, []);
+
+    const fetchServices = async () => {
+        try {
+            const response = await serviceService.getServices();
+            setServices(response);
+        } catch (error) {
+            console.error("Error fetching services:", error);
+        }
+    };
 
     const filtrarDatos = services.filter((service) =>
         Object.values(service).some((value) =>
@@ -46,15 +43,39 @@ export default function CreateServices() {
         setCurrentService(null);
         setIsModalOpen(true);
     };
-    const handleView = (id) => {
-        console.log('Ver', id);
-    }
-    const handleEdit = (id) => {
-        console.log('Editar', id);
+
+    const handleEdit = (Id_Service) => {
+        const service = services.find((service) => service.Id_Service === Id_Service);
+        setCurrentService(service);
+        setIsModalOpen(true);
     }
     const handleDelete = (id) => {
-        console.log('Eliminar', id);
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este servicio?");
+        if (confirmDelete) {
+            serviceService.deleteService(id).then(() => {
+                setServices(services.filter((service) => service.id !== id));
+            }).catch((error) => {
+                console.error("Error deleting service:", error);
+            });
+        }
     }
+    const handleSave = (service) => {
+        if (currentService) {
+            serviceService.updateService(currentService.Id_Service, service).then(() => {
+                setServices(services.map((s) => (s.id === currentService.id ? service : s)));
+            }).catch((error) => {
+                console.error("Error updating service:", error);
+            });
+        } else {
+            serviceService.createService(service).then((newService) => {
+                setServices([...services, newService]);
+            }).catch((error) => {
+                console.error("Error creating service:", error);
+            });
+        }
+        console.log(service);
+    }
+
     return (
         <div className="table-container">
             <div className="title-container">
@@ -81,30 +102,30 @@ export default function CreateServices() {
                         <tr>
                             <th>Id</th>
                             <th>Nombre Completo</th>
-                            <th>Tipo de documento</th>
+                            <th>Descripcion</th>
                             <th>Precio</th>
-                            <th>Status</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="table-body">
                         {services.map((service) => (
-                            <tr key={service.id}>
-                                <td className="table-cell">{service.id}</td>
+                            <tr key={service.Id_Service}>
+                                <td className="table-cell">{service.Id_Service}</td>
                                 <td className="table-cell">{service.name}</td>
-                                <td className="table-cell">{service.description}</td>
-                                <td className="table-cell">{service.price}</td>
+                                <td className="table-cell">{service.Description}</td>
+                                <td className="table-cell">{service.Price}</td>
                                 <td className="table-cell">
                                     <Switch
-                                        isOn={service.status === 'Activo'}
-                                        id={service.id}
-                                        handleToggle={(id) => {
+                                        isOn={service.StatusServices === true}
+                                        id={service.Id_Service}
+                                        handleToggle={(Id_Service) => {
                                             setServices(
                                                 services.map((service) =>
-                                                    service.id === id
+                                                    service.Id_Service === Id_Service
                                                         ? {
                                                             ...service,
-                                                            status: service.status === 'Activo' ? 'Inactivo' : 'Activo',
+                                                            StatusServices: service.StatusServices === true ? false : true,
                                                         }
                                                         : service
                                                 )
@@ -115,9 +136,8 @@ export default function CreateServices() {
                                 </td>
                                 <td className="table-cell">
                                     <ActionButtons
-                                        onView={() => handleView(service.id)}
-                                        onEdit={() => handleEdit(service.id)}
-                                        onDelete={() => handleDelete(service.id)}
+                                        onEdit={() => handleEdit(service.Id_Service)}
+                                        onDelete={() => handleDelete(service.Id_Service)}
                                     />
                                 </td>
                             </tr>
@@ -126,6 +146,12 @@ export default function CreateServices() {
                 </table>
                 <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
             </div>
+            <FormService
+                service={currentService}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSave}
+            />
 
         </div>
     );
