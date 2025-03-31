@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  LuLayoutDashboard, 
-  LuUsers, 
-  LuBedDouble, 
-  LuHotel, 
-  LuSettings, 
-  LuCalendar, 
-  LuChevronDown, 
+import {
+  LuLayoutDashboard,
+  LuUsers,
+  LuBedDouble,
+  LuHotel,
+  LuSettings,
+  LuCalendar,
+  LuChevronDown,
   LuChevronRight,
   LuBookmark
 } from "react-icons/lu";
@@ -134,9 +134,8 @@ const Sidebar = () => {
           </li>
 
           <li
-            className={`menu-item ${
-              activeSubMenu === "rooms" || isRouteInSubmenu(roomsSubmenu) ? "active" : ""
-            }`}
+            className={`menu-item ${activeSubMenu === "rooms" || isRouteInSubmenu(roomsSubmenu) ? "active" : ""
+              }`}
           >
             <div
               className="menu-header"
@@ -175,18 +174,17 @@ const Sidebar = () => {
 
             {collapsed && (
               <ul
-                className={`submenu stacked-buttons ${
-                  activeSubMenu === "rooms" ? "open" : ""
-                }`}
+                className={`submenu stacked-buttons ${activeSubMenu === "rooms" ? "open" : ""
+                  }`}
               >
                 {roomsSubmenu.map((item, index) => (
-                  <li 
-                    key={index} 
+                  <li
+                    key={index}
                     style={{ "--item-index": index }}
                     className={isActiveRoute(item.path) ? "active" : ""}
                   >
-                    <Link 
-                      to={item.path} 
+                    <Link
+                      to={item.path}
                       className={isActiveRoute(item.path) ? "active" : ""}
                     >
                       <span className="menu-icon">{item.icon}</span>
@@ -208,9 +206,8 @@ const Sidebar = () => {
           </li>
 
           <li
-            className={`menu-item ${
-              activeSubMenu === "bookings" || isRouteInSubmenu(bookingsSubmenu) ? "active" : ""
-            }`}
+            className={`menu-item ${activeSubMenu === "bookings" || isRouteInSubmenu(bookingsSubmenu) ? "active" : ""
+              }`}
           >
             <div
               className="menu-header"
@@ -234,17 +231,16 @@ const Sidebar = () => {
 
             {!collapsed && (
               <ul
-                className={`submenu ${
-                  activeSubMenu === "bookings" ? "open" : ""
-                }`}
+                className={`submenu ${activeSubMenu === "bookings" ? "open" : ""
+                  }`}
               >
                 {bookingsSubmenu.map((item, index) => (
-                  <li 
-                    key={index} 
+                  <li
+                    key={index}
                     className={isActiveRoute(item.path) ? "active" : ""}
                   >
-                    <Link 
-                      to={item.path} 
+                    <Link
+                      to={item.path}
                       className={isActiveRoute(item.path) ? "active" : ""}
                     >
                       <span className="menu-icon">{item.icon}</span>
@@ -257,18 +253,17 @@ const Sidebar = () => {
 
             {collapsed && (
               <ul
-                className={`submenu stacked-buttons ${
-                  activeSubMenu === "bookings" ? "open" : ""
-                }`}
+                className={`submenu stacked-buttons ${activeSubMenu === "bookings" ? "open" : ""
+                  }`}
               >
                 {bookingsSubmenu.map((item, index) => (
-                  <li 
-                    key={index} 
+                  <li
+                    key={index}
                     style={{ "--item-index": index }}
                     className={isActiveRoute(item.path) ? "active" : ""}
                   >
-                    <Link 
-                      to={item.path} 
+                    <Link
+                      to={item.path}
                       className={isActiveRoute(item.path) ? "active" : ""}
                     >
                       <span className="menu-icon">{item.icon}</span>
@@ -286,6 +281,14 @@ const Sidebar = () => {
                 <LuSettings />
               </span>
               <span className="menu-text">Configuración</span>
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link to="/admin/services">
+              <span className="menu-icon">
+                <LuHotel />
+              </span>
+              <span className="menu-text">Servicios</span>
             </Link>
           </li>
         </ul>
