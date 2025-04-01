@@ -3,6 +3,7 @@ import "./createConfig.css"
 import Switch from '../../common/Switch/Switch';
 import permissionService from '../../../services/PermissionService';
 const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
+    const [error, setError] = useState(null);
     const [permission, setPermission] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
@@ -20,12 +21,18 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
         };
         fetchPermissions();
     }, [])
-
     useEffect(() => {
         if (setting) {
             setFormData({
                 ...setting,
                 permissions: setting.permissions.map((perm) => perm.idPermission) // Extraer IDs
+            });
+        }
+        else {
+            setFormData({
+                name: '',
+                status: false,
+                permissions: []
             });
         }
     }, [setting])
