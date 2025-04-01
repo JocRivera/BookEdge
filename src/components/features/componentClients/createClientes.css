@@ -237,7 +237,7 @@
 .form-group input:focus,
 .form-group select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+  box-shadow: 0 0 0 3px hwb(212 29% 11% / 0.2);
   outline: none;
 }
 
