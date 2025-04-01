@@ -23,7 +23,10 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
 
     useEffect(() => {
         if (setting) {
-            setFormData(setting)
+            setFormData({
+                ...setting,
+                permissions: setting.permissions.map((perm) => perm.idPermission) // Extraer IDs
+            });
         }
     }, [setting])
 

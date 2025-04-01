@@ -40,11 +40,14 @@ export default function CreateConfig() {
         setCurrentConfig(null);
         setIsModalOpen(true);
     };
-    const handleView = (id) => {
-        console.log('Ver', id);
+    const handleView = (idRol) => {
+        console.log('Ver', idRol);
     }
-    const handleEdit = (id) => {
-        console.log('Editar', id);
+    const handleEdit = (idRol) => {
+        const config = settings.find((config) => config.idRol === idRol);
+        setCurrentConfig(config);
+        setIsModalOpen(true);
+        console.log(config)
     }
     const handleDelete = (idRol) => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este rol?");
@@ -58,8 +61,8 @@ export default function CreateConfig() {
     }
     const handleSave = (setting) => {
         if (currentConfig) {
-            rolesService.updateRole(currentConfig.id, setting).then((res) => {
-                setSettings(settings.map((config) => config.id === currentConfig.id ? { ...config, ...setting } : config))
+            rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
+                setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
             }).catch((error) => {
                 console.log(error)
             }
@@ -67,7 +70,7 @@ export default function CreateConfig() {
         }
         else {
             rolesService.createRole(setting).then((res) => {
-                setSettings([...settings, { id: settings.length + 1, ...setting }])
+                setSettings([...settings, { idRol: settings.length + 1, ...setting }])
             }).catch((error) => {
                 console.log(error)
             })
@@ -113,10 +116,10 @@ export default function CreateConfig() {
                                     <Switch
                                         isOn={config.status === true}
                                         id={config.idRol}
-                                        handleToggle={(id) => {
+                                        handleToggle={(idRol) => {
                                             setSettings(
                                                 settings.map((config) =>
-                                                    config.idRol === id
+                                                    config.idRol === idRol
                                                         ? {
                                                             ...config,
                                                             status: !config.status,
@@ -130,8 +133,8 @@ export default function CreateConfig() {
                                 </td >
                                 <td className="table-cell">
                                     <ActionButtons
-                                        onView={() => handleView(config.id)}
-                                        onEdit={() => handleEdit(config.id)}
+                                        onView={() => handleView(config.idRol)}
+                                        onEdit={() => handleEdit(config.idRol)}
                                         onDelete={() => handleDelete(config.idRol)}
                                     />
                                 </td>
