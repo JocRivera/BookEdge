@@ -1,45 +1,74 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import "./componentsReservations.css";
-import { FaUser, FaBed, FaCalendarAlt, FaDollarSign, FaInfoCircle } from "react-icons/fa";
-
+import { FaUser, FaBed, FaCalendarAlt, FaDollarSign, FaUsers } from "react-icons/fa";
+import CompanionsForm from '../componentCompanions/formCompanions';
+import PaymentForm from '../componentPayments/fromPayments';
 function FormReservation({ reservationData, onClose, onSave, isOpen }) {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     client: "",
-    room: "",
-    checkIn: "",
-    checkOut: "",
+    plan: "",
+    startDate: "",
+    endDate: "",
+    hasCompanions: false,
+    companionCount: 0,
+    companionsData: [],
     status: "Confirmada",
-    total: 0,
-    specialRequests: ""
+    total: 0
   });
 
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (reservationData) {
-      setFormData(reservationData);
+      setFormData({
+        ...reservationData,
+        companionsData: reservationData.companionsData || []
+      });
     } else {
-      // Reset form when creating new reservation
       setFormData({
         client: "",
-        room: "",
-        checkIn: "",
-        checkOut: "",
+        plan: "",
+        startDate: "",
+        endDate: "",
+        hasCompanions: false,
+        companionCount: 0,
+        companionsData: [],
         status: "Confirmada",
-        total: 0,
-        specialRequests: ""
+        total: 0
       });
     }
-  }, [reservationData]);
+    setStep(1);
+  }, [reservationData, isOpen]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when field is edited
+    const { name, value, type, checked } = e.target;
+
+    if (name === 'companionCount' && formData.hasCompanions) {
+      const count = parseInt(value) || 0;
+      const newCompanions = Array(count).fill().map((_, i) =>
+        (formData.companionsData && formData.companionsData[i]) || {
+          name: '',
+          birthDate: '',
+          age: '',
+          documentType: '',
+          documentNumber: '',
+          eps: ''
+        }
+      );
+
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        companionsData: newCompanions
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
+    }
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -48,38 +77,96 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
     }
   };
 
-  const validateForm = () => {
+  const validateStep = (step) => {
     const newErrors = {};
     const today = new Date().toISOString().split('T')[0];
-    
-    if (!formData.client) newErrors.client = "Cliente es requerido";
-    if (!formData.room) newErrors.room = "Habitación es requerida";
-    if (!formData.checkIn) newErrors.checkIn = "Fecha de entrada es requerida";
-    if (!formData.checkOut) newErrors.checkOut = "Fecha de salida es requerida";
-    
-    if (formData.checkIn && formData.checkOut && formData.checkIn > formData.checkOut) {
-      newErrors.checkOut = "La fecha de salida debe ser posterior a la de entrada";
+
+    if (step === 1) {
+      if (!formData.client) newErrors.client = "Cliente es requerido";
+      if (!formData.plan) newErrors.plan = "Plan es requerido";
+      if (!formData.startDate) newErrors.startDate = "Fecha de entrada es requerida";
+      if (!formData.endDate) newErrors.endDate = "Fecha de salida es requerida";
+
+      if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
+        newErrors.endDate = "La fecha de salida debe ser posterior a la de entrada";
+      }
+
+      if (formData.startDate && formData.startDate < today) {
+        newErrors.startDate = "La fecha de entrada no puede ser en el pasado";
+      }
     }
-    
-    if (formData.checkIn && formData.checkIn < today) {
-      newErrors.checkIn = "La fecha de entrada no puede ser en el pasado";
+    else if (step === 2) {
+      if (formData.hasCompanions) {
+        if (formData.companionCount <= 0) {
+          newErrors.companionCount = "Debe especificar al menos 1 acompañante";
+        }
+
+        // Validar cada acompañante
+        formData.companionsData.forEach((companion, index) => {
+          if (!companion.name) newErrors[`companionName_${index}`] = "Nombre es requerido";
+          if (!companion.birthDate) newErrors[`companionBirthDate_${index}`] = "Fecha de nacimiento es requerida";
+          if (!companion.documentType) newErrors[`companionDocType_${index}`] = "Tipo de documento es requerido";
+          if (!companion.documentNumber) newErrors[`companionDocNumber_${index}`] = "Número de documento es requerido";
+          if (!companion.eps) newErrors[`companionEps_${index}`] = "EPS es requerida";
+        });
+      }
     }
-    
-    if (formData.total < 0) newErrors.total = "El total no puede ser negativo";
-    
+
+
+    // Mover la validación de acompañantes al paso 2
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const nextStep = () => {
+    if (validateStep(step)) {
+      setStep(step + 1);
+    }
+  };
+
+  const prevStep = () => {
+    setStep(step - 1);
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (validateStep(step)) {
+      const calculatedTotal = calculateTotal(formData.plan, formData.companionCount);
+
       onSave({
         ...formData,
-        total: parseFloat(formData.total)
+        total: calculatedTotal
       });
       onClose();
     }
+  };
+
+  const calculateTotal = (plan, companions) => {
+    const basePrices = {
+      "Romántico": 750,
+      "Empresarial": 600,
+      "Pasadia Cumpleaños": 400,
+      "Spa": 900
+    };
+
+    const companionFee = 150;
+    const basePrice = basePrices[plan] || 0;
+    const companionsTotal = formData.hasCompanions ? companions * companionFee : 0;
+
+    return basePrice + companionsTotal;
+  };
+  const handleCompanionDataChange = (index, e) => {
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const updatedCompanions = [...(prev.companionsData || [])];
+      updatedCompanions[index] = {
+        ...(updatedCompanions[index] || {}),
+        [name]: value
+      };
+      return {
+        ...prev,
+        companionsData: updatedCompanions
+      };
+    });
   };
 
   if (!isOpen) return null;
@@ -89,150 +176,168 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
       <div className="modal-container">
         <div className="modal-header">
           <h2>
-            {reservationData && reservationData.id ? "Editar Reservación" : "Nueva Reservación"}
+            {reservationData && reservationData.id ? "Editar Reserva" : "Nueva Reserva"}
           </h2>
-          <button className="close-button" onClick={onClose}>
-            ×
-          </button>
+          <button className="close-button" onClick={onClose}>×</button>
         </div>
+
+        <div className="steps-indicator">
+          <div className={`step ${step === 1 ? 'active' : ''}`}>1. Datos Reserva</div>
+          <div className={`step ${step === 2 ? 'active' : ''}`}>2. Acompañantes</div>
+          <div className={`step ${step === 3 ? 'active' : ''}`}>3. Pagos</div>
+        </div>
+
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
-            <div className="form-grid">
-              {/* Cliente */}
-              <div className={`form-group ${errors.client ? 'has-error' : ''}`}>
-                <label htmlFor="client">
-                  <FaUser className="input-icon" /> Cliente
-                </label>
-                <input
-                  type="text"
-                  id="client"
-                  name="client"
-                  value={formData.client}
-                  onChange={handleChange}
-                  placeholder="Nombre del cliente"
-                  required
+            {step === 1 && (
+              <div className="form-step">
+                <div className="form-grid">
+                  <div className={`form-group ${errors.client ? 'has-error' : ''}`}>
+                    <label htmlFor="client">
+                      <FaUser className="input-icon" /> Cliente
+                    </label>
+                    <input
+                      type="text"
+                      id="client"
+                      name="client"
+                      value={formData.client}
+                      onChange={handleChange}
+                      placeholder="Nombre del cliente"
+                      required
+                    />
+                    {errors.client && <span className="error-message">{errors.client}</span>}
+                  </div>
+
+                  <div className={`form-group ${errors.plan ? 'has-error' : ''}`}>
+                    <label htmlFor="plan">
+                      <FaBed className="input-icon" /> Plan
+                    </label>
+                    <select
+                      id="plan"
+                      name="plan"
+                      value={formData.plan}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Seleccione un plan</option>
+                      <option value="Romántico">Plan Romántico</option>
+                      <option value="Empresarial">Plan Empresarial</option>
+                      <option value="Pasadia Cumpleaños">Pasadia Cumpleaños</option>
+                      <option value="Spa">Plan Spa</option>
+                    </select>
+                    {errors.plan && <span className="error-message">{errors.plan}</span>}
+                  </div>
+
+                  <div className="date-group">
+                    <div className={`form-group ${errors.startDate ? 'has-error' : ''}`}>
+                      <label htmlFor="startDate">
+                        <FaCalendarAlt className="input-icon" /> Fecha Inicio
+                      </label>
+                      <input
+                        type="date"
+                        id="startDate"
+                        name="startDate"
+                        value={formData.startDate}
+                        onChange={handleChange}
+                        required
+                      />
+                      {errors.startDate && <span className="error-message">{errors.startDate}</span>}
+                    </div>
+
+                    <div className={`form-group ${errors.endDate ? 'has-error' : ''}`}>
+                      <label htmlFor="endDate">
+                        <FaCalendarAlt className="input-icon" /> Fecha Fin
+                      </label>
+                      <input
+                        type="date"
+                        id="endDate"
+                        name="endDate"
+                        value={formData.endDate}
+                        onChange={handleChange}
+                        required
+                      />
+                      {errors.endDate && <span className="error-message">{errors.endDate}</span>}
+                    </div>
+                  </div>
+                  <div className="companion-controls">
+                    <div className="checkbox-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="hasCompanions"
+                          checked={formData.hasCompanions}
+                          onChange={handleChange}
+                        />
+                        ¿Incluye acompañantes?
+                      </label>
+                    </div>
+                    {formData.hasCompanions && (
+                      <div className={`form-group ${errors.companionCount ? 'has-error' : ''}`}>
+                        <label htmlFor="companionCount">
+                          <FaUsers className="input-icon" /> Cantidad de acompañantes
+                        </label>
+                        <input
+                          type="number"
+                          id="companionCount"
+                          name="companionCount"
+                          value={formData.companionCount}
+                          onChange={handleChange}
+                          min="1"
+                          placeholder="Número de acompañantes"
+                        />
+                        {errors.companionCount && <span className="error-message">{errors.companionCount}</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="form-step">
+                {formData.hasCompanions && formData.companionCount > 0 && (
+                  <CompanionsForm
+                    companionsData={formData.companionsData}
+                    onCompanionDataChange={handleCompanionDataChange}
+                  />
+                )}
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="form-step">
+                <PaymentForm
+                  totalAmount={calculateTotal(formData.plan, formData.companionCount)}
+                  onPaymentSubmit={(paymentData) => {
+                    const completeData = {
+                      ...formData,
+                      payment: paymentData,
+                      total: calculateTotal(formData.plan, formData.companionCount)
+                    };
+                    onSave(completeData);
+                    onClose();
+                  }}
                 />
-                {errors.client && <span className="error-message">{errors.client}</span>}
               </div>
-
-              {/* Habitación */}
-              <div className={`form-group ${errors.room ? 'has-error' : ''}`}>
-                <label htmlFor="room">
-                  <FaBed className="input-icon" /> Habitación
-                </label>
-                <select
-                  id="room"
-                  name="room"
-                  value={formData.room}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Seleccione una habitación</option>
-                  <option value="Habitación 101">Habitación 101</option>
-                  <option value="Habitación 102">Habitación 102</option>
-                  <option value="Suite 201">Suite 201</option>
-                  <option value="Suite 202">Suite 202</option>
-                  <option value="Habitación VIP 301">Habitación VIP 301</option>
-                </select>
-                {errors.room && <span className="error-message">{errors.room}</span>}
-              </div>
-
-              {/* Fechas */}
-              <div className="date-group">
-                <div className={`form-group ${errors.checkIn ? 'has-error' : ''}`}>
-                  <label htmlFor="checkIn">
-                    <FaCalendarAlt className="input-icon" /> Check-In
-                  </label>
-                  <input
-                    type="date"
-                    id="checkIn"
-                    name="checkIn"
-                    value={formData.checkIn}
-                    onChange={handleChange}
-                    required
-                  />
-                  {errors.checkIn && <span className="error-message">{errors.checkIn}</span>}
-                </div>
-
-                <div className={`form-group ${errors.checkOut ? 'has-error' : ''}`}>
-                  <label htmlFor="checkOut">
-                    <FaCalendarAlt className="input-icon" /> Check-Out
-                  </label>
-                  <input
-                    type="date"
-                    id="checkOut"
-                    name="checkOut"
-                    value={formData.checkOut}
-                    onChange={handleChange}
-                    required
-                  />
-                  {errors.checkOut && <span className="error-message">{errors.checkOut}</span>}
-                </div>
-              </div>
-
-              {/* Estado y Total */}
-              <div className="status-total-group">
-                <div className="form-group">
-                  <label htmlFor="status">Estado</label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                  >
-                    <option value="Confirmada">Confirmada</option>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Cancelada">Cancelada</option>
-                    <option value="Completada">Completada</option>
-                  </select>
-                </div>
-
-                <div className={`form-group ${errors.total ? 'has-error' : ''}`}>
-                  <label htmlFor="total">
-                    <FaDollarSign className="input-icon" /> Total
-                  </label>
-                  <input
-                    type="number"
-                    id="total"
-                    name="total"
-                    value={formData.total}
-                    onChange={handleChange}
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
-                  />
-                  {errors.total && <span className="error-message">{errors.total}</span>}
-                </div>
-              </div>
-
-              {/* Solicitudes especiales */}
-              <div className="form-group full-width">
-                <label htmlFor="specialRequests">
-                  <FaInfoCircle className="input-icon" /> Solicitudes Especiales
-                </label>
-                <textarea
-                  id="specialRequests"
-                  name="specialRequests"
-                  value={formData.specialRequests}
-                  onChange={handleChange}
-                  placeholder="Notas adicionales o solicitudes especiales..."
-                  rows="3"
-                />
-              </div>
-            </div>
-
+            )}
             <div className="modal-footer">
-              <button type="button" className="cancel-btn" onClick={onClose}>
-                Cancelar
-              </button>
-              <button type="submit" className="submit-btn">
-                {reservationData && reservationData.id ? "Guardar Cambios" : "Crear Reservación"}
-              </button>
+              {step > 1 && (
+                <button type="button" className="cancel-btn" onClick={prevStep}>
+                  Anterior
+                </button>
+              )}
+              {step < 3 && (
+                <button type="button" className="submit-btn" onClick={nextStep}>
+                  {step === 2 ? 'Ir a Pago' : 'Siguiente'}
+                </button>
+              )}
+
+
             </div>
           </form>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 

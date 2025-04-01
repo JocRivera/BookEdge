@@ -1,0 +1,156 @@
+/* componentsCompanions.css */
+
+/* Contenedor principal */
+.companion-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+}
+
+/* Grupo de checkbox */
+.checkbox-group {
+  margin-bottom: 1rem;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4299e1;
+}
+
+/* Input para cantidad de acompañantes */
+.companion-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.companion-input .input-icon {
+  color: #4a5568;
+}
+
+.companion-input input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.companion-input input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+}
+
+/* Mensaje de error */
+.error-message {
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.has-error input {
+  border-color: #e53e3e !important;
+}
+
+/* Contenedor de formularios detallados */
+.companion-forms-container {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Formulario individual de cada acompañante */
+.companion-form {
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.companion-form h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #2d3748;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Grid para los campos del formulario */
+.companion-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Estilos para grupos de campos */
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+}
+
+/* Campos de solo lectura */
+.form-group input[readonly] {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+}
+
+/* Ajustes para campos específicos */
+.form-group input[type="date"] {
+  padding: 0.45rem 0.5rem;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .companion-fields-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .companion-input input {
+    width: 100%;
+  }
+}
+
+/* Efectos hover para mejor interacción */
+.companion-form:hover {
+  border-color: #cbd5e0;
+  transition: border-color 0.2s ease;
+}
