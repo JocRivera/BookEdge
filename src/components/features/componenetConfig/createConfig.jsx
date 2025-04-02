@@ -6,13 +6,14 @@ import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [settings, setSettings] = useState([]);
     useEffect(() => {
-        const fectchConfig = async () => {
+        const fetchConfig = async () => {
             try {
                 const roles = await rolesService.getRoles()
                 setSettings(roles)
@@ -20,7 +21,7 @@ export default function CreateConfig() {
                 console.log(error)
             }
         }
-        fectchConfig()
+        fetchConfig()
     }, [])
     const [searchTerm, setSearchTerm] = useState("");
     const filtrarDatos = settings.filter((config) =>
@@ -40,32 +41,57 @@ export default function CreateConfig() {
         setCurrentConfig(null);
         setIsModalOpen(true);
     };
-    const handleView = (id) => {
-        console.log('Ver', id);
+    const handleView = (idRol) => {
+        console.log('Ver', idRol);
     }
-    const handleEdit = (id) => {
-        console.log('Editar', id);
+    const handleEdit = (idRol) => {
+        const config = settings.find((config) => config.idRol === idRol);
+        setCurrentConfig(config);
+        setIsModalOpen(true);
+        console.log(config)
     }
-    const handleDelete = (id) => {
-        console.log('Eliminar', id);
-    }
-    const handleSave = (setting) => {
-        if (currentConfig) {
-            rolesService.updateRole(currentConfig.id, setting).then((res) => {
-                setSettings(settings.map((config) => config.id === currentConfig.id ? { ...config, ...setting } : config))
+    const handleDelete = (idRol) => {
+        const notify = () => toast.success('Rol eliminado corretamente');
+        const notifyError = () => toast.error('Error al eliminar el rol');
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este rol?");
+        if (confirmDelete) {
+            rolesService.deleteRole(idRol).then(() => {
+                setSettings(settings.filter((config) => config.idRol !== idRol))
+                notify()
             }).catch((error) => {
                 console.log(error)
+                notifyError()
+            })
+        }
+    }
+    const handleSave = (setting) => {
+
+        if (currentConfig) {
+            const notify = () => toast.success('Rol Actualizado correctamente');
+            const notifyError = () => toast.error('Error al actualizar el rol');
+            rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
+                setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
+                // setCurrentConfig(null)
+                // setIsModalOpen(false)
+                notify()
+            }).catch((error) => {
+                console.log(error)
+                notifyError()
             }
             )
         }
         else {
+            const notify = () => toast.success('Rol creado correctamente');
+            const notifyError = () => toast.error('Error al crear el rol');
             rolesService.createRole(setting).then((res) => {
-                setSettings([...settings, { id: settings.length + 1, ...setting }])
+                setSettings([...settings, { idRol: settings.length + 1, ...setting }])
+                notify()
             }).catch((error) => {
                 console.log(error)
+                notifyError()
             })
         }
-        console.log('Guardar', setting);
+        console.log(setting);
     }
     return (
         <div className="table-container">
@@ -106,10 +132,10 @@ export default function CreateConfig() {
                                     <Switch
                                         isOn={config.status === true}
                                         id={config.idRol}
-                                        handleToggle={(id) => {
+                                        handleToggle={(idRol) => {
                                             setSettings(
                                                 settings.map((config) =>
-                                                    config.idRol === id
+                                                    config.idRol === idRol
                                                         ? {
                                                             ...config,
                                                             status: !config.status,
@@ -123,9 +149,9 @@ export default function CreateConfig() {
                                 </td >
                                 <td className="table-cell">
                                     <ActionButtons
-                                        onView={() => handleView(config.id)}
-                                        onEdit={() => handleEdit(config.id)}
-                                        onDelete={() => handleDelete(config.id)}
+                                        onView={() => handleView(config.idRol)}
+                                        onEdit={() => handleEdit(config.idRol)}
+                                        onDelete={() => handleDelete(config.idRol)}
                                     />
                                 </td>
                             </tr>
@@ -140,6 +166,7 @@ export default function CreateConfig() {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
             />
+            <Toaster />
         </div>
 
     )
