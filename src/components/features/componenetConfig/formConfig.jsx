@@ -63,8 +63,34 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
-        onClose()
+        if (validateForm()) {
+            onSave(formData);
+            onClose()
+        }
+    }
+    const validateForm = () => {
+        if (!formData.name) {
+            setError("El nombre es requerido");
+            return false;
+        }
+        if (formData.name.length < 3) {
+            setError("El nombre debe tener al menos 3 caracteres");
+            return false;
+        }
+        if (formData.name.length > 50) {
+            setError("El nombre no puede tener más de 50 caracteres");
+            return false;
+        }
+        if (!formData.name.match(/^[a-zA-Z\s]+$/)) {
+            setError("Ingrese un nombre valido");
+            return false;
+        }
+        if (formData.permissions.length === 0) {
+            setError("Al menos un permiso es requerido");
+            return false;
+        }
+        setError(null);
+        return true;
     }
     if (!isOpen) { return null }
     return (
@@ -83,6 +109,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                     value={formData.name}
                                     onChange={handleChange}
                                 />
+                                {error && <p style={{ color: "red" }}>{error}</p>}
                             </div>
                             <fieldset className="permissions-group">
                                 <legend>Permisos</legend>
