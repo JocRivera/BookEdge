@@ -4,8 +4,9 @@ import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import { CiSearch } from "react-icons/ci";
 import { MdPerson } from "react-icons/md";
 import FormCabins from "./FormCabins";
-import { deleteCabin, getCabins } from "../../../services/CabinService";
+import { deleteCabin, getCabins,getCabinById } from "../../../services/CabinService";
 import Pagination from "../../common/Paginator/Pagination";
+import CabinDetail from "./CabinDetails";
 
 function CardCabin() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,6 +15,9 @@ function CardCabin() {
   const [cabins, setCabins] = useState([]);
   const [error, setError] = useState(null); // Para ayudar a depurar
   const [selectedCabin, setSelectedCabin] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false); //cargar los detalles de la cabaña
+  const [viewCabin, setViewCabin] = useState(null);
+  const [isDetailOpen, setDetailOpen] = useState(false);// modal del detalle
 
   useEffect(() => {
     const fetchCabins = async () => {
@@ -59,7 +63,31 @@ function CardCabin() {
     setModalOpen(true);
   };
 
-  const handleDelete = async (idCabin) => {};
+  const handleDelete = async (idCabin) => {
+    try {
+      await deleteCabin(idCabin);
+      setCabins((prevCabins) =>
+        prevCabins.filter((cabin) => cabin.idCabin   !== idCabin)
+      );
+      console.log("cabaña Eliminada exitosamente");
+    } catch (error) {
+      console.log("Erorr al  eliminar la cabaña", error);
+    }
+  };
+
+  const handleView = async(idCabin) =>{
+    try {
+      setLoadingDetail(true)
+      const cabinData = await getCabinById(idCabin)
+      setViewCabin(cabinData)
+      setDetailOpen(true)
+    } catch (error) {
+      console.error("Error al obtener detalles de la cabaña:", error);
+
+    }finally{
+      setLoadingDetail(false)
+    }
+  }
 
   return (
     <section className="container-cabins">
@@ -95,8 +123,6 @@ function CardCabin() {
         {loading ? (
           <div className="loading-state">Cargando cabañas...</div>
         ) : error ? (
-          <div className="error-state">Error al cargar cabañas: {error}</div>
-        ) : currentItems.length === 0 ? (
           <div className="no-results">
             {searchTerm
               ? `No se encontraron resultados para "${searchTerm}"`
@@ -120,7 +146,7 @@ function CardCabin() {
                   <span
                     className={`cabin-status ${
                       cabin.status === "En Mantenimiento"
-                        ? "status-mantenimiento"
+                        ? "status-en-mantenimiento"
                         : cabin.status === "En Servicio"
                         ? "status-en-servicio"
                         : "status-fuera-de-servicio"
@@ -175,10 +201,8 @@ function CardCabin() {
                 <footer className="cabin-actions">
                   <ActionButtons
                     onEdit={() => handleEditCabin(cabin)}
-                    onDelete={() =>
-                      console.log("Eliminar cabaña", cabin.idCabin)
-                    }
-                    onView={() => console.log("Ver detalles", cabin.idCabin)}
+                     onDelete={() => handleDelete(cabin.idCabin)}
+                    onView={() => handleView(cabin.idCabin)}
                   />
                 </footer>
               </section>
@@ -206,6 +230,12 @@ function CardCabin() {
             .finally(() => setLoading(false));
         }}
         cabinToEdit={selectedCabin}
+      />
+
+      <CabinDetail
+      isOpen={isDetailOpen}
+      onClose={() => setDetailOpen(false)}
+      cabin={viewCabin}
       />
     </section>
   );
