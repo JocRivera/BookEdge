@@ -6,6 +6,7 @@ import Switch from "../../common/Switch/Switch";
 import Pagination from "../../common/Paginator/Pagination";
 import FormService from './formServices';
 import serviceService from '../../../services/serviceService';
+import toast, { Toaster } from 'react-hot-toast';
 export default function CreateServices() {
     const [currentService, setCurrentService] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,12 +51,16 @@ export default function CreateServices() {
         setIsModalOpen(true);
     }
     const handleDelete = (id) => {
+        const notify = () => toast.success('Rol eliminado corretamente');
+        const notifyError = () => toast.error('Error al eliminar el rol');
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este servicio?");
         if (confirmDelete) {
             serviceService.deleteService(id).then(() => {
                 setServices(services.filter((service) => service.id !== id));
+                notify();
             }).catch((error) => {
                 console.error("Error deleting service:", error);
+                notifyError();
             });
         }
     }
@@ -152,7 +157,7 @@ export default function CreateServices() {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
             />
-
+            <Toaster />
         </div>
     );
 }
