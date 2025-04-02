@@ -6,6 +6,7 @@ import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
@@ -50,29 +51,44 @@ export default function CreateConfig() {
         console.log(config)
     }
     const handleDelete = (idRol) => {
+        const notify = () => toast.success('Rol eliminado corretamente');
+        const notifyError = () => toast.error('Error al eliminar el rol');
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este rol?");
         if (confirmDelete) {
             rolesService.deleteRole(idRol).then(() => {
                 setSettings(settings.filter((config) => config.idRol !== idRol))
+                notify()
             }).catch((error) => {
                 console.log(error)
+                notifyError()
             })
         }
     }
     const handleSave = (setting) => {
+
         if (currentConfig) {
+            const notify = () => toast.success('Rol Actualizado correctamente');
+            const notifyError = () => toast.error('Error al actualizar el rol');
             rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
                 setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
+                // setCurrentConfig(null)
+                // setIsModalOpen(false)
+                notify()
             }).catch((error) => {
                 console.log(error)
+                notifyError()
             }
             )
         }
         else {
+            const notify = () => toast.success('Rol creado correctamente');
+            const notifyError = () => toast.error('Error al crear el rol');
             rolesService.createRole(setting).then((res) => {
                 setSettings([...settings, { idRol: settings.length + 1, ...setting }])
+                notify()
             }).catch((error) => {
                 console.log(error)
+                notifyError()
             })
         }
         console.log(setting);
@@ -150,6 +166,7 @@ export default function CreateConfig() {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
             />
+            <Toaster />
         </div>
 
     )
