@@ -7,7 +7,10 @@ export const getCabins = async () => {
   const { data } = await axios.get(API_URL);
   return data;
 };
-
+export const getCabinById = async (id) =>{
+  const { data } = await axios.get(`${API_URL}/${id}`);
+  return data;
+}
 export const createCabin = async (cabinData) => {
   const formData = new FormData();
   formData.append("name", cabinData.name);
@@ -52,5 +55,6 @@ export const updateCabin = async (id, cabinData) => {
 };
 
 export const deleteCabin = async (id) => {
-  await axios.delete(`${API_URL}/${id}`);
+  const {data} =await axios.delete(`${API_URL}/${id}`);
+  return data
 };

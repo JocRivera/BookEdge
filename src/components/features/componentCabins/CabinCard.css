@@ -442,34 +442,22 @@ textarea.form-input {
   transform: translateY(-2px);
 }
 
-@media (max-width: 768px) {
-  .form-content {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
-
-  .submit-btn,
-  .cancel-btn {
-    width: 100%;
-  }
+.detail-modal {
+  max-width: 800px;
+  width: 90%;
 }
-@media (max-width: 768px) {
-  .form-content {
-    grid-template-columns: 1fr;
-  }
 
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
-
-  .submit-btn,
-  .cancel-btn {
-    width: 100%;
-  }
+.cabin-detail-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
 }
+
+.cabin-detail-image img{
+  max-width: 400px;
+}
+
 @media (max-width: 768px) {
   .cabin-list {
     grid-template-columns: 1fr;
