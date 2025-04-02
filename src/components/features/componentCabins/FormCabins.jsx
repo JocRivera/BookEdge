@@ -70,10 +70,10 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.capacity) {
-      alert("Nombre y capacidad son obligatorios");
-      return;
-    }
+    // if (!formData.name || !formData.capacity) {
+    //   alert("Nombre y capacidad son obligatorios");
+    //   return;
+    // }
 
     try {
       if (cabinToEdit) {
@@ -156,7 +156,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                   className="form-input"
                 >
                   <option value="En Servicio">En Servicio</option>
-                  <option value="En Mantenimiento">En Mantenimiento</option> 
+                  <option value="Mantenimiento">En Mantenimiento</option> 
                   <option value="Fuera de Servicio">Fuera de Servicio</option>
                 </select>
               </div>
