@@ -58,15 +58,15 @@ const CabinDetail = ({ isOpen, onClose, cabin, loading }) => {
               </div>
 
               <div className="detail-section">
-                <h4>Capacidad</h4>
                 <div className="capacity-detail">
                   <MdPerson className="icon-person" />
-                  <span>{cabin.capacity || "No especificada"}</span>
+                <h4>Capacidad</h4>
+                  <span>:{cabin.capacity || "No especificada"}</span>
                 </div>
               </div>
 
               <div className="detail-section">
-                <h4>Comodidades</h4>
+                <h4 className="tittlecomodiades">Comodidades</h4>
                 <div className="comforts-detail">
                   {cabin.Comforts && cabin.Comforts.length > 0 ? (
                     <div className="all-comforts">
@@ -88,8 +88,8 @@ const CabinDetail = ({ isOpen, onClose, cabin, loading }) => {
           </div>
         )}
 
-        <div className="modal-footer">
-          <button className="cancel-btn" onClick={onClose}>
+        <div className="modal-footer-detail">
+          <button className="cancel-btn-detail" onClick={onClose}>
             Cerrar
           </button>
         </div>
