@@ -17,7 +17,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
     companionCount: 0,
     companionsData: [],
     savedCompanions: [],
-    status: "Confirmada",
+    status: "Reservada",
     total: 0
   });
 
@@ -34,7 +34,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
         companionCount: reservationData.companionCount || 0,
         companionsData: reservationData.companionsData || [],
         savedCompanions: reservationData.savedCompanions || [],
-        status: reservationData.status || "Confirmada",
+        status: reservationData.status || "Reservada",
         total: reservationData.total || 0
       });
     } else {
@@ -47,7 +47,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
         companionCount: 0,
         companionsData: [],
         savedCompanions: [],
-        status: "Confirmada",
+        status: "Reservada",
         total: 0
       });
     }
