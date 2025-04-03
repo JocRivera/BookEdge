@@ -4,7 +4,11 @@ import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import { CiSearch } from "react-icons/ci";
 import { MdPerson } from "react-icons/md";
 import FormCabins from "./FormCabins";
-import { deleteCabin, getCabins,getCabinById } from "../../../services/CabinService";
+import {
+  deleteCabin,
+  getCabins,
+  getCabinById,
+} from "../../../services/CabinService";
 import Pagination from "../../common/Paginator/Pagination";
 import CabinDetail from "./CabinDetails";
 
@@ -17,7 +21,7 @@ function CardCabin() {
   const [selectedCabin, setSelectedCabin] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false); //cargar los detalles de la cabaña
   const [viewCabin, setViewCabin] = useState(null);
-  const [isDetailOpen, setDetailOpen] = useState(false);// modal del detalle
+  const [isDetailOpen, setDetailOpen] = useState(false); // modal del detalle
 
   useEffect(() => {
     const fetchCabins = async () => {
@@ -67,7 +71,7 @@ function CardCabin() {
     try {
       await deleteCabin(idCabin);
       setCabins((prevCabins) =>
-        prevCabins.filter((cabin) => cabin.idCabin   !== idCabin)
+        prevCabins.filter((cabin) => cabin.idCabin !== idCabin)
       );
       console.log("cabaña Eliminada exitosamente");
     } catch (error) {
@@ -75,19 +79,18 @@ function CardCabin() {
     }
   };
 
-  const handleView = async(idCabin) =>{
+  const handleView = async (idCabin) => {
     try {
-      setLoadingDetail(true)
-      const cabinData = await getCabinById(idCabin)
-      setViewCabin(cabinData)
-      setDetailOpen(true)
+      setLoadingDetail(true);
+      const cabinData = await getCabinById(idCabin);
+      setViewCabin(cabinData);
+      setDetailOpen(true);
     } catch (error) {
       console.error("Error al obtener detalles de la cabaña:", error);
-
-    }finally{
-      setLoadingDetail(false)
+    } finally {
+      setLoadingDetail(false);
     }
-  }
+  };
 
   return (
     <section className="container-cabins">
@@ -96,17 +99,19 @@ function CardCabin() {
       </div>
 
       <div className="cabin-search">
-        <CiSearch className="search-icon" />
-        <input
-          type="text"
-          className="search"
-          placeholder="Buscar ..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(0); // Resetear a primera página al buscar
-          }}
-        />
+        <div>
+          <CiSearch className="search-icon" />
+          <input
+            type="text"
+            className="search"
+            placeholder="Buscar ..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(0); // Resetear a primera página al buscar
+            }}
+          />
+        </div>
         <CustomButton
           variant="primary"
           icon="add"
@@ -201,7 +206,7 @@ function CardCabin() {
                 <footer className="cabin-actions">
                   <ActionButtons
                     onEdit={() => handleEditCabin(cabin)}
-                     onDelete={() => handleDelete(cabin.idCabin)}
+                    onDelete={() => handleDelete(cabin.idCabin)}
                     onView={() => handleView(cabin.idCabin)}
                   />
                 </footer>
@@ -233,9 +238,9 @@ function CardCabin() {
       />
 
       <CabinDetail
-      isOpen={isDetailOpen}
-      onClose={() => setDetailOpen(false)}
-      cabin={viewCabin}
+        isOpen={isDetailOpen}
+        onClose={() => setDetailOpen(false)}
+        cabin={viewCabin}
       />
     </section>
   );

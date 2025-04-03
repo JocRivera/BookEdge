@@ -192,8 +192,8 @@ function TableReservations() {
                     >
                       <option value="Confirmada">Confirmada</option>
                       <option value="Pendiente">Pendiente</option>
-                      <option value="anulada">anulada</option>
-                      <option value="reservada">Reservada</option>
+                      <option value="Anulada">anulada</option>
+                      <option value="Reservada">Reservada</option>
                     </select>
                   </td>
                   <td className="reservations-table-cell">

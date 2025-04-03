@@ -1,5 +1,5 @@
 .container-cabins {
-  padding: 1rem;
+  padding: 0.450rem;
   background-color: #f9fafb;
   border-radius: 0.5rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -49,6 +49,7 @@
 .search-icon {
   position: absolute;
   left: 10px;
+  top: 8px;
   font-size: 16px;
   color: var(--color-text-light);
 }
