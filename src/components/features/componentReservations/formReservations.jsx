@@ -1,10 +1,13 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import "./componentsReservations.css";
-import { FaUser, FaBed, FaCalendarAlt, FaDollarSign, FaUsers } from "react-icons/fa";
+import { FaUser, FaBed, FaCalendarAlt, FaUsers } from "react-icons/fa";
 import CompanionsForm from '../componentCompanions/formCompanions';
+import TableCompanions from '../componentCompanions/tableCompanions';
 import PaymentForm from '../componentPayments/fromPayments';
-function FormReservation({ reservationData, onClose, onSave, isOpen }) {
+function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly }) {
   const [step, setStep] = useState(1);
+
   const [formData, setFormData] = useState({
     client: "",
     plan: "",
@@ -13,6 +16,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
     hasCompanions: false,
     companionCount: 0,
     companionsData: [],
+    savedCompanions: [],
     status: "Confirmada",
     total: 0
   });
@@ -22,8 +26,16 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
   useEffect(() => {
     if (reservationData) {
       setFormData({
-        ...reservationData,
-        companionsData: reservationData.companionsData || []
+        client: reservationData.client || "",
+        plan: reservationData.plan || "",
+        startDate: reservationData.startDate || "",
+        endDate: reservationData.endDate || "",
+        hasCompanions: reservationData.hasCompanions || false,
+        companionCount: reservationData.companionCount || 0,
+        companionsData: reservationData.companionsData || [],
+        savedCompanions: reservationData.savedCompanions || [],
+        status: reservationData.status || "Confirmada",
+        total: reservationData.total || 0
       });
     } else {
       setFormData({
@@ -34,6 +46,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
         hasCompanions: false,
         companionCount: 0,
         companionsData: [],
+        savedCompanions: [],
         status: "Confirmada",
         total: 0
       });
@@ -169,6 +182,43 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
     });
   };
 
+  const handleDeleteCompanion = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      savedCompanions: (prev.savedCompanions || []).filter(companion => companion.id !== id)
+    }));
+  };
+  const handleSaveCompanion = (index) => {
+    const companionToSave = formData.companionsData[index];
+    
+    if (!companionToSave?.name || !companionToSave?.birthDate ||
+      !companionToSave?.documentType || !companionToSave?.documentNumber || !companionToSave?.eps) {
+      alert("Por favor complete todos los campos del acompañante");
+      return;
+    }
+  
+    const newCompanion = {
+      ...companionToSave,
+      id: Date.now()
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      savedCompanions: [...(prev.savedCompanions || []), newCompanion],
+      companionsData: prev.companionsData.map((comp, i) => 
+        i === index ? {
+          name: '',
+          birthDate: '',
+          age: '',
+          documentType: '',
+          documentNumber: '',
+          eps: ''
+        } : comp
+      )
+    }));
+  };
+
+
   if (!isOpen) return null;
 
   return (
@@ -204,6 +254,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
                       onChange={handleChange}
                       placeholder="Nombre del cliente"
                       required
+                      readOnly={isReadOnly}
                     />
                     {errors.client && <span className="error-message">{errors.client}</span>}
                   </div>
@@ -218,6 +269,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
                       value={formData.plan}
                       onChange={handleChange}
                       required
+                      readOnly={isReadOnly}
                     >
                       <option value="">Seleccione un plan</option>
                       <option value="Romántico">Plan Romántico</option>
@@ -240,6 +292,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
                         value={formData.startDate}
                         onChange={handleChange}
                         required
+                        readOnly={isReadOnly}
                       />
                       {errors.startDate && <span className="error-message">{errors.startDate}</span>}
                     </div>
@@ -255,6 +308,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
                         value={formData.endDate}
                         onChange={handleChange}
                         required
+                        readOnly={isReadOnly}
                       />
                       {errors.endDate && <span className="error-message">{errors.endDate}</span>}
                     </div>
@@ -284,6 +338,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
                           onChange={handleChange}
                           min="1"
                           placeholder="Número de acompañantes"
+                          readOnly={isReadOnly}
                         />
                         {errors.companionCount && <span className="error-message">{errors.companionCount}</span>}
                       </div>
@@ -295,15 +350,28 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
 
             {step === 2 && (
               <div className="form-step">
-                {formData.hasCompanions && formData.companionCount > 0 && (
-                  <CompanionsForm
-                    companionsData={formData.companionsData}
-                    onCompanionDataChange={handleCompanionDataChange}
-                  />
+                {formData.hasCompanions && (
+                  <>
+                    <CompanionsForm
+                      companionsData={formData.companionsData}
+                      onCompanionDataChange={handleCompanionDataChange}
+                      onSaveCompanion={handleSaveCompanion}
+                      onDeleteCompanion={handleDeleteCompanion}
+                    />
+
+                    {formData.savedCompanions?.length > 0 && (
+                      <div className="saved-companions-section">
+                        <h3>Acompañantes Guardados</h3>
+                        <TableCompanions
+                          companions={formData.savedCompanions || []}
+                          onDeleteCompanion={handleDeleteCompanion}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
-
             {step === 3 && (
               <div className="form-step">
                 <PaymentForm
@@ -331,9 +399,14 @@ function FormReservation({ reservationData, onClose, onSave, isOpen }) {
                   {step === 2 ? 'Ir a Pago' : 'Siguiente'}
                 </button>
               )}
-
-
             </div>
+            {!isReadOnly && step === 3 && (
+              <button type="submit" className="btn btn-primary">
+                Guardar Reserva
+              </button>
+            )}
+
+
           </form>
         </div>
       </div >

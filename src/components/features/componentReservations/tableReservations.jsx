@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import Pagination from "../../common/Paginator/Pagination";
-import "./componentsReservations.css";
 import { CiSearch } from "react-icons/ci";
+import "./componentsReservations.css";
 import FormReservation from "./formReservations";
-
 function TableReservations() {
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentReservation, setCurrentReservation] = useState(null);
@@ -17,7 +17,8 @@ function TableReservations() {
       startDate: "2023-11-15",
       endDate: "2023-11-20",
       status: "Confirmada",
-      total: 750.00
+      total: 750.00,
+      savedCompanions: []
     },
     {
       id: 2,
@@ -26,7 +27,8 @@ function TableReservations() {
       startDate: "2023-11-18",
       endDate: "2023-11-22",
       status: "Pendiente",
-      total: 1200.00
+      total: 1200.00,
+      savedCompanions: []
     },
     {
       id: 3,
@@ -34,28 +36,38 @@ function TableReservations() {
       plan: "Empresarial",
       startDate: "2023-11-20",
       endDate: "2023-11-25",
-      status: "Cancelada",
-      total: 600.00
+      status: "Anulada",
+      total: 600.00,
+      savedCompanions: []
     },
   ]);
 
   const filteredData = useMemo(() => {
     return reservations.filter((reservation) =>
-      Object.values(reservation).some((value) =>
-        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      reservation.client?.toLowerCase().includes(searchTerm?.toLowerCase() || "") ||
+      reservation.plan?.toLowerCase().includes(searchTerm?.toLowerCase() || "") ||
+      reservation.status?.toLowerCase().includes(searchTerm?.toLowerCase() || "")
     );
   }, [reservations, searchTerm]);
 
+
   const itemsPerPage = 6;
   const [currentPage, setCurrentPage] = useState(0);
-  
+
   const { currentItems, pageCount } = useMemo(() => {
+    if (!Array.isArray(filteredData)) {
+      console.warn("⚠️ filteredData no es un array:", filteredData);
+      return { currentItems: [], pageCount: 0 };
+    }
+
     const offset = currentPage * itemsPerPage;
     const currentItems = filteredData.slice(offset, offset + itemsPerPage);
     const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+
     return { currentItems, pageCount };
   }, [currentPage, filteredData]);
+
+
 
   const handlePageClick = ({ selected }) => setCurrentPage(selected);
 
@@ -76,35 +88,43 @@ function TableReservations() {
   };
 
   const handleStatusChange = (id, newStatus) => {
-    setReservations(reservations.map(reservation => 
-      reservation.id === id ? {...reservation, status: newStatus} : reservation
+    setReservations(reservations.map(reservation =>
+      reservation.id === id ? { ...reservation, status: newStatus } : reservation
     ));
   };
 
   const handleSaveReservation = (newReservation) => {
     if (currentReservation) {
-      // Editar reservación existente
-      setReservations(reservations.map(res => 
-        res.id === currentReservation.id ? newReservation : res
+      setReservations(reservations.map(res =>
+        res.id === currentReservation.id ? {
+          ...newReservation,
+          savedCompanions: newReservation.savedCompanions || []
+        } : res
       ));
     } else {
-      // Agregar nueva reserva
-      const newId = reservations.length > 0 
-        ? Math.max(...reservations.map(r => r.id)) + 1 
+      const newId = reservations.length > 0
+        ? Math.max(...reservations.map(r => r.id)) + 1
         : 1;
       setReservations([...reservations, {
         ...newReservation,
-        id: newId
+        id: newId,
+        savedCompanions: newReservation.savedCompanions || []
       }]);
     }
     setIsModalOpen(false);
   };
 
   const formatCurrency = (amount) => {
-    return typeof amount === 'number' 
-      ? `$${amount.toFixed(2)}` 
+    return typeof amount === 'number'
+      ? `$${amount.toFixed(2)}`
       : amount;
   };
+  const handleViewDetails = (id) => {
+    const reservationToView = reservations.find((reservation) => reservation.id === id);
+    setCurrentReservation(reservationToView);
+    setIsDetailModalOpen(true);
+  };
+
 
   return (
     <div className="reservations-table-container">
@@ -135,6 +155,7 @@ function TableReservations() {
               <th>Plan</th>
               <th>Fecha inicio</th>
               <th>Fecha fin</th>
+              <th>Acompañantes</th>
               <th>Estado</th>
               <th>Total</th>
               <th>Acciones</th>
@@ -157,15 +178,22 @@ function TableReservations() {
                   <td className="reservations-table-cell">{reservation.startDate}</td>
                   <td className="reservations-table-cell">{reservation.endDate}</td>
                   <td className="reservations-table-cell">
+                    {reservation.savedCompanions?.length > 0 ? (
+                      <span className="companions-badge">
+                        {reservation.savedCompanions.length} acompañantes
+                      </span>
+                    ) : 'Sin acompañantes'}
+                  </td>
+                  <td className="reservations-table-cell">
                     <select
                       value={reservation.status}
                       onChange={(e) => handleStatusChange(reservation.id, e.target.value)}
-                      className={`status-select ${reservation.status.toLowerCase()}`}
+                      className={`status-select ${reservation.status.toLowerCase()} `}
                     >
                       <option value="Confirmada">Confirmada</option>
                       <option value="Pendiente">Pendiente</option>
-                      <option value="Cancelada">Cancelada</option>
-                      <option value="Completada">Reservada</option>
+                      <option value="anulada">anulada</option>
+                      <option value="reservada">Reservada</option>
                     </select>
                   </td>
                   <td className="reservations-table-cell">
@@ -175,6 +203,7 @@ function TableReservations() {
                     <ActionButtons
                       onEdit={() => handleEdit(reservation.id)}
                       onDelete={() => handleDelete(reservation.id)}
+                      onView={() => handleViewDetails(reservation.id)}
                       additionalActions={[
                         {
                           icon: "receipt",
@@ -205,6 +234,16 @@ function TableReservations() {
           onClose={() => setIsModalOpen(false)}
           onSave={handleSaveReservation}
         />
+        {isDetailModalOpen && (
+          <FormReservation
+            isOpen={isDetailModalOpen}
+            reservationData={currentReservation}
+            onClose={() => setIsDetailModalOpen(false)}
+            isReadOnly={true}
+            onSave={() => { }} //pa evitar errores
+          />
+        )}
+
       </div>
     </div>
   );
