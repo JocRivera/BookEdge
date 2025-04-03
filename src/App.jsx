@@ -15,6 +15,7 @@ import ComponentConfort from "./components/features/componentConfort/ComponentCo
 import CreateConfig from "./components/features/componenetConfig/createConfig";
 import CabinsPage from "./components/features/componentCabins/CardCabin";
 import TableReservations from "./components/features/componentReservations/tableReservations";
+import TableCompanions from "./components/features/componentCompanions/tableCompanions";
 
 export default function App() {
   return (
@@ -37,6 +38,10 @@ export default function App() {
           <Route path="config" element={<CreateConfig />} />
           <Route path="cabins" element={<CabinsPage />} />
           <Route path="reservations" element={<TableReservations />} />
+          <Route
+            path="companions"
+            element={<TableCompanions onDeleteCompanion={() => { }} />}
+          />
         </Route>
       </Routes>
 

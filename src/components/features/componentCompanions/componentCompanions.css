@@ -1,156 +1,191 @@
-/* componentsCompanions.css */
+/* Estilos base y contenedores */
+.companion-container, 
+.companions-table-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 70px;
+}
 
-/* Contenedor principal */
 .companion-container {
-  margin-top: 1rem;
-  padding: 1rem;
   border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
   background-color: #f9fafb;
 }
 
-/* Grupo de checkbox */
-.checkbox-group {
-  margin-bottom: 1rem;
-}
-
-.checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  font-weight: 500;
-  color: #2d3748;
-}
-
-.checkbox-group input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #4299e1;
-}
-
-/* Input para cantidad de acompañantes */
-.companion-input {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.companion-input .input-icon {
-  color: #4a5568;
-}
-
-.companion-input input {
-  width: 80px;
-  padding: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-}
-
-.companion-input input:focus {
-  outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
-}
-
-/* Mensaje de error */
-.error-message {
-  color: #e53e3e;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-.has-error input {
-  border-color: #e53e3e !important;
-}
-
-/* Contenedor de formularios detallados */
+/* Estructuras de formulario */
 .companion-forms-container {
-  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
+  margin-top: 20px;
 }
 
-/* Formulario individual de cada acompañante */
 .companion-form {
   padding: 1.25rem;
   border: 1px solid #e2e8f0;
   border-radius: 0.5rem;
   background-color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease;
 }
 
-.companion-form h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
-  color: #2d3748;
+.companion-form:hover {
+  border-color: #cbd5e0;
+}
+
+/* Cabeceras y acciones */
+.companion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
-/* Grid para los campos del formulario */
+.companion-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #2d3748;
+}
+
+.companion-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Grid y grupos de campos */
 .companion-fields-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: 15px;
 }
 
-/* Estilos para grupos de campos */
 .form-group {
-  margin-bottom: 0;
+  margin-bottom: 15px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 5px;
   font-size: 0.875rem;
   color: #4a5568;
   font-weight: 500;
 }
 
-.form-group input,
-.form-group select {
+/* Elementos de formulario */
+input, select {
   width: 100%;
-  padding: 0.5rem;
+  padding: 8px;
   border: 1px solid #e2e8f0;
-  border-radius: 0.25rem;
+  border-radius: 4px;
   font-size: 0.875rem;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+input:focus, 
+select:focus {
   outline: none;
   border-color: #4299e1;
   box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
 }
 
-/* Campos de solo lectura */
-.form-group input[readonly] {
+input[readonly] {
   background-color: #f7fafc;
   cursor: not-allowed;
 }
 
-/* Ajustes para campos específicos */
-.form-group input[type="date"] {
-  padding: 0.45rem 0.5rem;
+/* Tablas */
+.companions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-/* Estilos responsivos */
+.companions-table th, 
+.companions-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.companions-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.companions-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Botones */
+.btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-companion-btn,
+.view-detail-btn {
+  background-color: #2196F3;
+  color: white;
+}
+
+.delete-companion-btn,
+.delete-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.close-modal-btn {
+  background-color: #607d8b;
+  color: white;
+  padding: 8px 15px;
+  margin-top: 15px;
+}
+
+/* Modal */
+.companion-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.detail-item label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .companion-fields-grid {
     grid-template-columns: 1fr;
   }
   
-  .companion-input input {
-    width: 100%;
+  .detail-grid {
+    grid-template-columns: 1fr;
   }
-}
-
-/* Efectos hover para mejor interacción */
-.companion-form:hover {
-  border-color: #cbd5e0;
-  transition: border-color 0.2s ease;
 }
