@@ -9,7 +9,8 @@ import {
   LuCalendar,
   LuChevronDown,
   LuChevronRight,
-  LuBookmark
+  LuBookmark,
+  LuCreditCard
 } from "react-icons/lu";
 import "./sidebar.css";
 
@@ -79,6 +80,19 @@ const Sidebar = () => {
     }
   ];
 
+  const plansSubmenu = [
+    {
+      path: "/admin/plans",
+      icon: <LuCreditCard />,
+      text: "Planes",
+    },
+    {
+      path: "/admin/plansProgramed",
+      icon: <LuCalendar />,
+      text: "Planes Programados",
+    },
+  ];
+
   const calculateSubmenuPosition = (e) => {
     if (!collapsed) return;
 
@@ -129,7 +143,7 @@ const Sidebar = () => {
               <span className="menu-icon">
                 <LuUsers />
               </span>
-              <span className="menu-text">Clientes</span>
+              <span className="menu-text">Usuarios</span>
             </Link>
           </li>
 
@@ -203,6 +217,69 @@ const Sidebar = () => {
               </span>
               <span className="menu-text">Comodidades</span>
             </Link>
+          </li>
+
+          <li
+            className={`menu-item ${activeSubMenu === "plans" || isRouteInSubmenu(plansSubmenu) ? "active" : ""
+              }`}
+          >
+            <div
+              className="menu-header"
+              onClick={(e) => {
+                toggleSubMenu("plans", e);
+                calculateSubmenuPosition(e);
+              }}
+            >
+              <span className="menu-icon">
+                <LuCreditCard />
+              </span>
+              <span className="menu-text">Planes</span>
+              <span className="menu-arrow">
+                {activeSubMenu === "plans" ? (
+                  <LuChevronDown />
+                ) : (
+                  <LuChevronRight />
+                )}
+              </span>
+            </div>
+
+            {!collapsed && (
+              <ul
+                className={`submenu ${activeSubMenu === "plans" ? "open" : ""}`}
+              >
+                {plansSubmenu.map((item, index) => (
+                  <li key={index} className={isActiveRoute(item.path) ? "active" : ""}>
+                    <Link to={item.path} className={isActiveRoute(item.path) ? "active" : ""}>
+                      <span className="menu-icon">{item.icon}</span>
+                      <span className="menu-text">{item.text}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {collapsed && (
+              <ul
+                className={`submenu stacked-buttons ${activeSubMenu === "plans" ? "open" : ""
+                  }`}
+              >
+                {plansSubmenu.map((item, index) => (
+                  <li
+                    key={index}
+                    style={{ "--item-index": index }}
+                    className={isActiveRoute(item.path) ? "active" : ""}
+                  >
+                    <Link
+                      to={item.path}
+                      className={isActiveRoute(item.path) ? "active" : ""}
+                    >
+                      <span className="menu-icon">{item.icon}</span>
+                      <span className="menu-text">{item.text}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
 
           <li
