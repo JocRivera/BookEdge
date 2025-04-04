@@ -16,6 +16,8 @@ import CreateConfig from "./components/features/componenetConfig/createConfig";
 import CabinsPage from "./components/features/componentCabins/CardCabin";
 import TableReservations from "./components/features/componentReservations/tableReservations";
 import TableCompanions from "./components/features/componentCompanions/tableCompanions";
+import Plan from "./components/features/componentPlans/componentPlan";
+import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
 
 export default function App() {
   return (
@@ -42,6 +44,8 @@ export default function App() {
             path="companions"
             element={<TableCompanions onDeleteCompanion={() => { }} />}
           />
+          <Route path="plans" element={<Plan />} />
+          <Route path="plansProgramed" element={<PlanProgramed />} />
         </Route>
       </Routes>
 
