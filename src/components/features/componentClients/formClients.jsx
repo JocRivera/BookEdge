@@ -7,6 +7,8 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
   // Estado inicial como una constante separada para mayor claridad
   const initialFormData = {
     name: "",
+    eps: "SURA",
+    password: "123456789qweasd",
     identificationType: "",
     identification: "",
     email: "",
@@ -182,7 +184,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   required
                 >
                   <option value="">Seleccione un rol</option>
-                  <option value="Administrador">Administrador</option>
+                  <option value="1">Administrador</option>
                   <option value="Editor">Editor</option>
                   <option value="Usuario">Usuario</option>
                 </select>
