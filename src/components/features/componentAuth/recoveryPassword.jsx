@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import AuthNavbar from '../../layout/auth/AuthNavbar';
-import { ToastContainer, toast } from "react-toastify";  // ✅ Importación correcta
+import { useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import AuthNavbar from "../../layout/auth/AuthNavbar";
+import { ToastContainer, toast } from "react-toastify"; // ✅ Importación correcta
 import "react-toastify/dist/ReactToastify.css";
-import './recoveryPassword.css';
+import "./recoveryPassword.css";
+import { recoverPassword } from "../../../services/AuthService";
 
 const RecoveryPassword = () => {
   const [formulario, setFormulario] = useState({
-    email: '',
+    email: "",
   });
 
   const [errores, setErrores] = useState({});
@@ -15,66 +16,68 @@ const RecoveryPassword = () => {
 
   const validarFormulario = (nombre, valor) => {
     switch (nombre) {
-      case 'email': {
+      case "email": {
         const expresion = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
         if (!expresion.test(valor)) {
-          return 'El correo no es válido';
+          return "El correo no es válido";
         }
         break;
       }
       default:
         break;
     }
-    return '';
+    return "";
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    setFormulario(prev => ({
+
+    setFormulario((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     const error = validarFormulario(name, value);
-    setErrores(prev => ({
+    setErrores((prev) => ({
       ...prev,
-      [name]: error
+      [name]: error,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const nuevosErrores = {};
-    Object.keys(formulario).forEach(key => {
-      const error = validarFormulario(key, formulario[key]);
-      if (error) {
-        nuevosErrores[key] = error;
+  
+    const emailError = validarFormulario("email", formulario.email);
+    setErrores({ email: emailError });
+  
+    if (!emailError) {
+      try {
+        await recoverPassword(formulario.email); // ✅ Aquí se pasa el email
+        toast.success(
+          `Se ha enviado un correo electrónico a ${formulario.email} 📧`,
+          { autoClose: 2000 }
+        );
+        setTimeout(() => {
+          navigate("/Login");
+        }, 5000);
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message || "Error al enviar el correo",
+          { autoClose: 3000 }
+        );
       }
-    });
-
-    setErrores(nuevosErrores);
-
-    if (Object.keys(nuevosErrores).length === 0) {
-      console.log('Email enviado:', formulario.email);
-      toast.success(`Se ha enviado un correo electrónico a ${formulario.email}  📧`, { autoClose: 2000 });
-      setTimeout(() => {
-        navigate('/Emailcode');
-      }, 5000);
     }
   };
-
-
+  
   const handleCancel = () => {
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
     <div className="page-container">
       <AuthNavbar />
       <Outlet />
-      
+
       <div className="recovery-container">
         <div className="recovery-card">
           <div className="recovery-header">
@@ -99,14 +102,20 @@ const RecoveryPassword = () => {
                 placeholder="ejemplo@correo.com"
                 required
               />
-              {errores.email && <p className="error-message">{errores.email}</p>}
+              {errores.email && (
+                <p className="error-message">{errores.email}</p>
+              )}
             </div>
 
             <div className="buttons-recovery-password">
               <button type="submit" className="recovery-button">
                 Enviar
               </button>
-              <button type="button" onClick={handleCancel} className="cancel-button">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="cancel-button"
+              >
                 Cancelar
               </button>
             </div>
@@ -114,7 +123,7 @@ const RecoveryPassword = () => {
         </div>
       </div>
 
-      <ToastContainer /> 
+      <ToastContainer />
     </div>
   );
 };
