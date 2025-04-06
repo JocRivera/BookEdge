@@ -1,8 +1,9 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API = axios.create({
-  baseURL: "http://localhost:3000/", // Asegúrate de que este es el backend correcto
-  withCredentials: true, // Esto permite enviar y recibir cookies (authToken y refreshToken)
+const api = axios.create({
+  baseURL: 'http://localhost:3000',
+  withCredentials: true
 });
 
-export default API;
+
+export default api;

@@ -9,15 +9,17 @@ import {
   LuCalendar,
   LuChevronDown,
   LuChevronRight,
-  LuBookmark
+  LuBookmark,
 } from "react-icons/lu";
 import "./sidebar.css";
+import { useAuth } from "../../../context/AuthContext";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState("");
   const menuRef = useRef(null);
   const location = useLocation();
+  const { hasPermission } = useAuth();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -59,24 +61,29 @@ const Sidebar = () => {
       icon: <LuBedDouble />,
       text: "Habitaciones",
     },
+    {
+      path: "/admin/AssignAmenities",
+      icon: <LuBedDouble />,
+      text: "Asignar Comodidades",
+    },
   ];
 
   const bookingsSubmenu = [
     {
       path: "/admin/reservations",
       icon: <LuBookmark />,
-      text: "Lista de Reservas"
+      text: "Lista de Reservas",
     },
     {
       path: "/admin/companions",
       icon: <LuUsers />,
-      text: "Acompañantes"
+      text: "Acompañantes",
     },
     {
       path: "/admin/payments",
       icon: <LuCalendar />,
-      text: "Pagos"
-    }
+      text: "Pagos",
+    },
   ];
 
   const calculateSubmenuPosition = (e) => {
@@ -98,8 +105,9 @@ const Sidebar = () => {
   };
 
   const isRouteInSubmenu = (submenu) => {
-    return submenu.some(item => isActiveRoute(item.path));
+    return submenu.some((item) => isActiveRoute(item.path));
   };
+
 
   return (
     <div className={`sidebar ${collapsed ? "collapsed" : ""}`} ref={menuRef}>
@@ -115,7 +123,11 @@ const Sidebar = () => {
 
       <nav className="sidebar-content">
         <ul className="menu-list">
-          <li className={`menu-item ${isActiveRoute("/admin/dashboard") ? "active" : ""}`}>
+          <li
+            className={`menu-item ${
+              isActiveRoute("/admin/dashboard") ? "active" : ""
+            }`}
+          >
             <Link to="/admin/dashboard">
               <span className="menu-icon">
                 <LuLayoutDashboard />
@@ -123,19 +135,26 @@ const Sidebar = () => {
               <span className="menu-text">Dashboard</span>
             </Link>
           </li>
-
-          <li className={`menu-item ${isActiveRoute("/admin/clients") ? "active" : ""}`}>
-            <Link to="/admin/clients">
-              <span className="menu-icon">
-                <LuUsers />
-              </span>
-              <span className="menu-text">Clientes</span>
-            </Link>
-          </li>
-
-          <li
-            className={`menu-item ${activeSubMenu === "rooms" || isRouteInSubmenu(roomsSubmenu) ? "active" : ""
+          {hasPermission("view_users") && (
+            <li
+              className={`menu-item ${
+                isActiveRoute("/admin/clients") ? "active" : ""
               }`}
+            >
+              <Link to="/admin/clients">
+                <span className="menu-icon">
+                  <LuUsers />
+                </span>
+                <span className="menu-text">Clientes</span>
+              </Link>
+            </li>
+          )}
+          <li
+            className={`menu-item ${
+              activeSubMenu === "rooms" || isRouteInSubmenu(roomsSubmenu)
+                ? "active"
+                : ""
+            }`}
           >
             <div
               className="menu-header"
@@ -162,8 +181,14 @@ const Sidebar = () => {
                 className={`submenu ${activeSubMenu === "rooms" ? "open" : ""}`}
               >
                 {roomsSubmenu.map((item, index) => (
-                  <li key={index} className={isActiveRoute(item.path) ? "active" : ""}>
-                    <Link to={item.path} className={isActiveRoute(item.path) ? "active" : ""}>
+                  <li
+                    key={index}
+                    className={isActiveRoute(item.path) ? "active" : ""}
+                  >
+                    <Link
+                      to={item.path}
+                      className={isActiveRoute(item.path) ? "active" : ""}
+                    >
                       <span className="menu-icon">{item.icon}</span>
                       <span className="menu-text">{item.text}</span>
                     </Link>
@@ -174,8 +199,9 @@ const Sidebar = () => {
 
             {collapsed && (
               <ul
-                className={`submenu stacked-buttons ${activeSubMenu === "rooms" ? "open" : ""
-                  }`}
+                className={`submenu stacked-buttons ${
+                  activeSubMenu === "rooms" ? "open" : ""
+                }`}
               >
                 {roomsSubmenu.map((item, index) => (
                   <li
@@ -196,7 +222,11 @@ const Sidebar = () => {
             )}
           </li>
 
-          <li className={`menu-item ${isActiveRoute("/admin/accommodations") ? "active" : ""}`}>
+          <li
+            className={`menu-item ${
+              isActiveRoute("/admin/accommodations") ? "active" : ""
+            }`}
+          >
             <Link to="/admin/accommodations">
               <span className="menu-icon">
                 <LuHotel />
@@ -206,8 +236,11 @@ const Sidebar = () => {
           </li>
 
           <li
-            className={`menu-item ${activeSubMenu === "bookings" || isRouteInSubmenu(bookingsSubmenu) ? "active" : ""
-              }`}
+            className={`menu-item ${
+              activeSubMenu === "bookings" || isRouteInSubmenu(bookingsSubmenu)
+                ? "active"
+                : ""
+            }`}
           >
             <div
               className="menu-header"
@@ -231,8 +264,9 @@ const Sidebar = () => {
 
             {!collapsed && (
               <ul
-                className={`submenu ${activeSubMenu === "bookings" ? "open" : ""
-                  }`}
+                className={`submenu ${
+                  activeSubMenu === "bookings" ? "open" : ""
+                }`}
               >
                 {bookingsSubmenu.map((item, index) => (
                   <li
@@ -253,8 +287,9 @@ const Sidebar = () => {
 
             {collapsed && (
               <ul
-                className={`submenu stacked-buttons ${activeSubMenu === "bookings" ? "open" : ""
-                  }`}
+                className={`submenu stacked-buttons ${
+                  activeSubMenu === "bookings" ? "open" : ""
+                }`}
               >
                 {bookingsSubmenu.map((item, index) => (
                   <li
@@ -275,7 +310,11 @@ const Sidebar = () => {
             )}
           </li>
 
-          <li className={`menu-item ${isActiveRoute("/admin/config") ? "active" : ""}`}>
+          <li
+            className={`menu-item ${
+              isActiveRoute("/admin/config") ? "active" : ""
+            }`}
+          >
             <Link to="/admin/config">
               <span className="menu-icon">
                 <LuSettings />

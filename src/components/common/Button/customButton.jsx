@@ -35,11 +35,10 @@ export const CustomButton = ({
 };
 
 // componente de los iconos se puede se parar NOOO OLVIDAAAAR LE MANDAS LOS PROPS PARA QUE FUNCIONE Y IMPORTAS Y LLMAS
-export const ActionButtons = ({ onView, onEdit, onDelete}) => {
+export const ActionButtons = ({ onView, onEdit, onDelete, canEdit = true, canDelete = true, canView = true }) => {
   return (
     <div className="action-buttons">
-      {/* Botón de "Ver" solo si onView está definido */}
-      {onView && (
+      {onView && canView && (
         <CustomButton
           variant="primary"
           icon="view"
@@ -48,8 +47,7 @@ export const ActionButtons = ({ onView, onEdit, onDelete}) => {
           title="Ver"
         />
       )}
-      {/* Botón de "Editar" solo si onEdit está definido */}
-      {onEdit && (
+      {onEdit && canEdit && (
         <CustomButton
           variant="warning"
           icon="edit"
@@ -58,8 +56,7 @@ export const ActionButtons = ({ onView, onEdit, onDelete}) => {
           title="Editar"
         />
       )}
-      {/* Botón de "Eliminar" solo si onDelete está definido */}
-      {onDelete && (
+      {onDelete && canDelete && (
         <CustomButton
           variant="danger"
           icon="delete"
@@ -68,7 +65,7 @@ export const ActionButtons = ({ onView, onEdit, onDelete}) => {
           title="Eliminar"
         />
       )}
-
     </div>
   );
 };
+;

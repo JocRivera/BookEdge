@@ -139,13 +139,13 @@
 }
 
 .status-en-servicio {
-  background: #dcfce7;
-  color: #166534;
+  background: #1ef937;
+  color:white;
 }
 
 .status-fuera-de-servicio {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #ff2e2e;
+  color: white;
 }
 .status-en-mantenimiento {
   background-color: #FFA500; 
