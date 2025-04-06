@@ -1,13 +1,19 @@
-/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import "./componentsReservations.css";
-import { FaUser, FaBed, FaCalendarAlt, FaUsers } from "react-icons/fa";
 import CompanionsForm from '../componentCompanions/formCompanions';
-import TableCompanions from '../componentCompanions/tableCompanions';
-import PaymentForm from '../componentPayments/fromPayments';
-function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly }) {
-  const [step, setStep] = useState(1);
+import PaymentForm from '../componentPayments/fromPayments.jsx';
+import TableCompanions from "../componentCompanions/tableCompanions";
+import { createReservation } from "../../../services/reservationsService.jsx";
 
+function FormReservation({
+  reservationData = null,
+  onClose,
+  onSave,
+  isOpen,
+  isReadOnly = false
+}) {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     client: "",
     plan: "",
@@ -15,8 +21,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
     endDate: "",
     hasCompanions: false,
     companionCount: 0,
-    companionsData: [],
-    savedCompanions: [],
+    companions: [],
     status: "Reservada",
     total: 0
   });
@@ -24,56 +29,53 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (reservationData) {
-      setFormData({
-        client: reservationData.client || "",
-        plan: reservationData.plan || "",
-        startDate: reservationData.startDate || "",
-        endDate: reservationData.endDate || "",
-        hasCompanions: reservationData.hasCompanions || false,
-        companionCount: reservationData.companionCount || 0,
-        companionsData: reservationData.companionsData || [],
-        savedCompanions: reservationData.savedCompanions || [],
-        status: reservationData.status || "Reservada",
-        total: reservationData.total || 0
-      });
-    } else {
-      setFormData({
-        client: "",
-        plan: "",
-        startDate: "",
-        endDate: "",
-        hasCompanions: false,
-        companionCount: 0,
-        companionsData: [],
-        savedCompanions: [],
-        status: "Reservada",
-        total: 0
-      });
+    if (isOpen) {
+      if (reservationData) {
+        setFormData({
+          client: reservationData.client || "",
+          plan: reservationData.plan || "",
+          startDate: reservationData.startDate || "",
+          endDate: reservationData.endDate || "",
+          hasCompanions: reservationData.hasCompanions || false,
+          companionCount: reservationData.companionCount || 0,
+          companions: reservationData.savedCompanions || [],
+          status: reservationData.status || "Reservada",
+          total: reservationData.total || 0
+        });
+      } else {
+        setFormData({
+          client: "",
+          plan: "",
+          startDate: "",
+          endDate: "",
+          hasCompanions: false,
+          companionCount: 0,
+          companions: [],
+          status: "Reservada",
+          total: 0
+        });
+      }
+      setStep(1);
+      setErrors({});
     }
-    setStep(1);
   }, [reservationData, isOpen]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    if (name === 'companionCount' && formData.hasCompanions) {
-      const count = parseInt(value) || 0;
-      const newCompanions = Array(count).fill().map((_, i) =>
-        (formData.companionsData && formData.companionsData[i]) || {
-          name: '',
-          birthDate: '',
-          age: '',
-          documentType: '',
-          documentNumber: '',
-          eps: ''
-        }
-      );
-
+    if (name === 'hasCompanions' && !checked) {
       setFormData(prev => ({
         ...prev,
-        [name]: value,
-        companionsData: newCompanions
+        hasCompanions: false,
+        companionCount: 0,
+        companions: []
+      }));
+    } else if (name === 'companionCount' && formData.hasCompanions) {
+      const count = parseInt(value) || 0;
+      setFormData(prev => ({
+        ...prev,
+        [name]: count,
+        companions: prev.companions.slice(0, count)
       }));
     } else {
       setFormData(prev => ({
@@ -83,10 +85,11 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
     }
 
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
+      setErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
     }
   };
 
@@ -95,7 +98,7 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
     const today = new Date().toISOString().split('T')[0];
 
     if (step === 1) {
-      if (!formData.client) newErrors.client = "Cliente es requerido";
+      if (!formData.client.trim()) newErrors.client = "Cliente es requerido";
       if (!formData.plan) newErrors.plan = "Plan es requerido";
       if (!formData.startDate) newErrors.startDate = "Fecha de entrada es requerida";
       if (!formData.endDate) newErrors.endDate = "Fecha de salida es requerida";
@@ -107,49 +110,55 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
       if (formData.startDate && formData.startDate < today) {
         newErrors.startDate = "La fecha de entrada no puede ser en el pasado";
       }
-    }
-    else if (step === 2) {
-      if (formData.hasCompanions) {
-        if (formData.companionCount <= 0) {
-          newErrors.companionCount = "Debe especificar al menos 1 acompañante";
-        }
 
-        // Validar cada acompañante
-        formData.companionsData.forEach((companion, index) => {
-          if (!companion.name) newErrors[`companionName_${index}`] = "Nombre es requerido";
-          if (!companion.birthDate) newErrors[`companionBirthDate_${index}`] = "Fecha de nacimiento es requerida";
-          if (!companion.documentType) newErrors[`companionDocType_${index}`] = "Tipo de documento es requerido";
-          if (!companion.documentNumber) newErrors[`companionDocNumber_${index}`] = "Número de documento es requerido";
-          if (!companion.eps) newErrors[`companionEps_${index}`] = "EPS es requerida";
-        });
+      if (formData.hasCompanions && (!formData.companionCount || formData.companionCount <= 0)) {
+        newErrors.companionCount = "Debe especificar al menos 1 acompañante";
+      }
+    }
+    else if (step === 2 && formData.hasCompanions) {
+      if (formData.companions.length === 0) {
+        newErrors.companions = "Debe agregar al menos un acompañante";
       }
     }
 
-
-    // Mover la validación de acompañantes al paso 2
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const nextStep = () => {
     if (validateStep(step)) {
-      setStep(step + 1);
+      if (step === 1 && !formData.hasCompanions) {
+        setStep(3);
+      } else {
+        setStep(step + 1);
+      }
     }
   };
 
   const prevStep = () => {
-    setStep(step - 1);
+    if (step === 3 && !formData.hasCompanions) {
+      setStep(1);
+    } else {
+      setStep(step - 1);
+    }
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateStep(step)) {
-      const calculatedTotal = calculateTotal(formData.plan, formData.companionCount);
 
-      onSave({
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (validateStep(step)) {
+      const calculatedTotal = calculateTotal(formData.plan, formData.companions.length);
+
+      await createReservation ({
         ...formData,
+        savedCompanions: formData.companions,
+        companionCount: formData.companions.length,
         total: calculatedTotal
       });
       onClose();
+      onSave();
+     
+    
     }
   };
 
@@ -167,57 +176,27 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
 
     return basePrice + companionsTotal;
   };
-  const handleCompanionDataChange = (index, e) => {
-    const { name, value } = e.target;
+  const handleSaveCompanionInReservation = (newCompanion) => {
+    console.log('Nuevo acompañante a guardar:', newCompanion);
     setFormData(prev => {
-      const updatedCompanions = [...(prev.companionsData || [])];
-      updatedCompanions[index] = {
-        ...(updatedCompanions[index] || {}),
-        [name]: value
-      };
-      return {
-        ...prev,
-        companionsData: updatedCompanions
-      };
+      // Verificar si ya existe
+      const exists = prev.companions.some(c =>
+        c.documentNumber === newCompanion.documentNumber
+      );
+
+      if (!exists) {
+        return {
+          ...prev,
+          companions: [...prev.companions, {
+            ...newCompanion,
+            id: `${newCompanion.documentNumber}-${Date.now()}`
+          }],
+          companionCount: prev.companions.length + 1
+        };
+      }
+      return prev;
     });
   };
-
-  const handleDeleteCompanion = (id) => {
-    setFormData(prev => ({
-      ...prev,
-      savedCompanions: (prev.savedCompanions || []).filter(companion => companion.id !== id)
-    }));
-  };
-  const handleSaveCompanion = (index) => {
-    const companionToSave = formData.companionsData[index];
-    
-    if (!companionToSave?.name || !companionToSave?.birthDate ||
-      !companionToSave?.documentType || !companionToSave?.documentNumber || !companionToSave?.eps) {
-      alert("Por favor complete todos los campos del acompañante");
-      return;
-    }
-  
-    const newCompanion = {
-      ...companionToSave,
-      id: Date.now()
-    };
-
-    setFormData(prev => ({
-      ...prev,
-      savedCompanions: [...(prev.savedCompanions || []), newCompanion],
-      companionsData: prev.companionsData.map((comp, i) => 
-        i === index ? {
-          name: '',
-          birthDate: '',
-          age: '',
-          documentType: '',
-          documentNumber: '',
-          eps: ''
-        } : comp
-      )
-    }));
-  };
-
 
   if (!isOpen) return null;
 
@@ -226,161 +205,176 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
       <div className="modal-container">
         <div className="modal-header">
           <h2>
-            {reservationData && reservationData.id ? "Editar Reserva" : "Nueva Reserva"}
+            {reservationData?.id ? "Editar Reserva" : "Nueva Reserva"}
           </h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <button className="close-button" onClick={onClose} type="button" aria-label="Cerrar"></button>
         </div>
 
         <div className="steps-indicator">
           <div className={`step ${step === 1 ? 'active' : ''}`}>1. Datos Reserva</div>
-          <div className={`step ${step === 2 ? 'active' : ''}`}>2. Acompañantes</div>
-          <div className={`step ${step === 3 ? 'active' : ''}`}>3. Pagos</div>
+          {formData.hasCompanions && (
+            <div className={`step ${step === 2 ? 'active' : ''}`}>2. Acompañantes</div>
+          )}
+          <div className={`step ${step === 3 ? 'active' : ''}`}>{formData.hasCompanions ? '3' : '2'}. Pagos</div>
         </div>
 
         <div className="modal-body">
-          <form onSubmit={handleSubmit}>
-            {step === 1 && (
-              <div className="form-step">
-                <div className="form-grid">
-                  <div className={`form-group ${errors.client ? 'has-error' : ''}`}>
-                    <label htmlFor="client">
-                      <FaUser className="input-icon" /> Cliente
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="form-step">
+              <div className="form-grid">
+                <div className={`form-group ${errors.client ? 'has-error' : ''}`}>
+                  <label htmlFor="client">
+                    Cliente
+                  </label>
+                  <input
+                    type="text"
+                    id="client"
+                    name="client"
+                    value={formData.idUser}
+                    onChange={handleChange}
+                    placeholder="Nombre del cliente"
+                    disabled={isReadOnly}
+                    aria-invalid={!!errors.idUser}
+                    aria-describedby={errors.i ? "client-error" : undefined}
+                  />
+                  {errors.client && <span className="error-message" id="client-error">{errors.client}</span>}
+                </div>
+
+                <div className={`form-group ${errors.plan ? 'has-error' : ''}`}>
+                  <label htmlFor="plan">
+                    Plan
+                  </label>
+                  <select
+                    id="plan"
+                    name="plan"
+                    value={formData.plan}
+                    onChange={handleChange}
+                    disabled={isReadOnly}
+                    aria-invalid={!!errors.plan}
+                    aria-describedby={errors.plan ? "plan-error" : undefined}
+                  >
+                    <option value="">Seleccione un plan</option>
+                    <option value="Romántico">Plan Romántico</option>
+                    <option value="Empresarial">Plan Empresarial</option>
+                    <option value="Pasadia Cumpleaños">Pasadia Cumpleaños</option>
+                    <option value="Spa">Plan Spa</option>
+                  </select>
+                  {errors.plan && <span className="error-message" id="plan-error">{errors.plan}</span>}
+                </div>
+
+                <div className="date-group">
+                  <div className={`form-group ${errors.startDate ? 'has-error' : ''}`}>
+                    <label htmlFor="startDate">
+                      Fecha Inicio
                     </label>
                     <input
-                      type="text"
-                      id="client"
-                      name="client"
-                      value={formData.client}
+                      type="date"
+                      id="startDate"
+                      name="startDate"
+                      value={formData.startDate}
                       onChange={handleChange}
-                      placeholder="Nombre del cliente"
-                      required
-                      readOnly={isReadOnly}
+                      min={new Date().toISOString().split('T')[0]}
+                      disabled={isReadOnly}
+                      aria-invalid={!!errors.startDate}
+                      aria-describedby={errors.startDate ? "startDate-error" : undefined}
                     />
-                    {errors.client && <span className="error-message">{errors.client}</span>}
+                    {errors.startDate && <span className="error-message" id="startDate-error">{errors.startDate}</span>}
                   </div>
 
-                  <div className={`form-group ${errors.plan ? 'has-error' : ''}`}>
-                    <label htmlFor="plan">
-                      <FaBed className="input-icon" /> Plan
+                  <div className={`form-group ${errors.endDate ? 'has-error' : ''}`}>
+                    <label htmlFor="endDate">
+                      Fecha Fin
                     </label>
-                    <select
-                      id="plan"
-                      name="plan"
-                      value={formData.plan}
+                    <input
+                      type="date"
+                      id="endDate"
+                      name="endDate"
+                      value={formData.endDate}
                       onChange={handleChange}
-                      required
-                      readOnly={isReadOnly}
-                    >
-                      <option value="">Seleccione un plan</option>
-                      <option value="Romántico">Plan Romántico</option>
-                      <option value="Empresarial">Plan Empresarial</option>
-                      <option value="Pasadia Cumpleaños">Pasadia Cumpleaños</option>
-                      <option value="Spa">Plan Spa</option>
-                    </select>
-                    {errors.plan && <span className="error-message">{errors.plan}</span>}
-                  </div>
-
-                  <div className="date-group">
-                    <div className={`form-group ${errors.startDate ? 'has-error' : ''}`}>
-                      <label htmlFor="startDate">
-                        <FaCalendarAlt className="input-icon" /> Fecha Inicio
-                      </label>
-                      <input
-                        type="date"
-                        id="startDate"
-                        name="startDate"
-                        value={formData.startDate}
-                        onChange={handleChange}
-                        required
-                        readOnly={isReadOnly}
-                      />
-                      {errors.startDate && <span className="error-message">{errors.startDate}</span>}
-                    </div>
-
-                    <div className={`form-group ${errors.endDate ? 'has-error' : ''}`}>
-                      <label htmlFor="endDate">
-                        <FaCalendarAlt className="input-icon" /> Fecha Fin
-                      </label>
-                      <input
-                        type="date"
-                        id="endDate"
-                        name="endDate"
-                        value={formData.endDate}
-                        onChange={handleChange}
-                        required
-                        readOnly={isReadOnly}
-                      />
-                      {errors.endDate && <span className="error-message">{errors.endDate}</span>}
-                    </div>
-                  </div>
-                  <div className="companion-controls">
-                    <div className="checkbox-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="hasCompanions"
-                          checked={formData.hasCompanions}
-                          onChange={handleChange}
-                        />
-                        ¿Incluye acompañantes?
-                      </label>
-                    </div>
-                    {formData.hasCompanions && (
-                      <div className={`form-group ${errors.companionCount ? 'has-error' : ''}`}>
-                        <label htmlFor="companionCount">
-                          <FaUsers className="input-icon" /> Cantidad de acompañantes
-                        </label>
-                        <input
-                          type="number"
-                          id="companionCount"
-                          name="companionCount"
-                          value={formData.companionCount}
-                          onChange={handleChange}
-                          min="1"
-                          placeholder="Número de acompañantes"
-                          readOnly={isReadOnly}
-                        />
-                        {errors.companionCount && <span className="error-message">{errors.companionCount}</span>}
-                      </div>
-                    )}
+                      min={formData.startDate || new Date().toISOString().split('T')[0]}
+                      disabled={isReadOnly}
+                      aria-invalid={!!errors.endDate}
+                      aria-describedby={errors.endDate ? "endDate-error" : undefined}
+                    />
+                    {errors.endDate && <span className="error-message" id="endDate-error">{errors.endDate}</span>}
                   </div>
                 </div>
+                <div className="companion-controls">
+                  <div className="checkbox-group">
+                    <label htmlFor="hasCompanions">
+                      <input
+                        type="checkbox"
+                        id="hasCompanions"
+                        name="hasCompanions"
+                        checked={formData.hasCompanions}
+                        onChange={handleChange}
+                        disabled={isReadOnly}
+                      />
+                      ¿Incluye acompañantes?
+                    </label>
+                  </div>
+                  {formData.hasCompanions && (
+                    <div className={`form-group ${errors.companionCount ? 'has-error' : ''}`}>
+                      <label htmlFor="companionCount">
+                        Cantidad de acompañantes
+                      </label>
+                      <input
+                        type="number"
+                        id="companionCount"
+                        name="companionCount"
+                        value={formData.companionCount}
+                        onChange={handleChange}
+                        min="1"
+                        max="10"
+                        placeholder="Número de acompañantes"
+                        disabled={isReadOnly}
+                        aria-invalid={!!errors.companionCount}
+                        aria-describedby={errors.companionCount ? "companionCount-error" : undefined}
+                      />
+                      {errors.companionCount && <span className="error-message" id="companionCount-error">{errors.companionCount}</span>}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-
-            {step === 2 && (
+            </div>
+            {step === 2 && formData.hasCompanions && (
               <div className="form-step">
-                {formData.hasCompanions && (
-                  <>
-                    <CompanionsForm
-                      companionsData={formData.companionsData}
-                      onCompanionDataChange={handleCompanionDataChange}
-                      onSaveCompanion={handleSaveCompanion}
-                      onDeleteCompanion={handleDeleteCompanion}
-                    />
-
-                    {formData.savedCompanions?.length > 0 && (
-                      <div className="saved-companions-section">
-                        <h3>Acompañantes Guardados</h3>
-                        <TableCompanions
-                          companions={formData.savedCompanions || []}
-                          onDeleteCompanion={handleDeleteCompanion}
-                        />
-                      </div>
-                    )}
-                  </>
+                <h3>Registro de Acompañantes</h3>
+                {errors.companions && (
+                  <div className="error-banner">
+                    <p>{errors.companions}</p>
+                  </div>
                 )}
+
+                <CompanionsForm
+                  onSaveCompanion={handleSaveCompanionInReservation}
+                />
+
+                <h4>Acompañantes Registrados</h4>
+                <TableCompanions
+                  companions={formData.companions}
+                  onDeleteCompanion={(id) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      companions: prev.companions.filter(c => c.id !== id),
+                      companionCount: prev.companions.length - 1
+                    }));
+                  }}
+                />
               </div>
             )}
+
             {step === 3 && (
               <div className="form-step">
                 <PaymentForm
-                  totalAmount={calculateTotal(formData.plan, formData.companionCount)}
+                  totalAmount={calculateTotal(formData.plan, formData.companions.length)}
                   onPaymentSubmit={(paymentData) => {
                     const completeData = {
                       ...formData,
                       payment: paymentData,
-                      total: calculateTotal(formData.plan, formData.companionCount)
+                      savedCompanions: formData.companions,
+                      companionCount: formData.companions.length,
+                      total: calculateTotal(formData.plan, formData.companions.length)
                     };
                     onSave(completeData);
                     onClose();
@@ -388,30 +382,39 @@ function FormReservation({ reservationData, onClose, onSave, isOpen, isReadOnly 
                 />
               </div>
             )}
+
             <div className="modal-footer">
               {step > 1 && (
                 <button type="button" className="cancel-btn" onClick={prevStep}>
                   Anterior
                 </button>
               )}
+
               {step < 3 && (
                 <button type="button" className="submit-btn" onClick={nextStep}>
                   {step === 2 ? 'Ir a Pago' : 'Siguiente'}
                 </button>
               )}
+
+              {!isReadOnly && step === 3 && (
+                <button type="submit" className="btn btn-primary">
+                  Guardar Reserva
+                </button>
+              )}
             </div>
-            {!isReadOnly && step === 3 && (
-              <button type="submit" className="btn btn-primary">
-                Guardar Reserva
-              </button>
-            )}
-
-
           </form>
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }
+
+FormReservation.propTypes = {
+  reservationData: PropTypes.object,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  isReadOnly: PropTypes.bool
+};
 
 export default FormReservation;

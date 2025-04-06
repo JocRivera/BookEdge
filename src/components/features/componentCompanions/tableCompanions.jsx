@@ -1,79 +1,113 @@
-import React from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import './componentCompanions.css';
 
-const TableCompanions = ({ companions = [], clients = [], onDeleteCompanion }) => {
-  const [selectedCompanion, setSelectedCompanion] = React.useState(null);
+const TableCompanions = ({ companions = [], onDeleteCompanion = null, compact = false, isReadOnly = false }) => {
+  const [expanded, setExpanded] = useState(false);
 
-  const findClientForCompanion = (companionId) => {
-    return clients.find(client => 
-      client.companions?.some(comp => comp.documentNumber === companionId)
+  // Verificación segura de los acompañantes
+  if (!companions || !Array.isArray(companions)) {
+    return (
+      <div className="no-companions">
+        Datos de acompañantes no válidos
+      </div>
     );
-  };
+  }
 
-  // Verificación adicional para seguridad
-  if (!Array.isArray(companions)) {
-    console.error('companions no es un array:', companions);
-    return <div className="error-message">No hay datos de acompañantes disponibles</div>;
+  if (compact && companions.length > 0) {
+    return (
+      <div className="compact-companions">
+        <button 
+          className="toggle-companions-btn"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {companions.length} acompañante(s) {expanded ? '▲' : '▼'}
+        </button>
+        
+        {expanded && (
+          <div className="companions-popup">
+            <table className="companions-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Edad</th>
+                  {!isReadOnly && onDeleteCompanion && <th>Acciones</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {companions.map((companion) => (
+                  <tr key={`companion-${companion?.id || companion?.documentNumber || Math.random()}`}>
+                    <td>{companion?.name || 'N/A'}</td>
+                    <td>{companion?.age || 'N/A'}</td>
+                    {!isReadOnly && onDeleteCompanion && (
+                      <td>
+                        <button onClick={() => onDeleteCompanion(companion.id)}>
+                          Eliminar
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
-    <div className="companions-table-container">
-      <h2>Acompañantes Registrados</h2>
-      
-      {companions.length === 0 ? (
-        <p className="no-companions-message">No hay acompañantes registrados</p>
-      ) : (
-        <table className="companions-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Edad</th>
-              <th>Tipo Documento</th>
-              <th>Número Documento</th>
-              <th>EPS</th>
-              <th>Cliente Principal</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {companions.map((companion, index) => {
-              const client = findClientForCompanion(companion.documentNumber);
-              return (
-                <tr key={`companion-row-${index}`}>
-                  <td>{companion.name || '-'}</td>
-                  <td>{companion.age || '-'}</td>
-                  <td>{companion.documentType || '-'}</td>
-                  <td>{companion.documentNumber || '-'}</td>
-                  <td>{companion.eps || '-'}</td>
-                  <td>{client ? client.name : 'No asignado'}</td>
-                  <td>
-                    <button 
-                      className="view-detail-btn"
-                      onClick={() => setSelectedCompanion(companion)}
-                    >
-                      Ver detalle
-                    </button>
-                    <button 
-                      className="delete-btn"
-                      onClick={() => onDeleteCompanion(companion.documentNumber)}
+    <div className="companions-table-wrapper">
+      <table className="reservations-table">
+        <thead className="reservations-table-header">
+          <tr>
+            <th>Nombre</th>
+            <th>Fecha Nac.</th>
+            <th>Edad</th>
+            <th>Tipo Doc.</th>
+            <th>N° Documento</th>
+            <th>EPS</th>
+            {!isReadOnly && onDeleteCompanion && <th>Acciones</th>}
+          </tr>
+        </thead>
+        <tbody className="reservations-table-body">
+          {companions.length > 0 ? (
+            companions.map((companion, index) => (
+              <tr 
+                key={`companion-${companion?.id || companion?.documentNumber || Math.random()}`}
+                className={
+                  index % 2 === 0
+                    ? "reservations-table-row-even"
+                    : "reservations-table-row-odd"
+                }
+              >
+                <td className="reservations-table-cell">{companion?.name || 'N/A'}</td>
+                <td className="reservations-table-cell">{companion?.birthDate || 'N/A'}</td>
+                <td className="reservations-table-cell">{companion?.age || 'N/A'}</td>
+                <td className="reservations-table-cell">{companion?.documentType || 'N/A'}</td>
+                <td className="reservations-table-cell">{companion?.documentNumber || 'N/A'}</td>
+                <td className="reservations-table-cell">{companion?.eps || 'N/A'}</td>
+                {!isReadOnly && onDeleteCompanion && (
+                  <td className="reservations-table-cell">
+                    <button
+                      onClick={() => onDeleteCompanion(companion.id)}
+                      className="delete-companion-btn"
                     >
                       Eliminar
                     </button>
                   </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
-
-      {/* Modal de detalle */}
-      {selectedCompanion && (
-        <div className="companion-detail-modal">
-          {/* ... (mantén tu modal existente) */}
-        </div>
-      )}
+                )}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={!isReadOnly && onDeleteCompanion ? 7 : 6} className="no-results">
+                No hay acompañantes registrados
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };
@@ -81,6 +115,7 @@ const TableCompanions = ({ companions = [], clients = [], onDeleteCompanion }) =
 TableCompanions.propTypes = {
   companions: PropTypes.arrayOf(
     PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
       name: PropTypes.string,
       birthDate: PropTypes.string,
       age: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -89,14 +124,9 @@ TableCompanions.propTypes = {
       eps: PropTypes.string
     })
   ),
-  clients: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      companions: PropTypes.array
-    })
-  ),
-  onDeleteCompanion: PropTypes.func.isRequired
+  onDeleteCompanion: PropTypes.func,
+  compact: PropTypes.bool,
+  isReadOnly: PropTypes.bool
 };
-
 
 export default TableCompanions;

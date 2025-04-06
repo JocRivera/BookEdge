@@ -16,6 +16,7 @@ import CreateConfig from "./components/features/componenetConfig/createConfig";
 import CabinsPage from "./components/features/componentCabins/CardCabin";
 import TableReservations from "./components/features/componentReservations/tableReservations";
 import TableCompanions from "./components/features/componentCompanions/tableCompanions";
+import TablePayments from "./components/features/componentPayments/tablePayments";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
 
@@ -40,10 +41,8 @@ export default function App() {
           <Route path="config" element={<CreateConfig />} />
           <Route path="cabins" element={<CabinsPage />} />
           <Route path="reservations" element={<TableReservations />} />
-          <Route
-            path="companions"
-            element={<TableCompanions onDeleteCompanion={() => { }} />}
-          />
+          <Route path="companions" element={<TableCompanions companions={[]} />} />
+          <Route path="payments" element={<TablePayments />} />          
           <Route path="plans" element={<Plan />} />
           <Route path="plansProgramed" element={<PlanProgramed />} />
         </Route>
@@ -53,4 +52,6 @@ export default function App() {
       <ToastContainer position="top-right" autoClose={3000} />
     </BrowserRouter>
   );
+  
 }
+
