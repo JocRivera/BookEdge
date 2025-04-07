@@ -5,6 +5,7 @@ import permissionService from '../../../services/PermissionService';
 const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     const [error, setError] = useState(null);
     const [permission, setPermission] = useState([]);
+    const [privilege, setPrivilege] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
         status: false,
@@ -14,7 +15,9 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
         const fetchPermissions = async () => {
             try {
                 const permissions = await permissionService.getPermissions();
+                const privileges = await permissionService.getPrivileges();
                 setPermission(permissions);
+                setPrivilege(privileges);
             } catch (error) {
                 console.error("Error fetching permissions:", error);
             }
@@ -63,10 +66,41 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            onSave(formData);
-            onClose()
-        }
+    if (validateForm()) {
+        // Crear una copia del formData base sin los privilegios individuales
+        const { name, status, permissions } = formData;
+        
+        // Crear objeto para privilegios anidados
+        const permissionPrivileges = {};
+        
+        // Procesar cada permiso seleccionado
+        permissions.forEach(permId => {
+            // Inicializar objeto de privilegios para este permiso
+            permissionPrivileges[permId] = {};
+            
+            // Asignar estados para cada privilegio de este permiso
+            privilege.forEach(priv => {
+                const privilegeKey = `privilege-${permId}-${priv.idPrivilege}`;
+                const privilegeName = priv.name.toLowerCase();
+                
+                // Asignar true/false según el estado del checkbox
+                permissionPrivileges[permId][privilegeName] = 
+                    formData[privilegeKey] === true;
+            });
+        });
+        
+        // Crear objeto final con estructura anidada
+        const dataToSave = {
+            name,
+            status,
+            permissions,
+            permissionPrivileges
+        };
+        
+        // Enviar los datos estructurados
+        onSave(dataToSave);
+        onClose();
+    }
     }
     const validateForm = () => {
         if (!formData.name) {
@@ -111,24 +145,62 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                 />
                                 {error && <p style={{ color: "red" }}>{error}</p>}
                             </div>
-                            <fieldset className="permissions-group">
-                                <legend>Permisos</legend>
-                                <div className="permissions-list">
-                                    {permission.map((permiso) => (
-                                        <label key={permiso.idPermission} >
-                                            <input
-                                                type="checkbox"
-                                                name="permissions"
-                                                value={permiso.idPermission}
-                                                id={permiso.idPermission}
-                                                checked={formData.permissions.includes(permiso.idPermission)}
-                                                onChange={handlePermissionChange}
-                                            />
-                                            <span>{permiso.name}</span>
-                                        </label>
-                                    ))}
+                            <div className="permissions-group">
+                                <div className="permissions-table-container">
+                                    <table className="permissions-table">
+                                        <thead>
+                                            <tr>
+                                                <th className="permission-header">Permisos</th>
+                                                {privilege.map((priv) => (
+                                                    <th key={priv.idPrivilege} className="privilege-header">
+                                                        <div className="privilege-title">
+                                                            {priv.name}
+                                                        </div>
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {permission.map((permiso) => (
+                                                <tr key={permiso.idPermission}>
+                                                    <td className="permission-name">
+                                                        <label className="permission-checkbox">
+                                                            <input
+                                                                type="checkbox"
+                                                                name="permissions"
+                                                                value={permiso.idPermission}
+                                                                checked={formData.permissions.includes(permiso.idPermission)}
+                                                                onChange={handlePermissionChange}
+                                                            />
+                                                            <span>{permiso.name}</span>
+                                                        </label>
+                                                    </td>
+                                                    {privilege.map((priv) => (
+                                                        <td key={`${permiso.idPermission}-${priv.idPrivilege}`} className="privilege-cell">
+                                                            <input
+                                                                type="checkbox"
+                                                                name={`privilege-${permiso.idPermission}-${priv.idPrivilege}`}
+                                                                disabled={!formData.permissions.includes(permiso.idPermission)}
+                                                                checked={
+                                                                    formData.permissions.includes(permiso.idPermission) &&
+                                                                    formData[`privilege-${permiso.idPermission}-${priv.idPrivilege}`] === true
+                                                                }
+                                                                onChange={(e) => {
+                                                                    const { checked } = e.target;
+                                                                    setFormData(prevState => ({
+                                                                        ...prevState,
+                                                                        [`privilege-${permiso.idPermission}-${priv.idPrivilege}`]: checked
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            </fieldset>
+                            </div>
                             <div className="form-group">
                                 <label htmlFor="status">Estado</label>
                                 <Switch
