@@ -1,0 +1,575 @@
+/* Variables de color actualizadas */
+:root {
+    --color-primary: #2C5D7C;
+    --color-primary-dark: #1e405a;
+    --color-primary-light: #e8f1f8;
+    --color-primary-hover: #f5f9fc;
+    --color-secondary: #FF9F1C;
+    --color-text-dark: #2C3E50;
+    --color-text-normal: #526D82;
+    --color-text-light: #95A5A6;
+    --color-border: #E2E8F0;
+    --color-white: #FFFFFF;
+    --color-background: #F8FAFC;
+    --color-shadow: rgba(44, 93, 124, 0.1);
+    --color-shadow-light: rgba(44, 93, 124, 0.05);
+    --color-error: #DC2626;
+    --color-error-light: #FEE2E2;
+}
+
+.tabs-container {
+    padding: 0;
+    /* Cambiado de 20px a 0 */
+}
+
+/* Tabs mejorados */
+.tabs {
+    display: flex;
+    justify-content: center;
+    /* Centrar las pestañas */
+    gap: 30px;
+    /* Aumentado de 10px a 20px para más espaciado */
+    margin: 0;
+    /* Eliminar margen inferior */
+    padding: 20px 0;
+    /* Añadir padding vertical */
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-white);
+    /* Añadir fondo */
+    border-radius: 16px 16px 0 0;
+    /* Redondear esquinas superiores */
+}
+
+/* Tabs mejorados */
+.tab-button {
+    padding: 12px 30px;
+    /* Aumentar padding */
+    border: none;
+    background: transparent;
+    font-size: 0.95rem;
+    color: var(--color-text-normal);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    /* Añadir bordes redondeados */
+    font-weight: 500;
+}
+
+.tab-button:hover {
+    background-color: var(--color-primary-light);
+    /* Efecto hover */
+    color: var(--color-primary);
+}
+
+.tab-button.active {
+    color: var(--color-primary);
+    font-weight: 600;
+    background-color: var(--color-primary-light);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    /* Ajustado para alinear con el borde inferior */
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: 3px 3px 0 0;
+}
+
+.tab-content {
+    padding: 25px;
+    /* Añadir padding al contenido */
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-text-dark);
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.next-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.next-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .tabs {
+        justify-content: flex-start;
+        /* Alinear a la izquierda en móviles */
+        padding: 10px;
+        overflow-x: auto;
+        /* Permitir scroll horizontal en móviles */
+        gap: 10px;
+    }
+
+    .tab-button {
+        padding: 8px 15px;
+        white-space: nowrap;
+        /* Evitar que el texto se rompa */
+    }
+
+    .tab-button.active::after {
+        bottom: -10px;
+    }
+}
+
+.form-sections-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+/* Secciones del formulario */
+.form-section {
+    background: var(--color-white);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px var(--color-shadow-light);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--color-shadow);
+}
+
+.section-title {
+    color: var(--color-primary);
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--color-primary-light);
+    font-weight: 600;
+}
+
+.selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.select-group {
+    margin-bottom: 1rem;
+}
+
+.custom-select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--color-text-normal);
+    background-color: var(--color-white);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-select:hover {
+    border-color: var(--color-primary);
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.table-container {
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px var(--color-shadow-light);
+}
+
+/* Tablas mejoradas */
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--color-white);
+}
+
+.custom-table th,
+.custom-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.custom-table th {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 600;
+    padding: 16px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.custom-table tr:last-child td {
+    border-bottom: none;
+}
+
+.custom-table tr:hover td {
+    background-color: var(--color-primary-hover);
+}
+
+.remove-btn {
+    padding: 6px 12px;
+    border: none;
+    background-color: var(--color-error-light);
+    color: var(--color-error);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    background-color: var(--color-error);
+    color: white;
+}
+
+@media (min-width: 768px) {
+    .form-sections-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Modal y contenedor principal */
+.modal-container {
+    background: var(--color-background);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 1200px; /* Aumentado de 800px */
+    max-height: 90vh;
+    position: relative;
+    animation: modalFadeIn 0.3s ease-out;
+    box-shadow: 0 10px 25px rgba(44, 93, 124, 0.1);
+}
+
+.modal-body {
+    padding: 0;
+    max-height: calc(90vh - 140px); /* Altura máxima considerando header y footer */
+    overflow: hidden; /* Evita scroll general */
+}
+
+/* Ajustes para la sección de cabañas y habitaciones */
+.form-sections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+    height: 100%;
+}
+
+/* Secciones del formulario */
+.form-section {
+    background: var(--color-white);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px var(--color-shadow-light);
+    height: 450px; /* Altura fija para las secciones */
+    display: flex;
+    flex-direction: column;
+}
+
+.selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+    overflow: hidden; /* Contiene el scroll */
+}
+
+.table-container {
+    margin-top: 1rem;
+    flex: 1;
+    overflow-y: auto; /* Scroll vertical solo para las tablas */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--color-shadow-light);
+}
+
+/* Estilos para el scroll */
+.table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: var(--color-background);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--color-primary-light);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+}
+
+/* Ajustes para el contenido de las pestañas */
+.tab-content {
+    height: calc(90vh - 250px); /* Altura ajustada considerando tabs y botones */
+    overflow-y: auto;
+    padding: 0;
+}
+
+/* Ajustes responsive */
+@media (max-width: 1024px) {
+    .modal-container {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .form-section {
+        height: 400px; /* Altura reducida para pantallas más pequeñas */
+    }
+}
+
+@media (max-width: 768px) {
+    .form-sections-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-section {
+        height: 350px; /* Altura aún más reducida para móviles */
+    }
+
+    .modal-container {
+        width: 100%;
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+    }
+}
+
+/* Estilos para la sección de servicios */
+.services-section {
+    height: 500px !important;
+}
+
+.services-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.service-input-group {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.quantity-control {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* Inputs y controles */
+.quantity-input {
+    width: 80px;
+    padding: 8px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--color-text-dark);
+    transition: all 0.3s ease;
+}
+
+.quantity-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+    outline: none;
+}
+
+.add-service-btn {
+    padding: 8px 16px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-service-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.services-table {
+    margin-top: 1rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Estilos para el resumen de precios */
+.summary-section {
+    height: auto !important;
+    min-height: 250px;
+    background: linear-gradient(145deg, var(--color-primary-light), var(--color-white));
+}
+
+.price-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background-color: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--color-shadow-light);
+}
+
+.price-value {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.price-input {
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: right;
+}
+
+.custom-table .quantity-input {
+    width: 60px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.custom-table .quantity-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+}
+
+/* Botones mejorados */
+.add-service-btn, .add-btn {
+    padding: 8px 20px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-service-btn:hover, .add-btn:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
+
+/* Animaciones */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar personalizado */
+.table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: var(--color-background);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary-dark);
+}
