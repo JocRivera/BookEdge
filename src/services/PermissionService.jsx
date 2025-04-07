@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_URL_PERMISSION = "http://localhost:3000/permissions";
+const API_URL_PRIVILEGE = "http://localhost:3000/privileges";
 
 class PermissionService {
     async getPermissions() {
@@ -52,6 +53,28 @@ class PermissionService {
             throw error;
         }
     }
+
+    async getPrivileges() {
+        try {
+            const response = await axios.get(API_URL_PRIVILEGE);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching privileges:", error);
+            throw error;
+        }
+    }
+
+    async getPrivilegeById(id) {
+        try {
+            const response = await axios.get(`${API_URL_PRIVILEGE}/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching privilege by ID:", error);
+            throw error;
+        }
+    }
+
+    
 }
 const permissionService = new PermissionService();
 export default permissionService;

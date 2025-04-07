@@ -325,3 +325,87 @@
     color: var(--color-text-dark);
     padding: 0 8px;
 }
+.permissions-table-container {
+    overflow-x: auto;
+    margin-top: 10px;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.permissions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.permissions-table th, .permissions-table td {
+    border: 1px solid #e0e0e0;
+    padding: 8px;
+    text-align: center;
+}
+
+.permissions-table thead th {
+    background-color: #f5f5f5;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.permission-header {
+    min-width: 120px;
+    vertical-align: top;
+}
+
+.privilege-header {
+    background-color: #f0f0f0 !important;
+    font-weight: bold;
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    text-align: left !important;
+    min-width: 100px;
+}
+
+.permission-title {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.permission-checkbox {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 5px;
+}
+
+.permission-checkbox input {
+    margin: 0;
+}
+
+.privilege-name {
+    background-color: #f0f0f0;
+    font-weight: 500;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    text-align: left !important;
+}
+
+.privilege-cell {
+    text-align: center;
+}
+
+.privilege-cell input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.privilege-cell input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
