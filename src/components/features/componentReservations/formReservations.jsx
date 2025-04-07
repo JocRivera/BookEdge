@@ -201,13 +201,13 @@ function FormReservation({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container">
-        <div className="modal-header">
+    <div className="reservations-modal-overlay">
+      <div className="reservations-modal-container">
+        <div className="reservations-modal-header">
           <h2>
             {reservationData?.id ? "Editar Reserva" : "Nueva Reserva"}
           </h2>
-          <button className="close-button" onClick={onClose} type="button" aria-label="Cerrar"></button>
+          <button className="reservations-close-button" onClick={onClose} type="button" aria-label="Cerrar"></button>
         </div>
 
         <div className="steps-indicator">
@@ -218,11 +218,11 @@ function FormReservation({
           <div className={`step ${step === 3 ? 'active' : ''}`}>{formData.hasCompanions ? '3' : '2'}. Pagos</div>
         </div>
 
-        <div className="modal-body">
+        <div className="reservations-modal-body">
           <form onSubmit={handleSubmit} noValidate>
-            <div className="form-step">
-              <div className="form-grid">
-                <div className={`form-group ${errors.client ? 'has-error' : ''}`}>
+            <div className="reservations-form-step">
+              <div className="reservations-form-grid">
+                <div className={`reservations-form-group ${errors.client ? 'has-error' : ''}`}>
                   <label htmlFor="client">
                     Cliente
                   </label>
@@ -240,7 +240,7 @@ function FormReservation({
                   {errors.client && <span className="error-message" id="client-error">{errors.client}</span>}
                 </div>
 
-                <div className={`form-group ${errors.plan ? 'has-error' : ''}`}>
+                <div className={`reservations-form-group ${errors.plan ? 'has-error' : ''}`}>
                   <label htmlFor="plan">
                     Plan
                   </label>
@@ -262,8 +262,8 @@ function FormReservation({
                   {errors.plan && <span className="error-message" id="plan-error">{errors.plan}</span>}
                 </div>
 
-                <div className="date-group">
-                  <div className={`form-group ${errors.startDate ? 'has-error' : ''}`}>
+                <div className="reservations-date-group">
+                  <div className={`reservations-form-group ${errors.startDate ? 'has-error' : ''}`}>
                     <label htmlFor="startDate">
                       Fecha Inicio
                     </label>
@@ -281,7 +281,7 @@ function FormReservation({
                     {errors.startDate && <span className="error-message" id="startDate-error">{errors.startDate}</span>}
                   </div>
 
-                  <div className={`form-group ${errors.endDate ? 'has-error' : ''}`}>
+                  <div className={`reservations-form-group ${errors.endDate ? 'has-error' : ''}`}>
                     <label htmlFor="endDate">
                       Fecha Fin
                     </label>
@@ -385,7 +385,7 @@ function FormReservation({
 
             <div className="modal-footer">
               {step > 1 && (
-                <button type="button" className="cancel-btn" onClick={prevStep}>
+                <button type="button" className="reservations-cancel-btn "onClick={prevStep}>
                   Anterior
                 </button>
               )}

@@ -158,7 +158,7 @@ const Sidebar = () => {
                 <span className="menu-icon">
                   <LuUsers />
                 </span>
-                <span className="menu-text">Clientes</span>
+                <span className="menu-text">Usuarios</span>
               </Link>
             </li>
           )}

@@ -5,6 +5,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  toggleUserStatus,
 } from "../../../services/usersService";
 import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import FormUser from "./formClients";
@@ -45,15 +46,16 @@ function TableUser() {
     setCurrentPage(0);
   }, [searchTerm]);
 
+  const fetchUsers = async () => {
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch (error) {
+      console.log("Error al obtener usuarios, usando datos de prueba", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await getUsers();
-        setUsers(data);
-      } catch (error) {
-        console.log("Error al obtener usuarios, usando datos de prueba", error);
-      }
-    };
     fetchUsers();
   }, []);
 
@@ -63,8 +65,9 @@ function TableUser() {
   };
 
   const handleEdit = (id) => {
-    const userToEdit = users.find((user) => user.id === id);
+    const userToEdit = users.find((user) => user.idUser === id);
     setCurrentUser(userToEdit);
+    console.log(userToEdit)
     setIsModalOpen(true);
   };
 
@@ -72,7 +75,7 @@ function TableUser() {
     if (window.confirm("¿Estás seguro que deseas eliminar este usuario?")) {
       try {
         await deleteUser(id);
-        setUsers(users.filter((user) => user.id !== id));
+        setUsers(users.filter((user) => user.idUser !== id));
       } catch (error) {
         console.error("Error al eliminar usuario:", error);
       }
@@ -82,13 +85,12 @@ function TableUser() {
   const handleSaveUser = async (userData) => {
     console.log(userData);
     try {
-      if (userData.id) {
-        await updateUser(userData.id, userData);
+      if (userData.idUser) {
+        await updateUser(userData.idUser, userData);
       } else {
         await createUser(userData);
       }
-      const updatedUsers = await getUsers();
-      setUsers(updatedUsers);
+      fetchUsers()
       setIsModalOpen(false);
     } catch (error) {
       console.error(
@@ -98,21 +100,15 @@ function TableUser() {
     }
   };
 
-  const handleToggleStatus = async (id) => {
+  const handleToggleE = async (id, estado) => {
     try {
-      const userToUpdate = users.find((user) => user.id === id);
-      const newStatus =
-        userToUpdate.status === "Activo" ? "Inactivo" : "Activo";
-      await updateUser(id, { ...userToUpdate, status: newStatus });
-      setUsers(
-        users.map((user) =>
-          user.id === id ? { ...user, status: newStatus } : user
-        )
-      );
+      await toggleUserStatus(id, estado);
+      fetchUsers()
     } catch (error) {
       console.error("Error al cambiar el estado del usuario:", error);
     }
   };
+  
 
   return (
     <div className="table-container">
@@ -169,24 +165,11 @@ function TableUser() {
                 <td className="table-cell">{user.role.name}</td>
                 <td className="table-cell">
                   <Switch
-                    isOn={user.status === "Activo"}
-                    handleToggle={(id) => {
-                      console.log(`Cambiar estado del usuario ${id}`);
-                      setUsers(
-                        users.map((user) =>
-                          user.id === id
-                            ? {
-                                ...user,
-                                status:
-                                  user.status === "Activo"
-                                    ? "Inactivo"
-                                    : "Activo",
-                              }
-                            : user
-                        )
-                      );
+                    isOn={user.status == true}
+                    handleToggle={() => {handleToggleE(user.idUser, {status:!user.status})
+                      console.log(user, "USuario estado:",user.status)
                     }}
-                    id={user.id}
+                    id={user.idUser}
                   />
                 </td>
                 {(hasPermission("view_users") ||
