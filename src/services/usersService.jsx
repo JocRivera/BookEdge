@@ -1,25 +1,27 @@
-import axios from "axios";
-import api from "./api"; // donde sea que guardaste ese archivo
-
-
-const API_URL = "http://localhost:3000/user/";
+import api from "./api";
 
 export const getUsers = async () => {
   const response = await api.get("/user");
   return response.data;
 };
 
-
-
 export const createUser = async (userData) => {
-  const response = await api.post("/user", userData); // ✅ ahora sí
+  const response = await api.post("/user", userData);
   return response.data;
 };
 
 export const updateUser = async (id, userData) => {
-  const response = await axios.put(`${API_URL}/${id}`, userData);
-  return response.data;
+  try {
+    const response = await api.put(`/user/${id}`, userData);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
 };
 export const deleteUser = async (id) => {
-  await axios.delete(`${API_URL}/${id}`);
+  await api.delete(`/user/${id}`);
+};
+
+export const toggleUserStatus = async (id, userState) => {
+  await api.patch(`/user/${id}`, userState);
 };

@@ -7,8 +7,9 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
   // Estado inicial como una constante separada para mayor claridad
   const initialFormData = {
     name: "",
-    eps: "SURA",
-    password: "123456789qweasd",
+    eps: "",
+    birthdate:"",
+    password: "123456789aA",
     identificationType: "",
     identification: "",
     email: "",
@@ -16,8 +17,6 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
     address: "",
     idRol: 0,
     status: true,
-    password: "",
-    eps: "",
     role: {},
   };
 
@@ -168,11 +167,23 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                 >
                   <option value="">Seleccione un rol</option>
                   {rolesData.map((role) => (
-                    <option key={role.idRol} value={role.idRol}>
+                    <option key={role.idRol} value={role.name}>
                       {role.name}
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="eps">EPS</label>
+                <input
+                  type="eps"
+                  id="eps"
+                  name="eps"
+                  value={formData.eps}
+                  onChange={handleChange}
+                  placeholder="EPS"
+                  required
+                />
               </div>
               {/* <div className="form-group">
                 <label htmlFor="rol">Rol</label>
@@ -193,12 +204,12 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
               <div className="form-group">
                 <label htmlFor="status">Estado</label>
                 <Switch
-                  isOn={formData.status === "Activo"}
+                  isOn={formData.status === true}
                   handleToggle={() =>
                     setFormData((prevState) => ({
                       ...prevState,
                       status:
-                        prevState.status === "Activo" ? "Inactivo" : "Activo",
+                        prevState.status? false : true,
                     }))
                   }
                   id="status"
