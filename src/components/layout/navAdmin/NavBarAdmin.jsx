@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext'; 
+import { Link,useNavigate} from 'react-router-dom';
 import { IoSettingsOutline, IoHelpCircleOutline, IoLogOutOutline } from 'react-icons/io5';
 import { MdOutlineAccountCircle } from 'react-icons/md';
 import './navDropdown.css';
@@ -7,14 +8,16 @@ import './navDropdown.css';
 const NavDropdown = ({ sidebarCollapsed}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  
-  // Datos del usuario (puedes reemplazar con tu lógica de autenticación)
-  const user = {
-    name: "Daniel Rodriguez",
-    role: "Administrador",
-    avatar: null // URL de la imagen o null para usar iniciales
-  };
+  const { user: authUser, logout } = useAuth(); 
+  const navigate = useNavigate();
 
+  
+  const user = {
+    name: authUser?.name || "Invitado",
+    role: authUser?.role?.name || "Sin rol", 
+    avatar: null
+  };
+  
   // Cerrar dropdown cuando se hace clic fuera de él
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -32,10 +35,13 @@ const NavDropdown = ({ sidebarCollapsed}) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  // Manejar salida del sistema
-  const handleLogout = () => {
-    // Tu lógica de logout aquí
-    console.log('Logout clicked');
+  const handleLogout = async () => {
+    try {
+      await logout(); // Llama a la función logout del contexto
+      navigate('/login'); // Redirige al login después de cerrar sesión
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   };
 
   return (

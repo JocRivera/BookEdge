@@ -11,13 +11,19 @@ import FormUser from "./formClients";
 import Pagination from "../../common/Paginator/Pagination";
 import { CiSearch } from "react-icons/ci";
 import Switch from "../../common/Switch/Switch";
+import { useAuth } from "../../../context/AuthContext";
+import { Navigate } from "react-router-dom";
 
 function TableUser() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
+  //permisos
+  const { hasPermission } = useAuth();
+  if (!hasPermission("view_users")) {
+    return <Navigate to="/unauthorized" replace />;
+  }
   // Filtrar primero
   const filtrarDatos = users.filter((user) =>
     Object.values(user).some((value) =>
@@ -74,7 +80,7 @@ function TableUser() {
   };
 
   const handleSaveUser = async (userData) => {
-    console.log(userData)
+    console.log(userData);
     try {
       if (userData.id) {
         await updateUser(userData.id, userData);
@@ -85,7 +91,10 @@ function TableUser() {
       setUsers(updatedUsers);
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error al guardar usuario:", error);
+      console.error(
+        "Error al guardar usuario:",
+        error.response?.data?.message || error.message
+      );
     }
   };
 
@@ -120,9 +129,11 @@ function TableUser() {
           placeholder="Buscar usuario..."
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <CustomButton variant="primary" icon="add" onClick={handleAdd}>
-          Agregar Usuario
-        </CustomButton>
+        {hasPermission("create_users") && (
+          <CustomButton variant="primary" icon="add" onClick={handleAdd}>
+            Agregar Usuario
+          </CustomButton>
+        )}
       </div>
       <div className="table-wrapper">
         <table className="table">
@@ -137,7 +148,9 @@ function TableUser() {
               <th>Dirección</th>
               <th>Rol</th>
               <th>Estado</th>
-              <th>Acciones</th>
+              {(hasPermission("view_users") ||
+                hasPermission("edit_users") ||
+                hasPermission("delete_users")) && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody className="table-body">
@@ -176,13 +189,18 @@ function TableUser() {
                     id={user.id}
                   />
                 </td>
-
-                <td className="table-cell">
-                  <ActionButtons
-                    onEdit={() => handleEdit(user.id)}
-                    onDelete={() => handleDelete(user.id)}
-                  />
-                </td>
+                {(hasPermission("view_users") ||
+                  hasPermission("edit_users") ||
+                  hasPermission("delete_users")) && (
+                  <td className="table-cell">
+                    <ActionButtons
+                      onEdit={() => handleEdit(user.idUser)}
+                      onDelete={() => handleDelete(user.idUser)}
+                      canEdit={hasPermission("edit_users")}
+                      canDelete={hasPermission("delete_users")}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

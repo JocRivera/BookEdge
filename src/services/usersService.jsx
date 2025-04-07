@@ -1,15 +1,18 @@
 import axios from "axios";
+import api from "./api"; // donde sea que guardaste ese archivo
 
-const API_URL = "http://localhost:3000/user";
+
+const API_URL = "http://localhost:3000/user/";
 
 export const getUsers = async () => {
-  const response = await axios.get(API_URL);
+  const response = await api.get("/user");
   return response.data;
 };
 
 
+
 export const createUser = async (userData) => {
-  const response = await axios.post(API_URL, userData);
+  const response = await api.post("/user", userData); // ✅ ahora sí
   return response.data;
 };
 
