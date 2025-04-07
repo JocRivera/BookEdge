@@ -16,6 +16,7 @@ import CreateConfig from "./components/features/componenetConfig/createConfig";
 import CabinsPage from "./components/features/componentCabins/CardCabin";
 import TableReservations from "./components/features/componentReservations/tableReservations";
 import TableCompanions from "./components/features/componentCompanions/tableCompanions";
+import TablePayments from "./components/features/componentPayments/tablePayments";
 import Profile from "./components/features/componentAuth/Profile";
 import { AuthProvider } from "./context/AuthContext";
 import Error401 from "./components/common/401&404/401";
@@ -56,6 +57,10 @@ export default function App() {
                 path="companions"
                 element={<TableCompanions onDeleteCompanion={() => {}} />}
               />
+              <Route
+              path="payments"
+              element={<TablePayments/>}
+              ></Route>
               <Route path="plans" element={<Plan />} />
               <Route path="plansProgramed" element={<PlanProgramed />} />
             </Route>
@@ -66,4 +71,6 @@ export default function App() {
       </AuthProvider>
     </BrowserRouter>
   );
+  
 }
+

@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-// Corrige las importaciones de iconos
-import { FaCreditCard, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle } from 'react-icons/fa';
-// Para el icono de transferencia bancaria, puedes usar otro icono similar
-import { FaExchangeAlt } from 'react-icons/fa'; // Alternativa para transferencia bancaria
+import PropTypes from 'prop-types';
+import { useState } from 'react';
+import { FaCreditCard, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle, FaExchangeAlt } from 'react-icons/fa';
 import './componentPayments.css';
 
 const PaymentForm = ({ 
@@ -13,7 +11,7 @@ const PaymentForm = ({
   const [paymentData, setPaymentData] = useState({
     paymentMethod: initialData.paymentMethod || '',
     paymentDate: initialData.paymentDate || '',
-    amount: initialData.amount || totalAmount,
+    amount: initialData.amount || totalAmount || 0,
     status: initialData.status || 'Pendiente',
     confirmationDate: initialData.confirmationDate || ''
   });
@@ -29,10 +27,11 @@ const PaymentForm = ({
     
     // Limpiar error cuando se modifica el campo
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
+      setErrors(prev => {
+        const updatedErrors = { ...prev };
+        delete updatedErrors[name];
+        return updatedErrors;
+      });
     }
   };
 
@@ -44,7 +43,9 @@ const PaymentForm = ({
       const completePaymentData = {
         ...paymentData,
         amount: parseFloat(paymentData.amount),
-        confirmationDate: paymentData.status === 'Confirmado' ? new Date().toISOString().split('T')[0] : null
+        confirmationDate: paymentData.status === 'Confirmado' 
+          ? new Date().toISOString().split('T')[0] 
+          : paymentData.confirmationDate
       };
       onPaymentSubmit(completePaymentData);
     } else {
@@ -66,36 +67,54 @@ const PaymentForm = ({
       errors.paymentDate = 'La fecha no puede ser futura';
     }
 
-    if (!paymentData.amount || isNaN(paymentData.amount) ){
+    if (!paymentData.amount || isNaN(parseFloat(paymentData.amount))) {
       errors.amount = 'Monto es requerido';
     } else if (parseFloat(paymentData.amount) <= 0) {
       errors.amount = 'El monto debe ser mayor a 0';
+    } else if (parseFloat(paymentData.amount) > parseFloat(totalAmount || 0)) {
+      errors.amount = 'El monto no puede ser mayor al total a pagar';
     }
 
     return errors;
+  };
+
+  const renderPaymentMethodIcon = () => {
+    switch (paymentData.paymentMethod) {
+      case 'Tarjeta de Crédito':
+      case 'Tarjeta de Débito':
+        return <FaCreditCard className="input-icon" />;
+      case 'Transferencia Bancaria':
+        return <FaExchangeAlt className="input-icon" />;
+      case 'Efectivo':
+        return <FaMoneyBillWave className="input-icon" />;
+      default:
+        return <FaCreditCard className="input-icon" />;
+    }
   };
 
   return (
     <div className="payment-form-container">
       <h3 className="payment-title">Información de Pago</h3>
       
-      <form onSubmit={handleSubmit}>
+      <div onSubmit={handleSubmit} noValidate>
         <div className="payment-summary">
           <div className="payment-total">
             <span>Total a Pagar:</span>
-            <strong>${totalAmount.toFixed(2)}</strong>
+            <strong>${(totalAmount || 0).toFixed(2)}</strong>
           </div>
         </div>
 
         <div className={`form-group ${errors.paymentMethod ? 'has-error' : ''}`}>
-          <label>
-            <FaCreditCard className="input-icon" /> Método de Pago
+          <label htmlFor="paymentMethod">
+            {renderPaymentMethodIcon()} Método de Pago
           </label>
           <select
+            id="paymentMethod"
             name="paymentMethod"
             value={paymentData.paymentMethod}
             onChange={handleChange}
-            required
+            aria-invalid={!!errors.paymentMethod}
+            aria-describedby={errors.paymentMethod ? "paymentMethod-error" : undefined}
           >
             <option value="">Seleccione un método</option>
             <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
@@ -104,38 +123,48 @@ const PaymentForm = ({
             <option value="Efectivo">Efectivo</option>
             <option value="Otro">Otro</option>
           </select>
-          {errors.paymentMethod && <span className="error-message">{errors.paymentMethod}</span>}
+          {errors.paymentMethod && (
+            <span className="error-message" id="paymentMethod-error">{errors.paymentMethod}</span>
+          )}
         </div>
 
         <div className={`form-group ${errors.paymentDate ? 'has-error' : ''}`}>
-          <label>
+          <label htmlFor="paymentDate">
             <FaCalendarAlt className="input-icon" /> Fecha de Pago
           </label>
           <input
             type="date"
+            id="paymentDate"
             name="paymentDate"
             value={paymentData.paymentDate}
             onChange={handleChange}
             max={new Date().toISOString().split('T')[0]}
-            required
+            aria-invalid={!!errors.paymentDate}
+            aria-describedby={errors.paymentDate ? "paymentDate-error" : undefined}
           />
-          {errors.paymentDate && <span className="error-message">{errors.paymentDate}</span>}
+          {errors.paymentDate && (
+            <span className="error-message" id="paymentDate-error">{errors.paymentDate}</span>
+          )}
         </div>
 
         <div className={`form-group ${errors.amount ? 'has-error' : ''}`}>
-          <label>
+          <label htmlFor="amount">
             <FaMoneyBillWave className="input-icon" /> Monto Pagado
           </label>
           <input
             type="number"
+            id="amount"
             name="amount"
             value={paymentData.amount}
             onChange={handleChange}
             min="0.01"
             step="0.01"
-            required
+            aria-invalid={!!errors.amount}
+            aria-describedby={errors.amount ? "amount-error" : undefined}
           />
-          {errors.amount && <span className="error-message">{errors.amount}</span>}
+          {errors.amount && (
+            <span className="error-message" id="amount-error">{errors.amount}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -143,9 +172,10 @@ const PaymentForm = ({
             <FaCheckCircle className="input-icon" /> Estado del Pago
           </label>
           <div className="payment-status-options">
-            <label>
+            <label htmlFor="status-pending">
               <input
                 type="radio"
+                id="status-pending"
                 name="status"
                 value="Pendiente"
                 checked={paymentData.status === 'Pendiente'}
@@ -153,9 +183,10 @@ const PaymentForm = ({
               />
               Pendiente
             </label>
-            <label>
+            <label htmlFor="status-confirmed">
               <input
                 type="radio"
+                id="status-confirmed"
                 name="status"
                 value="Confirmado"
                 checked={paymentData.status === 'Confirmado'}
@@ -171,9 +202,16 @@ const PaymentForm = ({
             Confirmar Pago
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
+};
+
+// Validación de propiedades
+PaymentForm.propTypes = {
+  totalAmount: PropTypes.number.isRequired,
+  onPaymentSubmit: PropTypes.func.isRequired,
+  initialData: PropTypes.object
 };
 
 export default PaymentForm;

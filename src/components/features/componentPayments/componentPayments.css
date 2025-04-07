@@ -134,4 +134,116 @@
       width: 100%;
     }
   }
+  .payments-table-container {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
   
+  .payments-title-container {
+    margin-bottom: 20px;
+  }
+  
+  .payments-table-title {
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .payments-container-search {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .payments-search-wrapper {
+    position: relative;
+    width: 300px;
+  }
+  
+  .payments-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+  }
+  
+  .payments-search {
+    width: 100%;
+    padding: 10px 10px 10px 35px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .payments-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .payments-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .payments-table-header {
+    background-color: #f5f5f5;
+  }
+  
+  .payments-table-header th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  .payments-table-body tr {
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .payments-table-body tr:last-child {
+    border-bottom: none;
+  }
+  
+  .payments-table-cell {
+    padding: 12px 15px;
+    vertical-align: middle;
+  }
+  
+  .payments-table-row-even {
+    background-color: #f9f9f9;
+  }
+  
+  .payments-table-row-odd {
+    background-color: #fff;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+  }
+  
+  .payment-status {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .payment-status.pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .payment-status.confirmado {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .payment-status.anulado {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
