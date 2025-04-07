@@ -1,38 +1,96 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import AuthNavbar from "../../layout/auth/AuthNavbar";
 import "./register.css";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { register } from "../../../services/AuthService";
+
+
+
 
 export default function RegisterForm() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "", 
+    cellphone: "",
+    identificationType: "",
+    identification: "",
+    birthdate: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (formData.password !== formData.confirmPassword) {
+      return toast.error("Las contraseñas no coinciden");
+    }
+  
+    const { confirmPassword, ...dataToSend } = formData;
+  
+    try {
+      await register(dataToSend);
+  
+      toast.success("¡Usuario registrado exitosamente!", {
+        position: "top-right",
+        autoClose: 2000,
+        onClose: () => navigate("/login"), 
+      });
+    } catch (error) {
+      console.log("Error a conectar", error);
+      toast.error("Ocurrió un error al registrarse");
+    }
+  };
+  
   return (
     <>
       <AuthNavbar />
       <Outlet />
       <main className="register-container">
-        <form className="register-form">
+        <form className="register-form" onSubmit={handleSubmit}>
           <h2 className="title">Crear cuenta en BookEdge</h2>
           <p className="description">
-            Completa tus datos para comenzar nuestra hosteria.          </p>
+            Completa tus datos para comenzar nuestra hostería.
+          </p>
 
           <div className="form-grid">
             <div className="form-column">
               <div className="form-group">
-                <label htmlFor="fullName">Nombre completo</label>
+                <label htmlFor="name">Nombre completo</label>
                 <input
                   type="text"
-                  id="fullName"
-                  name="fullName"
+                  id="name"
+                  name="name"
                   required
                   placeholder="Como aparece en tu identificación"
+                  value={formData.name}
+                  onChange={handleChange}
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="tipoDocumento">Tipo de documento</label>
-                <select id="tipoDocumento" name="tipoDocumento" required>
+                <label htmlFor="identificationType">Tipo de documento</label>
+                <select
+                  id="identificationType"
+                  name="identificationType"
+                  required
+                  value={formData.identificationType}
+                  onChange={handleChange}
+                >
                   <option value="">Selecciona un tipo</option>
-                  <option value="dni">DNI</option>
-                  <option value="pasaporte">Pasaporte</option>
-                  <option value="ce">Carné de Extranjería</option>
+                  <option value="CC">Cédula</option>
+                  <option value="CE">CE</option>
                 </select>
               </div>
 
@@ -40,20 +98,24 @@ export default function RegisterForm() {
                 <label htmlFor="idNumber">Número de documento</label>
                 <input
                   type="text"
-                  id="idNumber"
-                  name="idNumber"
+                  id="identification"
+                  name="identification"
                   required
                   placeholder="Ingresa tu número de documento"
+                  value={formData.identification}
+                  onChange={handleChange}
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="phone">Número de contacto</label>
+                <label htmlFor="cellphone">Número de contacto</label>
                 <input
                   type="tel"
-                  id="phone"
-                  name="phone"
+                  id="cellphone"
+                  name="cellphone"
                   required
-                  placeholder="Ingresa porfavor un número valido"
+                  placeholder="Ingresa por favor un número válido"
+                  value={formData.cellphone}
+                  onChange={handleChange}
                 />
               </div>
             </div>
@@ -61,7 +123,14 @@ export default function RegisterForm() {
             <div className="form-column">
               <div className="form-group">
                 <label htmlFor="birthdate">Fecha de nacimiento</label>
-                <input type="date" id="birthdate" name="birthdate" required />
+                <input
+                  type="date"
+                  id="birthdate"
+                  name="birthdate"
+                  required
+                  value={formData.birthdate}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="form-group">
@@ -72,6 +141,8 @@ export default function RegisterForm() {
                   name="email"
                   required
                   placeholder="ejemplo@correo.com"
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -83,6 +154,8 @@ export default function RegisterForm() {
                   name="password"
                   required
                   placeholder="Al menos 8 caracteres"
+                  value={formData.password}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -94,6 +167,8 @@ export default function RegisterForm() {
                   name="confirmPassword"
                   required
                   placeholder="Repite tu contraseña"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
                 />
               </div>
             </div>
