@@ -42,9 +42,9 @@ export default function Videoslider() {
             <div className="overlay" />
 
             <div className="content-container">
-                <h1 className="slider-title">Título Principal</h1>
+                <h1 className="slider-title">SOGAL SOL</h1>
                 <p className="slider-description">
-                    Esta frase permanece mientras los videos van cambiando
+                    Pendiente de una frase 
                 </p>
             </div>
         </div>

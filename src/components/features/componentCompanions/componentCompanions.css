@@ -189,3 +189,144 @@ input[readonly] {
     grid-template-columns: 1fr;
   }
 }
+/* Añade esto a tu componentCompanions.css */
+
+/* Contenedor de la tabla */
+.companions-table-container {
+  margin-top: 15px;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: white;
+}
+
+/* Cabecera de la tabla */
+.companion-header {
+  padding-bottom: 15px;
+}
+
+/* Mejoras específicas para la tabla */
+.companions-table {
+  min-width: 100%;
+}
+
+.companions-table th {
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 10;
+}
+
+.companions-table td {
+  vertical-align: middle;
+  transition: background-color 0.2s ease;
+}
+
+/* Efecto hover más suave */
+.companions-table tr:hover td {
+  background-color: #f0f4f8;
+}
+
+/* Botón de eliminar */
+.delete-companion-btn {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+}
+
+/* Mensaje de no resultados */
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: #718096;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .companions-table th, 
+  .companions-table td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .companions-table th:nth-child(3),
+  .companions-table td:nth-child(3),
+  .companions-table th:nth-child(4),
+  .companions-table td:nth-child(4) {
+    display: none;
+  }
+}
+/* Estilos específicos para la tabla de acompañantes */
+.companions-table-wrapper {
+  margin-top: 20px;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px var(--reservations-shadow-medium),
+              0 2px 4px -1px var(--reservations-shadow-light);
+  background-color: var(--reservations-white);
+  overflow-x: auto;
+}
+
+.delete-companion-btn {
+  padding: 0.25rem 0.5rem;
+  background-color: var(--reservations-status-inactive);
+  color: #991b1b;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.delete-companion-btn:hover {
+  background-color: #fee2e2;
+}
+
+/* Ajustes para el modal de detalles */
+.modal-container .companions-table-wrapper {
+  box-shadow: none;
+  border: 1px solid var(--reservations-border);
+}
+
+.modal-container .reservations-table {
+  min-width: unset;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-container .reservations-table th:nth-child(3),
+  .modal-container .reservations-table td:nth-child(3),
+  .modal-container .reservations-table th:nth-child(4),
+  .modal-container .reservations-table td:nth-child(4) {
+    display: none;
+  }
+}
+/* Agregar al archivo CSS */
+.compact-companions {
+  position: relative;
+}
+
+.toggle-companions-btn {
+  background: none;
+  border: none;
+  color: #0066cc;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+}
+
+.companions-popup {
+  position: absolute;
+  z-index: 100;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.companions-popup table {
+  width: 100%;
+  font-size: 0.9em;
+}

@@ -150,7 +150,7 @@ function CardCabin() {
                   <h2>{cabin.name}</h2>
                   <span
                     className={`cabin-status ${
-                      cabin.status === "En Mantenimiento"
+                      cabin.status === "Mantenimiento"
                         ? "status-en-mantenimiento"
                         : cabin.status === "En Servicio"
                         ? "status-en-servicio"
