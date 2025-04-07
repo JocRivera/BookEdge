@@ -1,3 +1,4 @@
+/* Mantener las variables existentes */
 :root {
     /* Colores principales */
     --color-background: #f9fafb;
@@ -28,6 +29,7 @@
     --color-modal-border: #eaeaea;
 }
 
+/* Estilos de la tabla general */
 .table-container {
     padding: 1.5rem;
     background-color: var(--color-background);
@@ -140,7 +142,7 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-
+/* Modal y formulario - CORREGIDO */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -170,7 +172,6 @@
         opacity: 0;
         transform: translateY(-20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -183,6 +184,10 @@
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid var(--color-modal-border);
+    position: sticky;
+    top: 0;
+    background-color: var(--color-white);
+    z-index: 50;
 }
 
 .modal-header h2 {
@@ -208,9 +213,10 @@
     padding: 20px;
 }
 
+/* CORRECCIÓN: Arreglado el grid para que ocupe todo el ancho en el caso del formulario de configuración */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 16px;
 }
 
@@ -222,7 +228,7 @@
     display: block;
     font-size: 14px;
     font-weight: 500;
-    color: var(--color-text-light);
+    color: var(--color-text-normal);
     margin-bottom: 6px;
 }
 
@@ -230,7 +236,7 @@
 .form-group select {
     width: 100%;
     padding: 10px;
-    border: 1px solid var(--color-button-cancel-border);
+    border: 1px solid var(--color-border);
     border-radius: 4px;
     font-size: 14px;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -239,7 +245,7 @@
 .form-group input:focus,
 .form-group select:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
     outline: none;
 }
 
@@ -249,6 +255,10 @@
     gap: 12px;
     padding: 16px 20px;
     border-top: 1px solid var(--color-modal-border);
+    position: sticky;
+    bottom: 0;
+    background-color: var(--color-white);
+    z-index: 50;
 }
 
 .submit-btn {
@@ -281,55 +291,24 @@
     background-color: var(--color-button-cancel-hover);
 }
 
-@media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .modal-footer {
-        flex-direction: column-reverse;
-    }
-
-    .submit-btn,
-    .cancel-btn {
-        width: 100%;
-    }
-}
-
-.permissions-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 10px;
-    margin-top: 8px;
-
-}
-
-.permissions-list label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--color-text-dark);
-}
-
+/* CORRECCIÓN: Estilos de permisos mejorados */
 .permissions-group {
-    border: 1px solid var(--color-button-cancel-border);
+    grid-column: 1 / -1; /* Ocupa todo el ancho disponible */
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     padding: 16px;
     margin-bottom: 16px;
+    background-color: var(--color-background);
 }
 
-.permissions-group legend {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-text-dark);
-    padding: 0 8px;
-}
 .permissions-table-container {
     overflow-x: auto;
     margin-top: 10px;
     max-height: 350px;
     overflow-y: auto;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-white);
 }
 
 .permissions-table {
@@ -338,61 +317,57 @@
     font-size: 0.9rem;
 }
 
-.permissions-table th, .permissions-table td {
-    border: 1px solid #e0e0e0;
-    padding: 8px;
+.permissions-table th, 
+.permissions-table td {
+    border: 1px solid var(--color-border);
+    padding: 10px 8px;
     text-align: center;
 }
 
 .permissions-table thead th {
-    background-color: #f5f5f5;
+    background-color: var(--color-primary-light);
     position: sticky;
     top: 0;
     z-index: 10;
+    color: var(--color-text-primary);
+    font-weight: 600;
 }
 
 .permission-header {
-    min-width: 120px;
-    vertical-align: top;
+    min-width: 180px;
+    text-align: left !important;
+    background-color: var(--color-primary-light) !important;
 }
 
 .privilege-header {
-    background-color: #f0f0f0 !important;
-    font-weight: bold;
-    position: sticky;
-    left: 0;
-    z-index: 20;
-    text-align: left !important;
     min-width: 100px;
 }
 
-.permission-title {
-    writing-mode: vertical-lr;
-    transform: rotate(180deg);
-    height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.privilege-title {
+    font-weight: bold;
+    text-align: center;
+}
+
+.permission-name {
+    text-align: left !important;
+    font-weight: 500;
 }
 
 .permission-checkbox {
     display: flex;
-    flex-direction: row-reverse;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+    text-align: left;
 }
 
 .permission-checkbox input {
     margin: 0;
+    width: 16px;
+    height: 16px;
 }
 
-.privilege-name {
-    background-color: #f0f0f0;
-    font-weight: 500;
-    position: sticky;
-    left: 0;
-    z-index: 5;
-    text-align: left !important;
+.permission-checkbox span {
+    color: var(--color-text-normal);
 }
 
 .privilege-cell {
@@ -408,4 +383,44 @@
 .privilege-cell input[type="checkbox"]:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* CORRECCIÓN: Switch personalizado */
+.switch-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Media queries mejorados */
+@media (max-width: 768px) {
+    .modal-container {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .permissions-table-container {
+        max-height: 300px;
+    }
+    
+    .modal-footer {
+        flex-direction: column-reverse;
+    }
+    
+    .submit-btn,
+    .cancel-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .permissions-table th, 
+    .permissions-table td {
+        padding: 6px 4px;
+        font-size: 0.8rem;
+    }
+    
+    .modal-header h2 {
+        font-size: 18px;
+    }
 }
