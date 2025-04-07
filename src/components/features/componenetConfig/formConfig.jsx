@@ -66,10 +66,41 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            onSave(formData);
-            onClose()
-        }
+    if (validateForm()) {
+        // Crear una copia del formData base sin los privilegios individuales
+        const { name, status, permissions } = formData;
+        
+        // Crear objeto para privilegios anidados
+        const permissionPrivileges = {};
+        
+        // Procesar cada permiso seleccionado
+        permissions.forEach(permId => {
+            // Inicializar objeto de privilegios para este permiso
+            permissionPrivileges[permId] = {};
+            
+            // Asignar estados para cada privilegio de este permiso
+            privilege.forEach(priv => {
+                const privilegeKey = `privilege-${permId}-${priv.idPrivilege}`;
+                const privilegeName = priv.name.toLowerCase();
+                
+                // Asignar true/false según el estado del checkbox
+                permissionPrivileges[permId][privilegeName] = 
+                    formData[privilegeKey] === true;
+            });
+        });
+        
+        // Crear objeto final con estructura anidada
+        const dataToSave = {
+            name,
+            status,
+            permissions,
+            permissionPrivileges
+        };
+        
+        // Enviar los datos estructurados
+        onSave(dataToSave);
+        onClose();
+    }
     }
     const validateForm = () => {
         if (!formData.name) {
