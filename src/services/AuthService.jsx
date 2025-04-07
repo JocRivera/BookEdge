@@ -16,7 +16,7 @@ export const register = async (userData) => {
     const response = await api.post("/auth/register", userData);
     return response.data;
   } catch (error) {
-    console.error("Error al registrar:", error);
+    console.error("Errores del backend:", error.response?.data?.errors); // <-- Agrega esto
     throw error;
   }
 };

@@ -19,7 +19,7 @@
     };
     
 
-    // Limpiar errores después de 5 segundos
+    // Limpiar errores después de 5 segundos sassdassaas
     useEffect(() => {
       if (errors.length > 0) {
         const timer = setTimeout(() => setErrors([]), 5000);
