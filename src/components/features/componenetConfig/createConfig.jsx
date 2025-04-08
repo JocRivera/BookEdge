@@ -84,7 +84,7 @@ export default function CreateConfig() {
             const notify = () => toast.success('Rol creado correctamente');
             const notifyError = () => toast.error('Error al crear el rol');
             rolesService.createRole(setting).then((res) => {
-                setSettings([...settings, { idRol: settings.length + 1, ...setting }])
+                setSettings([...settings, res])
                 notify()
             }).catch((error) => {
                 console.log(error)
@@ -93,6 +93,29 @@ export default function CreateConfig() {
         }
         console.log(setting);
     }
+    const handleToggle = async (idRol) => {
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas cambiar el estado de este rol?");
+        if (!confirmDelete) {
+            return;
+        }
+        try {
+            // Encontrar el rol actual
+            const currentRole = settings.find(config => config.idRol === idRol);
+            // Enviar actualización al backend
+            await rolesService.changeStatus(idRol, !currentRole.status);
+
+            // Actualizar estado local después de confirmación del backend
+            setSettings(
+                settings.map((config) =>
+                    config.idRol === idRol ? { ...config, status: !config.status } : config
+                )
+            );
+            toast.success('Estado actualizado correctamente');
+        } catch (error) {
+            console.error("Error al actualizar el estado:", error);
+            toast.error('Error al actualizar el estado');
+        }
+    };
     return (
         <div className="table-container">
             <div className="title-container">
@@ -132,19 +155,7 @@ export default function CreateConfig() {
                                     <Switch
                                         isOn={config.status === true}
                                         id={config.idRol}
-                                        handleToggle={(idRol) => {
-                                            setSettings(
-                                                settings.map((config) =>
-                                                    config.idRol === idRol
-                                                        ? {
-                                                            ...config,
-                                                            status: !config.status,
-                                                        }
-                                                        : config
-                                                )
-                                            );
-                                        }
-                                        }
+                                        handleToggle={() => handleToggle(config.idRol)}
                                     />
                                 </td >
                                 <td className="table-cell">
