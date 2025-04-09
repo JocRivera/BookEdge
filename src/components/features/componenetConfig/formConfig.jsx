@@ -26,19 +26,35 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     }, [])
     useEffect(() => {
         if (setting) {
-            setFormData({
-                ...setting,
-                permissions: setting.permissions.map((perm) => perm.idPermission) // Extraer IDs
-            });
-        }
-        else {
+            const initialFormData = {
+                name: setting.name || '',
+                status: setting.status !== undefined ? setting.status : false,
+                permissions: [],
+            };
+            if (setting.permissions && Array.isArray(setting.permissions)) {
+                initialFormData.permissions = setting.permissions.map(perm => perm.idPermission);
+                // Procesar cada permiso y sus privilegios
+                setting.permissions.forEach(perm => {
+                    const permId = perm.idPermission;
+                    if (perm.privileges && Array.isArray(perm.privileges)) {
+                        privilege.forEach((priv, index) => {
+                            if (index < perm.privileges.length) {
+                                const hasPrivilege = Object.keys(perm.privileges[index]).length > 0;
+                                initialFormData[`privilege-${permId}-${priv.idPrivilege}`] = hasPrivilege;
+                            }
+                        });
+                    }
+                });
+            }
+            setFormData(initialFormData);
+        } else {
             setFormData({
                 name: '',
                 status: false,
                 permissions: []
             });
         }
-    }, [setting])
+    }, [setting, privilege])
 
     const handleChange = (e) => {
         setFormData(prevState => ({
@@ -66,41 +82,41 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     }
     const handleSubmit = (e) => {
         e.preventDefault();
-    if (validateForm()) {
-        // Crear una copia del formData base sin los privilegios individuales
-        const { name, status, permissions } = formData;
-        
-        // Crear objeto para privilegios anidados
-        const permissionPrivileges = {};
-        
-        // Procesar cada permiso seleccionado
-        permissions.forEach(permId => {
-            // Inicializar objeto de privilegios para este permiso
-            permissionPrivileges[permId] = {};
-            
-            // Asignar estados para cada privilegio de este permiso
-            privilege.forEach(priv => {
-                const privilegeKey = `privilege-${permId}-${priv.idPrivilege}`;
-                const privilegeName = priv.name.toLowerCase();
-                
-                // Asignar true/false según el estado del checkbox
-                permissionPrivileges[permId][privilegeName] = 
-                    formData[privilegeKey] === true;
+        if (validateForm()) {
+            // Crear una copia del formData base sin los privilegios individuales
+            const { name, status, permissions } = formData;
+
+            // Crear objeto para privilegios anidados
+            const permissionPrivileges = {};
+
+            // Procesar cada permiso seleccionado
+            permissions.forEach(permId => {
+                // Inicializar objeto de privilegios para este permiso
+                permissionPrivileges[permId] = {};
+
+                // Asignar estados para cada privilegio de este permiso
+                privilege.forEach(priv => {
+                    const privilegeKey = `privilege-${permId}-${priv.idPrivilege}`;
+                    const privilegeName = priv.name.toLowerCase();
+
+                    // Asignar true/false según el estado del checkbox
+                    permissionPrivileges[permId][privilegeName] =
+                        formData[privilegeKey] === true;
+                });
             });
-        });
-        
-        // Crear objeto final con estructura anidada
-        const dataToSave = {
-            name,
-            status,
-            permissions,
-            permissionPrivileges
-        };
-        
-        // Enviar los datos estructurados
-        onSave(dataToSave);
-        onClose();
-    }
+
+            // Crear objeto final con estructura anidada
+            const dataToSave = {
+                name,
+                status,
+                permissions,
+                permissionPrivileges
+            };
+
+            // Enviar los datos estructurados
+            onSave(dataToSave);
+            onClose();
+        }
     }
     const validateForm = () => {
         if (!formData.name) {
@@ -179,6 +195,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                                         <td key={`${permiso.idPermission}-${priv.idPrivilege}`} className="privilege-cell">
                                                             <input
                                                                 type="checkbox"
+                                                                value={priv.idPrivilege}
                                                                 name={`privilege-${permiso.idPermission}-${priv.idPrivilege}`}
                                                                 disabled={!formData.permissions.includes(permiso.idPermission)}
                                                                 checked={
