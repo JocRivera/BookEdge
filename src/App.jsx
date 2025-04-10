@@ -24,6 +24,7 @@ import Error404 from "./components/common/401&404/404";
 import ProtectedRoutes from "./ProtectedRutes";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
+import CabinComfortsCards from "./components/features/componentAssignment/AssignAmenitiesTable "
 export default function App() {
   return (
     <BrowserRouter>
@@ -52,6 +53,8 @@ export default function App() {
               <Route path="services" element={<CreateServices />} />
               <Route path="config" element={<CreateConfig />} />
               <Route path="cabins" element={<CabinsPage />} />
+              <Route path="AssignAmenities" element={<CabinComfortsCards />} />
+
               <Route path="reservations" element={<TableReservations />} />
               <Route
                 path="companions"

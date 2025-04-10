@@ -59,30 +59,3 @@ export const deleteCabin = async (id) => {
   return data
 };
 
-
-export const getComfortAssignments = async () => {
-  const { data } = await axios.get(`${API_URL}/cabinComforts/assignment`);
-  return data;
-};
-
-export const addComfortAssignment = async (data) => {
-  const response = await axios.post(`${API_URL}/cabinComforts`, data);
-  return response.data;
-};
-
-export const updateComfortAssignment = async (id, data) => {
-  try {
-    // Corregido: Ruta correcta con la barra inclinada antes del ID
-    const response = await axios.put(`${API_URL}/cabinComforts/${id}`, data);
-    return response.data;
-  } catch (error) {
-    console.error("Error updating comfort assignment:", error);
-    throw error;
-  }
-};
-
-export const deleteComfortAssignment = async (id) => {
-  // Corregido: Ruta correcta con la barra inclinada antes del ID y letra minúscula
-  const response = await axios.delete(`${API_URL}/cabinComforts/${id}`);
-  return response.data;
-};

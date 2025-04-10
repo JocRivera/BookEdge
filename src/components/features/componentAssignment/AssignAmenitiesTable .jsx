@@ -1,155 +1,133 @@
-import React, { useState, useEffect } from "react";
-import { CiSearch } from "react-icons/ci";
-import Pagination from "../../common/Paginator/Pagination";
-import "./AssignAmenities.css";
-import { ActionButtons,CustomButton } from "../../common/Button/customButton";
-import { getComfortAssignments } from "../../../services/CabinService";
+import { useEffect, useState } from "react";
+import { getAllComfortsForCabins } from "../../../services/AssingComforts";
+import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import AssignComfortsForm from "./FormAssign";
+import "./AssignComforts.css";
 
-function AssignAmenitiesTable() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [assignments, setAssignments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 3;
+const CabinComfortsCards = () => {
+  const [groupedCabins, setGroupedCabins] = useState([]);
+  const [isOpenModal, setModalOpen] = useState(false);
+  const [selectedCabin, setSelectedCabin] = useState(null); // <- NUEVO: cabaña seleccionada
 
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      try {
-        const data = await getComfortAssignments();
-        
-        const groupedData = data.reduce((acc, assignment) => {
-  const cabinId = assignment.idCabin;
-  const comfortId = assignment.idComfort;
-  
-  if (!acc[cabinId]) {
-    acc[cabinId] = {
-      id: cabinId,
-      cabinName: assignment.Cabin?.name || `Cabaña ${cabinId}`,
-      dateEntry: assignment.dateEntry,
-      description: assignment.description || "Sin descripción",
-      comforts: []
-    };
-  }
-  
-  // Agregar comodidad incluso si no tiene los datos completos
-  const comfortName = assignment.Comfort?.name || `Comodidad ${comfortId}`;
-  acc[cabinId].comforts.push(comfortName);
-  
-  return acc;
-}, {});
-        
-        setAssignments(Object.values(groupedData));
-      } catch (error) {
-        console.error("Error cargando asignaciones:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchAssignments();
-  }, []);
+  // Obtener datos
+  const fetchData = async () => {
+    try {
+      const data = await getAllComfortsForCabins();
 
+      const grouped = data.reduce((acc, item) => {
+        const cabinId = item.Cabin.idCabin;
 
-  // Filtrar y paginar
-  const filteredAssigns = assignments.filter(assign =>
-    `${assign.cabinName} ${assign.comforts.join(" ")}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+        if (!acc[cabinId]) {
+          acc[cabinId] = {
+            idCabin: cabinId,
+            name: item.Cabin.name,
+            description: item.description,
+            dateEntry: item.dateEntry,
+            comforts: [],
+          };
+        }
 
-  const currentItems = filteredAssigns.slice(
-    currentPage * itemsPerPage,
-    (currentPage + 1) * itemsPerPage
-  );
-  const pageCount = Math.ceil(filteredAssigns.length / itemsPerPage);
+        acc[cabinId].comforts.push({
+          idComfort: item.Comfort.idComfort,
+          name: item.Comfort.name,
+        });
 
-  
-  const handleDelete = (cabinId) => {
-    console.log("Eliminar asignaciones de cabaña:", cabinId);
+        return acc;
+      }, {});
+
+      setGroupedCabins(Object.values(grouped));
+    } catch (error) {
+      console.error("Error al obtener datos:", error);
+    }
   };
 
-  const handleEdit = (assignment) => {
-    console.log("Editar:", assignment);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleEditAssign = (cabinId) => {
+    const cabin = groupedCabins.find((c) => c.idCabin === cabinId);
+    setSelectedCabin(cabin);
+    setModalOpen(true);
+  };
+
+  const handleViewAssign = (cabinId) => {
+    console.log("Ver asignaciones para cabaña:", cabinId);
+  };
+
+  const handleDeleteAssign = async (cabinId) => {
+    console.log("Eliminar asignaciones para cabaña:", cabinId);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedCabin(null); // Limpiar estado al cerrar
+    fetchData(); // Refrescar datos después de crear/editar
   };
 
   return (
-    <section className="container-assign">
-      <header className="header">
-        <h1>Asignación de Comodidades</h1>
-        <div className="search-bar">
-          <CiSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Buscar por cabaña o comodidad..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+    <>
+      <div className="cards-container-assing">
+        <div className="title-container-assing">
+          <h1 className="section-title">Cabañas y sus Comodidades</h1>
+        </div>
+
+        <div className="asign-search">
+          <CustomButton
+            variant="primary"
+            icon="add"
+            onClick={() => {
+              setSelectedCabin(null); // <- Aseguramos que sea creación
+              setModalOpen(true);
+            }}
+            text="Asignar Comodidades"
           />
         </div>
-         <CustomButton
-          variant="primary"
-          icon="add"
-          
-        >
-          Agregar Cabaña
-        </CustomButton>
-      </header>
 
-      <main className="assign-list">
-        {loading ? (
-          <div className="loading">Cargando...</div>
-        ) : currentItems.length > 0 ? (
-          currentItems.map((assign) => (
-            <article key={assign.id} className="assign-card">
-              <div className="card-header">
-                <h2>{assign.cabinName}</h2>
-                <span className="date">{assign.dateEntry}</span>
+        <main className="card-list-assing">
+          {groupedCabins.map((cabin) => (
+            <div key={cabin.idCabin} className="cabin-card-assing">
+              <h2 className="cabin-title-assing">{cabin.name}</h2>
+
+              <div className="cabin-content">
+                <p className="cabin-description-assing">{cabin.description}</p>
+
+                <h3 className="comforts-title">Comodidades:</h3>
+                {cabin.comforts.length > 0 ? (
+                  <ul className="comforts-list">
+                    {cabin.comforts.map((c) => (
+                      <li key={c.idComfort}>{c.name}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="cabin-description-assing">Sin comodidades asignadas</p>
+                )}
+
+                <p className="modification-date">
+                  Última modificación:{" "}
+                  {new Date(cabin.dateEntry).toLocaleDateString()}
+                </p>
               </div>
 
-              <p className="description">
-                {assign.description || "Asignación de comodidades"}
-              </p>
-
-              <div className="comforts-section">
-                <h3>Comodidades asignadas ({assign.comforts.length}):</h3>
-                <div className="comforts-grid">
-                  {assign.comforts.slice(0, 4).map((comfort, index) => (
-                    <span key={index} className="comfort-badge">
-                      {comfort}
-                    </span>
-                  ))}
-                  {assign.comforts.length > 4 && (
-                    <span className="more-badge">
-                      +{assign.comforts.length - 4}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <footer className="card-footer">
+              <div className="assign-actions">
                 <ActionButtons
-                  onEdit={() => handleEdit(assign)}
-                  onDelete={() => handleDelete(assign.id)}
+                  onEdit={() => handleEditAssign(cabin.idCabin)}
+                  onDelete={() => handleDeleteAssign(cabin.idCabin)}
+                  onView={() => handleViewAssign(cabin.idCabin)}
                 />
-              </footer>
-            </article>
-          ))
-        ) : (
-          <div className="no-results">
-            {searchTerm
-              ? `No hay resultados para "${searchTerm}"`
-              : "No hay asignaciones registradas"}
-          </div>
-        )}
-      </main>
+              </div>
+            </div>
+          ))}
+        </main>
+      </div>
 
-      {pageCount > 1 && (
-        <Pagination
-          pageCount={pageCount}
-          onPageChange={({ selected }) => setCurrentPage(selected)}
-        />
-      )}
-    </section>
+      <AssignComfortsForm
+        isOpen={isOpenModal}
+        onClose={handleCloseModal}
+        assignToEdit={selectedCabin} 
+      />
+    </>
   );
-}
+};
 
-export default AssignAmenitiesTable;
+export default CabinComfortsCards;
