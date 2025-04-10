@@ -26,35 +26,41 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     }, [])
     useEffect(() => {
         if (setting) {
+            // Inicializar el formulario con los valores básicos
             const initialFormData = {
                 name: setting.name || '',
                 status: setting.status !== undefined ? setting.status : false,
-                permissions: [],
+                permissions: []
             };
-            if (setting.permissions && Array.isArray(setting.permissions)) {
-                initialFormData.permissions = setting.permissions.map(perm => perm.idPermission);
-                // Procesar cada permiso y sus privilegios
-                setting.permissions.forEach(perm => {
-                    const permId = perm.idPermission;
-                    if (perm.privileges && Array.isArray(perm.privileges)) {
-                        privilege.forEach((priv, index) => {
-                            if (index < perm.privileges.length) {
-                                const hasPrivilege = Object.keys(perm.privileges[index]).length > 0;
-                                initialFormData[`privilege-${permId}-${priv.idPrivilege}`] = hasPrivilege;
-                            }
-                        });
+
+            // Si el setting tiene permissionRoles, procesarlos
+            if (setting.permissionRoles && Array.isArray(setting.permissionRoles)) {
+                // Extraer IDs únicos de permisos
+                const uniquePermissionIds = [...new Set(
+                    setting.permissionRoles.map(pr => pr.idPermission)
+                )];
+
+                // Establecer los permisos seleccionados
+                initialFormData.permissions = uniquePermissionIds;
+
+                // Procesar cada permissionRole para configurar los privilegios
+                setting.permissionRoles.forEach(pr => {
+                    if (pr.idPermission && pr.idPrivilege) {
+                        // Marcar este privilegio como seleccionado
+                        initialFormData[`privilege-${pr.idPermission}-${pr.idPrivilege}`] = true;
                     }
                 });
             }
             setFormData(initialFormData);
         } else {
+            // Caso de nuevo rol
             setFormData({
                 name: '',
                 status: false,
                 permissions: []
             });
         }
-    }, [setting, privilege])
+    }, [setting]);
 
     const handleChange = (e) => {
         setFormData(prevState => ({
@@ -83,41 +89,39 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            // Crear una copia del formData base sin los privilegios individuales
+            // Crear una copia del formData base
             const { name, status, permissions } = formData;
 
-            // Crear objeto para privilegios anidados
-            const permissionPrivileges = {};
+            // Preparar array permissionRoles para enviar al backend
+            const permissionRoles = [];
 
-            // Procesar cada permiso seleccionado
+            // Construir el array de permissionRoles basado en permisos y privilegios seleccionados
             permissions.forEach(permId => {
-                // Inicializar objeto de privilegios para este permiso
-                permissionPrivileges[permId] = {};
-
-                // Asignar estados para cada privilegio de este permiso
                 privilege.forEach(priv => {
                     const privilegeKey = `privilege-${permId}-${priv.idPrivilege}`;
-                    const privilegeName = priv.name.toLowerCase();
 
-                    // Asignar true/false según el estado del checkbox
-                    permissionPrivileges[permId][privilegeName] =
-                        formData[privilegeKey] === true;
+                    // Si este privilegio está seleccionado para este permiso
+                    if (formData[privilegeKey]) {
+                        permissionRoles.push({
+                            idPermission: permId,
+                            idPrivilege: priv.idPrivilege
+                        });
+                    }
                 });
             });
 
-            // Crear objeto final con estructura anidada
+            // Crear objeto final para enviar
             const dataToSave = {
                 name,
                 status,
-                permissions,
-                permissionPrivileges
+                permissionRoles  // Formato que espera el backend
             };
 
-            // Enviar los datos estructurados
+            console.log("Datos enviados al guardar:", dataToSave);
             onSave(dataToSave);
             onClose();
         }
-    }
+    };
     const validateForm = () => {
         if (!formData.name) {
             setError("El nombre es requerido");
