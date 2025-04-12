@@ -14,14 +14,12 @@ import {
 } from "react-icons/lu";
 import "./sidebar.css";
 import { useAuth } from "../../../context/AuthContext";
-import {MODULES} from "../../../utils/modules"
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState("");
   const menuRef = useRef(null);
   const location = useLocation();
   const { hasPermission } = useAuth();
-  const canAccessUsers = hasPermission(MODULES.USERS, "read");
    
 
   const toggleSidebar = () => {
