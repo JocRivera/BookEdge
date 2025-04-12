@@ -1,3 +1,5 @@
-body{
+@import "tailwindcss";
+
+body {
     font-family: system-ui !important;
 }
