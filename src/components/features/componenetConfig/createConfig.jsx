@@ -122,7 +122,7 @@ export default function CreateConfig() {
                 <h2 className="table-title">Tabla de Roles</h2>
             </div>
             <div className="container-search">
-                <CiSearch className="search-icon" />
+                <CiSearch className="absolute left-[10px] text-[16px] text-text-light" />
 
                 <input
                     type="text"
@@ -147,7 +147,7 @@ export default function CreateConfig() {
                         </tr>
                     </thead>
                     <tbody className="table-body">
-                        {settings.map((config) => (
+                        {currentItems.map((config) => (
                             <tr key={config.idRol}>
                                 <td className="table-cell">{config.idRol}</td>
                                 <td className="table-cell">{config.name}</td>
@@ -157,7 +157,7 @@ export default function CreateConfig() {
                                         id={config.idRol}
                                         handleToggle={() => handleToggle(config.idRol)}
                                     />
-                                </td >
+                                </td>
                                 <td className="table-cell">
                                     <ActionButtons
                                         onView={() => handleView(config.idRol)}
@@ -167,6 +167,14 @@ export default function CreateConfig() {
                                 </td>
                             </tr>
                         ))}
+
+                        {currentItems.length === 0 && (
+                            <tr>
+                                <td colSpan="4" className="no-data">
+                                    No hay datos disponibles
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
                 <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
