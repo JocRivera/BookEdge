@@ -12,8 +12,7 @@ import FormUser from "./formClients";
 import Pagination from "../../common/Paginator/Pagination";
 import { CiSearch } from "react-icons/ci";
 import Switch from "../../common/Switch/Switch";
-import { useAuth } from "../../../context/AuthContext";
-import{MODULES} from "../../../utils/modules"
+import { useAuth } from "../../../context/authContext";
 
 function TableUser() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,14 +20,13 @@ function TableUser() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // permisos por módulo
-  const { hasPermission } = useAuth();
-  const MODULE = MODULES.USERS;
-
+  const { hasPermission, user } = useAuth();
 
   const filtrarDatos = users.filter((user) =>
     Object.values(user).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value && typeof value === 'object' 
+        ? Object.values(value).some(v => v && v.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+        : value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
@@ -93,40 +91,41 @@ function TableUser() {
     }
   };
 
-  const handleToggleE = async (id, estado) => {
+  const handleToggleE = async (id, currentStatus) => {
     try {
-      await toggleUserStatus(id, estado);
-      fetchUsers();
+      // Ahora pasamos directamente el estado contrario al actual
+      await toggleUserStatus(id, { status: !currentStatus });
+      fetchUsers(); 
     } catch (error) {
-      console.error("Error al cambiar el estado del usuario:", error);
+      console.error("Error al cambiar estado:", error);
+      alert("No se pudo cambiar el estado");
     }
   };
 
   return (
-    <div className="table-container">
-      <div className="title-container">
-        <h2 className="table-title">Tabla de Usuarios</h2>
+    <div className="user-table-container">
+      <div className="user-table-header-container">
+        <h2 className="user-table-header-title">Tabla de Usuarios</h2>
       </div>
-      <div className="container-search">
-        <CiSearch className="search-icon" />
-
+      <div className="user-search-container">
+        <CiSearch className="user-search-icon" />
         <input
           type="text"
-          className="search"
+          className="user-search-input"
           value={searchTerm}
           placeholder="Buscar usuario..."
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {hasPermission(MODULE, "create") && (
+        {hasPermission("Usuarios", "post") && (
           <CustomButton variant="primary" icon="add" onClick={handleAdd}>
             Agregar Usuario
           </CustomButton>
         )}
       </div>
 
-      <div className="table-wrapper">
-        <table className="table">
-          <thead className="table-header">
+      <div className="user-table-wrapper">
+        <table className="user-table">
+          <thead className="user-table-head">
             <tr>
               <th>ID</th>
               <th>Nombre</th>
@@ -135,48 +134,40 @@ function TableUser() {
               <th>Correo Electrónico</th>
               <th>Teléfono</th>
               <th>Dirección</th>
+              <th>EPS</th>
               <th>Rol</th>
               <th>Estado</th>
-              {(hasPermission(MODULE, "view") ||
-                hasPermission(MODULE, "edit") ||
-                hasPermission(MODULE, "delete")) && <th>Acciones</th>}
+              <th>Acciones</th>
             </tr>
           </thead>
-          <tbody className="table-body">
+          <tbody className="user-table-body">
             {currentItems.map((user, index) => (
               <tr
                 key={user.idUser}
-                className={index % 2 === 0 ? "table-row-even" : "table-row-odd"}
+                className={index % 2 === 0 ? "user-table-row-even" : "user-table-row-odd"}
               >
-                <td className="table-cell">{user.idUser}</td>
-                <td className="table-cell">{user.name}</td>
-                <td className="table-cell">{user.identificationType}</td>
-                <td className="table-cell">{user.identification}</td>
-                <td className="table-cell">{user.email}</td>
-                <td className="table-cell">{user.cellphone}</td>
-                <td className="table-cell">{user.address}</td>
-                <td className="table-cell">{user.role.name}</td>
-                <td className="table-cell">
+                <td className="user-table-cell">{user.idUser}</td>
+                <td className="user-table-cell">{user.name}</td>
+                <td className="user-table-cell">{user.identificationType}</td>
+                <td className="user-table-cell">{user.identification}</td>
+                <td className="user-table-cell">{user.email}</td>
+                <td className="user-table-cell">{user.cellphone}</td>
+                <td className="user-table-cell">{user.address}</td>
+                <td className="user-table-cell">{user.eps}</td>
+                <td className="user-table-cell">{user.role?.name || "Sin rol"}</td>
+                <td className="user-table-cell">
                   <Switch
                     isOn={user.status === true}
-                    handleToggle={() =>
-                      handleToggleE(user.idUser, { status: !user.status })
-                    }
-                    id={user.idUser}
+                    handleToggle={() => handleToggleE(user.idUser, user.status)}
+                    id={`status-${user.idUser}`}
                   />
                 </td>
-                {(hasPermission(MODULE, "view") ||
-                  hasPermission(MODULE, "edit") ||
-                  hasPermission(MODULE, "delete")) && (
-                  <td className="table-cell">
-                    <ActionButtons
-                      onEdit={() => handleEdit(user.idUser)}
-                      onDelete={() => handleDelete(user.idUser)}
-                      canEdit={hasPermission(MODULE, "edit")}
-                      canDelete={hasPermission(MODULE, "delete")}
-                    />
-                  </td>
-                )}
+                <td className="user-table-cell">
+                  <ActionButtons
+                    onEdit={() => handleEdit(user.idUser)}
+                    onDelete={() => handleDelete(user.idUser)}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>

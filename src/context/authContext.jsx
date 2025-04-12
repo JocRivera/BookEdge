@@ -12,15 +12,15 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const navigate = useNavigate();
   
-  const hasPermission = (moduleName, privilegeName = null) => {
-    if (!user || !user.role || !user.role.permissionRoles) return false;
-  
-    return user.role.permissionRoles.some((pr) => {
-      const matchesModule = pr.permission?.name === moduleName;
-      const matchesPrivilege = privilegeName ? pr.privilege?.name === privilegeName : true;
-      return matchesModule && matchesPrivilege;
-    });
-  };
+    const hasPermission = (moduleName, privilegeName = null) => {
+      if (!user || !user.role || !user.role.permissionRoles) return false;
+    
+      return user.role.permissionRoles.some((pr) => {
+        const matchesModule = pr.permissions?.name === moduleName;
+        const matchesPrivilege = privilegeName ? pr.privileges?.name === privilegeName : true;
+        return matchesModule && matchesPrivilege;
+      });
+    };
   
   
   // Verificar si el usuario es Cliente
