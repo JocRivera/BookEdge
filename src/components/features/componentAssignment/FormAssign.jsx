@@ -21,45 +21,56 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCabinData, setSelectedCabinData] = useState(null);
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    const loadInitialData = async () => {
-      if (!isOpen) return;
-      
-      try {
-        setIsLoading(true);
-        const [cabinSTOTALITY,cabinsResponse, comfortsResponse] = await Promise.all([
-          getAllComfortsForCabins(),
-          getCabinsWithoutComforts(),
-          getComforts()
-        ]);
-        setCabins(cabinsResponse);
-        setComforts(comfortsResponse);
+// En tu primer useEffect
+useEffect(() => {
+  const loadInitialData = async () => {
+    if (!isOpen) return;
+    
+    try {
+      setIsLoading(true);
+      const [cabinSTOTALITY, cabinsResponse, comfortsResponse] = await Promise.all([
+        getAllComfortsForCabins(),
+        getCabinsWithoutComforts(),
+        getComforts()
+      ]);
+      console.log(cabinSTOTALITY)
+      // Guardar todas las cabañas en un estado separado para referencia
+      setCabins(cabinsResponse);
+      setComforts(comfortsResponse);
 
-        // Si estamos editando, establecer la cabaña seleccionada
-        if (assignToEdit) {
+      // Si estamos editando, buscar la cabaña en la lista completa
+      if (assignToEdit) {
+        // Si los datos vienen con la estructura anidada, usar esa estructura
+        if (assignToEdit.Cabin && assignToEdit.Cabin.imagen) {
+          setSelectedCabinData({
+            idCabin: assignToEdit.idCabin,
+            name: assignToEdit.Cabin.name,
+            imagen: assignToEdit.Cabin.imagen
+          });
+        } else {
+          // Buscar en cabinSTOTALITY como tenías antes
           const cabinToEdit = cabinSTOTALITY.find(c => c.idCabin === assignToEdit.idCabin);
           setSelectedCabinData(cabinToEdit);
         }
-      } catch (error) {
-        console.error("Error cargando datos:", error);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    loadInitialData();
-  }, [isOpen, assignToEdit]);
-
-  // Actualizar cabaña seleccionada cuando cambia el formulario
-  useEffect(() => {
-    if (formData.selectedCabin) {
-      const selected = cabins.find(c => c.idCabin === formData.selectedCabin);
-      setSelectedCabinData(selected);
-    } else {
-      setSelectedCabinData(null);
+          } catch (error) {
+      console.error("Error cargando datos:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [formData.selectedCabin, cabins]);
+  };
+
+  loadInitialData();
+}, [isOpen, assignToEdit]);
+
+// Modifica el segundo useEffect para que no sobrescriba cuando esté en modo edición
+useEffect(() => {
+  if (formData.selectedCabin && !assignToEdit) {
+    // Solo actualizar selectedCabinData si no estamos en modo edición
+    const selected = cabins.find(c => c.idCabin === formData.selectedCabin);
+    setSelectedCabinData(selected);
+  }
+}, [formData.selectedCabin, cabins, assignToEdit]);
 
   // Cargar datos para edición
   useEffect(() => {
@@ -70,6 +81,7 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
         selectedCabin: assignToEdit.idCabin,
         description: assignToEdit.description,
         selectedComforts: assignToEdit.comforts.map(c => c.idComfort),
+        
       });
     } else {
       resetForm();
@@ -207,7 +219,6 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
                 )}
               </div>
             </div>
-
             <div className="ac-modal-footer">
               <button 
                 type="button" 

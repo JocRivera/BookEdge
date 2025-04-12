@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation,Navigate } from "react-router-dom";
 import {
   LuLayoutDashboard,
   LuUsers,
@@ -14,13 +14,15 @@ import {
 } from "react-icons/lu";
 import "./sidebar.css";
 import { useAuth } from "../../../context/AuthContext";
-
+import {MODULES} from "../../../utils/modules"
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState("");
   const menuRef = useRef(null);
   const location = useLocation();
   const { hasPermission } = useAuth();
+  const canAccessUsers = hasPermission(MODULES.USERS, "read");
+   
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -148,7 +150,6 @@ const Sidebar = () => {
               <span className="menu-text">Dashboard</span>
             </Link>
           </li>
-          {hasPermission("view_users") && (
             <li
               className={`menu-item ${
                 isActiveRoute("/admin/clients") ? "active" : ""
@@ -161,7 +162,7 @@ const Sidebar = () => {
                 <span className="menu-text">Usuarios</span>
               </Link>
             </li>
-          )}
+          
           <li
             className={`menu-item ${
               activeSubMenu === "rooms" || isRouteInSubmenu(roomsSubmenu)

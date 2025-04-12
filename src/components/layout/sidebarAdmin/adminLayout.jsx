@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './sidebar';
-import NavDropdown from '../navAdmin/NavBarAdmin';
+import Navbar from "../navbar/Navbar";
 import './adminLayaout.css';
 
 const AdminLayout = () => {
@@ -16,13 +16,14 @@ const AdminLayout = () => {
     return () => document.removeEventListener('sidebarToggle', handleSidebarToggle);
   }, []);
 
- 
   return (
     <div className="admin-layout">
-      <Sidebar />
-      <NavDropdown sidebarCollapsed={collapsed}  />
-      <div className={`admin-content ${collapsed ? 'collapsed' : ''}`}>
-        <Outlet />
+      <Sidebar collapsed={collapsed} />
+      <div className={`main-content ${collapsed ? 'collapsed' : ''}`}>
+        <Navbar />
+        <div className="content-wrapper">
+          <Outlet />
+        </div>
       </div>
     </div>
   );
