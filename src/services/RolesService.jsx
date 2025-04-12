@@ -53,6 +53,16 @@ class RolesService {
     }
   }
 
+  async changeStatus(id, status) {
+    try {
+      const response = await axios.patch(`${API_URL_ROL}/${id}`, { status });
+      return response.data;
+    } catch (error) {
+      console.error("Error changing role status:", error);
+      throw error;
+    }
+  }
+
 }
 
 const rolesService = new RolesService();
