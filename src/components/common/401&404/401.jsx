@@ -20,7 +20,7 @@ const Error401 = () => {
     setShake(true);
     setTimeout(() => {
       setShake(false);
-      window.location.href = '/profile';
+      window.location.href = 'admin/profile';
     }, 1000);
   };
 
