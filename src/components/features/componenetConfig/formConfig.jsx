@@ -265,13 +265,13 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                 />
                             </div>
                         </div>
+                        <div className="modal-footer">
+                            <button type="button" className="cancel-btn" onClick={onClose}>Cancelar</button>
+                            <button type="submit" className="submit-btn">
+                                {setting ? "Guardar Cambios" : "Registrar Configuracion"}
+                            </button>
+                        </div>
                     </form>
-                </div>
-                <div className="modal-footer">
-                    <button type="button" className="cancel-btn" onClick={onClose}>Cancelar</button>
-                    <button type="submit" className="submit-btn">
-                        {setting ? "Guardar Cambios" : "Registrar Configuracion"}
-                    </button>
                 </div>
             </div>
         </div>

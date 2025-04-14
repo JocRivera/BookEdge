@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import "./createService.css"
 import Switch from '../../common/Switch/Switch';
 
 const FormService = ({ isOpen, onClose, service, onSave }) => {

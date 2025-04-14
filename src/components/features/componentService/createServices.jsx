@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import "./createService.css";
 import { CustomButton, ActionButtons } from '../../common/Button/customButton';
 import { CiSearch } from "react-icons/ci";
 import Switch from "../../common/Switch/Switch";
