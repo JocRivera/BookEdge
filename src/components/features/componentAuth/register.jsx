@@ -4,9 +4,7 @@ import "./register.css";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { register } from "../../../services/AuthService";
-
-
-
+import { IoEye, IoEyeOff } from "react-icons/io5";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
@@ -15,12 +13,15 @@ export default function RegisterForm() {
     name: "",
     email: "",
     password: "",
-    confirmPassword: "", 
+    confirmPassword: "",
     cellphone: "",
     identificationType: "",
     identification: "",
     birthdate: "",
   });
+  const [errors, setErrors] = useState({}); // Estado para almacenar errores
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,44 +30,68 @@ export default function RegisterForm() {
       [name]: value,
     }));
   };
-  
+
+  const togglePasswordVisibility = (field) => {
+    if (field === "password") {
+      setShowPassword(!showPassword);
+    } else {
+      setShowConfirmPassword(!showConfirmPassword);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (formData.password !== formData.confirmPassword) {
       return toast.error("Las contraseñas no coinciden");
     }
-  
+
     const { confirmPassword, ...dataToSend } = formData;
-  
+
     try {
       await register(dataToSend);
-  
+
       toast.success("¡Usuario registrado exitosamente!", {
         position: "top-right",
         autoClose: 2000,
-        onClose: () => navigate("/login"), 
+        onClose: () => navigate("/login"),
       });
     } catch (error) {
-      console.log("Error a conectar", error);
-      toast.error("Ocurrió un error al registrarse");
+      if (
+        error.response &&
+        error.response.data &&
+        Array.isArray(error.response.data.errors)
+      ) {
+        // Procesar los errores del backend
+        const backendErrors = error.response.data.errors;
+        const formattedErrors = {};
+
+        // Mapear los errores al formato { campo: mensaje }
+        backendErrors.forEach((err) => {
+          formattedErrors[err.path] = err.msg;
+        });
+
+        setErrors(formattedErrors); // Actualizar el estado con los errores del backend
+      } else {
+        toast.error("Ocurrió un error al registrarse");
+      }
     }
   };
-  
+
   return (
     <>
       <AuthNavbar />
       <Outlet />
       <main className="register-container">
         <form className="register-form" onSubmit={handleSubmit}>
-          <h2 className="title">Crear cuenta en BookEdge</h2>
-          <p className="description">
+          <h2 className="title-register">Crear cuenta en BookEdge</h2>
+          <p className="description-register">
             Completa tus datos para comenzar nuestra hostería.
           </p>
 
-          <div className="form-grid">
-            <div className="form-column">
-              <div className="form-group">
+          <div className="form-grid-register">
+            <div className="form-column-register">
+              <div className="form-group-register">
                 <label htmlFor="name">Nombre completo</label>
                 <input
                   type="text"
@@ -77,9 +102,12 @@ export default function RegisterForm() {
                   value={formData.name}
                   onChange={handleChange}
                 />
+                {errors.name && (
+                  <span className="error-text">{errors.name}</span>
+                )}
               </div>
 
-              <div className="form-group">
+              <div className="form-group-register">
                 <label htmlFor="identificationType">Tipo de documento</label>
                 <select
                   id="identificationType"
@@ -92,9 +120,14 @@ export default function RegisterForm() {
                   <option value="CC">Cédula</option>
                   <option value="CE">CE</option>
                 </select>
+                {errors.identificationType && (
+                  <span className="error-text">
+                    {errors.identificationType}
+                  </span>
+                )}
               </div>
 
-              <div className="form-group">
+              <div className="form-group-register">
                 <label htmlFor="idNumber">Número de documento</label>
                 <input
                   type="text"
@@ -105,8 +138,11 @@ export default function RegisterForm() {
                   value={formData.identification}
                   onChange={handleChange}
                 />
+                {errors.identification && (
+                  <span className="error-text">{errors.identification}</span>
+                )}
               </div>
-              <div className="form-group">
+              <div className="form-group-register">
                 <label htmlFor="cellphone">Número de contacto</label>
                 <input
                   type="tel"
@@ -117,11 +153,14 @@ export default function RegisterForm() {
                   value={formData.cellphone}
                   onChange={handleChange}
                 />
+                {errors.cellphone && (
+                  <span className="error-text">{errors.cellphone}</span>
+                )}
               </div>
             </div>
 
             <div className="form-column">
-              <div className="form-group">
+              <div className="form-group-register">
                 <label htmlFor="birthdate">Fecha de nacimiento</label>
                 <input
                   type="date"
@@ -131,9 +170,12 @@ export default function RegisterForm() {
                   value={formData.birthdate}
                   onChange={handleChange}
                 />
+                {errors.birthdate && (
+                  <span className="error-text">{errors.birthdate}</span>
+                )}
               </div>
 
-              <div className="form-group">
+              <div className="form-group-register">
                 <label htmlFor="email">Correo electrónico</label>
                 <input
                   type="email"
@@ -144,32 +186,61 @@ export default function RegisterForm() {
                   value={formData.email}
                   onChange={handleChange}
                 />
+                {errors.email && (
+                  <span className="error-text">{errors.email}</span>
+                )}
               </div>
 
-              <div className="form-group">
+              <div className="form-group-register">
                 <label htmlFor="password">Contraseña</label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  required
-                  placeholder="Al menos 8 caracteres"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    required
+                    placeholder="Al menos 8 caracteres"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  {errors.password && (
+                    <span className="error-text">{errors.password}</span>
+                  )}
+
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => togglePasswordVisibility("password")}
+                  >
+                    {showPassword ? <IoEye /> : <IoEyeOff />}
+                  </button>
+                </div>
               </div>
 
-              <div className="form-group">
+              <div className="form-group-register">
                 <label htmlFor="confirmPassword">Confirmar contraseña</label>
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  required
-                  placeholder="Repite tu contraseña"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                />
+                <div className="password-input-container">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    required
+                    placeholder="Repite tu contraseña"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                  />
+                  {errors.confirmPassword && (
+                    <span className="error-text">{errors.confirmPassword}</span>
+                  )}
+
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => togglePasswordVisibility("confirm")}
+                  >
+                    {showConfirmPassword ? <IoEye /> : <IoEyeOff />}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -182,7 +253,9 @@ export default function RegisterForm() {
             </label>
           </div>
 
-          <button type="submit">Crear cuenta</button>
+          <button type="submit" className="register-button">
+            Crear cuenta
+          </button>
         </form>
 
         <div className="login-prompt">

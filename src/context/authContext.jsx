@@ -12,16 +12,15 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const navigate = useNavigate();
   
-    const hasPermission = (moduleName, privilegeName = null) => {
-      if (!user || !user.role || !user.role.permissionRoles) return false;
-    
-      return user.role.permissionRoles.some((pr) => {
-        const matchesModule = pr.permissions?.name === moduleName;
-        const matchesPrivilege = privilegeName ? pr.privileges?.name === privilegeName : true;
-        return matchesModule && matchesPrivilege;
-      });
-    };
+  const hasPermission = (moduleName, privilegeName = null) => {
+    if (!user || !user.role || !user.role.permissionRoles) return false;
   
+    return user.role.permissionRoles.some((pr) => {
+      const matchesModule = pr.permissions?.name === moduleName;
+      const matchesPrivilege = privilegeName ? pr.privileges?.name === privilegeName : true;
+      return matchesModule && matchesPrivilege;
+    });
+  };
   
   // Verificar si el usuario es Cliente
   const isClient = () => {
@@ -41,6 +40,22 @@ export const AuthProvider = ({ children }) => {
     }
   }, [errors]);
 
+  // Escuchar eventos de error de autenticación del interceptor
+  useEffect(() => {
+    const handleAuthError = () => {
+      setUser(null);
+      setIsAuthenticated(false);
+    };
+
+    // Agregar listener para el evento auth-error
+    window.addEventListener('auth-error', handleAuthError);
+    
+    // Limpiar el listener al desmontar el componente
+    return () => {
+      window.removeEventListener('auth-error', handleAuthError);
+    };
+  }, [navigate]);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -48,21 +63,9 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
       } catch (error) {
-        if (error.response?.status === 401) {
-          try {
-            await refreshAccessToken(); 
-            const userData = await getUserData();
-            setUser(userData);
-            setIsAuthenticated(true);
-          } catch (refreshError) {
-            console.log("No se pudo refrescar el token.");
-            setIsAuthenticated(false);
-            setUser(null);
-          }
-        } else {
-          console.error("Error inesperado al verificar autenticación:", error);
-          setIsAuthenticated(false);
-        }
+        // El interceptor ya maneja los errores 401, no es necesario hacer nada aquí
+        setIsAuthenticated(false);
+        setUser(null);
       } finally {
         setIsLoadingAuth(false);
       }
@@ -118,6 +121,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         isLoadingAuth,
         loading,
+        setLoading,
         errors,
         signin,
         logout,
