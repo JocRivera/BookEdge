@@ -7,11 +7,12 @@ import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
 import toast, { Toaster } from 'react-hot-toast';
-
+import DetailsConfig from "./detailsConfig";
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [settings, setSettings] = useState([]);
+    const [isView, setIsView] = useState(false)
     useEffect(() => {
         const fetchConfig = async () => {
             try {
@@ -42,7 +43,9 @@ export default function CreateConfig() {
         setIsModalOpen(true);
     };
     const handleView = (idRol) => {
-        console.log('Ver', idRol);
+        const config = settings.find((config) => config.idRol === idRol);
+        setCurrentConfig(config);
+        setIsView(true);
     }
     const handleEdit = (idRol) => {
         const config = settings.find((config) => config.idRol === idRol);
@@ -184,6 +187,11 @@ export default function CreateConfig() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
+            />
+            <DetailsConfig
+                currentConfig={currentConfig}
+                isOpen={isView}
+                onClose={() => setIsView(false)}
             />
             <Toaster />
         </div>
