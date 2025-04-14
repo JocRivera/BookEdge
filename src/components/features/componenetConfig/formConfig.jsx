@@ -185,7 +185,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                 </div>
                 <div className='modal-body'>
                     <form onSubmit={handleSubmit}>
-                        <div className='form-grid'>
+                        <div className='form-grid '>
                             <div className='form-group'>
                                 <label htmlFor="">Nombre del Rol</label>
                                 <input type="text" name="name" id="name" required
@@ -251,7 +251,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                     </table>
                                 </div>
                             </div>
-                            <div className=''>
+                            <div className='' >
                                 <label htmlFor="status">Estado</label>
                                 <Switch
                                     isOn={formData.status === true}
@@ -265,13 +265,13 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                 />
                             </div>
                         </div>
-                        <div className="modal-footer">
-                            <button type="button" className="cancel-btn" onClick={onClose}>Cancelar</button>
-                            <button type="submit" className="submit-btn">
-                                {setting ? "Guardar Cambios" : "Registrar Configuracion"}
-                            </button>
-                        </div>
                     </form>
+                </div>
+                <div className="modal-footer">
+                    <button type="button" className="cancel-btn" onClick={onClose}>Cancelar</button>
+                    <button type="submit" className="submit-btn">
+                        {setting ? "Guardar Cambios" : "Registrar Configuracion"}
+                    </button>
                 </div>
             </div>
         </div>
