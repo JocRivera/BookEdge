@@ -70,19 +70,47 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     }
     const handlePermissionChange = (e) => {
         const { value, checked } = e.target;
+        const permId = parseInt(value);
+
         setFormData(prevState => {
             if (checked) {
-                // Add permission if checked
-                return {
-                    ...prevState,
-                    permissions: [...prevState.permissions, parseInt(value)]
-                };
+                // Encontrar el ID del privilegio "read" (generalmente con nombre "read" o "get")
+                const readPrivilege = privilege.find(p =>
+                    p.name.toLowerCase() === "read" ||
+                    p.name.toLowerCase() === "get"
+                );
+
+                // Si encontramos el privilegio de lectura
+                if (readPrivilege) {
+                    // Añadir permiso y marcar automáticamente el privilegio de lectura
+                    return {
+                        ...prevState,
+                        permissions: [...prevState.permissions, permId],
+                        [`privilege-${permId}-${readPrivilege.idPrivilege}`]: true
+                    };
+                } else {
+                    // Si no encontramos el privilegio de lectura, solo añadir el permiso
+                    return {
+                        ...prevState,
+                        permissions: [...prevState.permissions, permId]
+                    };
+                }
             } else {
-                // Remove permission if unchecked
-                return {
+                // Remove permission if unchecked and clear its privileges
+                const updatedFormData = {
                     ...prevState,
-                    permissions: prevState.permissions.filter(id => id !== parseInt(value))
+                    permissions: prevState.permissions.filter(id => id !== permId)
                 };
+
+                // Limpiar todos los privilegios asociados a este permiso
+                privilege.forEach(priv => {
+                    const key = `privilege-${permId}-${priv.idPrivilege}`;
+                    if (updatedFormData[key]) {
+                        delete updatedFormData[key];
+                    }
+                });
+
+                return updatedFormData;
             }
         });
     }
@@ -143,6 +171,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
             setError("Al menos un permiso es requerido");
             return false;
         }
+
         setError(null);
         return true;
     }
