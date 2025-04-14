@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AuthNavbar from "../../layout/auth/AuthNavbar";
-import { ToastContainer, toast } from "react-toastify"; // ✅ Importación correcta
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./recoveryPassword.css";
 import { recoverPassword } from "../../../services/AuthService";
+import { useAuth } from "../../../context/AuthContext"; 
+import "./recoveryPassword.css"
 
 const RecoveryPassword = () => {
+  const { loading, setLoading } = useAuth(); 
   const [formulario, setFormulario] = useState({
     email: "",
   });
-
   const [errores, setErrores] = useState({});
   const navigate = useNavigate();
 
@@ -46,13 +47,14 @@ const RecoveryPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const emailError = validarFormulario("email", formulario.email);
     setErrores({ email: emailError });
-  
+
     if (!emailError) {
       try {
-        await recoverPassword(formulario.email); // ✅ Aquí se pasa el email
+        setLoading(true); 
+        await recoverPassword(formulario.email); 
         toast.success(
           `Se ha enviado un correo electrónico a ${formulario.email} 📧`,
           { autoClose: 2000 }
@@ -65,10 +67,12 @@ const RecoveryPassword = () => {
           error.response?.data?.message || "Error al enviar el correo",
           { autoClose: 3000 }
         );
+      } finally {
+        setLoading(false); // Desactivar el loading
       }
     }
   };
-  
+
   const handleCancel = () => {
     navigate("/login");
   };
@@ -76,8 +80,6 @@ const RecoveryPassword = () => {
   return (
     <div className="page-container">
       <AuthNavbar />
-      <Outlet />
-
       <div className="recovery-container">
         <div className="recovery-card">
           <div className="recovery-header">
@@ -102,14 +104,16 @@ const RecoveryPassword = () => {
                 placeholder="ejemplo@correo.com"
                 required
               />
-              {errores.email && (
-                <p className="error-message">{errores.email}</p>
-              )}
+              {errores.email && <p className="error-message">{errores.email}</p>}
             </div>
 
             <div className="buttons-recovery-password">
-              <button type="submit" className="recovery-button">
-                Enviar
+              <button
+                type="submit"
+                className="recovery-button"
+                disabled={loading} // Desactivar el botón mientras se está enviando
+              >
+                {loading ? "Enviando..." : "Enviar"}
               </button>
               <button
                 type="button"

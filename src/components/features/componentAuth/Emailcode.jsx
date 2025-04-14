@@ -1,46 +1,81 @@
-import AuthNavbar from '../../layout/auth/AuthNavbar'
-import { Outlet } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-export default function Emailcode() {
+import AuthNavbar from '../../layout/auth/AuthNavbar';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { resetPassword } from '../../../services/authService'; 
 
- const navigate = useNavigate();
-  
+export default function ResetPassword() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const queryParams = new URLSearchParams(location.search);
+  const token = queryParams.get('token');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
+    try {
+      await resetPassword(token, newPassword);
+      setSuccess('Contraseña restablecida correctamente');
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (error) {
+      setError('Error al restablecer la contraseña'.error);
+    }
+  };
+
   const handleCancel = () => {
     navigate('/login');
   };
 
   return (
-<div className="page-container">
+    <div className="page-container">
       <AuthNavbar />
-      <Outlet />
-      
       <div className="recovery-container">
         <div className="recovery-card">
           <div className="recovery-header">
-            <h1 className="recovery-title">Ingrese el código</h1>
+            <h1 className="recovery-title">Restablece tu contraseña</h1>
             <p className="recovery-subtitle">
-              Para reestablecer su contraseña debe de ingresar el codigo enviado a su correo.
+              Ingresa una nueva contraseña para tu cuenta.
             </p>
           </div>
 
-          <form  className="recovery-form">
+          <form onSubmit={handleSubmit} className="recovery-form">
             <div className="form-group">
-              
               <input
-                type="text"
-                id="email"
-                name="email"
+                type="password"
+                placeholder="Nueva contraseña"
                 className="form-input"
-                placeholder='por favor ingrese el código'
-
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
-              
             </div>
+
+            <div className="form-group">
+              <input
+                type="password"
+                placeholder="Confirmar contraseña"
+                className="form-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && <p className="error-text">{error}</p>}
+            {success && <p className="success-text">{success}</p>}
 
             <div className="buttons-recovery-password">
               <button type="submit" className="recovery-button">
-                Enviar
+                Restablecer contraseña
               </button>
               <button type="button" onClick={handleCancel} className="cancel-button">
                 Cancelar
@@ -49,6 +84,6 @@ export default function Emailcode() {
           </form>
         </div>
       </div>
-
-    </div>  )
+    </div>
+  );
 }
