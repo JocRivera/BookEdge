@@ -251,7 +251,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                     </table>
                                 </div>
                             </div>
-                            <div className='' >
+                            <div className='form-group' >
                                 <label htmlFor="status">Estado</label>
                                 <Switch
                                     isOn={formData.status === true}

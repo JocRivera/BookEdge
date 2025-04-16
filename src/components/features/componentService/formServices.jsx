@@ -44,8 +44,6 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                                     value={formData.name}
                                     onChange={handleChange}
                                 />
-                            </div>
-                            <div className='form-group'>
                                 <label htmlFor="">Descripción</label>
                                 <textarea required placeholder="Agrega una descripción..." name="Description" id="Description"
                                     value={formData.Description}
@@ -58,8 +56,6 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                                     value={formData.Price}
                                     onChange={handleChange}
                                 />
-                            </div>
-                            <div className="form-group">
                                 <label htmlFor="status">Estado</label>
                                 <Switch
                                     isOn={formData.StatusServices === true}
@@ -81,8 +77,8 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                         </div>
                     </form>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 
 }

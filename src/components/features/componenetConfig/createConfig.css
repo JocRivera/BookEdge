@@ -225,7 +225,7 @@
     grid-column: 1 / -1;
     /* Ocupa todo el ancho disponible */
     border-radius: 6px;
-    padding: 4px;
+    padding: 7px;
     margin-bottom: 16px;
 }
 
@@ -301,8 +301,7 @@
     grid-column: 1 / -1;
     /* Ocupa todo el ancho disponible */
     border-radius: 6px;
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 7px;
 }
 
 .permissions-table-container {

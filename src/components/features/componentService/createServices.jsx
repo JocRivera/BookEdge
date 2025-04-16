@@ -81,8 +81,7 @@ export default function CreateServices() {
                 <h2 className="table-title">Tabla de Servicios</h2>
             </div>
             <div className="container-search">
-                <CiSearch className="search-icon" />
-
+                <CiSearch className="absolute left-[10px] text-[16px] text-text-light" />
                 <input
                     type="text"
                     className="search"
