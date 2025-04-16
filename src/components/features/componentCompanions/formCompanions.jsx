@@ -7,7 +7,7 @@ function CompanionsForm({ onSaveCompanion = [] }) {
     name: '',
     birthDate: '',
     age: '',
-    documentType: '',
+    documentType: 'cédula de ciudadanía',
     documentNumber: '',
     eps: ''
   });
