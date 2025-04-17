@@ -8,7 +8,7 @@
 /* Sidebar se mantiene como lo tienes */
 .sidebar {
   pointer-events: none;
-  z-index: 1000; /* Aseguramos que esté por encima de todo */
+  z-index: 20;
 }
 .sidebar * {
   pointer-events: auto;
@@ -31,7 +31,7 @@
 .main-content > nav {
   position: sticky;
   top: 0;
-  z-index: 900; /* Debajo del sidebar pero encima del contenido */
+  z-index: 5; /* Debajo del sidebar pero encima del contenido */
   height: 60px;
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -43,7 +43,6 @@
   padding: 20px;
   background-color: #f5f5f5;
   position: relative;
-  z-index: 1;
 }
 
 /* Responsive Design */

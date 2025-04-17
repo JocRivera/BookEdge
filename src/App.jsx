@@ -14,6 +14,7 @@ import CreateServices from "./components/features/componentService/createService
 import ComponentConfort from "./components/features/componentConfort/ComponentConfort";
 import CreateConfig from "./components/features/componenetConfig/createConfig";
 import CabinsPage from "./components/features/componentCabins/CardCabin";
+import BedroomCard from "./components/features/componentBedrooms/CardBedroom";
 import TableReservations from "./components/features/componentReservations/tableReservations";
 import TableCompanions from "./components/features/componentCompanions/tableCompanions";
 import TablePayments from "./components/features/componentPayments/tablePayments";
@@ -53,6 +54,7 @@ export default function App() {
               <Route path="services" element={<CreateServices />} />
               <Route path="config" element={<CreateConfig />} />
               <Route path="cabins" element={<CabinsPage />} />
+              <Route path="rooms" element={<BedroomCard />} />
               <Route path="AssignAmenities" element={<CabinComfortsCards />} />
 
               <Route path="reservations" element={<TableReservations />} />
