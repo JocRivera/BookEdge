@@ -54,7 +54,7 @@ export default function RegisterForm() {
       toast.success("¡Usuario registrado exitosamente!", {
         position: "top-right",
         autoClose: 2000,
-        onClose: () => navigate("/login"),
+        onClose: () => navigate("/"),
       });
     } catch (error) {
       if (

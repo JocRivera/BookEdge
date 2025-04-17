@@ -12,13 +12,14 @@ export const getComforts = async () => {
   }
 };
 
+// services/ComfortService.js
 export const createComfort = async (comfortData) => {
   try {
     const response = await axios.post(API_URL, comfortData);
     return response.data;
   } catch (error) {
-    console.error("Error creando comodidad:", error);
-    throw error;
+    // Nuevo: Lanza el error completo para manejarlo en el componente
+    throw error.response?.data || { message: "Error desconocido" };
   }
 };
 
@@ -27,11 +28,9 @@ export const updateComfort = async (id, comfortData) => {
     const response = await axios.put(`${API_URL}/${id}`, comfortData);
     return response.data;
   } catch (error) {
-    console.error("Error actualizando comodidad:", error);
-    throw error;
+    throw error.response?.data || { message: "Error al actualizar" };
   }
 };
-
 export const deleteComfort = async (id) => {
   try {
     await axios.delete(`${API_URL}/${id}`);

@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { getComforts, createComfort, updateComfort, deleteComfort } from "../../../services/ComfortService";
+import {
+  getComforts,
+  createComfort,
+  updateComfort,
+  deleteComfort,
+} from "../../../services/ComfortService";
 import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import Pagination from "../../common/Paginator/Pagination";
 import "./componentConfort.css";
@@ -13,6 +18,8 @@ function ComponentConfort() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentComfort, setCurrentComfort] = useState(null);
   const [comforts, setComforts] = useState([]);
+  const [backendErrors, setBackendErrors] = useState({});
+
 
   useEffect(() => {
     const fetchComforts = async () => {
@@ -45,7 +52,9 @@ function ComponentConfort() {
   };
 
   const handleEdit = (idComfort) => {
-    const comfortToEdit = comforts.find((comfort) => comfort.idComfort === idComfort);
+    const comfortToEdit = comforts.find(
+      (comfort) => comfort.idComfort === idComfort
+    );
     setCurrentComfort(comfortToEdit);
     setIsModalOpen(true);
   };
@@ -53,7 +62,9 @@ function ComponentConfort() {
   const handleDelete = async (idComfort) => {
     try {
       await deleteComfort(idComfort);
-      setComforts(comforts.filter((comfort) => comfort.idComfort !== idComfort));
+      setComforts(
+        comforts.filter((comfort) => comfort.idComfort !== idComfort)
+      );
       toast.success("Comodidad eliminada correctamente");
       console.log("Comodidad eliminada exitosamente");
     } catch (error) {
@@ -65,19 +76,26 @@ function ComponentConfort() {
     try {
       if (data.idComfort) {
         await updateComfort(data.idComfort, data);
-        setComforts((prev) => prev.map((item) => (item.idComfort === data.idComfort ? data : item)));
+        setComforts((prev) =>
+          prev.map((item) => (item.idComfort === data.idComfort ? data : item))
+        );
         toast.success("Comodidad Actualizada correctamente");
-
-        
       } else {
         const newComfort = await createComfort(data);
         setComforts((prev) => [...prev, newComfort]);
         toast.success("Comodidad Creada correctamente");
-
       }
       setIsModalOpen(false);
     } catch (error) {
-      console.error("Error al guardar la comodidad:", error);
+      if (error.response && error.response.data.errors) {
+        const backendErrors = error.response.data.errors.reduce((acc, err) => {
+          acc[err.param] = err.msg;
+          return acc;
+        }, {});
+        setBackendErrors(backendErrors); // NUEVO
+      } else {
+        console.error("Error desconocido:", error);
+      }
     }
   };
 
@@ -87,10 +105,10 @@ function ComponentConfort() {
         <h2 className="comfort-table-title">Tabla de Comodidades</h2>
       </div>
       <div className="comfort-container-search">
-        <CiSearch className="search-icon" />
+        <CiSearch className="comfort-search-icon" />
         <input
           type="text"
-          className="search"
+          className="comfort-search"
           placeholder="Buscar comodidad..."
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -110,14 +128,14 @@ function ComponentConfort() {
           <tbody className="comfort-table-body">
             {currentItems.length > 0 ? (
               currentItems.map((comfort) => (
-                <tr
-                  key={comfort.idComfort}
-                  className="comfort-table-row"
-                >
+                <tr key={comfort.idComfort} className="comfort-table-row">
                   <td className="comfort-table-cell">{comfort.idComfort}</td>
                   <td className="comfort-table-cell">{comfort.name}</td>
                   <td className="comfort-table-cell">
-                    <ActionButtons onEdit={() => handleEdit(comfort.idComfort)} onDelete={() => handleDelete(comfort.idComfort)} />
+                    <ActionButtons
+                      onEdit={() => handleEdit(comfort.idComfort)}
+                      onDelete={() => handleDelete(comfort.idComfort)}
+                    />
                   </td>
                 </tr>
               ))
@@ -137,6 +155,8 @@ function ComponentConfort() {
           comfortData={currentComfort}
           onClose={() => setIsModalOpen(false)}
           onSave={handleSave}
+          backendErrors={backendErrors}
+
         />
       </div>
     </div>
