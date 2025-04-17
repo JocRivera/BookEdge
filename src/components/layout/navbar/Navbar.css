@@ -359,6 +359,8 @@
   100% { transform: rotate(360deg); }
 }
 
+
+
 /* Estilos responsive */
 @media (max-width: 992px) {
   .Nav {
