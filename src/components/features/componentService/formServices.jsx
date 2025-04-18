@@ -13,6 +13,14 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
         if (service) {
             setFormData(service);
         }
+        else {
+            setFormData({
+                name: '',
+                Description: '',
+                Price: '',
+                StatusServices: false
+            });
+        }
     }, [service]);
     const handleChange = (e) => {
         const { name, value } = e.target;
