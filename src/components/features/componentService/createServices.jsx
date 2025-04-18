@@ -5,6 +5,7 @@ import Switch from "../../common/Switch/Switch";
 import Pagination from "../../common/Paginator/Pagination";
 import FormService from './formServices';
 import serviceService from '../../../services/serviceService';
+import toast, { Toaster } from 'react-hot-toast';
 export default function CreateServices() {
     const [currentService, setCurrentService] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,31 +49,64 @@ export default function CreateServices() {
         setCurrentService(service);
         setIsModalOpen(true);
     }
-    const handleDelete = (id) => {
+    const handleDelete = (Id_Service) => {
+        const notify = () => toast.success('Servicio eliminado corretamente');
+        const notifyError = () => toast.error('Error al eliminar el servicio');
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este servicio?");
         if (confirmDelete) {
-            serviceService.deleteService(id).then(() => {
-                setServices(services.filter((service) => service.id !== id));
+            serviceService.deleteService(Id_Service).then(() => {
+                setServices(services.filter((service) => service.Id_Service !== Id_Service));
+                notify();
             }).catch((error) => {
                 console.error("Error deleting service:", error);
+                notifyError();
             });
         }
     }
     const handleSave = (service) => {
         if (currentService) {
+            const notify = () => toast.success('Rol Actualizado correctamente');
+            const notifyError = () => toast.error('Error al actualizar el rol');
             serviceService.updateService(currentService.Id_Service, service).then(() => {
-                setServices(services.map((s) => (s.id === currentService.id ? service : s)));
+                setServices(services.map((s) => (s.Id_Service === currentService.Id_Service ? service : s)));
+                notify();
             }).catch((error) => {
                 console.error("Error updating service:", error);
+                notifyError();
             });
         } else {
+            const notify = () => toast.success('Rol creado correctamente');
+            const notifyError = () => toast.error('Error al crear el rol');
             serviceService.createService(service).then((newService) => {
                 setServices([...services, newService]);
+                notify();
             }).catch((error) => {
                 console.error("Error creating service:", error);
+                notifyError();
             });
         }
         console.log(service);
+    }
+    const handleToggle = async (Id_Service) => {
+        const confirmToggle = window.confirm("¿Estás seguro de que deseas cambiar el estado de este servicio?");
+        if (!confirmToggle) return;
+        try {
+            const notify = () => toast.success('Estado cambiado correctamente');
+            const currentService = services.find((service) => service.Id_Service === Id_Service);
+            await serviceService.changeStatus(Id_Service, !currentService.StatusServices);
+            setServices(
+                services.map((service) =>
+                    service.Id_Service === Id_Service
+                        ? { ...service, StatusServices: !service.StatusServices }
+                        : service
+                )
+            )
+            console.log(services)
+            notify();
+        } catch (error) {
+            console.error("Error changing service status:", error);
+            toast.error("Chingaste");
+        }
     }
 
     return (
@@ -117,19 +151,7 @@ export default function CreateServices() {
                                     <Switch
                                         isOn={service.StatusServices === true}
                                         id={service.Id_Service}
-                                        handleToggle={(Id_Service) => {
-                                            setServices(
-                                                services.map((service) =>
-                                                    service.Id_Service === Id_Service
-                                                        ? {
-                                                            ...service,
-                                                            StatusServices: service.StatusServices === true ? false : true,
-                                                        }
-                                                        : service
-                                                )
-                                            );
-                                        }
-                                        }
+                                        handleToggle={() => handleToggle(service.Id_Service)}
                                     />
                                 </td>
                                 <td className="table-cell">
@@ -150,7 +172,7 @@ export default function CreateServices() {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
             />
-
+            <Toaster />
         </div>
     );
 }

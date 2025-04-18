@@ -42,6 +42,15 @@ class ServiceService {
             throw error;
         }
     }
+    async changeStatus(serviceId, StatusServices) {
+        try {
+            const response = await axios.patch(`${API_URL}/${serviceId}`, { StatusServices });
+            return response.data;
+        } catch (error) {
+            console.error("Error changing service status:", error);
+            throw error;
+        }
+    }
 }
 
 const serviceService = new ServiceService();
