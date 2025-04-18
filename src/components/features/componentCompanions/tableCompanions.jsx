@@ -17,13 +17,13 @@ const TableCompanions = ({ companions = [], onDeleteCompanion = null, compact = 
   if (compact && companions.length > 0) {
     return (
       <div className="compact-companions">
-        <button 
+        <button
           className="toggle-companions-btn"
           onClick={() => setExpanded(!expanded)}
         >
           {companions.length} acompañante(s) {expanded ? '▲' : '▼'}
         </button>
-        
+
         {expanded && (
           <div className="companions-popup">
             <table className="companions-table">
@@ -73,7 +73,7 @@ const TableCompanions = ({ companions = [], onDeleteCompanion = null, compact = 
         <tbody className="reservations-table-body">
           {companions.length > 0 ? (
             companions.map((companion, index) => (
-              <tr 
+              <tr
                 key={`companion-${companion?.id || companion?.documentNumber || Math.random()}`}
                 className={
                   index % 2 === 0
@@ -82,7 +82,7 @@ const TableCompanions = ({ companions = [], onDeleteCompanion = null, compact = 
                 }
               >
                 <td className="reservations-table-cell">{companion?.name || 'N/A'}</td>
-                <td className="reservations-table-cell">{companion?.birthDate || 'N/A'}</td>
+                <td className="reservations-table-cell">{companion?.birthdate || 'N/A'}</td>
                 <td className="reservations-table-cell">{companion?.age || 'N/A'}</td>
                 <td className="reservations-table-cell">{companion?.documentType || 'N/A'}</td>
                 <td className="reservations-table-cell">{companion?.documentNumber || 'N/A'}</td>
@@ -115,12 +115,15 @@ const TableCompanions = ({ companions = [], onDeleteCompanion = null, compact = 
 TableCompanions.propTypes = {
   companions: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      idCompanions: PropTypes.number,
       name: PropTypes.string,
-      birthDate: PropTypes.string,
-      age: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      birthdate: PropTypes.string,
+      age: PropTypes.number,
       documentType: PropTypes.string,
-      documentNumber: PropTypes.string,
+      documentNumber: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number
+      ]),
       eps: PropTypes.string
     })
   ),
