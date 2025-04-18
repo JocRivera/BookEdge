@@ -85,13 +85,11 @@ export default function CreateConfig() {
         }
         else {
             const notify = () => toast.success('Rol creado correctamente');
-            const notifyError = () => toast.error('Error al crear el rol');
             rolesService.createRole(setting).then((res) => {
                 setSettings([...settings, res])
                 notify()
             }).catch((error) => {
-                console.log(error)
-                notifyError()
+                toast.error(error)
             })
         }
         console.log(setting);
