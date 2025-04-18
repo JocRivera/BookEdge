@@ -7,7 +7,7 @@ const DoughnutsChart = () => {
         <div className='doughnutChart'>
             <Doughnut
                 data={{
-                    labels: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domindo'],
+                    labels: ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'],
                     datasets: [
                         {
                             label: 'Ventas',

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Switch from '../../common/Switch/Switch';
 
 const FormService = ({ isOpen, onClose, service, onSave }) => {
-    const [error, setError] = useState(null);
+    const [errors, setErrors] = useState({});
     const [formData, setFormData] = useState({
         name: '',
         Description: '',
@@ -40,32 +40,35 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
     };
 
     const validateForm = () => {
+        let isValid = true;
+        const newError = {};
+
         if (!formData.name) {
-            setError('El nombre del servicio es requerido');
-            return false;
+            newError.name = 'El nombre es requerido';
+            isValid = false;
         }
         if (formData.name.length < 3) {
-            setError("El nombre debe tener al menos 3 caracteres");
-            return false;
-        }
-        if (formData.name.length > 50) {
-            setError("El nombre no puede tener más de 50 caracteres");
-            return false;
+            newError.name = 'El nombre debe tener al menos 3 caracteres';
+            isValid = false;
         }
         if (!formData.name.match(/^[a-zA-Z\s]+$/)) {
-            setError("Ingrese un nombre valido");
-            return false;
+            newError.name = 'El nombre solo puede contener letras y espacios';
+            isValid = false;
         }
         if (!formData.Description) {
-            setError('La descripción es requerida');
-            return false;
+            newError.Description = 'La descripción es requerida';
+            isValid = false;
         }
         if (!formData.Price) {
-            setError('El precio es requerido');
-            return false;
+            newError.Price = 'El precio es requerido';
+            isValid = false;
+        } else if (isNaN(formData.Price)) {
+            newError.Price = 'El precio debe ser un número';
+            isValid = false;
         }
-        setError(null);
-        return true;
+
+        setErrors(newError);
+        return isValid;
     }
 
     if (!isOpen) {
@@ -87,12 +90,14 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                                     value={formData.name}
                                     onChange={handleChange}
                                 />
+                                {errors.name && <p style={{ color: "red" }}>{errors.name}</p>}
                                 <label htmlFor="">Descripción</label>
                                 <textarea required placeholder="Agrega una descripción..." name="Description" id="Description"
                                     value={formData.Description}
                                     onChange={handleChange}
                                 />
-                                {error && <p style={{ color: "red" }}>{error}</p>}
+                                {errors.Description && <p style={{ color: "red" }}>{errors.Description}</p>}
+
                             </div>
                             <div className='form-group'>
                                 <label htmlFor="">Precio</label>
@@ -100,6 +105,7 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                                     value={formData.Price}
                                     onChange={handleChange}
                                 />
+                                {errors.Price && <p style={{ color: "red" }}>{errors.Price}</p>}
                                 <label htmlFor="status">Estado</label>
                                 <Switch
                                     isOn={formData.StatusServices === true}
