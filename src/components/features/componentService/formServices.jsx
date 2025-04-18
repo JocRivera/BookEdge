@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Switch from '../../common/Switch/Switch';
 
 const FormService = ({ isOpen, onClose, service, onSave }) => {
+    const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         Description: '',
@@ -22,9 +23,51 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
     };
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
-        onClose();
+        if (validateForm()) {
+            const updatedService = {
+                ...formData,
+                StatusServices: formData.StatusServices === true ? 1 : 0
+            };
+            onSave(updatedService);
+            setFormData({
+                name: '',
+                Description: '',
+                Price: '',
+                StatusServices: false
+            });
+            onClose();
+        }
     };
+
+    const validateForm = () => {
+        if (!formData.name) {
+            setError('El nombre del servicio es requerido');
+            return false;
+        }
+        if (formData.name.length < 3) {
+            setError("El nombre debe tener al menos 3 caracteres");
+            return false;
+        }
+        if (formData.name.length > 50) {
+            setError("El nombre no puede tener más de 50 caracteres");
+            return false;
+        }
+        if (!formData.name.match(/^[a-zA-Z\s]+$/)) {
+            setError("Ingrese un nombre valido");
+            return false;
+        }
+        if (!formData.Description) {
+            setError('La descripción es requerida');
+            return false;
+        }
+        if (!formData.Price) {
+            setError('El precio es requerido');
+            return false;
+        }
+        setError(null);
+        return true;
+    }
+
     if (!isOpen) {
         return null;
     }
@@ -49,6 +92,7 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                                     value={formData.Description}
                                     onChange={handleChange}
                                 />
+                                {error && <p style={{ color: "red" }}>{error}</p>}
                             </div>
                             <div className='form-group'>
                                 <label htmlFor="">Precio</label>

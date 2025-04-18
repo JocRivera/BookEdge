@@ -71,7 +71,6 @@ export default function CreateConfig() {
 
         if (currentConfig) {
             const notify = () => toast.success('Rol Actualizado correctamente');
-            const notifyError = () => toast.error('Error al actualizar el rol');
             rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
                 setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
                 // setCurrentConfig(null)
@@ -79,7 +78,8 @@ export default function CreateConfig() {
                 notify()
             }).catch((error) => {
                 console.log(error)
-                notifyError()
+                toast.error(`Error al actualizar,
+                     ${error}`)
             }
             )
         }
@@ -89,7 +89,8 @@ export default function CreateConfig() {
                 setSettings([...settings, res])
                 notify()
             }).catch((error) => {
-                toast.error(error)
+                toast.error(`Error al crear,
+                     ${error}`)
             })
         }
         console.log(setting);

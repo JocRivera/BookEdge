@@ -66,23 +66,20 @@ export default function CreateServices() {
     const handleSave = (service) => {
         if (currentService) {
             const notify = () => toast.success('Servicio Actualizado correctamente');
-            const notifyError = () => toast.error('Error al actualizar el servicio');
             serviceService.updateService(currentService.Id_Service, service).then(() => {
                 setServices(services.map((s) => (s.Id_Service === currentService.Id_Service ? service : s)));
                 notify();
             }).catch((error) => {
                 console.error("Error updating service:", error);
-                notifyError();
+                toast.error(`Error al actualizar el servicio, ${error}`);
             });
         } else {
             const notify = () => toast.success('Servicio creado correctamente');
-            const notifyError = () => toast.error('Error al crear el servicio');
             serviceService.createService(service).then((newService) => {
                 setServices([...services, newService]);
                 notify();
             }).catch((error) => {
-                console.error("Error creating service:", error);
-                notifyError();
+                toast.error(`Error al crear el servicio, ${error}`);
             });
         }
         console.log(service);

@@ -18,8 +18,7 @@ class ServiceService {
             const response = await axios.post(API_URL, service);
             return response.data;
         } catch (error) {
-            console.error("Error creating service:", error);
-            throw error;
+            throw error.response?.data?.errors?.[0]?.msg;
         }
     }
 
