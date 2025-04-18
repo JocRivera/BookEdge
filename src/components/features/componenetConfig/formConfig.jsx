@@ -145,7 +145,6 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                 permissionRoles  // Formato que espera el backend
             };
 
-            console.log("Datos enviados al guardar:", dataToSave);
             onSave(dataToSave);
             onClose();
         }
