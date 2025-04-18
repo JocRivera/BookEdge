@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { getAllComfortsForCabins } from "../../../services/AssingComforts";
-import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import { getAllComfortsForCabins } from "../../../../services/AssingComforts";
+import { ActionButtons, CustomButton } from "../../../common/Button/customButton";
 import AssignComfortsForm from "./FormAssign";
 import "./AssignComforts.css";
 
 const CabinComfortsCards = () => {
   const [groupedCabins, setGroupedCabins] = useState([]);
   const [isOpenModal, setModalOpen] = useState(false);
-  const [selectedCabin, setSelectedCabin] = useState(null); // <- NUEVO: cabaña seleccionada
+  const [selectedCabin, setSelectedCabin] = useState(null); 
 
   // Obtener datos
   const fetchData = async () => {
