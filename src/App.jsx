@@ -16,7 +16,7 @@ import CreateConfig from "./components/features/componenetConfig/createConfig";
 import CabinsPage from "./components/features/componentCabins/CardCabin";
 import BedroomCard from "./components/features/componentBedrooms/CardBedroom";
 import TableReservations from "./components/features/componentReservations/tableReservations";
-import TableCompanions from "./components/features/componentCompanions/tableCompanions";
+import CompanionsView from "./components/features/componentCompanions/companionsView";
 import TablePayments from "./components/features/componentPayments/tablePayments";
 import Profile from "./components/features/componentAuth/Profile";
 import { AuthProvider } from "./context/AuthContext";
@@ -60,7 +60,7 @@ export default function App() {
               <Route path="reservations" element={<TableReservations />} />
               <Route
                 path="companions"
-                element={<TableCompanions onDeleteCompanion={() => {}} />}
+                element={<CompanionsView onDeleteCompanion={() => {}} />}
               />
               <Route
               path="payments"
