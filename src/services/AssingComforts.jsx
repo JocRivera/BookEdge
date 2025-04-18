@@ -1,6 +1,5 @@
 import api from "./api";
 
-// Obtener cabañas sin comodidades asignadas
 export const getAllComfortsForCabins = async () => {
     const response = await api.get("/cabin-comforts/all");
     return response.data;

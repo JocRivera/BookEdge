@@ -5,9 +5,9 @@ import './componentCompanions.css';
 function CompanionsForm({ onSaveCompanion = [] }) {
   const [currentCompanion, setCurrentCompanion] = useState({
     name: '',
-    birthDate: '',
+    birthdate: '',
     age: '',
-    documentType: 'cédula de ciudadanía',
+    documentType: 'Cédula de Ciudadanía',
     documentNumber: '',
     eps: ''
   });
@@ -15,18 +15,18 @@ function CompanionsForm({ onSaveCompanion = [] }) {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (currentCompanion.birthDate) {
-      const birthDate = new Date(currentCompanion.birthDate);
-      const ageDiff = Date.now() - birthDate.getTime();
+    if (currentCompanion.birthdate) {
+      const birthdate = new Date(currentCompanion.birthdate);
+      const ageDiff = Date.now() - birthdate.getTime();
       const ageDate = new Date(ageDiff);
       const calculatedAge = Math.abs(ageDate.getUTCFullYear() - 1970);
-      
+
       setCurrentCompanion(prev => ({
         ...prev,
         age: calculatedAge.toString()
       }));
     }
-  }, [currentCompanion.birthDate]);
+  }, [currentCompanion.birthdate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -46,60 +46,67 @@ function CompanionsForm({ onSaveCompanion = [] }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!currentCompanion.name.trim()) {
       newErrors.name = 'El nombre es obligatorio';
     }
-    
-    if (!currentCompanion.birthDate) {
-      newErrors.birthDate = 'La fecha de nacimiento es obligatoria';
+
+    if (!currentCompanion.birthdate) {
+      newErrors.birthdate = 'La fecha de nacimiento es obligatoria';
     }
-    
+
     if (!currentCompanion.documentType) {
       newErrors.documentType = 'El tipo de documento es obligatorio';
     }
-    
+
     if (!currentCompanion.documentNumber.trim()) {
       newErrors.documentNumber = 'El número de documento es obligatorio';
     }
-    
+
     if (!currentCompanion.eps.trim()) {
       newErrors.eps = 'La EPS es obligatoria';
     }
-    
+
     return newErrors;
   };
 
+  // Asegurar que el objeto companion tenga la estructura correcta
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
-    
+
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       return;
     }
-  
-    const companionToSave = {
-      ...currentCompanion,
-      id: Date.now()
+
+    const companionToAdd = {
+      name: currentCompanion.name.trim(),
+      birthdate: currentCompanion.birthdate,
+      age: Number(currentCompanion.age),
+      documentType: currentCompanion.documentType,
+      documentNumber: currentCompanion.documentNumber.trim(),
+      eps: currentCompanion.eps.trim(),
     };
-  
+
     if (typeof onSaveCompanion === 'function') {
-      onSaveCompanion(companionToSave);
+      // Ahora solo agregamos a la lista, no guardamos directamente
+      onSaveCompanion(companionToAdd);
     }
-  
+
+    // Resetear formulario
     setCurrentCompanion({
       name: '',
-      birthDate: '',
+      birthdate: '',
       age: '',
-      documentType: '',
+      documentType: 'Cédula de Ciudadanía',
       documentNumber: '',
       eps: ''
     });
-    
-    setErrors({});
-  };
 
+
+  setErrors({});
+};
   return (
     <div className="companion-form">
       <h3>Registrar Acompañante</h3>
@@ -118,19 +125,19 @@ function CompanionsForm({ onSaveCompanion = [] }) {
           {errors.name && <span className="error-message" id="name-error">{errors.name}</span>}
         </div>
 
-        <div className={`form-group ${errors.birthDate ? 'has-error' : ''}`}>
-          <label htmlFor="birthDate">Fecha de nacimiento:</label>
+        <div className={`form-group ${errors.birthdate ? 'has-error' : ''}`}>
+          <label htmlFor="birthdate">Fecha de nacimiento:</label>
           <input
             type="date"
-            id="birthDate"
-            name="birthDate"
-            value={currentCompanion.birthDate}
+            id="birthdate"
+            name="birthdate"
+            value={currentCompanion.birthdate}
             onChange={handleInputChange}
             max={new Date().toISOString().split('T')[0]}
-            aria-invalid={!!errors.birthDate}
-            aria-describedby={errors.birthDate ? "birthDate-error" : undefined}
+            aria-invalid={!!errors.birthdate}
+            aria-describedby={errors.birthdate ? "birthdate-error" : undefined}
           />
-          {errors.birthDate && <span className="error-message" id="birthDate-error">{errors.birthDate}</span>}
+          {errors.birthdate && <span className="error-message" id="birthdate-error">{errors.birthdate}</span>}
         </div>
 
         <div className="form-group">
@@ -154,12 +161,10 @@ function CompanionsForm({ onSaveCompanion = [] }) {
             aria-invalid={!!errors.documentType}
             aria-describedby={errors.documentType ? "documentType-error" : undefined}
           >
-            <option value="">Seleccione...</option>
-            <option value="CC">Cédula de Ciudadanía</option>
-            <option value="TI">Tarjeta de Identidad</option>
-            <option value="RC">Registro Civil</option>
-            <option value="CE">Cédula de Extranjería</option>
-            <option value="PA">Pasaporte</option>
+            <option value="Cédula de ciudadanía">Cédula de Ciudadanía</option>
+            <option value="Tarjeta de identidad">Tarjeta de Identidad</option>
+            <option value="Cédula de extranjería">Cédula de Extranjería</option>
+            <option value="Pasaporte">Pasaporte</option>
           </select>
           {errors.documentType && <span className="error-message" id="documentType-error">{errors.documentType}</span>}
         </div>
@@ -193,7 +198,7 @@ function CompanionsForm({ onSaveCompanion = [] }) {
         </div>
 
         <div className="form-actions">
-          <button 
+          <button
             type="button"
             className="btn-primary"
             onClick={handleSubmit}

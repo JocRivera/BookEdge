@@ -4,6 +4,7 @@ const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
 const API_URL_USERS = "http://localhost:3000/user"
 const API_URL_PLANS = "http://localhost:3000/plan"
 
+
 /**
  * Función auxiliar para validar IDs
  * @param {any} id - ID a validar
@@ -446,44 +447,67 @@ export const getReservationCompanions = async (reservationId) => {
  * @param {Object} companionData - Datos del acompañante
  * @returns {Promise<Object>} - Acompañante agregado
  */
+// Modificar addCompanionReservation
 export const addCompanionReservation = async (reservationId, companionData) => {
   try {
-    // Validar ID
+    console.log("Intentando asociar acompañante:", { reservationId, companionData });
+    
     const id = validateId(reservationId, "ID de reserva");
-
-    // Validar datos del acompañante
-    if (!companionData) {
-      throw new Error("No se proporcionaron datos del acompañante");
-    }
-
-    const requiredFields = ['name', 'birthDate', 'documentType', 'documentNumber', 'eps'];
-    const missingFields = requiredFields.filter(field => !companionData[field]);
-
-    if (missingFields.length > 0) {
-      throw new Error(`Faltan campos requeridos: ${missingFields.join(', ')}`);
+    
+    if (!companionData?.idCompanions) {
+      throw new Error("Falta el ID del acompañante");
     }
 
     const payload = {
-      ...companionData,
-      // Asegurar que el age sea un número si existe
-      age: companionData.age ? Number(companionData.age) : null
+      idCompanions: Number(companionData.idCompanions)
     };
 
-    const { data } = await axios.post(`${API_URL_RESERVATIONS}/${id}/companions`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const response = await axios.post(
+      `${API_URL_RESERVATIONS}/${id}/companions`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        }
+      }
+    );
+    
+    console.log("Respuesta del servidor:", response.data);
+    return response.data;
+    
+  } catch (error) {
+    console.error("Error detallado:", {
+      url: error.config?.url,
+      data: error.config?.data,
+      status: error.response?.status,
+      response: error.response?.data
     });
     
-    return data;
-  } catch (error) {
-    console.error(`Error al agregar acompañante a reserva con ID ${reservationId}:`, {
-      message: error.message,
-      response: error.response?.data,
-    });
-    throw new Error(`Error al agregar acompañante: ${error.message}`);
+    let errorMessage = error.response?.data?.message || error.message;
+    throw new Error(`Error al asociar acompañante: ${errorMessage}`);
   }
-}
+};
+export const associateCompanionToReservation = async (reservationId, companionId) => {
+  try {
+    const response = await axios.post(
+      `/reservations/${reservationId}/companions`,
+      { idCompanions: companionId }, // Asegúrate que coincida con lo que espera tu backend
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error en associateCompanionToReservation:", {
+      reservationId,
+      companionId,
+      error: error.response?.data || error.message
+    });
+    throw error;
+  }
+};
 
 /**
  * Elimina un acompañante de una reserva

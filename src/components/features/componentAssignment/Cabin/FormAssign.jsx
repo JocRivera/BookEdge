@@ -4,8 +4,8 @@ import {
   getCabinsWithoutComforts,
   assignComfortsToCabin,
   updateComfortsToCabin,
-} from "../../../services/AssingComforts";
-import { getComforts } from "../../../services/ComfortService";
+} from "../../../../services/AssingComforts";
+import { getComforts } from "../../../../services/ComfortService";
 import "./AssignComforts.css";
 
 const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
@@ -21,56 +21,59 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCabinData, setSelectedCabinData] = useState(null);
 
-// En tu primer useEffect
-useEffect(() => {
-  const loadInitialData = async () => {
-    if (!isOpen) return;
-    
-    try {
-      setIsLoading(true);
-      const [cabinSTOTALITY, cabinsResponse, comfortsResponse] = await Promise.all([
-        getAllComfortsForCabins(),
-        getCabinsWithoutComforts(),
-        getComforts()
-      ]);
-      console.log(cabinSTOTALITY)
-      // Guardar todas las cabañas en un estado separado para referencia
-      setCabins(cabinsResponse);
-      setComforts(comfortsResponse);
+  // En tu primer useEffect
+  useEffect(() => {
+    const loadInitialData = async () => {
+      if (!isOpen) return;
 
-      // Si estamos editando, buscar la cabaña en la lista completa
-      if (assignToEdit) {
-        // Si los datos vienen con la estructura anidada, usar esa estructura
-        if (assignToEdit.Cabin && assignToEdit.Cabin.imagen) {
-          setSelectedCabinData({
-            idCabin: assignToEdit.idCabin,
-            name: assignToEdit.Cabin.name,
-            imagen: assignToEdit.Cabin.imagen
-          });
-        } else {
-          // Buscar en cabinSTOTALITY como tenías antes
-          const cabinToEdit = cabinSTOTALITY.find(c => c.idCabin === assignToEdit.idCabin);
-          setSelectedCabinData(cabinToEdit);
+      try {
+        setIsLoading(true);
+        const [cabinSTOTALITY, cabinsResponse, comfortsResponse] =
+          await Promise.all([
+            getAllComfortsForCabins(),
+            getCabinsWithoutComforts(),
+            getComforts(),
+          ]);
+        console.log(cabinSTOTALITY);
+        // Guardar todas las cabañas en un estado separado para referencia
+        setCabins(cabinsResponse);
+        setComforts(comfortsResponse);
+
+        // Si estamos editando, buscar la cabaña en la lista completa
+        if (assignToEdit) {
+          // Si los datos vienen con la estructura anidada, usar esa estructura
+          if (assignToEdit.Cabin && assignToEdit.Cabin.imagen) {
+            setSelectedCabinData({
+              idCabin: assignToEdit.idCabin,
+              name: assignToEdit.Cabin.name,
+              imagen: assignToEdit.Cabin.imagen,
+            });
+          } else {
+            // Buscar en cabinSTOTALITY como tenías antes
+            const cabinToEdit = cabinSTOTALITY.find(
+              (c) => c.idCabin === assignToEdit.idCabin
+            );
+            setSelectedCabinData(cabinToEdit);
+          }
         }
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+      } finally {
+        setIsLoading(false);
       }
-          } catch (error) {
-      console.error("Error cargando datos:", error);
-    } finally {
-      setIsLoading(false);
+    };
+
+    loadInitialData();
+  }, [isOpen, assignToEdit]);
+
+  // Modifica el segundo useEffect para que no sobrescriba cuando esté en modo edición
+  useEffect(() => {
+    if (formData.selectedCabin && !assignToEdit) {
+      // Solo actualizar selectedCabinData si no estamos en modo edición
+      const selected = cabins.find((c) => c.idCabin === formData.selectedCabin);
+      setSelectedCabinData(selected);
     }
-  };
-
-  loadInitialData();
-}, [isOpen, assignToEdit]);
-
-// Modifica el segundo useEffect para que no sobrescriba cuando esté en modo edición
-useEffect(() => {
-  if (formData.selectedCabin && !assignToEdit) {
-    // Solo actualizar selectedCabinData si no estamos en modo edición
-    const selected = cabins.find(c => c.idCabin === formData.selectedCabin);
-    setSelectedCabinData(selected);
-  }
-}, [formData.selectedCabin, cabins, assignToEdit]);
+  }, [formData.selectedCabin, cabins, assignToEdit]);
 
   // Cargar datos para edición
   useEffect(() => {
@@ -80,8 +83,7 @@ useEffect(() => {
       setFormData({
         selectedCabin: assignToEdit.idCabin,
         description: assignToEdit.description,
-        selectedComforts: assignToEdit.comforts.map(c => c.idComfort),
-        
+        selectedComforts: assignToEdit.comforts.map((c) => c.idComfort),
       });
     } else {
       resetForm();
@@ -95,18 +97,18 @@ useEffect(() => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: name === "selectedCabin" ? parseInt(value) : value,
     }));
   };
 
   const handleComfortToggle = (comfortId) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       selectedComforts: prev.selectedComforts.includes(comfortId)
-        ? prev.selectedComforts.filter(id => id !== comfortId)
-        : [...prev.selectedComforts, comfortId]
+        ? prev.selectedComforts.filter((id) => id !== comfortId)
+        : [...prev.selectedComforts, comfortId],
     }));
   };
 
@@ -163,7 +165,15 @@ useEffect(() => {
                     onChange={handleInputChange}
                     required
                     disabled={!!assignToEdit || isLoading}
-                  > {assignToEdit?<option value={formData.selectedCabin}>{assignToEdit.name}</option>:<option value="">Seleccionar cabaña</option>}
+                  >
+                    {" "}
+                    {assignToEdit ? (
+                      <option value={formData.selectedCabin}>
+                        {assignToEdit.name}
+                      </option>
+                    ) : (
+                      <option value="">Seleccionar cabaña</option>
+                    )}
                     {Array.isArray(cabins) &&
                       cabins.map((cabin) => (
                         <option key={cabin.idCabin} value={cabin.idCabin}>
@@ -194,7 +204,9 @@ useEffect(() => {
                       <label key={c.idComfort} className="ac-checkbox-label">
                         <input
                           type="checkbox"
-                          checked={formData.selectedComforts.includes(c.idComfort)}
+                          checked={formData.selectedComforts.includes(
+                            c.idComfort
+                          )}
                           onChange={() => handleComfortToggle(c.idComfort)}
                           disabled={isLoading}
                         />
@@ -220,20 +232,24 @@ useEffect(() => {
               </div>
             </div>
             <div className="ac-modal-footer">
-              <button 
-                type="button" 
-                className="ac-cancel-btn" 
+              <button
+                type="button"
+                className="ac-cancel-btn"
                 onClick={onClose}
                 disabled={isLoading}
               >
                 Cancelar
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="ac-submit-btn"
                 disabled={isLoading}
               >
-                {isLoading ? "Procesando..." : assignToEdit ? "Guardar Cambios" : "Asignar"}
+                {isLoading
+                  ? "Procesando..."
+                  : assignToEdit
+                  ? "Guardar Cambios"
+                  : "Asignar"}
               </button>
             </div>
           </form>
