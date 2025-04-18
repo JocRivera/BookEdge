@@ -141,12 +141,12 @@ export default function CreateServices() {
                         </tr>
                     </thead>
                     <tbody className="table-body">
-                        {services.map((service) => (
+                        {currentItems.map((service) => (
                             <tr key={service.Id_Service}>
                                 <td className="table-cell">{service.Id_Service}</td>
                                 <td className="table-cell">{service.name}</td>
                                 <td className="table-cell">{service.Description}</td>
-                                <td className="table-cell">{service.Price}</td>
+                                <td className="table-cell" >{service.Price}</td>
                                 <td className="table-cell">
                                     <Switch
                                         isOn={service.StatusServices === true}
