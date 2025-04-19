@@ -17,18 +17,17 @@ function CardCabin() {
   const [isOpenModal, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [cabins, setCabins] = useState([]);
-  const [error, setError] = useState(null); // Para ayudar a depurar
+  const [error, setError] = useState(null);
   const [selectedCabin, setSelectedCabin] = useState(null);
-  const [loadingDetail, setLoadingDetail] = useState(false); //cargar los detalles de la cabaña
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [viewCabin, setViewCabin] = useState(null);
-  const [isDetailOpen, setDetailOpen] = useState(false); // modal del detalle
+  const [isDetailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     const fetchCabins = async () => {
       try {
         const data = await getCabins();
         setCabins(data);
-        console.log(data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -38,16 +37,14 @@ function CardCabin() {
     fetchCabins();
   }, []);
 
-  // Filtrado mejorado
   const filteredCabins = cabins.filter((cabin) =>
     `${cabin.name} ${cabin.description} ${cabin.status} ${
       cabin.capacity
-    } ${cabin.Comforts.map((c) => c.name).join(" ")}`
+    } ${cabin.Comforts?.map((c) => c.name).join(" ") || ""}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
 
-  // Paginación
   const itemsPerPage = 3;
   const [currentPage, setCurrentPage] = useState(0);
   const currentItems = filteredCabins.slice(
@@ -56,10 +53,9 @@ function CardCabin() {
   );
   const pageCount = Math.ceil(filteredCabins.length / itemsPerPage);
 
-  // Manejo de errores en imágenes
   const handleImageError = (e) => {
     e.target.style.objectFit = "contain";
-    e.target.onerror = null; // Prevenir loops
+    e.target.onerror = null;
   };
 
   const handleEditCabin = (cabin) => {
@@ -73,9 +69,8 @@ function CardCabin() {
       setCabins((prevCabins) =>
         prevCabins.filter((cabin) => cabin.idCabin !== idCabin)
       );
-      console.log("cabaña Eliminada exitosamente");
     } catch (error) {
-      console.log("Erorr al  eliminar la cabaña", error);
+      console.error("Error al eliminar la cabaña:", error);
     }
   };
 
@@ -86,7 +81,7 @@ function CardCabin() {
       setViewCabin(cabinData);
       setDetailOpen(true);
     } catch (error) {
-      console.error("Error al obtener detalles de la cabaña:", error);
+      console.error("Error al obtener detalles:", error);
     } finally {
       setLoadingDetail(false);
     }
@@ -108,7 +103,7 @@ function CardCabin() {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              setCurrentPage(0); // Resetear a primera página al buscar
+              setCurrentPage(0);
             }}
           />
         </div>
@@ -128,6 +123,12 @@ function CardCabin() {
         {loading ? (
           <div className="loading-state">Cargando cabañas...</div>
         ) : error ? (
+          <div className="no-results">
+            {searchTerm
+              ? `No se encontraron resultados para "${searchTerm}"`
+              : "Error al cargar las cabañas"}
+          </div>
+        ) : filteredCabins.length === 0 ? (
           <div className="no-results">
             {searchTerm
               ? `No se encontraron resultados para "${searchTerm}"`
@@ -182,7 +183,7 @@ function CardCabin() {
                         <>
                           {cabin.Comforts.slice(0, 3).map((comfort) => (
                             <span
-                              key={comfort.idComfort || Math.random()}
+                              key={comfort.idComfort}
                               className="comfort-badge"
                             >
                               {comfort.name}

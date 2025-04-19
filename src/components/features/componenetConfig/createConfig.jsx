@@ -7,11 +7,12 @@ import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
 import toast, { Toaster } from 'react-hot-toast';
-
+import DetailsConfig from "./detailsConfig";
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [settings, setSettings] = useState([]);
+    const [isView, setIsView] = useState(false)
     useEffect(() => {
         const fetchConfig = async () => {
             try {
@@ -42,7 +43,9 @@ export default function CreateConfig() {
         setIsModalOpen(true);
     };
     const handleView = (idRol) => {
-        console.log('Ver', idRol);
+        const config = settings.find((config) => config.idRol === idRol);
+        setCurrentConfig(config);
+        setIsView(true);
     }
     const handleEdit = (idRol) => {
         const config = settings.find((config) => config.idRol === idRol);
@@ -68,7 +71,6 @@ export default function CreateConfig() {
 
         if (currentConfig) {
             const notify = () => toast.success('Rol Actualizado correctamente');
-            const notifyError = () => toast.error('Error al actualizar el rol');
             rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
                 setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
                 // setCurrentConfig(null)
@@ -76,19 +78,19 @@ export default function CreateConfig() {
                 notify()
             }).catch((error) => {
                 console.log(error)
-                notifyError()
+                toast.error(`Error al actualizar
+                     ${error}`)
             }
             )
         }
         else {
             const notify = () => toast.success('Rol creado correctamente');
-            const notifyError = () => toast.error('Error al crear el rol');
             rolesService.createRole(setting).then((res) => {
                 setSettings([...settings, res])
                 notify()
             }).catch((error) => {
-                console.log(error)
-                notifyError()
+                toast.error(`Error al crear,
+                     ${error}`)
             })
         }
         console.log(setting);
@@ -122,7 +124,7 @@ export default function CreateConfig() {
                 <h2 className="table-title">Tabla de Roles</h2>
             </div>
             <div className="container-search">
-                <CiSearch className="search-icon" />
+                <CiSearch className="absolute left-[10px] text-[16px] text-text-light" />
 
                 <input
                     type="text"
@@ -147,7 +149,7 @@ export default function CreateConfig() {
                         </tr>
                     </thead>
                     <tbody className="table-body">
-                        {settings.map((config) => (
+                        {currentItems.map((config) => (
                             <tr key={config.idRol}>
                                 <td className="table-cell">{config.idRol}</td>
                                 <td className="table-cell">{config.name}</td>
@@ -157,7 +159,7 @@ export default function CreateConfig() {
                                         id={config.idRol}
                                         handleToggle={() => handleToggle(config.idRol)}
                                     />
-                                </td >
+                                </td>
                                 <td className="table-cell">
                                     <ActionButtons
                                         onView={() => handleView(config.idRol)}
@@ -167,6 +169,14 @@ export default function CreateConfig() {
                                 </td>
                             </tr>
                         ))}
+
+                        {currentItems.length === 0 && (
+                            <tr>
+                                <td colSpan="4" className="no-data">
+                                    No hay datos disponibles
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
                 <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
@@ -176,6 +186,11 @@ export default function CreateConfig() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
+            />
+            <DetailsConfig
+                currentConfig={currentConfig}
+                isOpen={isView}
+                onClose={() => setIsView(false)}
             />
             <Toaster />
         </div>

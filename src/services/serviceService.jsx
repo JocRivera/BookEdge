@@ -18,8 +18,7 @@ class ServiceService {
             const response = await axios.post(API_URL, service);
             return response.data;
         } catch (error) {
-            console.error("Error creating service:", error);
-            throw error;
+            throw error.response?.data?.errors?.[0]?.msg;
         }
     }
 
@@ -39,6 +38,15 @@ class ServiceService {
             return response.data;
         } catch (error) {
             console.error("Error deleting service:", error);
+            throw error;
+        }
+    }
+    async changeStatus(serviceId, StatusServices) {
+        try {
+            const response = await axios.patch(`${API_URL}/${serviceId}`, { StatusServices });
+            return response.data;
+        } catch (error) {
+            console.error("Error changing service status:", error);
             throw error;
         }
     }

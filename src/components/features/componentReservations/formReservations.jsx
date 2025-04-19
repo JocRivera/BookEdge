@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import PropTypes from "prop-types"
 import "./componentsReservations.css"
@@ -12,8 +10,9 @@ import {
   getUsers,
   updateReservation,
   getReservationById,
-  addCompanionReservation
+  addCompanionReservation,
 } from "../../../services/reservationsService.jsx"
+import { createCompanion, deleteCompanion } from "../../../services/companionsService.jsx"
 
 function FormReservation({ reservationData = null, onClose, onSave, isOpen, isReadOnly = false }) {
   const [step, setStep] = useState(1)
@@ -203,12 +202,13 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     e.preventDefault();
     try {
       setLoading(true);
+
       // Validaciones básicas
       if (!formData.idUser || !formData.idPlan || !formData.startDate || !formData.endDate) {
         throw new Error("Faltan datos requeridos para la reserva");
       }
-  
-      // Preparar payload con tipos correctos
+
+      // Preparar payload sin acompañantes inicialmente
       const payload = {
         idUser: Number(formData.idUser),
         idPlan: Number(formData.idPlan),
@@ -216,39 +216,44 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         endDate: formData.endDate,
         status: formData.status || "Reservado",
         total: calculateTotal(),
-        companions: formData.companions || [],
         paymentMethod: formData.paymentMethod || "Efectivo",
       };
-  
+
       // Validar fechas
       const today = new Date().toISOString().split("T")[0];
       if (payload.startDate < today) {
         throw new Error("La fecha de inicio no puede ser en el pasado");
       }
-  
+
       if (payload.startDate > payload.endDate) {
         throw new Error("La fecha de fin debe ser posterior a la de inicio");
       }
-  
+
       console.log("Enviando payload:", payload);
-  
-      // Operación de guardado
+
+      // Guardar la reserva primero
       let resultado;
-      if (reservationData && reservationData.idReservation) {
-        // Asegurarse que el ID sea un número válido
-        const reservationId = parseInt(reservationData.idReservation, 10);
-  
-        if (isNaN(reservationId) || reservationId <= 0) {
-          throw new Error("ID de reserva inválido");
-        }
-  
-        console.log("Modo EDICIÓN - ID:", reservationId);
-        resultado = await updateReservation(reservationId, payload);
+      if (reservationData?.idReservation) {
+        resultado = await updateReservation(reservationData.idReservation, payload);
       } else {
-        console.log("Modo CREACIÓN");
         resultado = await createReservation(payload);
       }
-  
+
+      // Si hay acompañantes, guardarlos después de tener el ID de reserva
+      if (formData.hasCompanions && formData.companions.length > 0) {
+        console.log("Guardando acompañantes para la reserva:", resultado.idReservation);
+
+        const companionsPromises = formData.companions.map(companion => {
+          // Solo crear acompañantes que no tengan ID (nuevos)
+          if (!companion.idCompanions) {
+            return handleSaveCompanionInReservation(companion, resultado.idReservation);
+          }
+          return Promise.resolve(companion); // Ya existe, no hacer nada
+        });
+
+        await Promise.all(companionsPromises);
+      }
+
       console.log("Operación completada con resultado:", resultado);
       onClose();
       onSave(resultado);
@@ -258,38 +263,70 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  const handleSaveCompanionInReservation = async (newCompanion) => {
+  const handleSaveCompanionInReservation = async (companionData, reservationId) => {
     try {
-      console.log("Nuevo acompañante a guardar:", newCompanion);
-      
-      // Verificar que tenemos una reserva existente
-      if (!reservationData?.idReservation) {
-        throw new Error("No se puede agregar acompañante a una reserva no guardada");
+      console.log("Iniciando guardado de acompañante:", { companionData, reservationId });
+
+      if (!reservationId) {
+        throw new Error("No se puede agregar acompañante sin ID de reserva");
       }
-  
-      // Llamar al servicio para agregar el acompañante
-      const savedCompanion = await addCompanionReservation(
-        reservationData.idReservation, 
-        newCompanion
-      );
-  
-      // Actualizar el estado local
-      setFormData((prev) => ({
+
+      // 1. Crear el acompañante
+      const companionResponse = await createCompanion(companionData);
+
+      // Verificar respuesta
+      if (!companionResponse?.idCompanions) {
+        console.error("Respuesta inesperada de createCompanion:", companionResponse);
+        throw new Error("El servidor no devolvió un ID válido para el acompañante");
+      }
+
+      console.log("Acompañante creado, ID:", companionResponse.idCompanions);
+
+      // 2. Asociar a la reserva
+      try {
+        const associationResponse = await addCompanionReservation(
+          reservationId,
+          { idCompanions: companionResponse.idCompanions }
+        );
+        console.log("Asociación exitosa:", associationResponse);
+      } catch (associationError) {
+        console.error("Error al asociar acompañante:", associationError);
+        // Intentar eliminar el acompañante creado si falla la asociación
+        try {
+          await deleteCompanion(companionResponse.idCompanions);
+          console.log("Acompañante eliminado por fallo en asociación");
+        } catch (deleteError) {
+          console.error("Error al limpiar acompañante:", deleteError);
+        }
+        throw new Error("Error al asociar acompañante a la reserva");
+      }
+
+      // 3. Actualizar estado local
+      const savedCompanion = {
+        ...companionData,
+        idCompanions: companionResponse.idCompanions
+      };
+
+      setFormData(prev => ({
         ...prev,
-        companions: [
-          ...prev.companions,
-          savedCompanion // Usar el acompañante guardado en el backend
-        ],
-        companionCount: prev.companions.length + 1,
+        companions: prev.companions.map(c =>
+          c.documentNumber === companionData.documentNumber ? savedCompanion : c
+        )
       }));
-  
+
+      return savedCompanion;
     } catch (error) {
-      console.error("Error al guardar acompañante:", error);
-      alert(`Error al guardar acompañante: ${error.message}`);
+      console.error("Error completo en handleSaveCompanionInReservation:", {
+        error: error.message,
+        companionData,
+        reservationId,
+        stack: error.stack
+      });
+      throw error;
     }
-  }
+  };
 
   if (!isOpen) return null
 
@@ -451,7 +488,6 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 </div>
               </div>
             )}
-
             {step === 2 && formData.hasCompanions && (
               <div className="form-step">
                 <h3>Registro de Acompañantes</h3>
@@ -461,19 +497,29 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                   </div>
                 )}
 
-                <CompanionsForm onSaveCompanion={handleSaveCompanionInReservation} />
-
-                <h4>Acompañantes Registrados</h4>
-                <TableCompanions
-                  companions={formData.companions}
-                  onDeleteCompanion={(id) => {
-                    setFormData((prev) => ({
+                <CompanionsForm
+                  onSaveCompanion={(newCompanion) => {
+                    setFormData(prev => ({
                       ...prev,
-                      companions: prev.companions.filter((c) => c.id !== id),
-                      companionCount: prev.companions.length - 1,
-                    }))
+                      companions: [...prev.companions, newCompanion],
+                      companionCount: prev.companions.length + 1
+                    }));
                   }}
                 />
+
+                <div className="companions-section">
+                  <TableCompanions
+                    companions={formData.companions}
+                    onDeleteCompanion={(id) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        companions: prev.companions.filter(c => c.idCompanions !== id),
+                        companionCount: prev.companions.length - 1,
+                      }));
+                    }}
+                    isReadOnly={isReadOnly}
+                  />
+                </div>
               </div>
             )}
 

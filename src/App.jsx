@@ -16,7 +16,7 @@ import CreateConfig from "./components/features/componenetConfig/createConfig";
 import CabinsPage from "./components/features/componentCabins/CardCabin";
 import BedroomCard from "./components/features/componentBedrooms/CardBedroom";
 import TableReservations from "./components/features/componentReservations/tableReservations";
-import TableCompanions from "./components/features/componentCompanions/tableCompanions";
+import CompanionsView from "./components/features/componentCompanions/companionsView";
 import TablePayments from "./components/features/componentPayments/tablePayments";
 import Profile from "./components/features/componentAuth/Profile";
 import { AuthProvider } from "./context/AuthContext";
@@ -25,7 +25,9 @@ import Error404 from "./components/common/401&404/404";
 import ProtectedRoutes from "./ProtectedRutes";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
-import CabinComfortsCards from "./components/features/componentAssignment/AssignAmenitiesTable "
+import ComfortAssignmentSelector from "./components/features/componentAssignment/selectorAssing";
+import DashboardManagement from "./components/features/componentDashboard/main";
+
 import Customer from "./components/features/componentCustomer/customer";
 export default function App() {
   return (
@@ -57,16 +59,16 @@ export default function App() {
               <Route path="config" element={<CreateConfig />} />
               <Route path="cabins" element={<CabinsPage />} />
               <Route path="rooms" element={<BedroomCard />} />
-              <Route path="AssignAmenities" element={<CabinComfortsCards />} />
-
+              <Route path="AssignAmenities" element={<ComfortAssignmentSelector />} />
+              <Route path="dashboard" element={<DashboardManagement />} />
               <Route path="reservations" element={<TableReservations />} />
               <Route
                 path="companions"
-                element={<TableCompanions onDeleteCompanion={() => {}} />}
+                element={<CompanionsView onDeleteCompanion={() => { }} />}
               />
               <Route
-              path="payments"
-              element={<TablePayments/>}
+                path="payments"
+                element={<TablePayments />}
               ></Route>
               <Route path="plans" element={<Plan />} />
               <Route path="plansProgramed" element={<PlanProgramed />} />
@@ -78,6 +80,6 @@ export default function App() {
       </AuthProvider>
     </BrowserRouter>
   );
-  
+
 }
 
