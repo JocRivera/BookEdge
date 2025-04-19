@@ -8,6 +8,7 @@ import {
   deleteCabin,
   getCabins,
   getCabinById,
+  getCabinImages,
 } from "../../../services/CabinService";
 import Pagination from "../../common/Paginator/Pagination";
 import CabinDetail from "./CabinDetails";
@@ -17,6 +18,7 @@ function CardCabin() {
   const [isOpenModal, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [cabins, setCabins] = useState([]);
+  const [cabinImages, setCabinImages] = useState({});
   const [error, setError] = useState(null);
   const [selectedCabin, setSelectedCabin] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -28,6 +30,10 @@ function CardCabin() {
       try {
         const data = await getCabins();
         setCabins(data);
+
+        // Cargar imágenes para cada cabaña
+        const imagesMap = await loadCabinImages(data);
+        setCabinImages(imagesMap);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -37,10 +43,27 @@ function CardCabin() {
     fetchCabins();
   }, []);
 
+  const loadCabinImages = async (cabinsList) => {
+    const imagesMap = {};
+    for (const cabin of cabinsList) {
+      try {
+        const images = await getCabinImages(cabin.idCabin);
+        // Encontrar la imagen principal o la primera disponible
+        const primaryImage = images.find((img) => img.isPrimary) || images[0];
+        imagesMap[cabin.idCabin] = primaryImage ? primaryImage.imagePath : null;
+      } catch (err) {
+        console.error(
+          `Error al cargar imágenes para cabaña ${cabin.idCabin}:`,
+          err
+        );
+      }
+    }
+    return imagesMap;
+  };
   const filteredCabins = cabins.filter((cabin) =>
-    `${cabin.name} ${cabin.description} ${cabin.status} ${
-      cabin.capacity
-    } ${cabin.Comforts?.map((c) => c.name).join(" ") || ""}`
+    `${cabin.name} ${cabin.description} ${cabin.status} ${cabin.capacity} ${
+      cabin.Comforts?.map((c) => c.name).join(" ") || ""
+    }`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
@@ -138,12 +161,24 @@ function CardCabin() {
           currentItems.map((cabin) => (
             <article key={cabin.idCabin} className="cabin-card">
               <div className="image-wrapper">
-                <img
-                  src={`http://localhost:3000/uploads/${cabin.imagen}`}
-                  alt={cabin.name}
-                  className="cabin-image"
-                  onError={handleImageError}
-                />
+                {cabinImages[cabin.idCabin] ? (
+                  <img
+                    src={`http://localhost:3000/uploads/${
+                      cabinImages[cabin.idCabin]
+                    }`}
+                    alt={cabin.name}
+                    className="cabin-image"
+                    onError={handleImageError}
+                  />
+                ) : (
+                  <div className="no-image-placeholder">Sin imágenes</div>
+                )}
+                {/* Indicador de múltiples imágenes */}
+                {cabin.imageCount > 1 && (
+                  <span className="multiple-images-badge">
+                    +{cabin.imageCount - 1}
+                  </span>
+                )}
               </div>
 
               <section className="cabins-details">
@@ -224,16 +259,22 @@ function CardCabin() {
           forcePage={currentPage}
         />
       )}
-
       <FormCabins
         isOpen={isOpenModal}
         onClose={() => setModalOpen(false)}
-        onSave={() => {
+        onSave={async () => {
           setLoading(true);
-          getCabins()
-            .then(setCabins)
-            .catch((error) => setError(error.message))
-            .finally(() => setLoading(false));
+          try {
+            const newCabins = await getCabins();
+            setCabins(newCabins);
+
+            const newImagesMap = await loadCabinImages(newCabins);
+            setCabinImages(newImagesMap);
+          } catch (error) {
+            setError(error.message);
+          } finally {
+            setLoading(false);
+          }
         }}
         cabinToEdit={selectedCabin}
       />
