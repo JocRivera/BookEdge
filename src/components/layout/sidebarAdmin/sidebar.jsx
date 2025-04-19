@@ -150,15 +150,28 @@ const Sidebar = () => {
           </li>
             <li
               className={`menu-item ${
-                isActiveRoute("/admin/clients") ? "active" : ""
+                isActiveRoute("/admin/users") ? "active" : ""
               }`}
             >
-              <Link to="/admin/clients">
+              <Link to="/admin/users">
                 <span className="menu-icon">
                   <LuUsers />
                 </span>
                 <span className="menu-text">Usuarios</span>
               </Link>
+            </li>
+
+            <li
+              className={`menu-item ${
+                isActiveRoute("/admin/customer") ? "active" : ""
+              }`}>
+              <Link to="/admin/customer">
+                <span className="menu-icon">
+                  <LuUsers />
+                </span>
+                <span className="menu-text">Clientes</span>
+              </Link>
+
             </li>
           
           <li

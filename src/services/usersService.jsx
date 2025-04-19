@@ -25,3 +25,10 @@ export const deleteUser = async (id) => {
 export const toggleUserStatus = async (id, userState) => {
   await api.patch(`/user/${id}`, userState);
 };
+
+
+//CUSTOMERS
+export const getCustomers = async () => {
+  const response = await api.get("/user/customers/get");
+  return response.data;
+};

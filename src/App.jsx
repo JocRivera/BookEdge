@@ -28,6 +28,7 @@ import PlanProgramed from "./components/features/componentPlans/componentPlanPro
 import ComfortAssignmentSelector from "./components/features/componentAssignment/selectorAssing";
 import DashboardManagement from "./components/features/componentDashboard/main";
 
+import Customer from "./components/features/componentCustomer/customer";
 export default function App() {
   return (
     <BrowserRouter>
@@ -51,7 +52,8 @@ export default function App() {
           <Route element={<ProtectedRoutes />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="profile" element={<Profile />} />
-              <Route path="clients" element={<TableUser />} />
+              <Route path="users" element={<TableUser />} />
+              <Route path="customer" element={<Customer />} />
               <Route path="accommodations" element={<ComponentConfort />} />
               <Route path="services" element={<CreateServices />} />
               <Route path="config" element={<CreateConfig />} />
