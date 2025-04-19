@@ -6,7 +6,7 @@ import {
   updateComfortsToCabin,
 } from "../../../../services/AssingComforts";
 import { getComforts } from "../../../../services/ComfortService";
-import "./AssignComforts.css";
+import "./AssignComforts.css"; // Asegurar que los estilos sean consistentes
 
 const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
   const initialFormState = {
@@ -21,40 +21,56 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCabinData, setSelectedCabinData] = useState(null);
 
-  // En tu primer useEffect
   useEffect(() => {
     const loadInitialData = async () => {
       if (!isOpen) return;
 
       try {
         setIsLoading(true);
-        const [cabinSTOTALITY, cabinsResponse, comfortsResponse] =
+        const [allCabinComforts, cabinsResponse, comfortsResponse] =
           await Promise.all([
             getAllComfortsForCabins(),
             getCabinsWithoutComforts(),
             getComforts(),
           ]);
-        console.log(cabinSTOTALITY);
-        // Guardar todas las cabañas en un estado separado para referencia
+
         setCabins(cabinsResponse);
         setComforts(comfortsResponse);
 
-        // Si estamos editando, buscar la cabaña en la lista completa
         if (assignToEdit) {
-          // Si los datos vienen con la estructura anidada, usar esa estructura
-          if (assignToEdit.Cabin && assignToEdit.Cabin.imagen) {
-            setSelectedCabinData({
-              idCabin: assignToEdit.idCabin,
-              name: assignToEdit.Cabin.name,
-              imagen: assignToEdit.Cabin.imagen,
-            });
-          } else {
-            // Buscar en cabinSTOTALITY como tenías antes
-            const cabinToEdit = cabinSTOTALITY.find(
-              (c) => c.idCabin === assignToEdit.idCabin
+          console.log("Datos para editar:", assignToEdit);
+          
+          // Buscar la cabaña completa con imágenes
+          let cabinWithImages = null;
+          
+          if (Array.isArray(allCabinComforts)) {
+            const cabinComfort = allCabinComforts.find(
+              cc => cc.idCabin === assignToEdit.idCabin
             );
-            setSelectedCabinData(cabinToEdit);
+            if (cabinComfort?.Cabin) {
+              cabinWithImages = cabinComfort.Cabin;
+            }
           }
+          
+          if (!cabinWithImages) {
+            cabinWithImages = cabins.find(c => c.idCabin === assignToEdit.idCabin);
+          }
+          
+          const cabinData = {
+            idCabin: assignToEdit.idCabin,
+            name: assignToEdit.name || cabinWithImages?.name,
+            images: cabinWithImages?.images || [],
+            description: assignToEdit.description,
+          };
+        
+          console.log("Cabin data procesado:", cabinData);
+          setSelectedCabinData(cabinData);
+          
+          setFormData({
+            selectedCabin: assignToEdit.idCabin,
+            description: assignToEdit.description || "",
+            selectedComforts: assignToEdit.comforts?.map((c) => c.idComfort) || [],
+          });
         }
       } catch (error) {
         console.error("Error cargando datos:", error);
@@ -66,41 +82,48 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
     loadInitialData();
   }, [isOpen, assignToEdit]);
 
-  // Modifica el segundo useEffect para que no sobrescriba cuando esté en modo edición
   useEffect(() => {
     if (formData.selectedCabin && !assignToEdit) {
-      // Solo actualizar selectedCabinData si no estamos en modo edición
       const selected = cabins.find((c) => c.idCabin === formData.selectedCabin);
       setSelectedCabinData(selected);
     }
   }, [formData.selectedCabin, cabins, assignToEdit]);
 
-  // Cargar datos para edición
   useEffect(() => {
-    if (!isOpen) return;
-
-    if (assignToEdit) {
-      setFormData({
-        selectedCabin: assignToEdit.idCabin,
-        description: assignToEdit.description,
-        selectedComforts: assignToEdit.comforts.map((c) => c.idComfort),
-      });
-    } else {
+    if (!isOpen) {
       resetForm();
     }
-  }, [assignToEdit, isOpen]);
+  }, [isOpen]);
 
   const resetForm = () => {
     setFormData(initialFormState);
     setSelectedCabinData(null);
+    setIsLoading(false);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "selectedCabin" ? parseInt(value) : value,
-    }));
+    
+    if (name === "selectedCabin") {
+      const selectedValue = value === "" ? "" : parseInt(value);
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: selectedValue,
+      }));
+      
+      if (value === "") {
+        setSelectedCabinData(null);
+      } else {
+        const selected = cabins.find(c => c.idCabin === parseInt(value));
+        setSelectedCabinData(selected);
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleComfortToggle = (comfortId) => {
@@ -141,22 +164,22 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="ac-modal-overlay">
-      <div className="ac-modal-container">
-        <div className="ac-modal-header">
+    <div className="rc-modal-overlay"> 
+      <div className="rc-modal-container">
+        <div className="rc-modal-header">
           <h2>
             {assignToEdit ? "Editar Asignaciones" : "Asignar Comodidades"}
           </h2>
-          <button className="ac-close-button" onClick={onClose}>
+          <button className="rc-close-button" onClick={onClose}>
             ×
           </button>
         </div>
 
-        <div className="ac-modal-body">
+        <div className="rc-modal-body">
           <form onSubmit={handleSubmit}>
-            <div className="ac-form-container">
-              <div className="ac-form-grid">
-                <div className="ac-form-group">
+            <div className="rc-form-container">
+              <div className="rc-form-grid">
+                <div className="rc-form-group">
                   <label htmlFor="selectedCabin">Cabaña</label>
                   <select
                     id="selectedCabin"
@@ -166,24 +189,26 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
                     required
                     disabled={!!assignToEdit || isLoading}
                   >
-                    {" "}
                     {assignToEdit ? (
-                      <option value={formData.selectedCabin}>
-                        {assignToEdit.name}
+                      <option value={assignToEdit.idCabin}>
+                        {assignToEdit.name ||
+                          `Cabaña #${assignToEdit.idCabin}`}
                       </option>
                     ) : (
-                      <option value="">Seleccionar cabaña</option>
+                      <>
+                        <option value="">Seleccionar cabaña</option>
+                        {Array.isArray(cabins) &&
+                          cabins.map((cabin) => (
+                            <option key={cabin.idCabin} value={cabin.idCabin}>
+                              {cabin.name || `Cabaña #${cabin.idCabin}`}
+                            </option>
+                          ))}
+                      </>
                     )}
-                    {Array.isArray(cabins) &&
-                      cabins.map((cabin) => (
-                        <option key={cabin.idCabin} value={cabin.idCabin}>
-                          {cabin.name}
-                        </option>
-                      ))}
                   </select>
                 </div>
 
-                <div className="ac-form-group">
+                <div className="rc-form-group">
                   <label htmlFor="description">Descripción</label>
                   <textarea
                     id="description"
@@ -197,11 +222,11 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
                   />
                 </div>
 
-                <div className="ac-form-group">
+                <div className="rc-form-group">
                   <label>Comodidades</label>
-                  <div className="ac-checkbox-group">
+                  <div className="rc-checkbox-group">
                     {comforts.map((c) => (
-                      <label key={c.idComfort} className="ac-checkbox-label">
+                      <label key={c.idComfort} className="rc-checkbox-label">
                         <input
                           type="checkbox"
                           checked={formData.selectedComforts.includes(
@@ -216,25 +241,30 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
                   </div>
                 </div>
               </div>
-
-              <div className="ac-image-preview">
-                {selectedCabinData?.imagen ? (
-                  <img
-                    src={`http://localhost:3000/uploads/${selectedCabinData.imagen}`}
-                    alt={selectedCabinData.name}
-                    className="preview-img"
-                  />
+              <div className="rc-image-preview">
+                {selectedCabinData?.images?.length > 0 ? (
+                  <div className="image-container">
+                    <img
+                      src={`http://localhost:3000/uploads/${selectedCabinData.images[0].imagePath}`}
+                      alt={`Cabaña ${selectedCabinData.name}`}
+                      className="preview-room-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/placeholder-room.jpg";
+                      }}
+                    />
+                  </div>
                 ) : (
-                  <p className="no-image-text">
-                    Selecciona una cabaña para ver la imagen
-                  </p>
+                  <div className="no-image-placeholder">
+                    <p>No hay imagen disponible</p>
+                    </div>
                 )}
               </div>
             </div>
-            <div className="ac-modal-footer">
+            <div className="rc-modal-footer">
               <button
                 type="button"
-                className="ac-cancel-btn"
+                className="rc-cancel-btn"
                 onClick={onClose}
                 disabled={isLoading}
               >
@@ -242,7 +272,7 @@ const AssignComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
               </button>
               <button
                 type="submit"
-                className="ac-submit-btn"
+                className="rc-submit-btn"
                 disabled={isLoading}
               >
                 {isLoading

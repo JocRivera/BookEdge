@@ -1,95 +1,166 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MdClose, MdImage } from "react-icons/md";
-import "./BedroomCard.css"
-import { createBedroom, updateBedroom } from "../../../services/BedroomService";
+import { MdClose, MdImage, MdDelete, MdStar, MdStarBorder } from "react-icons/md";
+import {
+  createBedroom,
+  updateBedroom,
+  getBedroomImages,
+  uploadBedroomImages,
+  deleteBedroomImage,
+  setPrimaryBedroomImage,
+} from "../../../services/bedroomService";
 
 const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
-  const [formData, setFormData] = useState({
+  // Estados iniciales
+  const initialFormData = {
     name: "",
     description: "",
     capacity: "",
     status: "En Servicio",
-    imagen: null, 
-  });
-
-  const [previewImage, setPreviewImage] = useState(null);
-  const fileInputRef = useRef(null);
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      capacity: "",
-      status: "En Servicio",
-      imagen: null,
-    });
-    setPreviewImage(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+
+  const [formData, setFormData] = useState(initialFormData);
+  const [existingImages, setExistingImages] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const fileInputRefs = useRef([]);
+
+  // Resetear formulario
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImages([]);
+  };
+
+  // Cargar datos para edición
   useEffect(() => {
-    if (isOpen) {
-      if (bedroomToEdit) {
-        setFormData({
-          name: bedroomToEdit.name,
-          description: bedroomToEdit.description,
-          capacity: bedroomToEdit.capacity,
-          status: bedroomToEdit.status,
-          imagen: bedroomToEdit.imagen || null, // Mantener la referencia a la imagen existente
-        });
-        setPreviewImage(
-          bedroomToEdit.imagen
-            ? `http://localhost:3000/uploads/${bedroomToEdit.imagen}`
-            : null
-        );
-      } else {
-        resetForm();
-      }
+    if (!isOpen) return;
+    
+    resetForm();
+    
+    if (bedroomToEdit) {
+      setFormData({
+        name: bedroomToEdit.name || "",
+        description: bedroomToEdit.description || "",
+        capacity: bedroomToEdit.capacity || "",
+        status: bedroomToEdit.status || "En Servicio",
+      });
+      
+      // Cargar imágenes existentes
+      loadExistingImages(bedroomToEdit.idRoom);
     }
   }, [isOpen, bedroomToEdit]);
-  
+
+  // Cargar imágenes existentes
+  const loadExistingImages = async (bedroomId) => {
+    try {
+      const images = await getBedroomImages(bedroomId);
+      setExistingImages(images);
+    } catch (error) {
+      console.error("Error al cargar imágenes:", error);
+    }
+  };
+
+  // Manejadores de eventos
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (index, e) => {
     const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, imagen: file }));
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewImage(reader.result);
-      reader.readAsDataURL(file);
-    }
-  };
+    if (!file) return;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    // Agregar nuevo archivo
+    setImageFiles(prev => {
+      const newFiles = [...prev];
+      newFiles[index] = file;
+      return newFiles;
+    });
 
-    try {
-      if (bedroomToEdit) {
-        await updateBedroom(bedroomToEdit.idRoom, formData);
-      } else {
-        await createBedroom(formData);
-      }
-
-      resetForm();
-      onSave();
-      onClose();
-    } catch (error) {
-      console.error("ERROR:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreviews(prev => {
+        const newPreviews = [...prev];
+        newPreviews[index] = reader.result;
+        return newPreviews;
       });
-      alert(`Error al ${bedroomToEdit ? "editar" : "crear"}. Ver consola.`);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = (index) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    
+    if (fileInputRefs.current[index]) {
+      fileInputRefs.current[index].value = "";
     }
   };
+
+  const handleRemoveExistingImage = async (imageId) => {
+    if (!window.confirm("¿Estás seguro de querer eliminar esta imagen?")) return;
+    
+    try {
+      await deleteBedroomImage(imageId);
+      setExistingImages(prev => prev.filter(img => img.idRoomImage !== imageId));
+      alert("Imagen eliminada correctamente");
+    } catch (error) {
+      console.error("Error al eliminar imagen:", error);
+        }
+  };
+
+  const handleSetPrimary = async (imageId) => {
+    try {
+      await setPrimaryBedroomImage(bedroomToEdit.idRoom, imageId);
+      setExistingImages(prev => 
+        prev.map(img => ({
+          ...img,
+          isPrimary: img.idRoomImage === imageId
+        }))
+      );
+    } catch (error) {
+      console.error("Error al establecer imagen principal:", error);
+    }
+  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    
+    // Crear o actualizar habitación
+    let bedroomId;
+    if (bedroomToEdit) {
+      await updateBedroom(bedroomToEdit.idRoom, formData);
+      bedroomId = bedroomToEdit.idRoom;
+    } else {
+      const newBedroom = await createBedroom(formData);
+      bedroomId = newBedroom.idRoom;
+    }
+
+    // Subir nuevas imágenes
+    if (imageFiles.filter(Boolean).length > 0) {
+      await uploadBedroomImages(bedroomId, imageFiles.filter(Boolean));
+    }
+
+    resetForm();
+    onSave();
+    onClose();
+  } catch (error) {
+    console.error("ERROR:", error);
+  }
+};
   if (!isOpen) return null;
+
+  // Calcular espacios disponibles para imágenes
+  const availableSlots = 5 - existingImages.length;
+  const showNewImageFields = availableSlots > 0;
 
   return (
     <div className="modal-overlay">
-      <div className="modal-container">
+      <div className="modal-container-bedroom">
         <div className="modal-header">
           <h2>{bedroomToEdit ? "Editar Habitación" : "Agregar Nueva Habitación"}</h2>
           <button className="close-button" onClick={onClose}>
@@ -100,6 +171,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
         <form onSubmit={handleSubmit} className="bedroom-form">
           <div className="form-content">
             <div className="form-inputs">
+              {/* Campo Nombre */}
               <div className="form-group">
                 <label className="form-label">Nombre de la habitación</label>
                 <input
@@ -112,6 +184,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                 />
               </div>
 
+              {/* Campo Descripción */}
               <div className="form-group">
                 <label className="form-label">Descripción</label>
                 <textarea
@@ -123,6 +196,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                 />
               </div>
 
+              {/* Campo Capacidad */}
               <div className="form-group">
                 <label className="form-label">Capacidad</label>
                 <input
@@ -136,6 +210,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                 />
               </div>
 
+              {/* Campo Estado */}
               <div className="form-group">
                 <label className="form-label">Estado</label>
                 <select
@@ -145,47 +220,120 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   className="form-input"
                 >
                   <option value="En Servicio">En Servicio</option>
-                  <option value="Mantenimiento">En Mantenimiento</option> 
+                  <option value="Mantenimiento">En Mantenimiento</option>
                   <option value="Fuera de Servicio">Fuera de Servicio</option>
                 </select>
               </div>
+              
             </div>
 
+            {/* Sección de imágenes */}
             <div className="image-upload-section">
               <div className="form-group">
-                <label className="form-label">Imagen de la habitación</label>
-                <div className="image-upload-container">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    className="file-input"
-                    id="bedroom-image-upload"
-                    style={{ display: "none" }}
-                  />
+                <label className="form-label">Imágenes de la habitación (máx. 5)</label>
 
-                  <label htmlFor="bedroom-image-upload" className="upload-label">
-                    {previewImage ? (
-                      <div className="image-preview-wrapper">
-                        <img
-                          src={previewImage}
-                          alt="Preview"
-                          className="preview-image"
-                        />
-                        <span className="change-image-text">
-                          Haz clic para cambiar
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="upload-placeholder">
-                        <MdImage size={48} className="upload-icon" />
-                        <p>Haz clic para subir una imagen</p>
-                        <small>Formatos: JPG, PNG (Max. 5MB)</small>
-                      </div>
-                    )}
-                  </label>
-                </div>
+                {/* Imágenes existentes */}
+                {existingImages.length > 0 && (
+                  <div className="existing-images-container">
+                    <h4>Imágenes guardadas ({existingImages.length}/5)</h4>
+                    <div className="images-grid">
+                      {existingImages.map(image => (
+                        <div key={image.idRoomImage} className="image-item">
+                          <div className="image-preview-wrapper">
+                            <img
+                              src={`http://localhost:3000/uploads/${image.imagePath}`}
+                              alt="Bedroom"
+                              className="preview-image"
+                            />
+                            <div className="image-actions">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveExistingImage(image.idRoomImage);
+                                }}
+                                className="image-action-btn delete-btn"
+                                title="Eliminar imagen"
+                                style={{ right: "35px" }}
+                              >
+                                <MdDelete />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSetPrimary(image.idRoomImage);
+                                }}
+                                className={`image-action-btn star-btn ${image.isPrimary ? "primary" : ""}`}
+                                title={image.isPrimary ? "Imagen principal" : "Establecer como principal"}
+                                disabled={image.isPrimary}
+                              >
+                                {image.isPrimary ? <MdStar /> : <MdStarBorder />}
+                              </button>
+                            </div>
+                          </div>
+                          {image.isPrimary && <span className="primary-label">Principal</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Campos para nuevas imágenes */}
+                {showNewImageFields && (
+                  <div className="new-images-container">
+                    <h4>Agregar imágenes ({availableSlots} disponibles)</h4>
+                    <div className="individual-image-uploads">
+                      {Array(availableSlots).fill().map((_, index) => (
+                        <div key={`new-${index}`} className="image-upload-field">
+                          {imagePreviews[index] ? (
+                            <div className="image-preview-wrapper">
+                              <img
+                                src={imagePreviews[index]}
+                                alt={`Preview ${index + 1}`}
+                                className="preview-image"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(index)}
+                                className="image-action-btn delete-btn"
+                              >
+                                <MdDelete />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="upload-single-container">
+                              <input
+                                type="file"
+                                ref={el => (fileInputRefs.current[index] = el)}
+                                onChange={(e) => handleImageChange(index, e)}
+                                accept="image/*"
+                                className="file-input"
+                                id={`bedroom-image-upload-${index}`}
+                                style={{ display: "none" }}
+                              />
+                              <label
+                                htmlFor={`bedroom-image-upload-${index}`}
+                                className="upload-single-label"
+                              >
+                                <MdImage size={24} />
+                                <span>Imagen {existingImages.length + index + 1}</span>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mensaje de límite de imágenes */}
+                {existingImages.length >= 5 && (
+                  <div className="max-images-message">
+                    <p>Ya has alcanzado el límite máximo de 5 imágenes.</p>
+                    <p>Elimina alguna imagen existente si deseas agregar nuevas.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -1,61 +1,84 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:3000/cabins";
+const IMAGE_API_URL = "http://localhost:3000/cabin-images";
 
-// Versión SUPER SIMPLE pero FUNCIONAL
+// Servicios para cabañas
 export const getCabins = async () => {
   const { data } = await axios.get(API_URL);
   return data;
 };
-export const getCabinById = async (id) =>{
+
+export const getCabinById = async (id) => {
   const { data } = await axios.get(`${API_URL}/${id}`);
   return data;
-}
+};
 export const createCabin = async (cabinData) => {
-  const formData = new FormData();
-  formData.append("name", cabinData.name);
-  formData.append("description", cabinData.description);
-  formData.append("capacity", cabinData.capacity);
-  formData.append("status", cabinData.status);
-  
-  if (cabinData.imagen instanceof File) {
-    formData.append("imagen", cabinData.imagen);
+  try {
+    // Convertimos capacity a número si existe
+    const dataToSend = {
+      ...cabinData,
+      capacity: cabinData.capacity ? Number(cabinData.capacity) : undefined
+    };
+    
+    const response = await axios.post(API_URL, dataToSend);
+    return response.data;
+  } catch (error) {
+    // Lanzamos el error completo para manejarlo en el componente
+    throw error.response?.data || { 
+      message: error.message || "Error al crear la cabaña" 
+    };
   }
-
-  const { data } = await axios.post(API_URL, formData, {
-    headers: { "Content-Type": "multipart/form-data" }
-  });
-  return data;
 };
 export const updateCabin = async (id, cabinData) => {
-  const formData = new FormData();
-  
-  // Adjunta todos los campos, incluso si no cambian
-  formData.append("name", cabinData.name);
-  formData.append("description", cabinData.description);
-  formData.append("capacity", cabinData.capacity);
-  formData.append("status", cabinData.status);
-
-  // Manejo de imágenes:
-  if (cabinData.imagen instanceof File) {
-    // Si hay una imagen nueva, adjúntala
-    formData.append("imagen", cabinData.imagen);
-  } else if (cabinData.imagen) {
-    // Si es una ruta (string), envía la ruta como campo normal (no como File)
-    // Esto depende de tu backend. Algunas opciones:
-    // Opción 1: Enviar como campo adicional
-    formData.append("imagenPath", cabinData.imagen);
-    // Opción 2: Omitir el campo si no hay imagen nueva (ajusta el backend para que ignore este caso)
+  try {
+    // Convertimos capacity a número si existe
+    const dataToSend = {
+      ...cabinData,
+      capacity: cabinData.capacity ? Number(cabinData.capacity) : undefined
+    };
+    
+    const response = await axios.put(`${API_URL}/${id}`, dataToSend);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { 
+      message: error.message || "Error al actualizar la cabaña" 
+    };
   }
-
-  const { data } = await axios.put(`${API_URL}/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return data;
 };
 
 export const deleteCabin = async (id) => {
-  const {data} =await axios.delete(`${API_URL}/${id}`);
-  return data
+  const { data } = await axios.delete(`${API_URL}/${id}`);
+  return data;
 };
 
+// Servicios para imágenes de cabañas
+export const getCabinImages = async (cabinId) => {
+  const { data } = await axios.get(`${IMAGE_API_URL}/${cabinId}`);
+  return data;
+};
+
+export const uploadCabinImages = async (cabinId, imageFiles) => {
+  const formData = new FormData();
+  
+  // Permitir subir múltiples imágenes
+  imageFiles.forEach(file => {
+    formData.append("images", file);
+  });
+  
+  const { data } = await axios.post(`${IMAGE_API_URL}/${cabinId}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
+  
+  return data;
+};
+
+export const deleteCabinImage = async (imageId) => {
+  const { data } = await axios.delete(`${IMAGE_API_URL}/${imageId}`);
+  return data;
+};
+
+export const setPrimaryImage = async (cabinId, imageId) => {
+  const { data } = await axios.put(`${IMAGE_API_URL}/${cabinId}/primary/${imageId}`);
+  return data;
+};

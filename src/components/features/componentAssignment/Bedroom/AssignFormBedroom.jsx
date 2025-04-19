@@ -21,14 +21,14 @@ const AssignRoomComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRoomData, setSelectedRoomData] = useState(null);
 
-  // Reemplaza esta parte en tu useEffect de carga inicial
+  // Carga inicial de datos
   useEffect(() => {
     const loadInitialData = async () => {
       if (!isOpen) return;
 
       try {
         setIsLoading(true);
-        const [roomsTOTALITY, roomsResponse, comfortsResponse] =
+        const [allBedroomComforts, roomsResponse, comfortsResponse] =
           await Promise.all([
             getAllComfortsForBedRoom(),
             getBedRoomsWithoutComforts(),
@@ -39,36 +39,43 @@ const AssignRoomComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
         setComforts(comfortsResponse);
 
         if (assignToEdit) {
-          // Opción 1: Buscar en roomsTOTALITY
-          const roomToEdit = roomsTOTALITY.find(
-            (r) => r.idRoom === assignToEdit.idRoom
-          );
-
-          // Opción 2: Si no se encuentra, buscar en roomsResponse (habitaciones sin comodidades)
-          const fallbackRoom = roomsResponse.find(
-            (r) => r.idRoom === assignToEdit.idRoom
-          );
-
-          // Opción 3: Usar los datos que vienen directamente de assignToEdit
-          const finalRoomData = roomToEdit?.Room ||
-            roomToEdit ||
-            fallbackRoom || {
-              idRoom: assignToEdit.idRoom,
-              name: assignToEdit.name,
-              imagen: assignToEdit.imagen,
-              description: assignToEdit.description,
-            };
-
-          console.log("Datos finales de la habitación:", finalRoomData);
-          setSelectedRoomData(finalRoomData);
-
-          // Asegurar que el formulario tenga los datos correctos
+          console.log("Datos para editar:", assignToEdit);
+          
+          // Buscar la habitación completa con imágenes en la lista de habitaciones
+          // o en allBedroomComforts
+          let roomWithImages = null;
+          
+          // Primero buscar en allBedroomComforts 
+          if (Array.isArray(allBedroomComforts)) {
+            const bedroomComfort = allBedroomComforts.find(
+              bc => bc.idRoom === assignToEdit.idRoom
+            );
+            if (bedroomComfort?.Bedroom) {
+              roomWithImages = bedroomComfort.Bedroom;
+            }
+          }
+          
+          // Si no se encuentra, buscar en la lista de habitaciones
+          if (!roomWithImages) {
+            roomWithImages = rooms.find(r => r.idRoom === assignToEdit.idRoom);
+          }
+          
+          // Crear el objeto con los datos de la habitación
+          const roomData = {
+            idRoom: assignToEdit.idRoom,
+            name: assignToEdit.name || roomWithImages?.name,
+            images: roomWithImages?.images || [],
+            description: assignToEdit.description,
+          };
+        
+          console.log("Room data procesado:", roomData);
+          setSelectedRoomData(roomData);
+          
+          // Configurar el formulario con los datos para edición
           setFormData({
             selectedRoom: assignToEdit.idRoom,
-            description:
-              assignToEdit.description || finalRoomData.description || "",
-            selectedComforts:
-              assignToEdit.comforts?.map((c) => c.idComfort) || [],
+            description: assignToEdit.description || "",
+            selectedComforts: assignToEdit.comforts?.map((c) => c.idComfort) || [],
           });
         }
       } catch (error) {
@@ -81,7 +88,7 @@ const AssignRoomComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
     loadInitialData();
   }, [isOpen, assignToEdit]);
 
-  // Modifica el segundo useEffect para que no sobrescriba cuando esté en modo edición
+  // Actualizar datos de habitación seleccionada
   useEffect(() => {
     if (formData.selectedRoom && !assignToEdit) {
       // Solo actualizar selectedRoomData si no estamos en modo edición
@@ -90,33 +97,43 @@ const AssignRoomComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
     }
   }, [formData.selectedRoom, rooms, assignToEdit]);
 
-  // Cargar datos para edición
-  useEffect(() => {
-    if (!isOpen) return;
+useEffect(() => {
+  if (!isOpen) {
+    resetForm();
+  }
+}, [isOpen]);
 
-    if (assignToEdit) {
-      setFormData({
-        selectedRoom: assignToEdit.idRoom,
-        description: assignToEdit.description,
-        selectedComforts: assignToEdit.comforts.map((c) => c.idComfort),
-      });
-    } else {
-      resetForm();
-    }
-  }, [assignToEdit, isOpen]);
+const resetForm = () => {
+  setFormData(initialFormState);
+  setSelectedRoomData(null);
+  setIsLoading(false);
+};
 
-  const resetForm = () => {
-    setFormData(initialFormState);
-    setSelectedRoomData(null);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  
+  if (name === "selectedRoom") {
+    const selectedValue = value === "" ? "" : parseInt(value);
+    
+    setFormData(prev => ({
       ...prev,
-      [name]: name === "selectedRoom" ? parseInt(value) : value,
+      [name]: selectedValue,
     }));
-  };
+    
+    if (value === "") {
+      setSelectedRoomData(null);
+    } else {
+      const selected = rooms.find(c => c.idRoom === parseInt(value));
+      setSelectedRoomData(selected);
+    }
+  } else {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+};
+
 
   const handleComfortToggle = (comfortId) => {
     setFormData((prev) => ({
@@ -182,9 +199,8 @@ const AssignRoomComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
                     disabled={!!assignToEdit || isLoading}
                   >
                     {assignToEdit ? (
-                      <option value={formData.selectedRoom}>
-                        {selectedRoomData?.name ||
-                          assignToEdit.name ||
+                      <option value={assignToEdit.idRoom}>
+                        {assignToEdit.name ||
                           `Habitación #${assignToEdit.idRoom}`}
                       </option>
                     ) : (
@@ -234,18 +250,23 @@ const AssignRoomComfortsForm = ({ isOpen, onClose, onSave, assignToEdit }) => {
                   </div>
                 </div>
               </div>
-
               <div className="rc-image-preview">
-                {selectedRoomData?.imagen ? (
-                  <img
-                    src={`http://localhost:3000/uploads/${selectedRoomData.imagen}`}
-                    alt={selectedRoomData.name}
-                    className="preview-room-img"
-                  />
+                {selectedRoomData?.images?.length > 0 ? (
+                  <div className="image-container">
+                    <img
+                      src={`http://localhost:3000/uploads/${selectedRoomData.images[0].imagePath}`}
+                      alt={`Habitación ${selectedRoomData.name}`}
+                      className="preview-room-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/placeholder-room.jpg";
+                      }}
+                    />
+                  </div>
                 ) : (
-                  <p className="no-image-text-room">
-                    Selecciona una habitación para ver la imagen
-                  </p>
+                  <div className="no-image-placeholder">
+                    <p>No hay imagen disponible</p>
+                  </div>
                 )}
               </div>
             </div>
