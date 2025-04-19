@@ -78,7 +78,7 @@ export default function CreateConfig() {
                 notify()
             }).catch((error) => {
                 console.log(error)
-                toast.error(`Error al actualizar,
+                toast.error(`Error al actualizar
                      ${error}`)
             }
             )

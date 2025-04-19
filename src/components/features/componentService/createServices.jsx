@@ -79,7 +79,8 @@ export default function CreateServices() {
                 setServices([...services, newService]);
                 notify();
             }).catch((error) => {
-                toast.error(`Error al crear el servicio, ${error}`);
+                toast.error(`Error al crear
+                    ${error}`);
             });
         }
         console.log(service);
