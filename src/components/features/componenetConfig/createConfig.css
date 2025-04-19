@@ -110,7 +110,7 @@
 }
 
 .table-header th {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 3rem;
     text-align: left;
     font-size: 0.75rem;
     font-weight: 500;
@@ -136,7 +136,7 @@
 }
 
 .table-cell {
-    padding: 0.75rem;
+    padding: 0.75rem 3rem;
     font-size: 0.875rem;
     color: var(--color-text-normal);
     border-bottom: 1px solid var(--color-border);
@@ -172,6 +172,7 @@
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -209,18 +210,22 @@
     color: var(--color-text-dark);
 }
 
-.modal-body {
-    padding: 20px;
+.config-modal-body {
+    padding: 0px;
 }
 
 /* CORRECCIÓN: Arreglado el grid para que ocupe todo el ancho en el caso del formulario de configuración */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 6px;
 }
 
 .form-group {
+    grid-column: 1 / -1;
+    /* Ocupa todo el ancho disponible */
+    border-radius: 6px;
+    padding: 7px;
     margin-bottom: 16px;
 }
 
@@ -293,12 +298,10 @@
 
 /* CORRECCIÓN: Estilos de permisos mejorados */
 .permissions-group {
-    grid-column: 1 / -1; /* Ocupa todo el ancho disponible */
-    border: 1px solid var(--color-border);
+    grid-column: 1 / -1;
+    /* Ocupa todo el ancho disponible */
     border-radius: 6px;
-    padding: 16px;
-    margin-bottom: 16px;
-    background-color: var(--color-background);
+    padding: 7px;
 }
 
 .permissions-table-container {
@@ -317,7 +320,7 @@
     font-size: 0.9rem;
 }
 
-.permissions-table th, 
+.permissions-table th,
 .permissions-table td {
     border: 1px solid var(--color-border);
     padding: 10px 8px;
@@ -398,15 +401,15 @@
         width: 95%;
         max-height: 95vh;
     }
-    
+
     .permissions-table-container {
         max-height: 300px;
     }
-    
+
     .modal-footer {
         flex-direction: column-reverse;
     }
-    
+
     .submit-btn,
     .cancel-btn {
         width: 100%;
@@ -414,12 +417,13 @@
 }
 
 @media (max-width: 480px) {
-    .permissions-table th, 
+
+    .permissions-table th,
     .permissions-table td {
         padding: 6px 4px;
         font-size: 0.8rem;
     }
-    
+
     .modal-header h2 {
         font-size: 18px;
     }

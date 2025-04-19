@@ -28,8 +28,7 @@ class RolesService {
       const response = await axios.post(API_URL_ROL, roleData);
       return response.data;
     } catch (error) {
-      console.error("Error creating role:", error);
-      throw error;
+      throw error.response?.data?.errors?.[0]?.msg;
     }
   }
 

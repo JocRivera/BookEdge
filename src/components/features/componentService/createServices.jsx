@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import "./createService.css";
 import { CustomButton, ActionButtons } from '../../common/Button/customButton';
 import { CiSearch } from "react-icons/ci";
 import Switch from "../../common/Switch/Switch";
 import Pagination from "../../common/Paginator/Pagination";
 import FormService from './formServices';
 import serviceService from '../../../services/serviceService';
+import toast, { Toaster } from 'react-hot-toast';
 export default function CreateServices() {
     const [currentService, setCurrentService] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,31 +49,62 @@ export default function CreateServices() {
         setCurrentService(service);
         setIsModalOpen(true);
     }
-    const handleDelete = (id) => {
+    const handleDelete = (Id_Service) => {
+        const notify = () => toast.success('Servicio eliminado corretamente');
+        const notifyError = () => toast.error('Error al eliminar el servicio');
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este servicio?");
         if (confirmDelete) {
-            serviceService.deleteService(id).then(() => {
-                setServices(services.filter((service) => service.id !== id));
+            serviceService.deleteService(Id_Service).then(() => {
+                setServices(services.filter((service) => service.Id_Service !== Id_Service));
+                notify();
             }).catch((error) => {
                 console.error("Error deleting service:", error);
+                notifyError();
             });
         }
     }
     const handleSave = (service) => {
         if (currentService) {
+            const notify = () => toast.success('Servicio Actualizado correctamente');
             serviceService.updateService(currentService.Id_Service, service).then(() => {
-                setServices(services.map((s) => (s.id === currentService.id ? service : s)));
+                setServices(services.map((s) => (s.Id_Service === currentService.Id_Service ? service : s)));
+                notify();
             }).catch((error) => {
                 console.error("Error updating service:", error);
+                toast.error(`Error al actualizar el servicio, ${error}`);
             });
         } else {
+            const notify = () => toast.success('Servicio creado correctamente');
             serviceService.createService(service).then((newService) => {
                 setServices([...services, newService]);
+                notify();
             }).catch((error) => {
-                console.error("Error creating service:", error);
+                toast.error(`Error al crear
+                    ${error}`);
             });
         }
         console.log(service);
+    }
+    const handleToggle = async (Id_Service) => {
+        const confirmToggle = window.confirm("¿Estás seguro de que deseas cambiar el estado de este servicio?");
+        if (!confirmToggle) return;
+        try {
+            const notify = () => toast.success('Estado cambiado correctamente');
+            const currentService = services.find((service) => service.Id_Service === Id_Service);
+            await serviceService.changeStatus(Id_Service, !currentService.StatusServices);
+            setServices(
+                services.map((service) =>
+                    service.Id_Service === Id_Service
+                        ? { ...service, StatusServices: !service.StatusServices }
+                        : service
+                )
+            )
+            console.log(services)
+            notify();
+        } catch (error) {
+            console.error("Error changing service status:", error);
+            toast.error("Chingaste");
+        }
     }
 
     return (
@@ -82,8 +113,7 @@ export default function CreateServices() {
                 <h2 className="table-title">Tabla de Servicios</h2>
             </div>
             <div className="container-search">
-                <CiSearch className="search-icon" />
-
+                <CiSearch className="absolute left-[10px] text-[16px] text-text-light" />
                 <input
                     type="text"
                     className="search"
@@ -109,29 +139,17 @@ export default function CreateServices() {
                         </tr>
                     </thead>
                     <tbody className="table-body">
-                        {services.map((service) => (
+                        {currentItems.map((service) => (
                             <tr key={service.Id_Service}>
                                 <td className="table-cell">{service.Id_Service}</td>
                                 <td className="table-cell">{service.name}</td>
                                 <td className="table-cell">{service.Description}</td>
-                                <td className="table-cell">{service.Price}</td>
+                                <td className="table-cell" >{service.Price}</td>
                                 <td className="table-cell">
                                     <Switch
                                         isOn={service.StatusServices === true}
                                         id={service.Id_Service}
-                                        handleToggle={(Id_Service) => {
-                                            setServices(
-                                                services.map((service) =>
-                                                    service.Id_Service === Id_Service
-                                                        ? {
-                                                            ...service,
-                                                            StatusServices: service.StatusServices === true ? false : true,
-                                                        }
-                                                        : service
-                                                )
-                                            );
-                                        }
-                                        }
+                                        handleToggle={() => handleToggle(service.Id_Service)}
                                     />
                                 </td>
                                 <td className="table-cell">
@@ -152,7 +170,7 @@ export default function CreateServices() {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
             />
-
+            <Toaster />
         </div>
     );
 }

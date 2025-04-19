@@ -26,6 +26,8 @@ import ProtectedRoutes from "./ProtectedRutes";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
 import ComfortAssignmentSelector from "./components/features/componentAssignment/selectorAssing";
+import DashboardManagement from "./components/features/componentDashboard/main";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -56,15 +58,15 @@ export default function App() {
               <Route path="cabins" element={<CabinsPage />} />
               <Route path="rooms" element={<BedroomCard />} />
               <Route path="AssignAmenities" element={<ComfortAssignmentSelector />} />
-
+              <Route path="dashboard" element={<DashboardManagement />} />
               <Route path="reservations" element={<TableReservations />} />
               <Route
                 path="companions"
-                element={<CompanionsView onDeleteCompanion={() => {}} />}
+                element={<CompanionsView onDeleteCompanion={() => { }} />}
               />
               <Route
-              path="payments"
-              element={<TablePayments/>}
+                path="payments"
+                element={<TablePayments />}
               ></Route>
               <Route path="plans" element={<Plan />} />
               <Route path="plansProgramed" element={<PlanProgramed />} />
@@ -76,6 +78,6 @@ export default function App() {
       </AuthProvider>
     </BrowserRouter>
   );
-  
+
 }
 
