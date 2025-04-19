@@ -182,7 +182,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                     <h2>{setting ? 'Editar Configuracion' : 'Registrar Configuracion'}</h2>
                     <button className="close-button" onClick={onClose}>×</button>
                 </div>
-                <div className='modal-body'>
+                <div className='config-modal-body'>
                     <form onSubmit={handleSubmit}>
                         <div className='form-grid '>
                             <div className='form-group'>

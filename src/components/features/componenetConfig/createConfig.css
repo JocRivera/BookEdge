@@ -110,7 +110,7 @@
 }
 
 .table-header th {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 3rem;
     text-align: left;
     font-size: 0.75rem;
     font-weight: 500;
@@ -136,7 +136,7 @@
 }
 
 .table-cell {
-    padding: 0.75rem;
+    padding: 0.75rem 3rem;
     font-size: 0.875rem;
     color: var(--color-text-normal);
     border-bottom: 1px solid var(--color-border);
@@ -210,8 +210,8 @@
     color: var(--color-text-dark);
 }
 
-.modal-body {
-    padding: 20px;
+.config-modal-body {
+    padding: 0px;
 }
 
 /* CORRECCIÓN: Arreglado el grid para que ocupe todo el ancho en el caso del formulario de configuración */
