@@ -26,6 +26,7 @@ import ProtectedRoutes from "./ProtectedRutes";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
 import CabinComfortsCards from "./components/features/componentAssignment/AssignAmenitiesTable "
+import Customer from "./components/features/componentCustomer/customer";
 export default function App() {
   return (
     <BrowserRouter>
@@ -49,7 +50,8 @@ export default function App() {
           <Route element={<ProtectedRoutes />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="profile" element={<Profile />} />
-              <Route path="clients" element={<TableUser />} />
+              <Route path="users" element={<TableUser />} />
+              <Route path="customer" element={<Customer />} />
               <Route path="accommodations" element={<ComponentConfort />} />
               <Route path="services" element={<CreateServices />} />
               <Route path="config" element={<CreateConfig />} />
