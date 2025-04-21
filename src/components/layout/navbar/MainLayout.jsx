@@ -7,9 +7,17 @@ import Footer from '../Footer/Footer'
 export default function MainLayout() {
   return (
 <>
-<Navbar/>
+<main 
+  className="container-main" 
+  style={{
+    backgroundColor: '#F1F5F9  ',
+    
+  }}
+><Navbar/>
 <Outlet/>
 <Footer/>
+</main>
+
 </>
 )
 }

@@ -27,6 +27,9 @@ import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
 import ComfortAssignmentSelector from "./components/features/componentAssignment/selectorAssing";
 import DashboardManagement from "./components/features/componentDashboard/main";
+import CabinDetailClient from "./pages/Cabins/CabinDetailCliente";
+import CabinsClient from "./pages/Cabins/CabinsClient"
+
 
 import Customer from "./components/features/componentCustomer/customer";
 export default function App() {
@@ -37,12 +40,19 @@ export default function App() {
           {/* Rutas públicas */}
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Homepage />} />
+            <Route path="profile" element={<Profile />} />
+
+            <Route path="cabins">
+              <Route index element={<CabinsClient />} />
+              <Route path=":cabinName" element={<CabinDetailClient />} />
+            </Route>
           </Route>
           <Route path="/login" element={<Loginform />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/recoveryPassword" element={<RecoveryPassword />} />
           <Route path="/Emailcode" element={<Emailcode />} />
-
+         
+          
           {/* Página de error 401 */}
           <Route path="/unauthorized" element={<Error401 />} />
           {/* Página de error 404 */}
