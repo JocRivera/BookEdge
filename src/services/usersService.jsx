@@ -32,3 +32,23 @@ export const getCustomers = async () => {
   const response = await api.get("/user/customers/get");
   return response.data;
 };
+
+export const postCustomers = async (customer) => {
+  const response = await api.post("/user/customers/post", customer);
+  return response.data;
+}
+
+export const updateCustomers = async (customer) => {
+  const response = await api.put(`/user/customers/put/${customer.idUser}`, customer);
+  return response.data;
+}
+
+export const deleteCustomer = async (id) => {
+  const response = await api.delete(`/user/customers/delete/${id}`);
+  return response.data;
+}
+
+export const changeSatus = async (id, customer) => {
+  const response = await api.patch(`/user/customers/patch/${id}`, customer);
+  return response.data;
+}
