@@ -20,7 +20,6 @@ function ComponentConfort() {
   const [comforts, setComforts] = useState([]);
   const [backendErrors, setBackendErrors] = useState({});
 
-
   useEffect(() => {
     const fetchComforts = async () => {
       try {
@@ -48,6 +47,7 @@ function ComponentConfort() {
 
   const handleAdd = () => {
     setCurrentComfort(null);
+    setBackendErrors({});
     setIsModalOpen(true);
   };
 
@@ -87,15 +87,13 @@ function ComponentConfort() {
       }
       setIsModalOpen(false);
     } catch (error) {
-      if (error.response && error.response.data.errors) {
-        const backendErrors = error.response.data.errors.reduce((acc, err) => {
-          acc[err.param] = err.msg;
-          return acc;
-        }, {});
-        setBackendErrors(backendErrors); // NUEVO
-      } else {
-        console.error("Error desconocido:", error);
-      }
+      if (error.errors) {
+        const errorMap = {};
+        error.errors.forEach((err) => {
+          errorMap[err.path] = err.msg;
+        });
+        setBackendErrors(errorMap);
+      }c
     }
   };
 
@@ -153,10 +151,12 @@ function ComponentConfort() {
         <FormConfort
           isOpen={isModalOpen}
           comfortData={currentComfort}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setBackendErrors({}); // Reiniciar errores del backend al cerrar
+          }}
           onSave={handleSave}
           backendErrors={backendErrors}
-
         />
       </div>
     </div>

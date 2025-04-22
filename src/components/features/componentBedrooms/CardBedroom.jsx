@@ -1,92 +1,145 @@
-import React, { useState, useEffect } from "react";
-import "./BedroomCard.css";
-import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import React, { useState, useEffect, useCallback } from "react";
 import { CiSearch } from "react-icons/ci";
 import { MdPerson } from "react-icons/md";
+import { ActionButtons, CustomButton } from "../../common/Button/customButton";
 import BedroomDetail from "./BedroomDetail";
+import FormBedrooms from "./FormBedRoom";
+import Pagination from "../../common/Paginator/Pagination";
 import {
   getBedrooms,
   getBedroomById,
   deleteBedroom,
+  getBedroomImages,
 } from "../../../services/bedroomService";
-import Pagination from "../../common/Paginator/Pagination";
-import FormBedrooms from "./FormBedRoom";
+import "./BedroomCard.css";
 
 function BedroomCard() {
+  // Estados
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpenModal, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [bedrooms, setBedrooms] = useState([]);
+  const [bedroomImages, setBedroomImages] = useState({});
   const [error, setError] = useState(null);
   const [selectedBedroom, setSelectedBedroom] = useState(null);
-  const [loadingDetail, setLoadingDetail] = useState(false);
   const [viewBedroom, setViewBedroom] = useState(null);
   const [isDetailOpen, setDetailOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchBedroom = async () => {
-      try {
-        const data = await getBedrooms();
-        setBedrooms(data);
-        console.log(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBedroom();
+  // Paginación
+  const itemsPerPage = 3;
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Cargar datos de habitaciones e imágenes
+  const loadBedroomData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getBedrooms();
+      setBedrooms(data);
+
+      // Cargar imágenes principales
+      const imagesMap = await loadBedroomImages(data);
+      setBedroomImages(imagesMap);
+    } catch (error) {
+      setError(error.message || "Error al cargar habitaciones");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  // Cargar imágenes para cada habitación
+  const loadBedroomImages = async (bedroomsList) => {
+    const imagesMap = {};
+
+    for (const bedroom of bedroomsList) {
+      try {
+        const images = await getBedroomImages(bedroom.idRoom);
+        bedroom.imageCount = images.length; // 👈 Esto es lo que falta
+        // Encontrar imagen principal
+        const primaryImage = images.find((img) => img.isPrimary) || images[0];
+        imagesMap[bedroom.idRoom] = primaryImage
+          ? primaryImage.imagePath
+          : null;
+      } catch (err) {
+        console.error(
+          `Error al cargar imágenes para habitación ${bedroom.idRoom}:`,
+          err
+        );
+      }
+    }
+
+    return imagesMap;
+  };
+
+  // Filtrar habitaciones según término de búsqueda
   const filteredBedrooms = bedrooms.filter((bedroom) =>
     `${bedroom.name} ${bedroom.description} ${bedroom.status} ${
       bedroom.capacity
-    } ${bedroom.Comforts.map((c) => c.name).join(" ")}`
+    } 
+     ${bedroom.Comforts?.map((c) => c.name).join(" ") || ""}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
 
-  const itemsPerPage = 3;
-  const [currentPage, setCurrentPage] = useState(0);
+  // Calcular elementos para la página actual
   const currentItems = filteredBedrooms.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
+
   const pageCount = Math.ceil(filteredBedrooms.length / itemsPerPage);
 
+  // Cargar datos iniciales
+  useEffect(() => {
+    loadBedroomData();
+  }, [loadBedroomData]);
+
+  // Manejar error de carga de imagen
   const handleImageError = (e) => {
     e.target.style.objectFit = "contain";
     e.target.onerror = null;
   };
 
+  // Editar habitación
   const handleEditBedroom = (bedroom) => {
     setSelectedBedroom(bedroom);
     setModalOpen(true);
   };
 
+  // Eliminar habitación
   const handleDelete = async (idRoom) => {
+    if (!window.confirm("¿Estás seguro de eliminar esta habitación?")) return;
+
     try {
       await deleteBedroom(idRoom);
       setBedrooms((prevBedrooms) =>
         prevBedrooms.filter((bedroom) => bedroom.idRoom !== idRoom)
       );
-      console.log("Habitación eliminada exitosamente");
     } catch (error) {
-      console.log("Error al eliminar la habitación", error);
+      console.error("Error al eliminar la habitación", error);
     }
   };
 
+  // Ver detalles de habitación
   const handleView = async (idRoom) => {
     try {
-      setLoadingDetail(true);
       const bedroomData = await getBedroomById(idRoom);
       setViewBedroom(bedroomData);
       setDetailOpen(true);
     } catch (error) {
       console.error("Error al obtener detalles de la habitación:", error);
-    } finally {
-      setLoadingDetail(false);
     }
+  };
+
+  // Actualizar búsqueda y resetear página
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(0);
+  };
+
+  // Abrir modal para nueva habitación
+  const handleAddBedroom = () => {
+    setSelectedBedroom(null);
+    setModalOpen(true);
   };
 
   return (
@@ -95,6 +148,7 @@ function BedroomCard() {
         <h1 className="title-bedroom">Nuestras Habitaciones</h1>
       </div>
 
+      {/* Barra de búsqueda y botón de agregar */}
       <div className="bedroom-search">
         <div>
           <CiSearch className="search-icon" />
@@ -103,24 +157,15 @@ function BedroomCard() {
             className="search"
             placeholder="Buscar ..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(0);
-            }}
+            onChange={handleSearch}
           />
         </div>
-        <CustomButton
-          variant="primary"
-          icon="add"
-          onClick={() => {
-            setSelectedBedroom(null);
-            setModalOpen(true);
-          }}
-        >
+        <CustomButton variant="primary" icon="add" onClick={handleAddBedroom}>
           Agregar Habitación
         </CustomButton>
       </div>
 
+      {/* Lista de habitaciones */}
       <main className="bedroom-list">
         {loading ? (
           <div className="loading-state">Cargando habitaciones...</div>
@@ -130,7 +175,7 @@ function BedroomCard() {
               ? `No se encontraron resultados para "${searchTerm}"`
               : "Error al cargar las habitaciones"}
           </div>
-        ) : filteredBedrooms.length === 0 ? ( // Nueva condición
+        ) : filteredBedrooms.length === 0 ? (
           <div className="no-results">
             {searchTerm
               ? `No se encontraron resultados para "${searchTerm}"`
@@ -139,15 +184,28 @@ function BedroomCard() {
         ) : (
           currentItems.map((bedroom) => (
             <article key={bedroom.idRoom} className="bedroom-card">
+              {/* Imagen de la habitación */}
               <div className="image-wrapper">
-                <img
-                  src={`http://localhost:3000/uploads/${bedroom.imagen}`}
-                  alt={bedroom.name}
-                  className="bedroom-image"
-                  onError={handleImageError}
-                />
+                {bedroomImages[bedroom.idRoom] ? (
+                  <img
+                    src={`http://localhost:3000/uploads/${
+                      bedroomImages[bedroom.idRoom]
+                    }`}
+                    alt={bedroom.name}
+                    className="bedroom-image"
+                    onError={handleImageError}
+                  />
+                ) : (
+                  <div className="no-image-placeholder">Sin imágenes</div>
+                )}
+                {bedroom.imageCount > 1 && (
+                  <span className="multiple-images-badge">
+                    +{bedroom.imageCount - 1}
+                  </span>
+                )}
               </div>
 
+              {/* Detalles de la habitación */}
               <section className="bedrooms-details">
                 <header className="bedroom-header">
                   <h2>{bedroom.name}</h2>
@@ -169,12 +227,14 @@ function BedroomCard() {
                 </p>
 
                 <div className="bedroom-meta">
+                  {/* Capacidad */}
                   <span className="capacity-info">
                     <MdPerson className="icon-person" />
                     <span className="label">Capacidad:</span>{" "}
                     {bedroom.capacity || "N/A"}
                   </span>
 
+                  {/* Comodidades */}
                   <div className="comforts-section">
                     <div className="comforts-info">
                       <MdPerson className="icon-person" />
@@ -206,6 +266,7 @@ function BedroomCard() {
                   </div>
                 </div>
 
+                {/* Botones de acción */}
                 <footer className="bedroom-actions">
                   <ActionButtons
                     onEdit={() => handleEditBedroom(bedroom)}
@@ -218,18 +279,8 @@ function BedroomCard() {
           ))
         )}
       </main>
-      <FormBedrooms
-        isOpen={isOpenModal}
-        onClose={() => setModalOpen(false)}
-        onSave={() => {
-          setLoading(true);
-          getBedrooms()
-            .then(setBedrooms)
-            .catch((error) => setError(error.message))
-            .finally(() => setLoading(false));
-        }}
-        bedroomToEdit={selectedBedroom}
-      />
+
+      {/* Paginación */}
       {pageCount > 1 && (
         <Pagination
           pageCount={pageCount}
@@ -238,10 +289,19 @@ function BedroomCard() {
         />
       )}
 
+      {/* Modal de formulario */}
+      <FormBedrooms
+        isOpen={isOpenModal}
+        onClose={() => setModalOpen(false)}
+        onSave={loadBedroomData}
+        bedroomToEdit={selectedBedroom}
+      />
+
+      {/* Modal de detalles */}
       <BedroomDetail
-      isOpen={isDetailOpen}
-      onClose={() => setDetailOpen(false)}
-      bedroom={viewBedroom}
+        isOpen={isDetailOpen}
+        onClose={() => setDetailOpen(false)}
+        bedroom={viewBedroom}
       />
     </section>
   );

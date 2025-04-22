@@ -17,45 +17,46 @@ const RoomComfortsCards = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Obtener datos de habitaciones y comodidades
   const fetchData = async () => {
     try {
       setLoading(true);
       const data = await getAllComfortsForBedRoom();
       console.log("Datos de API:", data); // Para depuración
-
+  
+      // Adaptar a la nueva estructura de datos
       const grouped = data.reduce((acc, item) => {
-        // Manejo seguro de datos según la estructura recibida
-        const roomData = item.Bedroom || item;
-        const roomId = roomData.idRoom;
-
+        const roomId = item.idRoom || item.Bedroom?.idRoom;
+  
         if (!roomId) {
           console.warn("Item sin ID de habitación:", item);
           return acc;
         }
-
+  
+        // Inicializar la entrada de habitación si no existe
         if (!acc[roomId]) {
           acc[roomId] = {
             idRoom: roomId,
-            name: roomData.name || `Habitación ${roomId}`,
+            name: item.name || item.Bedroom?.name || `Habitación ${roomId}`,
             description: item.description || "Sin descripción",
             dateEntry: item.dateEntry || new Date().toISOString(),
-            imagen: roomData.imagen || null,
+            images: item.Bedroom?.images || [], // <-- Aquí capturamos las imágenes
             comforts: [],
           };
         }
-
-        // Agregar comodidad si existe
+  
+        // Agregar comodidades si existen
         if (item.Comfort) {
-          acc[roomId].comforts.push({
-            idComfort: item.Comfort.idComfort,
-            name: item.Comfort.name,
-          });
+          if (!acc[roomId].comforts.some(c => c.idComfort === item.Comfort.idComfort)) {
+            acc[roomId].comforts.push({
+              idComfort: item.Comfort.idComfort,
+              name: item.Comfort.name,
+            });
+          }
         }
-
+  
         return acc;
       }, {});
-
+  
       setGroupedRooms(Object.values(grouped));
       setError(null);
     } catch (error) {
@@ -128,7 +129,7 @@ const RoomComfortsCards = () => {
               setModalOpen(true);
             }}
             text="Asignar Comodidades"
-          />
+          >Asignar Comodidades</CustomButton>
         </div>
 
         <main className="card-list-room">
@@ -146,18 +147,21 @@ const RoomComfortsCards = () => {
             currentItems.map((room) => (
               <div key={room.idRoom} className="room-card">
                 <div className="room-image-container">
-                  {room.imagen && (
+                  {room.images?.length > 0 ? (
                     <img
-                      src={`http://localhost:3000/uploads/${room.imagen}`}
+                      src={`http://localhost:3000/uploads/${room.images[0].imagePath}`}
                       alt={room.name}
                       className="room-image"
                       onError={(e) => {
-                        e.target.style.display = "none";
+                        e.target.src = '/placeholder-room.jpg';
                       }}
                     />
+                  ) : (
+                    <div className="no-image-placeholder">
+                      <span className="material-icons">image_not_supported</span>
+                    </div>
                   )}
                 </div>
-
                 <div className="room-header">
                   <h2 className="room-title">{room.name}</h2>
                 </div>
@@ -175,7 +179,7 @@ const RoomComfortsCards = () => {
                             {comfort.name}
                           </li>
                         ))}
-                        {room.comforts.length >4  && (
+                        {room.comforts.length > 4 && (
                           <li className="comfort-item more-comforts">
                             +{room.comforts.length - 4}
                           </li>
@@ -194,7 +198,6 @@ const RoomComfortsCards = () => {
                 <div className="assign-actions">
                   <ActionButtons onEdit={() => handleEditAssign(room.idRoom)} />
                 </div>
-
               </div>
             ))
           )}

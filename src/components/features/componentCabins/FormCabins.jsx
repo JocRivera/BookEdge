@@ -1,7 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import { MdClose, MdImage } from "react-icons/md";
-import "./Cabincard.css"
-import { createCabin , updateCabin} from "../../../services/CabinService";
+import {
+  MdClose,
+  MdImage,
+  MdDelete,
+  MdStar,
+  MdStarBorder,
+} from "react-icons/md";
+import "./Cabincard.css";
+import {
+  createCabin,
+  updateCabin,
+  getCabinImages,
+  uploadCabinImages,
+  deleteCabinImage,
+  setPrimaryImage,
+} from "../../../services/CabinService";
 
 const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
   const [formData, setFormData] = useState({
@@ -9,100 +22,184 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
     description: "",
     capacity: "",
     status: "En Servicio",
-    imagen: null, 
   });
 
-  const [previewImage, setPreviewImage] = useState(null);
-  const fileInputRef = useRef(null);
+  const [existingImages, setExistingImages] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const fileInputRefs = useRef([]);
+  const [errors, setErrors] = useState({}); // Estado para almacenar errores
 
-  // Resetear TODO el formulario
+
+  // Resetear todo el formulario
   const resetForm = () => {
     setFormData({
       name: "",
       description: "",
       capacity: "",
       status: "En Servicio",
-      imagen: null,
     });
-    setPreviewImage(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImages([]);
+    fileInputRefs.current = [];
   };
 
   useEffect(() => {
     if (isOpen) {
-      resetForm()
+      resetForm();
       if (cabinToEdit) {
         setFormData({
           name: cabinToEdit.name,
           description: cabinToEdit.description,
           capacity: cabinToEdit.capacity,
           status: cabinToEdit.status,
-          imagen: null, // IMPORTANTE: siempre null al editar
         });
-        // Solo mostrar preview de imagen existente
-        setPreviewImage(
-          cabinToEdit.imagen
-            ? `http://localhost:3000/uploads/${cabinToEdit.imagen}`
-            : null
-        );
-      } else {
-        resetForm();
+
+        // Cargar imágenes existentes
+        loadExistingImages(cabinToEdit.idCabin);
       }
     }
   }, [isOpen, cabinToEdit]);
+
+  const loadExistingImages = async (cabinId) => {
+    try {
+      const images = await getCabinImages(cabinId);
+      setExistingImages(images);
+    } catch (error) {
+      console.error("Error al cargar imágenes:", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = (index, e) => {
     const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, imagen: file }));
-      // Mostrar preview
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewImage(reader.result);
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const newImageFiles = [...imageFiles];
+    newImageFiles[index] = file;
+    setImageFiles(newImageFiles);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newImagePreviews = [...imagePreviews];
+      newImagePreviews[index] = reader.result;
+      setImagePreviews(newImagePreviews);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = (index) => {
+    const newImageFiles = [...imageFiles];
+    newImageFiles.splice(index, 1);
+    setImageFiles(newImageFiles);
+
+    const newImagePreviews = [...imagePreviews];
+    newImagePreviews.splice(index, 1);
+    setImagePreviews(newImagePreviews);
+
+    if (fileInputRefs.current[index]) {
+      fileInputRefs.current[index].value = "";
+    }
+  };
+
+  const handleRemoveExistingImage = async (imageId) => {
+    try {
+      if (window.confirm("¿Estás seguro de querer eliminar esta imagen?")) {
+        await deleteCabinImage(imageId);
+        setExistingImages((prev) =>
+          prev.filter((img) => img.idCabinImage !== imageId)
+        );
+
+        // Mostrar mensaje de éxito
+        alert("Imagen eliminada correctamente");
+      }
+    } catch (error) {
+      console.error("Error al eliminar imagen:", error);
+      alert("Error al eliminar la imagen");
+    }
+  };
+  const handleSetPrimary = async (imageId) => {
+    try {
+      await setPrimaryImage(cabinToEdit.idCabin, imageId);
+      setExistingImages((prev) =>
+        prev.map((img) => ({
+          ...img,
+          isPrimary: img.idCabinImage === imageId,
+        }))
+      );
+    } catch (error) {
+      console.error("Error al establecer imagen principal:", error);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // if (!formData.name || !formData.capacity) {
-    //   alert("Nombre y capacidad son obligatorios");
-    //   return;
-    // }
-
     try {
+      // Validar que no se excedan 5 imágenes en total
+      const totalImages = existingImages.length + imageFiles.length;
+      if (totalImages > 5) {
+        alert("No puedes tener más de 5 imágenes en total");
+        return;
+      }
+
+      let cabinId;
+
       if (cabinToEdit) {
-        // Lógica de EDICIÓN
         await updateCabin(cabinToEdit.idCabin, formData);
+        cabinId = cabinToEdit.idCabin;
       } else {
-        // Lógica de CREACIÓN
-        await createCabin(formData);
+        const newCabin = await createCabin(formData);
+        cabinId = newCabin.idCabin;
+      }
+
+      // Subir nuevas imágenes si hay
+      if (imageFiles.length > 0) {
+        await uploadCabinImages(cabinId, imageFiles);
       }
 
       resetForm();
-      onSave(); // Recarga la lista
+      onSave();
       onClose();
     } catch (error) {
-      console.error("ERROR:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
+      if (
+        error.response &&
+        error.response.data &&
+        Array.isArray(error.response.data.errors)
+      ) {
+        // Procesar los errores del backend
+        const backendErrors = error.response.data.errors;
+        const formattedErrors = {};
+
+        // Mapear los errores al formato { campo: mensaje }
+        backendErrors.forEach((err) => {
+          formattedErrors[err.path] = err.msg;
+        });
+
+        setErrors(formattedErrors); // Actualizar el estado con los errores del backend
+      } 
+        
+  
       alert(`Error al ${cabinToEdit ? "editar" : "crear"}. Ver consola.`);
     }
   };
+
   if (!isOpen) return null;
+
+  // Calcular cuántos campos de imagen nuevos mostrar
+  const availableSlots = 5 - existingImages.length;
+  const showNewImageFields = availableSlots > 0;
 
   return (
     <div className="modal-overlay">
-      <div className="modal-container">
+      <div className="modal-container-cabin">
         <div className="modal-header">
-          <h2>{cabinToEdit ? "Editar Cabaña" : "Agregar Nueva Cabaña"}</h2>{" "}
+          <h2>{cabinToEdit ? "Editar Cabaña" : "Agregar Nueva Cabaña"}</h2>
           <button className="close-button" onClick={onClose}>
             <MdClose size={24} />
           </button>
@@ -121,6 +218,9 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                   required
                   className="form-input"
                 />
+                {errors.name && (
+                  <span className="error-text">{errors.name}</span>
+                )}
               </div>
 
               <div className="form-group">
@@ -145,6 +245,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                   required
                   className="form-input"
                 />
+             
               </div>
 
               <div className="form-group">
@@ -156,7 +257,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                   className="form-input"
                 >
                   <option value="En Servicio">En Servicio</option>
-                  <option value="Mantenimiento">En Mantenimiento</option> 
+                  <option value="Mantenimiento">En Mantenimiento</option>
                   <option value="Fuera de Servicio">Fuera de Servicio</option>
                 </select>
               </div>
@@ -164,39 +265,133 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
 
             <div className="image-upload-section">
               <div className="form-group">
-                <label className="form-label">Imagen de la cabaña</label>
-                <div className="image-upload-container">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    className="file-input"
-                    id="cabin-image-upload"
-                    style={{ display: "none" }}
-                  />
+                <label className="form-label">
+                  Imágenes de la cabaña (máx. 5)
+                </label>
 
-                  <label htmlFor="cabin-image-upload" className="upload-label">
-                    {previewImage ? (
-                      <div className="image-preview-wrapper">
-                        <img
-                          src={previewImage}
-                          alt="Preview"
-                          className="preview-image"
-                        />
-                        <span className="change-image-text">
-                          Haz clic para cambiar
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="upload-placeholder">
-                        <MdImage size={48} className="upload-icon" />
-                        <p>Haz clic para subir una imagen</p>
-                        <small>Formatos: JPG, PNG (Max. 5MB)</small>
-                      </div>
-                    )}
-                  </label>
-                </div>
+                {/* Imágenes existentes */}
+                {existingImages.length > 0 && (
+                  <div className="existing-images-container">
+                    <h4>Imágenes guardadas ({existingImages.length}/5)</h4>
+                    <div className="images-grid">
+                      {existingImages.map((image) => (
+                        <div key={image.idCabinImage} className="image-item">
+                          <div className="image-preview-wrapper">
+                            <img
+                              src={`http://localhost:3000/uploads/${image.imagePath}`}
+                              alt="Cabin"
+                              className="preview-image"
+                            />
+                            <div className="image-actions">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveExistingImage(image.idCabinImage);
+                                }}
+                                className="image-action-btn delete-btn"
+                                title="Eliminar imagen"
+                                style={{ right: "35px" }} // Posicionamos a la izquierda de la estrella
+                              >
+                                <MdDelete />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSetPrimary(image.idCabinImage);
+                                }}
+                                className={`image-action-btn star-btn ${
+                                  image.isPrimary ? "primary" : ""
+                                }`}
+                                title={
+                                  image.isPrimary
+                                    ? "Imagen principal"
+                                    : "Establecer como principal"
+                                }
+                                disabled={image.isPrimary}
+                              >
+                                {image.isPrimary ? (
+                                  <MdStar />
+                                ) : (
+                                  <MdStarBorder />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                          {image.isPrimary && (
+                            <span className="primary-label">Principal</span>
+                          )}
+                        </div>
+                      ))}{" "}
+                    </div>
+                  </div>
+                )}
+
+                {/* Campos para nuevas imágenes - solo mostramos si hay espacio disponible */}
+                {showNewImageFields && (
+                  <div className="new-images-container">
+                    <h4>Agregar imágenes ({availableSlots} disponibles)</h4>
+                    <div className="individual-image-uploads">
+                      {[...Array(availableSlots)].map((_, index) => (
+                        <div
+                          key={`new-${index}`}
+                          className="image-upload-field"
+                        >
+                          {imagePreviews[index] ? (
+                            <div className="image-preview-wrapper">
+                              <img
+                                src={imagePreviews[index]}
+                                alt={`Preview ${index + 1}`}
+                                className="preview-image"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(index)}
+                                className="image-action-btn delete-btn"
+                              >
+                                <MdDelete />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="upload-single-container">
+                              <input
+                                type="file"
+                                ref={(el) =>
+                                  (fileInputRefs.current[index] = el)
+                                }
+                                onChange={(e) => handleImageChange(index, e)}
+                                accept="image/*"
+                                className="file-input"
+                                id={`cabin-image-upload-${index}`}
+                                style={{ display: "none" }}
+                              />
+                              <label
+                                htmlFor={`cabin-image-upload-${index}`}
+                                className="upload-single-label"
+                              >
+                                <MdImage size={24} />
+                                <span>
+                                  Imagen {existingImages.length + index + 1}
+                                </span>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mensaje cuando ya hay 5 imágenes */}
+                {existingImages.length >= 5 && (
+                  <div className="max-images-message">
+                    <p>Ya has alcanzado el límite máximo de 5 imágenes.</p>
+                    <p>
+                      Elimina alguna imagen existente si deseas agregar nuevas.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -10,7 +10,6 @@ export const getCabinsWithoutComforts = async () => {
 };
 
 
-// Asignar comodidades a una cabaña
 export const assignComfortsToCabin = async (data) => {
   const response = await api.post("/cabin-comforts/assign", data);
   return response.data;

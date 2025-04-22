@@ -1,4 +1,3 @@
-
 import api from "./api";
 
 export const loginUser = async (credentials) => {
@@ -73,3 +72,18 @@ export const getUserData = async () => {
     throw error;
   }
 };
+
+export const updateProfile = async ({ idUser, ...data }) => {
+  
+  const payload = (({ name,email,identificationType,identification, eps, cellphone, address, birthdate }) => 
+    ({ name,email,identificationType,identification, eps, cellphone, address, birthdate }))(data);
+
+  try {
+    const { data: response } = await api.put(`/auth/update/${idUser}`, payload);
+    return { ...response, idUser };
+  } catch (error) {
+    console.error("Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
