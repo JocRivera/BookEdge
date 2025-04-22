@@ -28,6 +28,8 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const fileInputRefs = useRef([]);
+  const [errors, setErrors] = useState({}); // Estado para almacenar errores
+
 
   // Resetear todo el formulario
   const resetForm = () => {
@@ -165,11 +167,24 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
       onSave();
       onClose();
     } catch (error) {
-      console.error("ERROR:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
+      if (
+        error.response &&
+        error.response.data &&
+        Array.isArray(error.response.data.errors)
+      ) {
+        // Procesar los errores del backend
+        const backendErrors = error.response.data.errors;
+        const formattedErrors = {};
+
+        // Mapear los errores al formato { campo: mensaje }
+        backendErrors.forEach((err) => {
+          formattedErrors[err.path] = err.msg;
+        });
+
+        setErrors(formattedErrors); // Actualizar el estado con los errores del backend
+      } 
+        
+  
       alert(`Error al ${cabinToEdit ? "editar" : "crear"}. Ver consola.`);
     }
   };
@@ -203,6 +218,9 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                   required
                   className="form-input"
                 />
+                {errors.name && (
+                  <span className="error-text">{errors.name}</span>
+                )}
               </div>
 
               <div className="form-group">
@@ -227,6 +245,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                   required
                   className="form-input"
                 />
+             
               </div>
 
               <div className="form-group">

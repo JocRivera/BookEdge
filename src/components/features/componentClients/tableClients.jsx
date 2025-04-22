@@ -116,11 +116,11 @@ function TableUser() {
           placeholder="Buscar usuario..."
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {hasPermission("Usuarios", "post") && (
+        {/* {hasPermission("Usuarios", "post") && ( */}
           <CustomButton variant="primary" icon="add" onClick={handleAdd}>
             Agregar Usuario
           </CustomButton>
-        )}
+        {/* )} */}
       </div>
 
       <div className="user-table-wrapper">

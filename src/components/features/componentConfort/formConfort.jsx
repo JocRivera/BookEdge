@@ -5,25 +5,30 @@ function FormConfort({ comfortData, onClose, onSave, isOpen, backendErrors }) {
   const [formDataComfort, setFormDataComfort] = useState({
     name: "",
   });
-
-  const [errors, setErrors] = useState({
-    name: "",
-    backend: "",
-  });
+  const [errors, setErrors] = useState({ name: "" });
 
   useEffect(() => {
-    if (isOpen && comfortData) {
-      setFormDataComfort({
-        ...comfortData,
-        name: comfortData.name || "",
-      });
-    } else if (isOpen && !comfortData) {
-      setFormDataComfort({
-        name: "",
-      });
+    if (backendErrors?.name) {
+      setErrors({ name: backendErrors.name });
     }
-    setErrors({ name: "" }); // Reiniciar errores al abrir el modal
+  }, [backendErrors]);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (comfortData) {
+        setFormDataComfort({
+          ...comfortData,
+          name: comfortData.name || "",
+        });
+      } else {
+        setFormDataComfort({
+          name: "",
+        });
+      }
+      setErrors({ name: "" }); // Reiniciar errores locales
+    }
   }, [isOpen, comfortData]);
+  
 
   const validateName = (name) => {
     if (!name.trim()) {
@@ -50,7 +55,6 @@ function FormConfort({ comfortData, onClose, onSave, isOpen, backendErrors }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 🔹 Validación antes de enviar
     const nameError = validateName(formDataComfort.name);
     if (nameError) {
       setErrors({ name: nameError });
@@ -58,7 +62,29 @@ function FormConfort({ comfortData, onClose, onSave, isOpen, backendErrors }) {
     }
 
     onSave(formDataComfort);
-    onClose();
+    // En CardCabin.jsx o en tu servicio donde manejas errores
+try {
+  // Intenta guardar la cabaña...
+} catch (error) {
+  console.error("ERROR:", error);
+  
+  // Manejar los errores del backend
+  if (error.response?.data?.errors) {
+    const errorMap = {};
+    error.response.data.errors.forEach(err => {
+      errorMap[err.path] = err.msg;
+    });
+    setBackendErrors(errorMap);
+    
+    // Configurar un temporizador para limpiar los errores después de un tiempo
+    setTimeout(() => {
+      setBackendErrors({});
+    }, 5000); // 5 segundos
+  } else {
+    // Manejo general de errores
+    alert(`Error al ${cabinToEdit ? "editar" : "crear"}. Ver consola.`);
+  }
+}
   };
 
   if (!isOpen) return null;

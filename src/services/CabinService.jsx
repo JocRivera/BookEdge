@@ -24,10 +24,9 @@ export const createCabin = async (cabinData) => {
     const response = await axios.post(API_URL, dataToSend);
     return response.data;
   } catch (error) {
-    // Lanzamos el error completo para manejarlo en el componente
-    throw error.response?.data || { 
-      message: error.message || "Error al crear la cabaña" 
-    };
+    console.error("Errores del backend:", error.response?.data?.errors); // <-- Agrega esto
+    throw error; // ← Aquí propagas el error correctamente
+
   }
 };
 export const updateCabin = async (id, cabinData) => {
