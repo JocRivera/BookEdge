@@ -3,25 +3,253 @@ import { useState, useEffect } from "react";
 import { CiSearch } from "react-icons/ci";
 import { CustomButton, ActionButtons } from "../../common/Button/customButton";
 import Switch from "../../common/Switch/Switch";
-import { getCustomers } from '../../../services/usersService';
+import rolesService from "../../../services/RolesService"
+import { getCustomers, postCustomers, updateCustomers, deleteCustomer, changeSatus } from '../../../services/usersService';
+import FormCustomer from './customerForm'
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 import './customerTable.css'
-import { use } from 'react';
 
 function Customer() {
     const [customers, setCustomers] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formData, setFormData] = useState(null);
+    const [rolExistence, setRolExistence] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fecthCustomers = async () => {
         try {
+            setIsLoading(true);
             const data = await getCustomers();
             setCustomers(data);
+            await fecthRoles();
         } catch (error) {
             console.log("Error al obtener clientes", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const fecthRoles = async () => {
+        try {
+            const roles = await rolesService.getRoles()
+            const clientRole = roles.find(rol => rol.name === "Cliente");
+            if (clientRole) {
+                setRolExistence(clientRole.idRol);
+            }
+        }
+        catch (error) {
+            console.log("Error al traer los roles: ", error)
         }
     }
 
     useEffect(() => {
         fecthCustomers();
-    }, []);
+    }, [rolExistence]);
+
+    const handleEdit = (customer) => {
+        setFormData(customer)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setFormData(null);
+    }
+
+    const handleSubmit = async (data) => {
+        try {
+            if (data.idUser) {
+                // Si password está vacío, lo eliminas
+                if (data.password === "") {
+                    delete data.password;
+                }
+                iziToast.question({
+                    timeout: 20000,
+                    close: false,
+                    overlay: true,
+                    displayMode: 'once',
+                    id: 'question',
+                    class: 'custom-alert',
+                    backgroundColor: '#ffffff',
+                    zindex: 999,
+                    title: 'Confirmación',
+                    message: `¿Está seguro de actualizar al cliente ${data.name}?`,
+                    position: 'topRight',
+                    buttons: [
+                        ['<button><b>Confirmar</b></button>', async function (instance, toast) {
+                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+
+                            await updateCustomers(data);
+                            await fecthCustomers();
+                            // Alerta de éxito
+                            iziToast.success({
+                                class: 'custom-alert',
+                                title: 'Éxito',
+                                message: 'Cliente actualizado correctamente',
+                                position: 'topRight',
+                                timeout: 5000
+                            });
+                        }],
+                        ['<button>Cancelar</button>', function (instance, toast) {
+                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                            // Notificación de cancelación (opcional)
+                            iziToast.info({
+                                class: 'custom-alert',
+                                title: 'Cancelado',
+                                message: 'No se realizaron cambios',
+                                position: 'topRight',
+                                timeout: 3000
+                            });
+                            handleEdit(data)
+                        }]
+                    ]
+                });
+            } else {
+                await postCustomers(data);
+                await fecthCustomers();
+                // Alerta de éxito
+                iziToast.success({
+                    class: 'custom-alert',
+                    title: 'Éxito',
+                    message: 'Cliente creado correctamente',
+                    position: 'topRight',
+                    timeout: 5000
+                })
+            }
+            setIsModalOpen(false);
+        }
+        catch (error) {
+            // Alerta de error
+            iziToast.error({
+                class: 'custom-alert',
+                title: 'Error',
+                message: `${error.message}`,
+                position: 'topRight',
+                timeout: 5000
+            });
+        }
+    }
+
+    const handleDeleteCustomer = async (customer) => {
+        // Alerta de confirmación
+        iziToast.question({
+            timeout: 20000,
+            close: false,
+            overlay: true,
+            displayMode: 'once',
+            id: 'question',
+            class: 'custom-alert',
+            backgroundColor: '#ffffff',
+            zindex: 999,
+            title: 'Confirmación',
+            message: `¿Está seguro de eliminar al cliente ${customer.name}?`,
+            position: 'topRight',
+            buttons: [
+                ['<button><b>Confirmar</b></button>', async function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+
+                    try {
+                        await deleteCustomer(customer.idUser);
+                        await fecthCustomers();
+
+                        // Alerta de éxito
+                        iziToast.success({
+                            class: 'custom-alert',
+                            title: 'Éxito',
+                            message: 'Cliente eliminado correctamente',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    } catch (error) {
+                        console.log(error);
+
+                        // Alerta de error
+                        iziToast.error({
+                            class: 'custom-alert',
+                            title: 'Error',
+                            message: 'No se pudo eliminar el cliente',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    }
+                }],
+                ['<button>Cancelar</button>', function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+
+                    // Notificación de cancelación (opcional)
+                    iziToast.info({
+                        class: 'custom-alert',
+                        title: 'Cancelado',
+                        message: 'No se realizaron cambios',
+                        position: 'topRight',
+                        timeout: 3000
+                    });
+                }]
+            ]
+        });
+    }
+
+    const handleChangeStatus = async (customer) => {
+        // Alerta de confirmación
+        iziToast.question({
+            timeout: 20000,
+            close: false,
+            overlay: true,
+            displayMode: 'once',
+            id: 'question',
+            class: 'custom-alert',
+            backgroundColor: '#ffffff',
+            zindex: 999,
+            title: 'Confirmación',
+            message: `¿Está seguro de cambiar el estado del cliente ${customer.name}?`,
+            position: 'topRight',
+            buttons: [
+                ['<button><b>Confirmar</b></button>', async function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+
+                    try {
+                        await changeSatus(customer.idUser, { status: !customer.status });
+                        await fecthCustomers();
+
+                        // Alerta de éxito
+                        iziToast.success({
+                            class: 'custom-alert',
+                            title: 'Éxito',
+                            message: 'Estado del cliente actualizado correctamente',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    }
+                    catch (error) {
+                        console.log(error);
+
+                        // Alerta de error
+                        iziToast.error({
+                            class: 'custom-alert',
+                            title: 'Error',
+                            message: 'No se pudo actualizar el estado del cliente',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    }
+                }],
+                ['<button>Cancelar</button>', function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+
+                    // Notificación de cancelación (opcional)
+                    iziToast.info({
+                        class: 'custom-alert',
+                        title: 'Cancelado',
+                        message: 'No se realizaron cambios',
+                        position: 'topRight',
+                        timeout: 3000
+                    });
+                }]
+            ]
+        });
+    };
+
     return (
         <div className="customer-table-container">
             <div className="customer-table-header-container">
@@ -36,9 +264,18 @@ function Customer() {
                     placeholder="Buscar usuario..."
                 //   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <CustomButton variant="primary" icon="add">
+                <CustomButton variant="primary" icon="add" onClick={() => setIsModalOpen(true)}>
                     Agregar Cliente
                 </CustomButton>
+                {!isLoading && (
+                    <FormCustomer
+                        isOpen={isModalOpen}
+                        onClose={handleCloseModal}
+                        onSave={handleSubmit}
+                        customerData={formData}
+                        rolID={rolExistence}
+                    />
+                )}
             </div>
 
             <div className="customer-table-wrapper">
@@ -74,14 +311,14 @@ function Customer() {
                                 <td className="customer-table-cell">
                                     <Switch
                                         isOn={customer.status === true}
-                                        handleToggle={() => handleToggleE(customer.idUser, customer.status)}
+                                        handleToggle={() => handleChangeStatus(customer)}
                                         id={`status-${customer.idUser}`}
                                     />
                                 </td>
                                 <td className="customer-table-cell">
                                     <ActionButtons
-                                        onEdit={() => handleEdit(customer.idUser)}
-                                        onDelete={() => handleDelete(customer.idUser)}
+                                        onEdit={() => handleEdit(customer)}
+                                        onDelete={() => handleDeleteCustomer(customer)}
                                     />
                                 </td>
                             </tr>

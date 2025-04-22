@@ -3,3 +3,44 @@
 body {
     font-family: system-ui !important;
 }
+
+.custom-alert {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+.custom-alert .iziToast-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+}
+
+.custom-alert button {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    padding: 6px 16px !important;
+    border-radius: 50px !important; /* Hace los botones ovalados */
+    transition: all 0.2s ease !important;
+}
+
+/* Estilo para el botón de confirmación (Sí) */
+.custom-alert button:first-child {
+    background-color: #22c55e !important; /* verde */
+    color: white !important;
+}
+
+.custom-alert button:first-child:hover {
+    background-color: #16a34a !important; /* verde más oscuro */
+}
+
+/* Estilo para el botón de cancelación (No) */
+.custom-alert button:last-child {
+    background-color: #ef4444 !important; /* rojo */
+    color: white !important;
+}
+
+.custom-alert button:last-child:hover {
+    background-color: #dc2626 !important; /* rojo más oscuro */
+}

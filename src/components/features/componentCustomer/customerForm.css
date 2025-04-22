@@ -1,0 +1,151 @@
+.modal-overlay-customer {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-container-customer {
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalFadeIn 0.3s ease-out forwards;
+}
+
+.modal-header-customer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.close-button-customer {
+    background: transparent;
+    border: none;
+    font-size: 1.75rem;
+    color: #718096;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-button-customer:hover {
+    color: #2d3748;
+}
+
+.customer-form {
+    padding: 1.5rem;
+}
+
+.form-content-customer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.form-group-customer {
+    margin-bottom: 1rem;
+}
+
+.form-label-customer {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.form-input-customer {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.938rem;
+    color: #2d3748;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-input-customer:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    outline: none;
+}
+
+.modal-footer-customer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-top: 1px solid #f7fafc;
+    background-color: #f9fafb;
+}
+
+.cancel-btn-customer {
+    padding: 0.75rem 1.5rem;
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn-customer {
+    padding: 0.75rem 1.5rem;
+    background-color: #4299e1;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn-customer:hover,
+.submit-btn-customer:hover {
+    transform: translateY(-2px);
+}
+
+.cancel-btn-customer:hover {
+    background-color: #edf2f7;
+}
+
+.submit-btn-customer:hover {
+    background-color: #3182ce;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .form-content-customer {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-footer-customer {
+        flex-direction: column-reverse;
+    }
+
+    .cancel-btn-customer,
+    .submit-btn-customer {
+        width: 100%;
+    }
+}
