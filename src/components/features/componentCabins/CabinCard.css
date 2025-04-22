@@ -7,6 +7,7 @@
     0 4px 6px -2px rgba(0, 0, 0, 0.06);
 }
 
+
 /* Title Styles */
 .title-container {
   display: flex;
@@ -578,6 +579,13 @@ textarea.form-input {
   background-color: #f7fafc;
 }
 
+.error-text {
+  color: #ff3333;
+  font-size: 10rem;
+  font-weight: bold;
+  margin-top: 5px;
+  display: block;
+}
 .submit-btn,
 .cancel-btn-detail {
   background-color: #4299e1;

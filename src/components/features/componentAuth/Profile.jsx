@@ -1,22 +1,14 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/authContext";
-// Importaciones CORRECTAS de react-icons/fi
 import {
-  FiEye,
-  FiEyeOff,
   FiEdit,
   FiSave,
-  FiLock,
-  FiMail,
   FiUser,
-  FiPhone,
-  FiCalendar,
   FiMapPin,
-  FiCreditCard, // Para identificación (reemplaza FiId)
   FiShield,
-  FiHome, // Para dirección (opcional)
 } from "react-icons/fi";
 import "./Profile.css";
+import { updateProfile } from "../../../services/AuthService";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -33,10 +25,10 @@ const Profile = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  // Cargar datos del perfil al montar el componente
   useEffect(() => {
     if (user) {
       setFormData({
+        idUser:user.idUser,
         name: user.name || "",
         email: user.email || "",
         eps: user.eps || "",
@@ -56,11 +48,9 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Aquí llamarías a tu servicio de actualización:
-      // await updateProfileService(formData);
+      await updateProfile(formData);
       console.log("Datos a actualizar:", formData);
       setIsEditing(false);
-      // Opcional: Mostrar notificación de éxito
     } catch (error) {
       console.error("Error al actualizar:", error);
     }
@@ -70,29 +60,29 @@ const Profile = () => {
     <div className="profile-container">
       <div className="profile-card">
         <div className="profile-header">
-          <div>
+          <div className="profile-header-content">
             <h2>Mi Perfil</h2>
-            <h2>{user?.name }</h2>
-            <span className="user-role">
+            <h2 className="profile-name">{user?.name}</h2>
+            <span className="profile-user-role">
               <FiShield /> {user?.role?.name || "Rol no definido"}
             </span>
           </div>
           {!isEditing && (
-            <button onClick={() => setIsEditing(true)} className="edit-button">
+            <button onClick={() => setIsEditing(true)} className="profile-edit-button">
               <FiEdit /> Editar
             </button>
           )}
         </div>
 
         <form onSubmit={handleSubmit} className="profile-form">
-          <div className="form-section">
-            <h3 className="section-title">
-              <FiUser className="section-icon" />
+          <div className="profile-form-section">
+            <h3 className="profile-section-title">
+              <FiUser className="profile-section-icon" />
               Información Personal
             </h3>
 
-            <div className="form-grid">
-              <div className="form-group">
+            <div className="profile-form-grid">
+              <div className="profile-form-group">
                 <label>Nombre Completo</label>
                 {isEditing ? (
                   <input
@@ -107,9 +97,9 @@ const Profile = () => {
                 )}
               </div>
 
-              <div className="form-group">
+              <div className="profile-form-group">
                 <label>
-                  <FiMail /> Email
+                  Email
                 </label>
                 {isEditing ? (
                   <input
@@ -118,16 +108,14 @@ const Profile = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    disabled 
                   />
                 ) : (
                   <p>{formData.email}</p>
                 )}
               </div>
 
-              <div className="form-group">
-                <label>
-                  <FiCreditCard /> Tipo de ID
+              <div className="profile-form-group">
+                <label>Tipo de ID
                 </label>
                 {isEditing ? (
                   <select
@@ -135,24 +123,21 @@ const Profile = () => {
                     value={formData.identificationType}
                     onChange={handleChange}
                   >
-                    <option value="CC">Cédula</option>
-                    <option value="TI">Tarjeta de Identidad</option>
-                    <option value="CE">Cédula Extranjería</option>
+                     <option value="CC">Cédula</option>
+                     <option value="CE">Cédula Extranjería</option>
                   </select>
                 ) : (
                   <p>
                     {formData.identificationType === "CC" && "Cédula"}
-                    {formData.identificationType === "TI" &&
-                      "Tarjeta de Identidad"}
                     {formData.identificationType === "CE" &&
                       "Cédula Extranjería"}
                   </p>
                 )}
               </div>
 
-              <div className="form-group">
+              <div className="profile-form-group">
                 <label>
-                  <FiCreditCard /> Número de ID
+                  Número de ID
                 </label>
                 {isEditing ? (
                   <input
@@ -161,7 +146,7 @@ const Profile = () => {
                     value={formData.identification}
                     onChange={handleChange}
                     required
-                    disabled
+                    
                   />
                 ) : (
                   <p>{formData.identification || "No especificado"}</p>
@@ -171,14 +156,14 @@ const Profile = () => {
           </div>
 
           {/* Sección 2: Datos Médicos y Contacto */}
-          <div className="form-section">
-            <h3 className="section-title">
-              <FiMapPin className="section-icon" />
+          <div className="profile-form-section">
+            <h3 className="profile-section-title">
+              <FiMapPin className="profile-section-icon" />
               Datos Adicionales
             </h3>
-            <div className="form-grid">
+            <div className="profile-form-grid">
               {/* EPS */}
-              <div className="form-group">
+              <div className="profile-form-group">
                 <label>EPS</label>
                 {isEditing ? (
                   <input
@@ -193,9 +178,9 @@ const Profile = () => {
               </div>
 
               {/* Teléfono */}
-              <div className="form-group">
+              <div className="profile-form-group">
                 <label>
-                  <FiPhone /> Teléfono/Celular
+                  Teléfono/Celular
                 </label>
                 {isEditing ? (
                   <input
@@ -211,9 +196,9 @@ const Profile = () => {
               </div>
 
               {/* Fecha de Nacimiento */}
-              <div className="form-group">
+              <div className="profile-form-group">
                 <label>
-                  <FiCalendar /> Fecha de Nacimiento
+                  Fecha de Nacimiento
                 </label>
                 {isEditing ? (
                   <input
@@ -228,9 +213,9 @@ const Profile = () => {
               </div>
 
               {/* Dirección */}
-              <div className="form-group">
+              <div className="profile-form-group">
                 <label>
-                  <FiMapPin /> Dirección
+                  Dirección
                 </label>
                 {isEditing ? (
                   <input
@@ -244,33 +229,25 @@ const Profile = () => {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Botones */}
-          <div className="form-actions">
-            {isEditing ? (
+            <div className="profile-form-actions">
+            {isEditing && (
               <>
                 <button
                   type="button"
-                  className="secondary-button"
+                  className="profile-secondary-button"
                   onClick={() => setIsEditing(false)}
                 >
                   Cancelar
                 </button>
-                <button type="submit" className="primary-button">
+                <button type="submit" className="profile-primary-button">
                   <FiSave /> Guardar Cambios
                 </button>
               </>
-            ) : (
-              <button
-                type="button"
-                className="primary-button"
-                onClick={() => setIsEditing(true)}
-              >
-                <FiEdit /> Editar Perfil
-              </button>
             )}
           </div>
+          </div>
+
+          
         </form>
       </div>
     </div>
