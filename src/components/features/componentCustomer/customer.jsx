@@ -6,6 +6,7 @@ import Switch from "../../common/Switch/Switch";
 import rolesService from "../../../services/RolesService"
 import { getCustomers, postCustomers, updateCustomers, deleteCustomer, changeSatus } from '../../../services/usersService';
 import FormCustomer from './customerForm'
+import Pagination from "../../common/Paginator/Pagination"; // Asegúrate de importar tu paginador
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import './customerTable.css'
@@ -16,6 +17,28 @@ function Customer() {
     const [formData, setFormData] = useState(null);
     const [rolExistence, setRolExistence] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+
+    // --- NUEVO: estados para buscador y paginador ---
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 6;
+    const [currentPage, setCurrentPage] = useState(0);
+
+    // --- FILTRADO ---
+    const filtrarDatos = customers.filter((customer) =>
+        Object.values(customer).some((value) =>
+            value && typeof value === 'object'
+                ? Object.values(value).some(v => v && v.toString().toLowerCase().includes(searchTerm.toLowerCase()))
+                : value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    );
+
+    const offset = currentPage * itemsPerPage;
+    const currentItems = filtrarDatos.slice(offset, offset + itemsPerPage);
+    const pageCount = Math.ceil(filtrarDatos.length / itemsPerPage);
+
+    const handlePageClick = ({ selected }) => setCurrentPage(selected);
+    useEffect(() => setCurrentPage(0), [searchTerm]);
+    // --- FIN NUEVO ---
 
     const fecthCustomers = async () => {
         try {
@@ -260,9 +283,9 @@ function Customer() {
                 <input
                     type="text"
                     className="customer-search-input"
-                    //   value={searchTerm}
+                    value={searchTerm}
                     placeholder="Buscar usuario..."
-                //   onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <CustomButton variant="primary" icon="add" onClick={() => setIsModalOpen(true)}>
                     Agregar Cliente
@@ -295,7 +318,7 @@ function Customer() {
                         </tr>
                     </thead>
                     <tbody className="customer-table-body">
-                        {customers.map((customer, index) => (
+                        {currentItems.map((customer, index) => (
                             <tr
                                 key={customer.idUser}
                                 className={index % 2 === 0 ? "customer-table-row-even" : "customer-table-row-odd"}
@@ -325,8 +348,8 @@ function Customer() {
                         ))}
                     </tbody>
                 </table>
-
-                {/* <Pagination pageCount={pageCount} onPageChange={handlePageClick} /> */}
+                {/* PAGINADOR */}
+                <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
             </div>
         </div>
     );

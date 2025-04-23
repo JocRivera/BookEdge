@@ -6,22 +6,30 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-container detail-modal">
-                <div className="modal-header">
+            <div className="plan-detail-modal">
+                <div className="plan-detail-modal-header">
                     <h2>Detalle del Plan</h2>
-                    <button className="close-button" onClick={onClose}>×</button>
+                    <button className="plan-detail-close-button" onClick={onClose}>×</button>
                 </div>
-
-                <div className="modal-body detail-content">
+                <div className="plan-detail-content">
                     {/* Sección de información básica */}
-                    <section className="detail-section">
+                    <section className="plan-detail-section">
                         <h3 className="section-title">Información Básica</h3>
                         <div className="basic-info">
                             <div className="plan-image-container">
                                 {plan.image ? (
-                                    <img src={plan.image} alt={plan.name} className="plan-detail-image" />
+                                    <img
+                                        src={`http://localhost:3000${plan.image}`}
+                                        alt={plan.name}
+                                        onError={(e) => {
+                                            e.target.onerror = null
+                                            e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible"
+                                        }}
+                                    />
                                 ) : (
-                                    <div className="image-placeholder">Sin imagen</div>
+                                    <div className="image-placeholder">
+                                        <span>Sin imagen</span>
+                                    </div>
                                 )}
                             </div>
                             <div className="plan-info">
@@ -40,7 +48,7 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                     </section>
 
                     {/* Sección de cabañas */}
-                    <section className="detail-section">
+                    <section className="plan-detail-section">
                         <h3 className="section-title">Cabañas Asignadas</h3>
                         <div className="table-container">
                             <table className="detail-table">
@@ -72,8 +80,41 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                         </div>
                     </section>
 
+                    {/* Sección de bedrooms */}
+                    <section className="plan-detail-section">
+                        <h3 className="section-title">Habitaciones Asignadas</h3>
+                        <div className="table-container">
+                            <table className="detail-table">
+                                <thead>
+                                    <tr>
+                                        <th>Capacidad</th>
+                                        <th>Cantidad Solicitada</th>
+                                        <th>Habitaciones Asignadas</th>
+                                        <th>Capacidad Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {plan.bedroomDistribution?.map((dist, index) => (
+                                        <tr key={index}>
+                                            <td>{dist.capacity} personas</td>
+                                            <td>{dist.requestedQuantity}</td>
+                                            <td>
+                                                <ul className="assigned-cabins">
+                                                    {dist.assignedBedrooms.map(bedroom => (
+                                                        <li key={bedroom.idRoom}>{bedroom.name}</li>
+                                                    ))}
+                                                </ul>
+                                            </td>
+                                            <td>{dist.capacity * dist.requestedQuantity}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
                     {/* Sección de servicios */}
-                    <section className="detail-section">
+                    <section className="plan-detail-section">
                         <h3 className="section-title">Servicios Incluidos</h3>
                         <div className="table-container">
                             <table className="detail-table">
@@ -107,9 +148,8 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                         </div>
                     </section>
                 </div>
-
-                <div className="modal-footer">
-                    <button className="close-btn" onClick={onClose}>Cerrar</button>
+                <div className="plan-detail-modal-footer">
+                    <button className="plan-detail-close-btn" onClick={onClose}>Cerrar</button>
                 </div>
             </div>
         </div>

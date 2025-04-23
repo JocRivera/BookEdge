@@ -10,7 +10,7 @@ function Plan() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
-    
+
     const [data, setData] = useState([]);
 
     const fetchData = async () => {
@@ -27,28 +27,27 @@ function Plan() {
 
     const handleSavePlan = async (planData) => {
         try {
-            let updatedPlan;
+            let updatedPlan
             if (selectedPlan) {
+                if (!planData.get("image") || planData.get("image") === "") {
+                    // Eliminar el campo vacío para que el backend mantenga la imagen existente
+                    planData.delete("image")
+                  }
                 // Editar plan existente
-                updatedPlan = await updatePlan({
-                    ...planData,
-                    idPlan: selectedPlan.idPlan
-                });
+                updatedPlan = await updatePlan(selectedPlan.idPlan, planData)
                 // Actualizar el plan en el estado local
-                setData(prevData => prevData.map(plan => 
-                    plan.idPlan === selectedPlan.idPlan ? updatedPlan : plan
-                ));
+                fetchData()
             } else {
                 // Crear nuevo plan
-                updatedPlan = await createPlan(planData);
-                setData(prevData => [...prevData, updatedPlan]);
+                updatedPlan = await createPlan(planData)
+                fetchData()
             }
-            setIsModalOpen(false);
-            setSelectedPlan(null);
+            setIsModalOpen(false)
+            setSelectedPlan(null)
         } catch (error) {
-            console.error("Error al guardar el plan:", error);
+            console.error("Error al guardar el plan:", error)
         }
-    };
+    }
 
     const handleDeletePlan = async (planId) => {
         await deletePlan(planId);
@@ -84,7 +83,14 @@ function Plan() {
                     <div key={plan.idPlan} className="plan-card">
                         <div className="plan-image">
                             {plan.image ? (
-                                <img src={plan.image} alt={plan.name} />
+                                <img
+                                    src={`http://localhost:3000${plan.image}`}
+                                    alt={plan.name}
+                                    onError={(e) => {
+                                        e.target.onerror = null
+                                        e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible"
+                                    }}
+                                />
                             ) : (
                                 <div className="image-placeholder">
                                     <span>Sin imagen</span>

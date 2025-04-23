@@ -1,204 +1,633 @@
-import React, { useState, useEffect } from 'react';
-import { FiPlus } from 'react-icons/fi';
-import './PlanProgramed.css';
+"use client"
+
+import { useState, useEffect } from "react"
+import {
+    format,
+    startOfMonth,
+    endOfMonth,
+    eachDayOfInterval,
+    isSameMonth,
+    isSameDay,
+    addMonths,
+    subMonths,
+    parseISO,
+    isAfter,
+    isBefore,
+} from "date-fns"
+import { es } from "date-fns/locale"
+import { FiChevronLeft, FiChevronRight, FiCalendar, FiClock, FiUsers, FiDollarSign } from "react-icons/fi"
+import {
+    getAllProgramedPlans,
+    createProgramedPlan,
+    updateProgramedPlan,
+    deleteProgramedPlan,
+} from "../../../services/PlanProgramed"
+import { getAllPlans } from "../../../services/PlanService"
+import "./PlanProgramed.css"
 
 const PlanProgramed = () => {
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(new Date());
-    const [viewMode, setViewMode] = useState('month');
-    const [isAnimating, setIsAnimating] = useState(false);
+    const [currentDate, setCurrentDate] = useState(new Date())
+    const [programedPlans, setProgramedPlans] = useState([])
+    const [availablePlans, setAvailablePlans] = useState([])
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedDate, setSelectedDate] = useState(null)
+    const [selectedPlan, setSelectedPlan] = useState(null)
+    const [formData, setFormData] = useState({
+        idPlan: "",
+        startDate: "",
+        endDate: "",
+    })
+    const [formErrors, setFormErrors] = useState({})
+    const [isEditMode, setIsEditMode] = useState(false)
+    const [selectedProgramedPlan, setSelectedProgramedPlan] = useState(null)
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+    const [detailPlan, setDetailPlan] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
 
-    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
+    // Fetch programed plans and available plans
     useEffect(() => {
-        const interval = setInterval(() => {
-            const now = new Date();
-            if (now.getDate() !== selectedDate.getDate() ||
-                now.getMonth() !== selectedDate.getMonth() ||
-                now.getFullYear() !== selectedDate.getFullYear()) {
-                setSelectedDate(now);
+        const fetchData = async () => {
+            setIsLoading(true)
+            try {
+                const [programedPlansData, availablePlansData] = await Promise.all([getAllProgramedPlans(), getAllPlans()])
+
+                // Transform dates from string to Date objects
+                const formattedProgramedPlans = programedPlansData.map((plan) => ({
+                    ...plan,
+                    startDate: parseISO(plan.startDate),
+                    endDate: parseISO(plan.endDate),
+                }))
+
+                setProgramedPlans(formattedProgramedPlans)
+                setAvailablePlans(availablePlansData)
+            } catch (error) {
+                console.error("Error fetching data:", error)
+            } finally {
+                setIsLoading(false)
             }
-        }, 60000);
-
-        return () => clearInterval(interval);
-    }, [selectedDate]);
-
-    const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-    const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
-
-    const navigate = (direction) => {
-        setIsAnimating(true);
-        setTimeout(() => setIsAnimating(false), 300);
-
-        const newDate = new Date(currentDate);
-        if (viewMode === 'month') {
-            newDate.setMonth(currentDate.getMonth() + direction);
-        } else {
-            newDate.setFullYear(currentDate.getFullYear() + direction);
         }
-        setCurrentDate(newDate);
-    };
 
-    const selectMonth = (monthIndex) => {
-        const newDate = new Date(currentDate);
-        newDate.setMonth(monthIndex);
-        setCurrentDate(newDate);
-        setViewMode('month');
-    };
+        fetchData()
+    }, [selectedProgramedPlan, isModalOpen])
 
+    // Get days of current month
+    const monthStart = startOfMonth(currentDate)
+    const monthEnd = endOfMonth(currentDate)
+    const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
+
+    // Get days from previous and next month to fill the calendar grid
+    const startDay = monthStart.getDay() // 0 = Sunday, 1 = Monday, etc.
+    const endDay = 6 - monthEnd.getDay()
+
+    // Previous month days to display
+    const prevMonthDays = []
+    for (let i = startDay - 1; i >= 0; i--) {
+        const date = new Date(monthStart)
+        date.setDate(date.getDate() - (i + 1))
+        prevMonthDays.push(date)
+    }
+
+    // Next month days to display
+    const nextMonthDays = []
+    for (let i = 1; i <= endDay; i++) {
+        const date = new Date(monthEnd)
+        date.setDate(date.getDate() + i)
+        nextMonthDays.push(date)
+    }
+
+    // All days to display in the calendar
+    const calendarDays = [...prevMonthDays, ...monthDays, ...nextMonthDays]
+
+    // Navigate to previous month
+    const prevMonth = () => {
+        setCurrentDate(subMonths(currentDate, 1))
+    }
+
+    // Navigate to next month
+    const nextMonth = () => {
+        setCurrentDate(addMonths(currentDate, 1))
+    }
+
+    // Navigate to today
     const goToToday = () => {
-        const today = new Date();
-        setCurrentDate(today);
-        setSelectedDate(today);
-        setViewMode('month');
-    };
+        setCurrentDate(new Date())
+    }
 
-    const selectDate = (day) => {
-        const newDate = new Date(currentDate);
-        newDate.setDate(day);
-        setSelectedDate(newDate);
-    };
+    // Open modal to add a new programed plan
+    const openAddModal = (date) => {
+        setSelectedDate(date)
+        setFormData({
+            idPlan: "",
+            startDate: format(date, "yyyy-MM-dd"),
+            endDate: format(date, "yyyy-MM-dd"),
+        })
+        setIsEditMode(false)
+        setIsModalOpen(true)
+    }
 
-    const toggleViewMode = () => {
-        setViewMode(viewMode === 'month' ? 'year' : 'month');
-    };
+    // Open modal to edit an existing programed plan
+    const openEditModal = (programedPlan) => {
+        setSelectedProgramedPlan(programedPlan)
+        setFormData({
+            idPlan: programedPlan.idPlan,
+            startDate: format(programedPlan.startDate, "yyyy-MM-dd"),
+            endDate: format(programedPlan.endDate, "yyyy-MM-dd"),
+        })
+        setIsEditMode(true)
+        setIsModalOpen(true)
+    }
 
-    const renderMonthView = () => {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const daysInMonth = getDaysInMonth(year, month);
-        const firstDayOfMonth = getFirstDayOfMonth(year, month);
-        const today = new Date();
-        const days = [];
+    // Open modal to view plan details
+    const openDetailModal = (programedPlan) => {
+        const planDetails = availablePlans.find((plan) => plan.idPlan === programedPlan.idPlan)
+        setDetailPlan({
+            ...programedPlan,
+            planDetails,
+        })
+        setIsDetailModalOpen(true)
+    }
 
-        for (let i = 0; i < firstDayOfMonth; i++) {
-            days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>);
+    // Handle form input changes
+    const handleInputChange = (e) => {
+        const { name, value } = e.target
+        setFormData({
+            ...formData,
+            [name]: value,
+        })
+
+        // Clear error for this field
+        if (formErrors[name]) {
+            setFormErrors({
+                ...formErrors,
+                [name]: "",
+            })
         }
 
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-            const isSelected = day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear();
+        // If plan is selected, update selected plan
+        if (name === "idPlan") {
+            const plan = availablePlans.find((p) => p.idPlan === Number.parseInt(value))
+            setSelectedPlan(plan)
+        }
+    }
 
-            days.push(
-                <div
-                    key={`day-${day}`}
-                    className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
-                    onClick={() => selectDate(day)}
-                >
-                    <div className="day-number">{day}</div>
-                    <div className="day-content">
-                        {/* Eventos o contenido adicional iría aquí */}
-                    </div>
-                </div>
-            );
+    // Validate form data
+    const validateForm = () => {
+        const errors = {}
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const startDate = parseISO(formData.startDate)
+        const endDate = parseISO(formData.endDate)
+
+        if (!formData.idPlan) {
+            errors.idPlan = "Debes seleccionar un plan"
         }
 
-        return (
-            <div className={`calendar-grid ${isAnimating ? 'fade' : ''}`}>
-                {dayNames.map(day => (
-                    <div key={day} className="calendar-header-cell">
-                        {day}
-                    </div>
-                ))}
-                {days}
-            </div>
-        );
-    };
+        if (!formData.startDate) {
+            errors.startDate = "La fecha de inicio es requerida"
+        } else if (isBefore(startDate, today)) {
+            errors.startDate = "La fecha de inicio no puede ser anterior a hoy"
+        }
 
-    const renderYearView = () => {
+        if (!formData.endDate) {
+            errors.endDate = "La fecha de fin es requerida"
+        } else if (isBefore(endDate, startDate)) {
+            errors.endDate = "La fecha de fin no puede ser anterior a la fecha de inicio"
+        }
+
+        return errors
+    }
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+
+        // Validate form
+        const errors = validateForm()
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors)
+            return
+        }
+
+        setIsLoading(true)
+        try {
+            if (isEditMode) {
+                console.log(selectedProgramedPlan)
+                // Update existing programed plan
+                await updateProgramedPlan(selectedProgramedPlan.idPlanProgramed, formData)
+            } else {
+                // Create new programed plan
+                await createProgramedPlan(formData)
+            }
+
+            // Refresh programed plans
+            const programedPlansData = await getAllProgramedPlans()
+            const formattedProgramedPlans = programedPlansData.map((plan) => ({
+                ...plan,
+                startDate: parseISO(plan.startDate),
+                endDate: parseISO(plan.endDate),
+            }))
+            setProgramedPlans(formattedProgramedPlans)
+
+            // Close modal and reset form
+            setIsModalOpen(false)
+            setFormData({
+                idPlan: "",
+                startDate: "",
+                endDate: "",
+            })
+            setSelectedPlan(null)
+        } catch (error) {
+            console.error("Error saving programed plan:", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Handle delete programed plan
+    const handleDelete = async () => {
+        if (!selectedProgramedPlan) return
+
+        setIsLoading(true)
+        try {
+            await deleteProgramedPlan(selectedProgramedPlan.idPlanProgramed)
+
+            // Refresh programed plans
+            const programedPlansData = await getAllProgramedPlans()
+            const formattedProgramedPlans = programedPlansData.map((plan) => ({
+                ...plan,
+                startDate: parseISO(plan.startDate),
+                endDate: parseISO(plan.endDate),
+            }))
+            setProgramedPlans(formattedProgramedPlans)
+
+            // Close modal and reset form
+            setIsModalOpen(false)
+            setFormData({
+                idPlan: "",
+                startDate: "",
+                endDate: "",
+            })
+            setSelectedPlan(null)
+            setSelectedProgramedPlan(null)
+        } catch (error) {
+            console.error("Error deleting programed plan:", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Reemplazar la función getPlansForDate y la renderización de los días del calendario
+
+    // Reemplazar la función getPlansForDate con esta nueva implementación
+    const getPlansForDate = (date) => {
+        return programedPlans.filter((plan) => {
+            return (
+                (isSameDay(date, plan.startDate) || isAfter(date, plan.startDate)) &&
+                (isSameDay(date, plan.endDate) || isBefore(date, plan.endDate))
+            )
+        })
+    }
+
+    // Reemplazar la función isFirstDayOfPlan
+    const isFirstDayOfPlan = (date, plan) => {
+        return isSameDay(date, plan.startDate)
+    }
+
+    // Reemplazar la función isLastDayOfPlan
+    const isLastDayOfPlan = (date, plan) => {
+        return isSameDay(date, plan.endDate)
+    }
+
+    // Reemplazar la función getPositionInWeek
+    const getPositionInWeek = (date) => {
+        return date.getDay()
+    }
+
+    // Check if a date has programed plans
+    /*const getPlansForDate = (date) => {
+      return programedPlans.filter((plan) => {
         return (
-            <div className={`year-grid ${isAnimating ? 'fade' : ''}`}>
-                {monthNames.map((month, index) => {
-                    const isCurrentMonth = index === new Date().getMonth() && currentDate.getFullYear() === new Date().getFullYear();
-                    return (
-                        <div
-                            key={month}
-                            onClick={() => selectMonth(index)}
-                            className={`month-cell ${isCurrentMonth ? 'current-month' : ''}`}
-                        >
-                            {month}
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    };
+          (isSameDay(date, plan.startDate) || isAfter(date, plan.startDate)) &&
+          (isSameDay(date, plan.endDate) || isBefore(date, plan.endDate))
+        )
+      })
+    }*/
+
+    // Get plan name by id
+    const getPlanNameById = (idPlan) => {
+        const plan = availablePlans.find((p) => p.idPlan === idPlan)
+        return plan ? plan.name : "Plan desconocido"
+    }
 
     return (
-        <div className="programed-container">
-            <div className="programed-header">
-                <h2 className="programed-title">Programación de Planes</h2>
-                <button
-                    className="add-schedule-btn"
-                    onClick={() => {
-                        // Lógica para abrir modal de agregar programación
-                        console.log("Agregar nueva programación");
-                    }}
-                >
-                    <FiPlus />
-                    Agregar Programación
-                </button>
-            </div>
-
-            <div className="calendar-container">
-                <div className="calendar-header">
-                    <button
-                        className="nav-button"
-                        onClick={viewMode === 'month' ? () => navigateMonth(-1) : () => navigateYear(-1)}
-                    >
-                        <span className="arrow-icon">←</span>
+        <div className="calendar-container">
+            <div className="calendar-header">
+                <h1 className="calendar-title">Calendario de Planes</h1>
+                <div className="calendar-navigation">
+                    <button className="calendar-nav-btn" onClick={prevMonth}>
+                        <FiChevronLeft />
                     </button>
-
-                    <div
-                        className="current-period"
-                        onClick={toggleViewMode}
-                    >
-                        {viewMode === 'month'
-                            ? `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`
-                            : currentDate.getFullYear()}
-                    </div>
-
-                    <button
-                        className="nav-button"
-                        onClick={viewMode === 'month' ? () => navigateMonth(1) : () => navigateYear(1)}
-                    >
-                        <span className="arrow-icon">→</span>
+                    <h2 className="calendar-current-month">{format(currentDate, "MMMM yyyy", { locale: es })}</h2>
+                    <button className="calendar-nav-btn" onClick={nextMonth}>
+                        <FiChevronRight />
                     </button>
-                </div>
-
-                <div className="calendar-body">
-                    {viewMode === 'month' ? renderMonthView() : renderYearView()}
-                </div>
-
-                <div className="calendar-footer">
-                    <button
-                        className="today-button"
-                        onClick={goToToday}
-                    >
+                    <button className="calendar-today-btn" onClick={goToToday}>
                         Hoy
                     </button>
-
-                    <div className="view-toggles">
-                        <button
-                            className={`view-toggle ${viewMode === 'month' ? 'active' : ''}`}
-                            onClick={() => setViewMode('month')}
-                        >
-                            Mes
-                        </button>
-                        <button
-                            className={`view-toggle ${viewMode === 'year' ? 'active' : ''}`}
-                            onClick={() => setViewMode('year')}
-                        >
-                            Año
-                        </button>
-                    </div>
                 </div>
             </div>
-        </div>
-    );
-};
 
-export default PlanProgramed;
+            <div className="calendar-grid">
+                <div className="calendar-weekdays">
+                    <div>Dom</div>
+                    <div>Lun</div>
+                    <div>Mar</div>
+                    <div>Mié</div>
+                    <div>Jue</div>
+                    <div>Vie</div>
+                    <div>Sáb</div>
+                </div>
+                    <div className="calendar-days">
+                        {calendarDays.map((day, index) => {
+                            const isCurrentMonth = isSameMonth(day, currentDate)
+                            const isToday = isSameDay(day, new Date())
+                            const plansForDay = getPlansForDate(day)
+                            const hasPlans = plansForDay.length > 0
+                            const dayPosition = getPositionInWeek(day)
+
+                            return (
+                                <div
+                                    key={index}
+                                    className={`calendar-day ${isCurrentMonth ? "" : "other-month"} ${isToday ? "today" : ""
+                                        } ${hasPlans ? "has-plans" : ""}`}
+                                    onClick={() => openAddModal(day)}
+                                >
+                                    <div className="day-number">{format(day, "d")}</div>
+                                    <div className="day-plans-container">
+                                        {plansForDay.slice(0, 3).map((plan, planIndex) => {
+                                            const planName = getPlanNameById(plan.idPlan)
+                                            const isFirst = isFirstDayOfPlan(day, plan)
+                                            const isLast = isLastDayOfPlan(day, plan)
+                                            const planColor = `hsl(${(plan.idPlan * 75) % 360}, 70%, 65%)`
+
+                                            return (
+                                                <div
+                                                    key={`${plan.idPlanProgramed}-${planIndex}`}
+                                                    className={`day-plan-continuous ${isFirst ? 'plan-start' : ''} ${isLast ? 'plan-end' : ''}`}
+                                                    style={{
+                                                        backgroundColor: planColor,
+                                                        borderRadius: `${isFirst ? '4px' : '0'} ${isLast ? '4px' : '0'} ${isLast ? '4px' : '0'} ${isFirst ? '4px' : '0'}`,
+                                                        marginLeft: isFirst && dayPosition !== 0 ? '0' : '',
+                                                        marginRight: isLast && dayPosition !== 6 ? '0' : '',
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        openDetailModal(plan)
+                                                    }}
+                                                >
+                                                    {isFirst && (
+                                                        <span className="plan-name-label">{planName}</span>
+                                                    )}
+                                                </div>
+                                            )
+                                        })}
+                                        {plansForDay.length > 3 && (
+                                            <div className="more-plans">+{plansForDay.length - 3} más</div>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+
+                {isDetailModalOpen && detailPlan && (
+                    <div className="calendar-modal-overlay">
+                        <div className="calendar-modal-container">
+                            <div className="calendar-modal-header">
+                                <h2>Detalles del Plan Programado</h2>
+                                <button className="calendar-close-button" onClick={() => setIsDetailModalOpen(false)}>
+                                    ×
+                                </button>
+                            </div>
+
+                            <div className="calendar-modal-body">
+                                <div className="calendar-plan-detail-content">
+                                    {detailPlan.planDetails && (
+                                        <>
+                                            <div className="calendar-plan-detail-header">
+                                                <h3>{detailPlan.planDetails.name}</h3>
+                                                <span className="calendar-plan-price">${detailPlan.planDetails.salePrice.toLocaleString()}</span>
+                                            </div>
+
+                                            {detailPlan.planDetails.image && (
+                                                <div className="calendar-plan-detail-image">
+                                                    <img
+                                                        src={`http://localhost:3000${detailPlan.planDetails.image}`}
+                                                        alt={detailPlan.planDetails.name}
+                                                        onError={(e) => {
+                                                            e.target.onerror = null
+                                                            e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible"
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <p className="calendar-plan-detail-description">{detailPlan.planDetails.description}</p>
+
+                                            <div className="calendar-plan-detail-info">
+                                                <div className="calendar-info-item">
+                                                    <FiCalendar className="calendar-info-icon" />
+                                                    <div>
+                                                        <strong>Periodo:</strong>
+                                                        <div>
+                                                            {format(detailPlan.startDate, "dd/MM/yyyy")} - {format(detailPlan.endDate, "dd/MM/yyyy")}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="calendar-info-item">
+                                                    <FiClock className="calendar-info-icon" />
+                                                    <div>
+                                                        <strong>Duración:</strong>
+                                                        <div>
+                                                            {Math.ceil((detailPlan.endDate - detailPlan.startDate) / (1000 * 60 * 60 * 24))} días
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="calendar-info-item">
+                                                    <FiUsers className="calendar-info-icon" />
+                                                    <div>
+                                                        <strong>Capacidad:</strong>
+                                                        <div>{detailPlan.planDetails.capacity} personas</div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="calendar-info-item">
+                                                    <div className="switch-container">
+                                                        <label className="switch">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={detailPlan.statusProgramed}
+                                                                onChange={async () => {
+                                                                    try {
+                                                                        await updateProgramedPlan(detailPlan.idPlanProgramed, {
+                                                                            ...detailPlan,
+                                                                            statusProgramed: !detailPlan.statusProgramed
+                                                                        });
+                                                                        setDetailPlan({
+                                                                            ...detailPlan,
+                                                                            statusProgramed: !detailPlan.statusProgramed
+                                                                        });
+                                                                    } catch (error) {
+                                                                        console.error("Error updating status:", error);
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <span className="slider"></span>
+                                                        </label>
+                                                        <span className={`status-label ${detailPlan.statusProgramed ? 'active' : 'inactive'}`}>
+                                                            {detailPlan.statusProgramed ? 'Activo' : 'Inactivo'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="calendar-plan-detail-actions">
+                                        <button
+                                            className="calendar-edit-btn"
+                                            onClick={() => {
+                                                setIsDetailModalOpen(false)
+                                                openEditModal(detailPlan)
+                                            }}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            className="calendar-delete-btn"
+                                            onClick={async () => {
+                                                setIsDetailModalOpen(false)
+                                                setSelectedProgramedPlan(detailPlan)
+                                                await handleDelete()
+                                            }}
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {isModalOpen && (
+                    <div className="calendar-modal-overlay">
+                        <div className="calendar-modal-container">
+                            <div className="calendar-modal-header">
+                                <h2>{isEditMode ? "Editar Plan Programado" : "Agregar Plan Programado"}</h2>
+                                <button className="calendar-close-button" onClick={() => setIsModalOpen(false)}>
+                                    ×
+                                </button>
+                            </div>
+
+                            <div
+                                className=
+                                "calendar-modal-body" >
+                                (
+                                <form onSubmit={handleSubmit}>
+                                    <div className="calendar-form-group">
+                                        <label htmlFor="idPlan">Plan</label>
+                                        <select
+                                            id="idPlan"
+                                            name="idPlan"
+                                            value={formData.idPlan}
+                                            onChange={handleInputChange}
+                                            className={formErrors.idPlan ? "calendar-error" : ""}
+                                        >
+                                            <option value="">Seleccionar plan</option>
+                                            {availablePlans.map((plan) => (
+                                                <option key={plan.idPlan} value={plan.idPlan}>
+                                                    {plan.name} - ${plan.salePrice.toLocaleString()}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {formErrors.idPlan && <div className="calendar-error-message">{formErrors.idPlan}</div>}
+                                    </div>
+
+                                    {selectedPlan && (
+                                        <div className="calendar-selected-plan-info">
+                                            <div className="calendar-plan-info-item">
+                                                <FiUsers className="calendar-plan-info-icon" />
+                                                <span>Capacidad: {selectedPlan.capacity} personas</span>
+                                            </div>
+                                            <div className="calendar-plan-info-item">
+                                                <FiDollarSign className="calendar-plan-info-icon" />
+                                                <span>Precio: ${selectedPlan.salePrice.toLocaleString()}</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="calendar-form-row">
+                                        <div className="calendar-form-group">
+                                            <label htmlFor="startDate">Fecha de inicio</label>
+                                            <input
+                                                type="date"
+                                                id="startDate"
+                                                name="startDate"
+                                                value={formData.startDate}
+                                                onChange={handleInputChange}
+                                                min={format(new Date(), "yyyy-MM-dd")}
+                                                className={formErrors.startDate ? "calendar-error" : ""}
+                                            />
+                                            {formErrors.startDate && <div className="calendar-error-message">{formErrors.startDate}</div>}
+                                        </div>
+
+                                        <div className="calendar-form-group">
+                                            <label htmlFor="endDate">Fecha de fin</label>
+                                            <input
+                                                type="date"
+                                                id="endDate"
+                                                name="endDate"
+                                                value={formData.endDate}
+                                                onChange={handleInputChange}
+                                                min={formData.startDate}
+                                                className={formErrors.endDate ? "calendar-error" : ""}
+                                            />
+                                            {formErrors.endDate && <div className="calendar-error-message">{formErrors.endDate}</div>}
+                                        </div>
+                                    </div>
+
+                                    <div className="calendar-modal-footer">
+                                        {isEditMode && (
+                                            <button type="button" className="calendar-delete-btn" onClick={handleDelete} disabled={isLoading}>
+                                                Eliminar
+                                            </button>
+                                        )}
+                                        <button
+                                            type="button"
+                                            className="calendar-cancel-btn"
+                                            onClick={() => setIsModalOpen(false)}
+                                            disabled={isLoading}
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button type="submit" className="calendar-submit-btn" disabled={isLoading}>
+                                            {isLoading ? "Guardando..." : isEditMode ? "Actualizar" : "Guardar"}
+                                        </button>
+                                    </div>
+                                </form>
+                                )
+                            </div>
+                        </div>
+                    </div>
+                )
+                }
+            </div>
+            )
+}
+
+            export default PlanProgramed;
