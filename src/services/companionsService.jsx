@@ -77,13 +77,3 @@ export const deleteCompanion = async (id) => {
     throw error;
   }
 };
-
-export const searchCompanions = async (filters = {}) => {
-  try {
-    const response = await axios.get(API_URL_COMPANIONS, { params: filters });
-    return response.data;
-  } catch (error) {
-    console.error("Error buscando acompañantes:", error);
-    throw error;
-  }
-};
