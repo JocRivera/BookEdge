@@ -5,12 +5,12 @@ import { getCabinsPerCapacity, getServicesPerPlan } from "../../../services/Plan
 // Primero, modifica la función calculateTotalCapacity para que sea más precisa
 const calculateTotalCapacity = (cabins, bedrooms) => {
     if (cabins.length === 0 && bedrooms.length === 0) return 30;
-    
-    const cabinsCapacity = cabins.reduce((total, cabin) => 
+
+    const cabinsCapacity = cabins.reduce((total, cabin) =>
         total + (cabin.capacity * cabin.quantity), 0);
-    const bedroomsCapacity = bedrooms.reduce((total, bedroom) => 
+    const bedroomsCapacity = bedrooms.reduce((total, bedroom) =>
         total + (bedroom.capacity * bedroom.quantity), 0);
-    
+
     return cabinsCapacity + bedroomsCapacity;
 };
 
@@ -37,8 +37,28 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                             id="image"
                             name="image"
                             accept="image/*"
-                            onChange={handleChange}
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                    setLocalFormData((prev) => ({
+                                        ...prev,
+                                        imageFile: e.target.files[0],
+                                    }))
+                                }
+                            }}
                         />
+                        {localFormData.image && (
+                            <div className="image-preview">
+                                <img
+                                    src={
+                                        typeof localFormData.image === "string"
+                                            ? `http://localhost:3000${localFormData.image}`
+                                            : URL.createObjectURL(localFormData.imageFile)
+                                    }
+                                    alt="Vista previa"
+                                    style={{ maxWidth: "100%", maxHeight: "200px", marginTop: "10px" }}
+                                />
+                            </div>
+                        )}
                     </div>
                     <div className="form-group">
                         <label htmlFor="description">Descripción</label>
@@ -91,18 +111,18 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                 if (selectedCabin) {
                                                     const cabin = availableCabins.find(c => c.id === parseInt(selectedCabin));
                                                     const quantity = localFormData.cabinQuantity || 1;
-                                                    
+
                                                     setLocalFormData(prev => {
                                                         const existingCabinIndex = prev.cabins.findIndex(c => c.capacity === cabin.capacity);
-                                                        
+
                                                         let newCabins;
                                                         if (existingCabinIndex >= 0) {
-                                                            newCabins = prev.cabins.map((c, index) => 
-                                                                index === existingCabinIndex 
-                                                                    ? { 
-                                                                        ...c, 
+                                                            newCabins = prev.cabins.map((c, index) =>
+                                                                index === existingCabinIndex
+                                                                    ? {
+                                                                        ...c,
                                                                         quantity: c.quantity + quantity,
-                                                                        totalCapacity: (c.quantity + quantity) * c.capacity 
+                                                                        totalCapacity: (c.quantity + quantity) * c.capacity
                                                                     }
                                                                     : c
                                                             );
@@ -114,7 +134,7 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                                 totalCapacity: quantity * cabin.capacity
                                                             }];
                                                         }
-                                                        
+
                                                         return {
                                                             ...prev,
                                                             cabins: newCabins,
@@ -156,8 +176,8 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                                     const newQuantity = parseInt(e.target.value) || 0;
                                                                     if (newQuantity >= 0) {
                                                                         setLocalFormData(prev => {
-                                                                            const newCabins = prev.cabins.map((c, idx) => 
-                                                                                idx === index 
+                                                                            const newCabins = prev.cabins.map((c, idx) =>
+                                                                                idx === index
                                                                                     ? {
                                                                                         ...c,
                                                                                         quantity: newQuantity,
@@ -239,13 +259,33 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                 if (selectedBedroom) {
                                                     const bedroom = availableBedrooms.find(b => b.id === parseInt(selectedBedroom));
                                                     const quantity = localFormData.bedroomQuantity || 1;
+
                                                     setLocalFormData(prev => {
-                                                        const newBedrooms = [...prev.bedrooms, {
-                                                            capacity: bedroom.capacity,
-                                                            quantity,
-                                                            name: bedroom.name,
-                                                            totalCapacity: quantity * bedroom.capacity
-                                                        }];
+                                                        // Buscar si ya existe una habitación con la misma capacidad
+                                                        const existingBedroomIndex = prev.bedrooms.findIndex(b => b.capacity === bedroom.capacity);
+
+                                                        let newBedrooms;
+                                                        if (existingBedroomIndex >= 0) {
+                                                            // Si existe, actualizar la cantidad
+                                                            newBedrooms = prev.bedrooms.map((b, index) =>
+                                                                index === existingBedroomIndex
+                                                                    ? {
+                                                                        ...b,
+                                                                        quantity: b.quantity + quantity,
+                                                                        totalCapacity: (b.quantity + quantity) * b.capacity
+                                                                    }
+                                                                    : b
+                                                            );
+                                                        } else {
+                                                            // Si no existe, agregar nueva habitación
+                                                            newBedrooms = [...prev.bedrooms, {
+                                                                capacity: bedroom.capacity,
+                                                                quantity: quantity,
+                                                                name: `Habitación ${bedroom.capacity} personas`,
+                                                                totalCapacity: quantity * bedroom.capacity
+                                                            }];
+                                                        }
+
                                                         return {
                                                             ...prev,
                                                             bedrooms: newBedrooms,
@@ -287,8 +327,8 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                                     const newQuantity = parseInt(e.target.value) || 0;
                                                                     if (newQuantity >= 0) {
                                                                         setLocalFormData(prev => {
-                                                                            const newBedrooms = prev.bedrooms.map((b, idx) => 
-                                                                                idx === index 
+                                                                            const newBedrooms = prev.bedrooms.map((b, idx) =>
+                                                                                idx === index
                                                                                     ? {
                                                                                         ...b,
                                                                                         quantity: newQuantity,
@@ -386,17 +426,17 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                     const service = availableServices.find(
                                                         s => s.Id_Service === parseInt(selectedService)
                                                     );
-                                                    
+
                                                     setLocalFormData(prev => {
                                                         const existingServiceIndex = prev.services.findIndex(s => s.id === service.Id_Service);
-                                                        
+
                                                         let newServices;
                                                         if (existingServiceIndex >= 0) {
                                                             // Actualizar la cantidad si ya existe
-                                                            newServices = prev.services.map((s, index) => 
-                                                                index === existingServiceIndex 
-                                                                    ? { 
-                                                                        ...s, 
+                                                            newServices = prev.services.map((s, index) =>
+                                                                index === existingServiceIndex
+                                                                    ? {
+                                                                        ...s,
                                                                         quantity: s.quantity + serviceQuantity,
                                                                         subtotal: service.Price * (s.quantity + serviceQuantity)
                                                                     }
@@ -412,10 +452,10 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                                 subtotal: service.Price * serviceQuantity
                                                             }];
                                                         }
-                                                        
+
                                                         // Calcular nuevo total
                                                         const newTotal = newServices.reduce((total, s) => total + s.subtotal, 0);
-                                                        
+
                                                         return {
                                                             ...prev,
                                                             services: newServices,
@@ -458,8 +498,8 @@ const MemoizedTabContent = React.memo(({ tabNumber, localFormData, handleChange,
                                                                     const newQuantity = parseInt(e.target.value) || 0;
                                                                     if (newQuantity >= 0) {
                                                                         setLocalFormData(prev => {
-                                                                            const newServices = prev.services.map((s, idx) => 
-                                                                                idx === index 
+                                                                            const newServices = prev.services.map((s, idx) =>
+                                                                                idx === index
                                                                                     ? {
                                                                                         ...s,
                                                                                         quantity: newQuantity,
@@ -562,7 +602,7 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
             try {
                 const data = await getCabinsPerCapacity();
                 setAvailableCabins(data); // Actualizamos directamente availableCabins
-            } catch(error) {
+            } catch (error) {
                 console.error("Error fetching cabins:", error);
             }
         };
@@ -570,10 +610,10 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
             try {
                 const data = await getServicesPerPlan();
                 setAvailableServices(data); // Actualizamos directamente availableServices
-            } catch(error) {
+            } catch (error) {
                 console.error("Error fetching services:", error);
             }
-            }
+        }
         fetchCabins();
         fetchServices();
     }, []);
@@ -597,8 +637,16 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                 totalCapacity: dist.capacity * dist.requestedQuantity
             })) || [];
 
+            // Transformar las habitaciones al formato requerido
+            const formattedBedrooms = planToEdit.bedroomDistribution?.map(dist => ({
+                capacity: dist.capacity,
+                quantity: dist.requestedQuantity,
+                name: `Habitación ${dist.capacity} personas`,
+                totalCapacity: dist.capacity * dist.requestedQuantity
+            })) || [];
+
             // Calcular el total de servicios
-            const servicesTotal = formattedServices.reduce((total, service) => 
+            const servicesTotal = formattedServices.reduce((total, service) =>
                 total + (service.Price * service.quantity), 0);
 
             setLocalFormData({
@@ -607,7 +655,7 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                 description: planToEdit.description || "",
                 services: formattedServices,
                 cabins: formattedCabins,
-                bedrooms: [], // Si tienes datos de habitaciones, procesarlos aquí
+                bedrooms: formattedBedrooms, // Si tienes datos de habitaciones, procesarlos aquí
                 salePrice: planToEdit.salePrice || 0,
                 total: servicesTotal,
                 capacidad: planToEdit.capacity || 30
@@ -652,35 +700,96 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
     }
 
     // En el handleSubmit, antes de enviar los datos, elimina la capacidad
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        const totalCapacity = calculateTotalCapacity(localFormData.cabins, localFormData.bedrooms);
-        
-        const dataToSend = {
-            name: localFormData.name,
-            image: localFormData.image,
-            description: localFormData.description,
-            services: localFormData.services.map(service => ({
-                id: service.id,
-                quantity: service.quantity
-            })),
-            cabins: localFormData.cabins.map(cabin => ({
-                capacity: cabin.capacity,
-                quantity: cabin.quantity
-            })),
-            salePrice: parseFloat(localFormData.salePrice),
-            total: localFormData.total,
-            capacity: totalCapacity // Incluimos la capacidad calculada
-        };
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
 
-        if (planToEdit) {
-            dataToSend.idPlan = planToEdit.idPlan;
+    //     const totalCapacity = calculateTotalCapacity(localFormData.cabins, localFormData.bedrooms);
+
+    //     const dataToSend = {
+    //         name: localFormData.name,
+    //         image: localFormData.image,
+    //         description: localFormData.description,
+    //         services: localFormData.services.map(service => ({
+    //             id: service.id,
+    //             quantity: service.quantity
+    //         })),
+    //         cabins: localFormData.cabins.map(cabin => ({
+    //             capacity: cabin.capacity,
+    //             quantity: cabin.quantity
+    //         })),
+    //         salePrice: parseFloat(localFormData.salePrice),
+    //         total: localFormData.total,
+    //         capacity: totalCapacity // Incluimos la capacidad calculada
+    //     };
+
+    //     if (planToEdit) {
+    //         dataToSend.idPlan = planToEdit.idPlan;
+    //     }
+
+    //     onSave(dataToSend);
+    //     cerrarDefinitivoPerras();
+    // };
+
+    // En el handleSubmit, antes de enviar los datos, elimina la capacidad
+    const handleSubmit = (e) => {
+        e.preventDefault()
+
+        const totalCapacity = calculateTotalCapacity(localFormData.cabins, localFormData.bedrooms)
+
+        // Crear FormData para enviar datos multipart (incluyendo la imagen)
+        const formData = new FormData()
+
+        // Agregar datos básicos
+        formData.append("name", localFormData.name)
+        formData.append("description", localFormData.description)
+        formData.append("salePrice", Number.parseFloat(localFormData.salePrice))
+        formData.append("total", localFormData.total)
+        formData.append("capacity", totalCapacity)
+
+        // Agregar la imagen si existe
+        if (localFormData.imageFile) {
+            formData.append("image", localFormData.imageFile)
+        } else {
+            formData.append("image", "")
         }
 
-        onSave(dataToSend);
-        cerrarDefinitivoPerras();
-    };
+        // Agregar servicios y cabañas como JSON
+        formData.append(
+            "services",
+            JSON.stringify(
+                localFormData.services.map((service) => ({
+                    id: service.id,
+                    quantity: service.quantity,
+                })),
+            ),
+        )
+
+        formData.append(
+            "cabins",
+            JSON.stringify(
+                localFormData.cabins.map((cabin) => ({
+                    capacity: cabin.capacity,
+                    quantity: cabin.quantity,
+                })),
+            ),
+        )
+        formData.append(
+            "bedrooms",
+            JSON.stringify(
+                localFormData.bedrooms.map((bedroom) => ({
+                    capacity: bedroom.capacity,
+                    quantity: bedroom.quantity,
+                })),
+            ),
+        )
+
+        if (planToEdit) {
+            formData.append("idPlan", planToEdit.idPlan)
+        }
+
+        onSave(formData)
+        cerrarDefinitivoPerras()
+    }
 
     if (!isOpen) return null;
 
@@ -716,7 +825,7 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                         </div>
 
                         <form onSubmit={handleSubmit}>
-                            <MemoizedTabContent 
+                            <MemoizedTabContent
                                 tabNumber={activeTab}
                                 localFormData={localFormData}
                                 handleChange={handleChange}
