@@ -1,10 +1,14 @@
-/* Estilos base */
 .profile-container {
   padding: 1rem;
   background-color: #f5f5f5;
-  min-height: calc(80vh - 80px);
-  margin-top: -19px;
+  min-height: calc(100vh - 80px);
 }
+
+.profile-container-cliente {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
 
 .profile-card {
   background: #ffffff;
@@ -22,7 +26,6 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-radius: 4px;
 }
 
 .profile-header-content {

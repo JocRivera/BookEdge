@@ -1,18 +1,16 @@
-  import "./Landingpage.css";
-  import Videoslider from "./Videoslider";
-  import CabinsClient from "./Cabins/CabinsClient";
+// Homepage.js - Versión optimizada
+import Videoslider from "./Videoslider";
+import CabinsClient from "./Cabins/CabinsClient";
+import BedroomsClient from "./Rooms/BedroomClient"
 
-
-  function Homepage() {
-    return (
-      <>
-      <div className="container-homepage">
+function Homepage() {
+  return (
+    <>
       <Videoslider />
-      <CabinsClient/>
-    </div>
-      </>
-    
-    );
-  }
-  
-  export default Homepage;
+      <CabinsClient />
+      <BedroomsClient/>
+    </>
+  );
+}
+
+export default Homepage;
