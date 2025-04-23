@@ -38,8 +38,8 @@ export const deletePlan = async (planId) => {
     return response
 }
 
-export const updatePlan = async (plan) => {
-    const response = await axios.put(`${API_URL_PLANES}/${plan.idPlan}`, plan);
+export const updatePlan = async (id, plan) => {
+    const response = await axios.put(`${API_URL_PLANES}/${id}`, plan);
     const updatedPlan = await getAllPlans(); // Obtener datos actualizados
     return updatedPlan.find(p => p.idPlan === plan.idPlan); // Retornar el plan actualizado
 };
