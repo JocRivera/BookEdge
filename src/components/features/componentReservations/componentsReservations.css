@@ -480,4 +480,91 @@
   cursor: not-allowed;
   background-color: #f3f4f6;
 }
+/* Estilos para el grid de detalles */
+.reservation-details-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
 
+.reservation-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reservation-secondary-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Estilos para las tarjetas */
+.reservation-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.card-header-with-actions h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--reservations-text-dark);
+}
+
+.payment-summary, .companions-count {
+  font-weight: 500;
+  color: var(--reservations-text-normal);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .reservation-details-container {
+    grid-template-columns: 1fr;
+  }
+}
+/* Estilos para la información de la reserva */
+.reservation-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.info-group {
+  margin-bottom: 10px;
+}
+
+.info-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--reservations-text-light);
+  margin-bottom: 4px;
+}
+
+.info-group p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--reservations-text-dark);
+}
+
+.total-amount {
+  font-weight: bold;
+  color: var(--reservations-primary);
+  font-size: 1.1rem;
+}
+
+.no-companions-message {
+  text-align: center;
+  color: var(--reservations-text-light);
+  font-style: italic;
+  padding: 20px 0;
+}

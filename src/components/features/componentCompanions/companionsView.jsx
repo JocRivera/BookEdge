@@ -3,54 +3,37 @@ import { getAllCompanions, deleteCompanion } from '../../../services/companionsS
 import './componentCompanions.css';
 
 const CompanionsView = () => {
-    // Inicializa los estados con valores por defecto adecuados
     const [companions, setCompanions] = useState([]);
-    const [filteredCompanions, setFilteredCompanions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const companionsPerPage = 10;
 
     useEffect(() => {
         const fetchCompanions = async () => {
-          try {
-            setLoading(true);
-            const data = await getAllCompanions();
-            // Asegúrate de que siempre sea un array, incluso si la API retorna null
-            setCompanions(Array.isArray(data) ? data : []);
-            setFilteredCompanions(Array.isArray(data) ? data : []);
-          } catch (err) {
-            setError(err.message);
-            setCompanions([]);
-            setFilteredCompanions([]);
-          } finally {
-            setLoading(false);
-          }
+            try {
+                setLoading(true);
+                const data = await getAllCompanions();
+                 console.log("Datos de acompañantes:", data);
+                setCompanions(Array.isArray(data) ? data : []);
+            } catch (err) {
+                setError(err.message);
+                setCompanions([]);
+            } finally {
+                setLoading(false);
+            }
         };
-    
+
         fetchCompanions();
-      }, []);
-      useEffect(() => {
-        // Filtra solo si companions es un array
-        if (Array.isArray(companions)) {
-          const results = companions.filter(companion =>
-            (companion.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            companion.documentNumber?.includes(searchTerm) ||
-            companion.reservationId?.toString().includes(searchTerm))
-          );
-          setFilteredCompanions(results);
-          setCurrentPage(1);
-        }
-      }, [searchTerm, companions]);
-    
-      // Paginación - asegúrate de que filteredCompanions sea un array
-      const indexOfLastCompanion = currentPage * companionsPerPage;
-      const indexOfFirstCompanion = indexOfLastCompanion - companionsPerPage;
-      const currentCompanions = Array.isArray(filteredCompanions) 
-        ? filteredCompanions.slice(indexOfFirstCompanion, indexOfLastCompanion)
+    }, []);
+
+    // Paginación
+    const indexOfLastCompanion = currentPage * companionsPerPage;
+    const indexOfFirstCompanion = indexOfLastCompanion - companionsPerPage;
+    const currentCompanions = Array.isArray(companions)
+        ? companions.slice(indexOfFirstCompanion, indexOfLastCompanion)
         : [];
-      const totalPages = Math.ceil((filteredCompanions?.length || 0) / companionsPerPage);
+    const totalPages = Math.ceil((companions?.length || 0) / companionsPerPage);
 
     const handleDelete = async (id) => {
         if (window.confirm('¿Estás seguro de eliminar este acompañante?')) {
@@ -71,17 +54,8 @@ const CompanionsView = () => {
             <div className="companions-header">
                 <h2>Acompañantes</h2>
                 <div className="companions-controls">
-                    <div className="search-box">
-                        <input
-                            type="text"
-                            placeholder="Buscar por nombre, documento o reserva..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <span className="search-icon">🔍</span>
-                    </div>
                     <div className="total-count">
-                        Total: {filteredCompanions.length} acompañantes
+                        Total: {companions.length} acompañantes
                     </div>
                 </div>
             </div>
@@ -93,6 +67,7 @@ const CompanionsView = () => {
                             <th>Reserva ID</th>
                             <th>Nombre</th>
                             <th>Documento</th>
+                            <th>Numero de documento</th>
                             <th>Edad</th>
                             <th>EPS</th>
                             <th>Acciones</th>
@@ -102,9 +77,10 @@ const CompanionsView = () => {
                         {currentCompanions.length > 0 ? (
                             currentCompanions.map(companion => (
                                 <tr key={companion.idCompanions}>
-                                    <td>{companion.reservationId}</td>
+                                  <td>{companion.idReservation || companion.reservationId}</td>
                                     <td>{companion.name}</td>
-                                    <td>{companion.documentType} {companion.documentNumber}</td>
+                                    <td>{companion.documentType}</td>
+                                    <td>{companion.documentNumber}</td>
                                     <td>{companion.age}</td>
                                     <td>{companion.eps}</td>
                                     <td>
@@ -121,7 +97,7 @@ const CompanionsView = () => {
                         ) : (
                             <tr>
                                 <td colSpan="6" className="no-results">
-                                    {searchTerm ? 'No se encontraron resultados' : 'No hay acompañantes registrados'}
+                                    No hay acompañantes registrados
                                 </td>
                             </tr>
                         )}

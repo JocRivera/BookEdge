@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import PropTypes from "prop-types"
 import "./componentsReservations.css"
 import CompanionsForm from "../componentCompanions/formCompanions"
-import PaymentForm from "../componentPayments/fromPayments.jsx"
+import PaymentForm from "../componentPayments/formPayments"
 import TableCompanions from "../componentCompanions/tableCompanions"
 import {
   createReservation,
@@ -13,6 +13,10 @@ import {
   addCompanionReservation,
 } from "../../../services/reservationsService.jsx"
 import { createCompanion, deleteCompanion } from "../../../services/companionsService.jsx"
+import {
+  addPaymentToReservation,
+  getReservationPayments,
+} from "../../../services/paymentsService.jsx";
 
 function FormReservation({ reservationData = null, onClose, onSave, isOpen, isReadOnly = false }) {
   const [step, setStep] = useState(1)
@@ -28,19 +32,23 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     total: 0,
     paymentMethod: "Efectivo",
   })
-
+  const [reservationPayments, setReservationPayments] = useState([])
   const [errors, setErrors] = useState({})
   const [planes, setPlanes] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(false)
 
-  // Mejorado: useEffect para cargar datos iniciales
+  // Cargar datos iniciales
   useEffect(() => {
     const fetchInitialData = async () => {
+      if (!isOpen) return;
+
       try {
         setLoading(true)
-        const planesData = await getAllPlanes()
-        const usersData = await getUsers()
+        const [planesData, usersData] = await Promise.all([
+          getAllPlanes(),
+          getUsers()
+        ]);
 
         setPlanes(planesData)
         setUsers(usersData)
@@ -48,34 +56,42 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         if (reservationData) {
           console.log("Cargando datos de reserva existente:", reservationData)
 
-          // Si tenemos el ID de la reservación, intentar obtener los datos actualizados
+          // Obtener datos actualizados de la reserva si existe
+          let freshData = reservationData;
           if (reservationData.idReservation) {
             try {
-              const freshData = await getReservationById(reservationData.idReservation)
-              if (freshData) {
-                console.log("Datos actualizados de la reserva:", freshData)
-                reservationData = freshData
-              }
+              freshData = await getReservationById(reservationData.idReservation) || reservationData;
+              console.log("Datos actualizados de la reserva:", freshData)
             } catch (error) {
               console.warn("No se pudieron obtener datos actualizados de la reserva:", error.message)
             }
           }
 
-          // Asegurar que los IDs sean números
-          const idUser = reservationData.idUser ? Number(reservationData.idUser) : ""
-          const idPlan = reservationData.idPlan ? Number(reservationData.idPlan) : ""
+          // Cargar pagos si existe la reserva
+          if (freshData.idReservation) {
+            try {
+              const payments = await getReservationPayments(freshData.idReservation);
+              setReservationPayments(payments);
+            } catch (error) {
+              console.error("Error cargando pagos:", error);
+              setReservationPayments([]);
+            }
+          }
+
+          // Asegurarse de que los companions sean un array
+          const companions = Array.isArray(freshData.companions) ? freshData.companions : [];
 
           setFormData({
-            idUser: idUser,
-            idPlan: idPlan,
-            startDate: reservationData.startDate || "",
-            endDate: reservationData.endDate || "",
-            hasCompanions: Array.isArray(reservationData.companions) && reservationData.companions.length > 0,
-            companionCount: Array.isArray(reservationData.companions) ? reservationData.companions.length : 0,
-            companions: Array.isArray(reservationData.companions) ? reservationData.companions : [],
-            status: reservationData.status || "Reservado",
-            total: reservationData.total || 0,
-            paymentMethod: reservationData.paymentMethod || "Efectivo",
+            idUser: freshData.idUser ? Number(freshData.idUser) : "",
+            idPlan: freshData.idPlan ? Number(freshData.idPlan) : "",
+            startDate: freshData.startDate || "",
+            endDate: freshData.endDate || "",
+            hasCompanions: companions.length > 0,
+            companionCount: companions.length,
+            companions: companions,
+            status: freshData.status || "Reservado",
+            total: freshData.total || 0,
+            paymentMethod: freshData.paymentMethod || "Efectivo",
           })
         } else {
           // Inicializar nueva reserva
@@ -91,6 +107,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
             total: 0,
             paymentMethod: "Efectivo",
           })
+          setReservationPayments([])
         }
       } catch (error) {
         console.error("Error inicializando formulario:", error)
@@ -100,30 +117,30 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
       }
     }
 
-    if (isOpen) fetchInitialData()
+    fetchInitialData()
   }, [isOpen, reservationData])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
 
-    if (name === "hasCompanions" && !checked) {
+    if (name === "hasCompanions") {
       setFormData((prev) => ({
         ...prev,
-        hasCompanions: false,
-        companionCount: 0,
-        companions: [],
+        hasCompanions: checked,
+        companionCount: checked ? prev.companionCount || 1 : 0,
+        companions: checked ? prev.companions : [],
       }))
     } else if (name === "companionCount" && formData.hasCompanions) {
-      const count = Number.parseInt(value) || 0
+      const count = Math.max(0, parseInt(value) || 0)
       setFormData((prev) => ({
         ...prev,
         [name]: count,
-        companions: prev.companions.slice(0, count),
+        // No recortamos los companions aquí para evitar pérdida de datos
       }))
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: type === "checkbox" ? checked : value || "",
+        [name]: type === "checkbox" ? checked : value,
       }))
     }
 
@@ -163,6 +180,8 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     } else if (step === 2 && formData.hasCompanions) {
       if (formData.companions.length === 0) {
         newErrors.companions = "Debe agregar al menos un acompañante"
+      } else if (formData.companions.length !== formData.companionCount) {
+        newErrors.companions = `Debe agregar ${formData.companionCount} acompañantes (actualmente: ${formData.companions.length})`
       }
     }
 
@@ -188,27 +207,27 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     }
   }
 
-  // Mejorado: Función para calcular el total de forma consistente
   const calculateTotal = () => {
     const selectedPlan = planes.find((p) => p.idPlan === Number(formData.idPlan))
     if (!selectedPlan) return 0
 
-    const basePrice = selectedPlan.price || selectedPlan.salePrice || 0
-    const companionFee = 150
+    // Usar precio de venta si está disponible, si no usar precio regular
+    const basePrice = selectedPlan.price || selectedPlan.salePrice || selectedPlan.precio || 0
+    const companionFee = 150  // Tarifa por acompañante
     return basePrice + formData.companions.length * companionFee
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateStep(3)) {
+      return; // No continuar si hay errores
+    }
+
     try {
       setLoading(true);
 
-      // Validaciones básicas
-      if (!formData.idUser || !formData.idPlan || !formData.startDate || !formData.endDate) {
-        throw new Error("Faltan datos requeridos para la reserva");
-      }
-
-      // Preparar payload sin acompañantes inicialmente
+      // Preparar payload
       const payload = {
         idUser: Number(formData.idUser),
         idPlan: Number(formData.idPlan),
@@ -219,19 +238,9 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         paymentMethod: formData.paymentMethod || "Efectivo",
       };
 
-      // Validar fechas
-      const today = new Date().toISOString().split("T")[0];
-      if (payload.startDate < today) {
-        throw new Error("La fecha de inicio no puede ser en el pasado");
-      }
-
-      if (payload.startDate > payload.endDate) {
-        throw new Error("La fecha de fin debe ser posterior a la de inicio");
-      }
-
       console.log("Enviando payload:", payload);
 
-      // Guardar la reserva primero
+      // Guardar la reserva
       let resultado;
       if (reservationData?.idReservation) {
         resultado = await updateReservation(reservationData.idReservation, payload);
@@ -239,19 +248,32 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         resultado = await createReservation(payload);
       }
 
-      // Si hay acompañantes, guardarlos después de tener el ID de reserva
+      if (!resultado || !resultado.idReservation) {
+        throw new Error("No se recibió un ID de reserva válido del servidor");
+      }
+
+      // Guardar acompañantes si existen
       if (formData.hasCompanions && formData.companions.length > 0) {
         console.log("Guardando acompañantes para la reserva:", resultado.idReservation);
-
-        const companionsPromises = formData.companions.map(companion => {
-          // Solo crear acompañantes que no tengan ID (nuevos)
+        for (const companion of formData.companions) {
           if (!companion.idCompanions) {
-            return handleSaveCompanionInReservation(companion, resultado.idReservation);
+            await handleSaveCompanionInReservation(companion, resultado.idReservation);
           }
-          return Promise.resolve(companion); // Ya existe, no hacer nada
-        });
-
-        await Promise.all(companionsPromises);
+        }
+      }
+      if (reservationPayments.length > 0) {
+        await Promise.all(
+          reservationPayments.map(payment => {
+            if (!payment.amount || isNaN(payment.amount)) {
+              console.warn("Pago inválido omitido:", payment);
+              return Promise.resolve();
+            }
+            return addPaymentToReservation({
+              ...payment,
+              idReservation: resultado.idReservation
+            });
+          })
+        );
       }
 
       console.log("Operación completada con resultado:", resultado);
@@ -275,31 +297,16 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
       // 1. Crear el acompañante
       const companionResponse = await createCompanion(companionData);
-
-      // Verificar respuesta
       if (!companionResponse?.idCompanions) {
-        console.error("Respuesta inesperada de createCompanion:", companionResponse);
         throw new Error("El servidor no devolvió un ID válido para el acompañante");
       }
 
-      console.log("Acompañante creado, ID:", companionResponse.idCompanions);
-
       // 2. Asociar a la reserva
       try {
-        const associationResponse = await addCompanionReservation(
-          reservationId,
-          { idCompanions: companionResponse.idCompanions }
-        );
-        console.log("Asociación exitosa:", associationResponse);
-      } catch (associationError) {
-        console.error("Error al asociar acompañante:", associationError);
-        // Intentar eliminar el acompañante creado si falla la asociación
-        try {
-          await deleteCompanion(companionResponse.idCompanions);
-          console.log("Acompañante eliminado por fallo en asociación");
-        } catch (deleteError) {
-          console.error("Error al limpiar acompañante:", deleteError);
-        }
+        await addCompanionReservation(reservationId, { idCompanions: companionResponse.idCompanions });
+      } catch (error) {
+        // Intentar eliminar el acompañante si falla la asociación
+        await deleteCompanion(companionResponse.idCompanions).catch(error);
         throw new Error("Error al asociar acompañante a la reserva");
       }
 
@@ -318,32 +325,57 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
       return savedCompanion;
     } catch (error) {
-      console.error("Error completo en handleSaveCompanionInReservation:", {
-        error: error.message,
-        companionData,
-        reservationId,
-        stack: error.stack
-      });
+      console.error("Error completo en handleSaveCompanionInReservation:", error);
       throw error;
     }
   };
 
-  if (!isOpen) return null
+  const handleAddPayment = async (paymentData) => {
+    if (!reservationData?.idReservation) {
+      alert("Debe guardar la reserva antes de registrar pagos");
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const paymentWithReservation = { 
+        ...paymentData, 
+        idReservation: reservationData.idReservation 
+      };
+      
+      // Eliminamos la asignación a newPayment ya que no la usamos
+      await addPaymentToReservation(paymentWithReservation);
+      
+      // Actualizar la lista de pagos localmente y con una llamada al backend
+      const updatedPayments = await getReservationPayments(reservationData.idReservation);
+      setReservationPayments(updatedPayments);
+      
+      alert("Pago registrado correctamente");
+    } catch (error) {
+      console.error("Error al registrar pago:", error);
+      alert(`Error al registrar pago: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
     <div className="reservations-modal-overlay">
       <div className="reservations-modal-container">
         <div className="reservations-modal-header">
           <h2>{reservationData?.idReservation ? "Editar Reserva" : "Nueva Reserva"}</h2>
-          <button className="reservations-close-button" onClick={onClose} type="button" aria-label="Cerrar"></button>
+          <button
+            className="reservations-close-button"
+            onClick={onClose}
+            type="button"
+            aria-label="Cerrar"
+            disabled={loading}
+          >
+            &times;
+          </button>
         </div>
-
-        {loading && (
-          <div className="loading-overlay">
-            <div className="loading-spinner"></div>
-            <p>Cargando...</p>
-          </div>
-        )}
 
         <div className="steps-indicator">
           <div className={`step ${step === 1 ? "active" : ""}`}>1. Datos Reserva</div>
@@ -366,11 +398,12 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                       disabled={isReadOnly || loading}
                       aria-invalid={!!errors.idUser}
                       aria-describedby={errors.idUser ? "idUser-error" : undefined}
+                      required
                     >
                       <option value="">Seleccione un cliente</option>
                       {users.map((user) => (
                         <option key={user.idUser} value={user.idUser}>
-                          {user.name} {user.lastName} -({user.identification})
+                          {user.name} {user.lastName} - ({user.identification})
                         </option>
                       ))}
                     </select>
@@ -383,18 +416,18 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
                   <div className={`reservations-form-group ${errors.idPlan ? "has-error" : ""}`}>
                     <label htmlFor="idPlan">Plan</label>
-
                     <select
                       id="idPlan"
                       name="idPlan"
                       value={formData.idPlan || ""}
                       onChange={handleChange}
                       disabled={isReadOnly || loading}
+                      required
                     >
                       <option value="">Seleccione un plan</option>
                       {planes.map((plan) => (
                         <option key={plan.idPlan} value={plan.idPlan}>
-                          {plan.name || plan.nombre} - ${plan.price || plan.precio || plan.total}
+                          {plan.name || plan.nombre} - ${plan.price || plan.precio || plan.salePrice || plan.total}
                         </option>
                       ))}
                     </select>
@@ -418,6 +451,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                         disabled={isReadOnly || loading}
                         aria-invalid={!!errors.startDate}
                         aria-describedby={errors.startDate ? "startDate-error" : undefined}
+                        required
                       />
                       {errors.startDate && (
                         <span className="error-message" id="startDate-error">
@@ -438,6 +472,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                         disabled={isReadOnly || loading}
                         aria-invalid={!!errors.endDate}
                         aria-describedby={errors.endDate ? "endDate-error" : undefined}
+                        required
                       />
                       {errors.endDate && (
                         <span className="error-message" id="endDate-error">
@@ -476,6 +511,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                           disabled={isReadOnly || loading}
                           aria-invalid={!!errors.companionCount}
                           aria-describedby={errors.companionCount ? "companionCount-error" : undefined}
+                          required={formData.hasCompanions}
                         />
                         {errors.companionCount && (
                           <span className="error-message" id="companionCount-error">
@@ -488,9 +524,9 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 </div>
               </div>
             )}
+
             {step === 2 && formData.hasCompanions && (
               <div className="form-step">
-                <h3>Registro de Acompañantes</h3>
                 {errors.companions && (
                   <div className="error-banner">
                     <p>{errors.companions}</p>
@@ -501,23 +537,26 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                   onSaveCompanion={(newCompanion) => {
                     setFormData(prev => ({
                       ...prev,
-                      companions: [...prev.companions, newCompanion],
-                      companionCount: prev.companions.length + 1
+                      companions: [...prev.companions, newCompanion]
                     }));
                   }}
+                  maxCompanions={formData.companionCount}
+                  currentCompanionsCount={formData.companions.length}
+                  disabled={formData.companions.length >= formData.companionCount || isReadOnly || loading}
                 />
 
                 <div className="companions-section">
                   <TableCompanions
                     companions={formData.companions}
                     onDeleteCompanion={(id) => {
+                      if (isReadOnly || loading) return;
+
                       setFormData(prev => ({
                         ...prev,
-                        companions: prev.companions.filter(c => c.idCompanions !== id),
-                        companionCount: prev.companions.length - 1,
+                        companions: prev.companions.filter(c => c.idCompanions !== id)
                       }));
                     }}
-                    isReadOnly={isReadOnly}
+                    isReadOnly={isReadOnly || loading}
                   />
                 </div>
               </div>
@@ -527,36 +566,43 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
               <div className="form-step">
                 <PaymentForm
                   totalAmount={calculateTotal()}
-                  onPaymentSubmit={(paymentData) => {
-                    const completeData = {
-                      ...formData,
-                      payment: paymentData,
-                      savedCompanions: formData.companions,
-                      companionCount: formData.companions.length,
-                      total: calculateTotal(),
-                    }
-                    onSave(completeData)
-                    onClose()
-                  }}
+                  reservationId={reservationData?.idReservation}
+                  initialData={{}}
+                  onPaymentSubmit={handleAddPayment}
+                  disabled={!reservationData?.idReservation || isReadOnly || loading}
                 />
+
               </div>
             )}
-
             <div className="modal-footer">
               {step > 1 && (
-                <button type="button" className="reservations-cancel-btn" onClick={prevStep} disabled={loading}>
+                <button
+                  type="button"
+                  className="reservations-cancel-btn"
+                  onClick={prevStep}
+                  disabled={loading}
+                >
                   Anterior
                 </button>
               )}
 
               {step < 3 && (
-                <button type="button" className="submit-btn" onClick={nextStep} disabled={loading}>
+                <button
+                  type="button"
+                  className="submit-btn"
+                  onClick={nextStep}
+                  disabled={loading}
+                >
                   {step === 2 ? "Ir a Pago" : "Siguiente"}
                 </button>
               )}
 
               {!isReadOnly && step === 3 && (
-                <button type="submit" className="btn btn-primary" disabled={loading}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
                   {loading ? "Guardando..." : "Guardar Reserva"}
                 </button>
               )}

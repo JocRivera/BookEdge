@@ -1,16 +1,19 @@
 import PropTypes from 'prop-types';
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ActionButtons } from "../../common/Button/customButton";
 import Pagination from "../../common/Paginator/Pagination";
 import { CiSearch } from "react-icons/ci";
 import "./componentPayments.css";
+import { getReservationPayments} from '../../../services/paymentsService';
 
 function TablePayments({ 
-  payments = [], 
-  onEditPayment = () => {}, 
-  onDeletePayment = () => {} 
+  reservationId,
+  payments=[],
+  onEditPayment = () => console.warn('Función onEditPayment no proporcionada'), 
+  onDeletePayment = () => console.warn('Función onDeletePayment no proporcionada') 
 }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [ setPayments] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 6;
 
@@ -32,6 +35,22 @@ function TablePayments({
       );
     });
   }, [payments, searchTerm]);
+   useEffect(() => {
+    const loadPayments = async () => {
+      if (!reservationId) return;
+      
+      try {
+        const paymentsData = await getReservationPayments(reservationId);
+        setPayments(paymentsData);
+      } catch (error) {
+        console.error("Error cargando pagos:", error);
+        setPayments([]);
+      }
+    };
+
+    loadPayments();
+  }, [reservationId]);
+
 
   // Cálculo seguro de paginación
   const { currentItems, pageCount } = useMemo(() => {
@@ -123,15 +142,13 @@ function TablePayments({
 }
 
 TablePayments.propTypes = {
+  reservationId: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number
+  ]),
   payments: PropTypes.array,
   onEditPayment: PropTypes.func,
   onDeletePayment: PropTypes.func,
-};
-
-TablePayments.defaultProps = {
-  payments: [],
-  onEditPayment: () => console.warn('Función onEditPayment no proporcionada'),
-  onDeletePayment: () => console.warn('Función onDeletePayment no proporcionada'),
 };
 
 export default TablePayments;
