@@ -1,0 +1,127 @@
+.container-main-alojamientos {
+  margin: 0;
+  background-color: #fff;
+  margin-bottom: 1rem;
+  border-radius: 20px;
+  box-shadow: 
+    0 3px 10px rgba(0, 0, 0, 0.08),
+    0 6px 15px rgba(0, 0, 0, 0.05);
+  
+}
+
+.filter-alojamientos {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  display: flex ;
+  justify-content: space-between;
+}
+
+.filter-title {
+  font-size: 2rem;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.filter-title::after {
+  content: "";
+  position: absolute;
+  bottom:30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 3px;
+  background: #d4af37;
+}
+
+.filter-nav{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+
+.filter-menu{
+    display: inline-flex;
+    border-radius: 50px;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    list-style: none;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-menu li{
+    margin: 0 0.5rem;
+}
+
+.filter-cabin,
+.filter-bedrooms{
+    padding: 0.75rem 1rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease ;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #495057;
+    position: relative;
+    overflow: hidden;
+}
+
+.filter-cabin:hover,
+.filter-bedrooms:hover {
+  color: #212529;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.filter-cabin.active,
+.filter-bedrooms.active {
+  background: #D4AF37;
+  color: white;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  
+}
+
+
+.filter-alojamiento-content {
+    width: 100%;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+
+  @media (max-width:760px){
+    .filter-title{
+        font-size: 2rem;
+    }
+    
+    .filter-menu{
+        
+        border-radius: 12px;
+        padding: 0.25rem;
+    }
+
+    .filter-menu li{
+        margin:  0.25rem 0;
+    }
+
+    .filter-cabin,
+    .filter-bedrooms{
+        width: 100%;
+        padding: 0.75rem;
+    }
+  }

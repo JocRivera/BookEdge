@@ -57,8 +57,9 @@ const Profile = () => {
   };
 
   return (
-    <div className="profile-container">
-      <div className="profile-card">
+<div className={`profile-container profile-container-${user?.role?.name?.toLowerCase() || 'default'}`}>
+
+<div className="profile-card">
         <div className="profile-header">
           <div className="profile-header-content">
             <h2>Mi Perfil</h2>

@@ -93,7 +93,7 @@ function ComponentConfort() {
           errorMap[err.path] = err.msg;
         });
         setBackendErrors(errorMap);
-      }c
+      }
     }
   };
 

@@ -30,22 +30,14 @@ const TableCompanions = ({ companions = [], onDeleteCompanion = null, compact = 
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th>Edad</th>
-                  {!isReadOnly && onDeleteCompanion && <th>Acciones</th>}
+                  <th>N° Documento</th>
                 </tr>
               </thead>
               <tbody>
                 {companions.map((companion) => (
                   <tr key={`companion-${companion?.id || companion?.documentNumber || Math.random()}`}>
                     <td>{companion?.name || 'N/A'}</td>
-                    <td>{companion?.age || 'N/A'}</td>
-                    {!isReadOnly && onDeleteCompanion && (
-                      <td>
-                        <button onClick={() => onDeleteCompanion(companion.id)}>
-                          Eliminar
-                        </button>
-                      </td>
-                    )}
+                    <td>{companion.documentNumber || 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>

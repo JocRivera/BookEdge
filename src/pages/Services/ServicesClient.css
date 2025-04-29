@@ -1,0 +1,215 @@
+:root {
+    --gold: #D4AF37;
+    --primary: #4a6741;
+    --primary-dark: #304a27;
+    --text-dark: #333333;
+    --background-dark: #f8f8f8;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --radius: 12px;
+  }
+  
+  .services-container-creative {
+    padding: 60px 40px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 
+      0 3px 10px rgba(0, 0, 0, 0.08),
+      0 6px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .services-title-creative {
+    font-size: 2rem;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 0.5rem;
+    margin: 0 auto 2rem;
+    text-align: center;
+    top: -30px;
+    width: auto;
+  }
+  
+  .services-title-creative::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30%; 
+    height: 3px;
+    background: var(--gold);
+    border-radius: 3px;
+  }
+  .services-title-creative span {
+    font-weight: 700;
+    color: var(--gold);
+  }
+  
+  /* Track del carrusel */
+  .services-track {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 20px 0;
+  }
+  
+  /* Contenido en movimiento */
+  .services-infinite-scroll {
+    display: flex;
+    will-change: transform;
+  }
+  
+  /* Tarjetas de servicio */
+  .service-card {
+    min-width: 300px;
+    background: white;
+    border-radius: var(--radius);
+    padding: 30px 25px;
+    margin: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Iconos */
+  .service-icon {
+    font-size: 2.8rem;
+    color: var(--gold);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+  }
+  
+  .service-card:hover .service-icon {
+    transform: scale(1.1);
+  }
+  
+  /* Texto */
+  .service-name {
+    font-size: 1.4rem;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 600;
+    position: relative;
+  }
+  
+  .service-description {
+    color: var(--text-dark);
+    font-size: 1rem;
+    line-height: 1.6;
+    text-align: center;
+    max-width: 260px;
+  }
+  
+  /* Efectos de degradado en los bordes */
+  .services-track::before,
+  .services-track::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 150px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  
+  .services-track::before {
+    left: 0;
+    background: linear-gradient(to right, var(--background-dark) 0%, rgba(248, 248, 248, 0) 100%);
+  }
+  
+  .services-track::after {
+    right: 0;
+    background: linear-gradient(to left, var(--background-dark) 0%, rgba(248, 248, 248, 0) 100%);
+  }
+  
+  /* Efecto hover en el track */
+  .services-track:hover .services-infinite-scroll {
+    animation-play-state: paused;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .services-container-creative {
+      padding: 70px 30px;
+    }
+    
+    .service-card {
+      min-width: 280px;
+      padding: 25px 20px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .services-title-creative {
+      font-size: 2.2rem;
+    }
+    
+    .service-icon {
+      font-size: 2.5rem;
+    }
+    
+    .service-name {
+      font-size: 1.3rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .services-container-creative {
+      padding: 60px 20px;
+    }
+    
+    .services-title-creative {
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+    
+    .service-card {
+      min-width: 240px;
+      padding: 20px 15px;
+      margin: 0 15px;
+    }
+    
+    .service-icon {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+    }
+    
+    .service-name {
+      font-size: 1.1rem;
+    }
+    
+    .service-description {
+      font-size: 0.9rem;
+      max-width: 220px;
+    }
+    
+    .services-track::before,
+    .services-track::after {
+      width: 60px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .services-container-creative {
+      padding: 50px 15px;
+    }
+    
+    .service-card {
+      min-width: 220px;
+      margin: 0 10px;
+    }
+  }

@@ -77,7 +77,7 @@ const CompanionsView = () => {
                         {currentCompanions.length > 0 ? (
                             currentCompanions.map(companion => (
                                 <tr key={companion.idCompanions}>
-                                  <td>{companion.idReservation || companion.reservationId}</td>
+                                  <td>{companion.idCompanions || companion.reservationId}</td>
                                     <td>{companion.name}</td>
                                     <td>{companion.documentType}</td>
                                     <td>{companion.documentNumber}</td>

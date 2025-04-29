@@ -27,8 +27,8 @@ import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
 import ComfortAssignmentSelector from "./components/features/componentAssignment/selectorAssing";
 import DashboardManagement from "./components/features/componentDashboard/main";
-import CabinDetailClient from "./pages/Cabins/CabinDetailCliente";
-import CabinsClient from "./pages/Cabins/CabinsClient"
+import CabinsClient from "./pages/Habitaciones/Cabins/CabinsClient"
+import BedroomsClient from "./pages/Habitaciones/Rooms/BedroomClient";
 
 
 import Customer from "./components/features/componentCustomer/customer";
@@ -44,7 +44,9 @@ export default function App() {
 
             <Route path="cabins">
               <Route index element={<CabinsClient />} />
-              <Route path=":cabinName" element={<CabinDetailClient />} />
+            </Route>
+            <Route path="bedrooms">
+              <Route index element={<BedroomsClient />} />
             </Route>
           </Route>
           <Route path="/login" element={<Loginform />} />

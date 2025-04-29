@@ -80,6 +80,7 @@ function TableUser() {
         await updateUser(userData.idUser, userData);
       } else {
         await createUser(userData);
+        
       }
       fetchUsers();
       setIsModalOpen(false);

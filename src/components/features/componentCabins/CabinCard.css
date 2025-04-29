@@ -579,9 +579,9 @@ textarea.form-input {
   background-color: #f7fafc;
 }
 
-.error-text {
+.error-text-cabin {
   color: #ff3333;
-  font-size: 10rem;
+  font-size: 1rem;
   font-weight: bold;
   margin-top: 5px;
   display: block;
