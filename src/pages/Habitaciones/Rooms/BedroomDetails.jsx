@@ -1,53 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getBedrooms, getBedroomImages } from "../../../services/BedroomService";
 import {
-  Users,
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-} from "lucide-react";
+  getBedrooms,
+  getBedroomImages,
+} from "../../../services/BedroomService";
+import { X, ChevronLeft, ChevronRight, Users, CheckCircle } from "lucide-react";
+
 import "./BedroomClient.css";
 
-const BedroomDetailClient = () => {
-  const { bedroomName } = useParams();
-  const navigate = useNavigate();
-  const [bedroom, setBedroom] = useState(null);
+const BedroomDetailClient = ({ room, isOpen, onClose }) => {
   const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState([]);
+  const [error, setError] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const fetchBedroomData = async () => {
+    const fetchRoomData = async () => {
+      if (!room) return;
+
       try {
         setLoading(true);
-        const bedroomsData = await getBedrooms();
-        const decodedBedroomName = decodeURIComponent(bedroomName);
-        const foundBedroom = bedroomsData.find((b) => b.name === decodedBedroomName);
-
-        setBedroom(foundBedroom);
-        
-        const imagesData = await getBedroomImages(foundBedroom.idRoom);
+        const imagesData = await getBedroomImages(room.idRoom);
+        if (!Array.isArray(imagesData)) {
+          throw new Error("Formado de imagenes Invalido");
+        }
         setImages(imagesData);
 
         if (imagesData.length > 0) {
-          const primaryImage = imagesData.find((img) => img.isPrimary);
-          if (primaryImage) {
-            setCurrentImageIndex(imagesData.indexOf(primaryImage));
-          }
+          const primaryIndex = imagesData.findIndex((img) => img.isPrimary);
+          setCurrentImageIndex(primaryIndex !== -1 ? primaryIndex : 0);
         }
-      } catch (err) {
-        setError("Error al cargar los datos de la habitación");
-        console.error(err);
+      } catch (error) {
+        console.error("Error fetching room images:", error);
+        setError("Error al cargar las imágenes de la cabaña");
+        setImages([]);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchBedroomData();
-  }, [bedroomName]);
+    if (isOpen && room) {
+      fetchRoomData();
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [room, isOpen]);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
@@ -57,128 +55,134 @@ const BedroomDetailClient = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
-  const handleToReturn = () => {
-    navigate("/");
-  }; 
+  const handleModalClick = (e) => {
+    e.stopPropagation();
+  };
 
-  if (loading) return <p className="bedroom-details-loading">Cargando...</p>;
-  if (error) return <p className="bedroom-details-error">{error}</p>;
-  if (!bedroom)
-    return <p className="bedroom-details-error">No se encontró la habitación</p>;
-
+  if (!isOpen || !room) return null;
   return (
-    <main className="bedroom-details-container">
-      <button className="bedroom-details-back-button" onClick={() => handleToReturn()}>
-        <ArrowLeft size={18} />
-        <span>Volver</span>
-      </button>
+    <div className="rooms-modal-overlay" onClick={onClose}>
+      <div className="rooms-modal-container-client" onClick={handleModalClick}>
+        <button className="rooms-details-close-button" onClick={onClose}>
+          <X size={24} />
+        </button>
 
-      <header className="bedroom-details-header">
-        <h1 className="bedroom-details-title">{bedroom.name}</h1>
-        <p className="bedroom-details-meta">
-          <span className="bedroom-details-capacity">
-            <Users size={18} />
-            {bedroom.capacity} personas
-          </span>
-          <span
-            className={`bedroom-details-status ${
-              bedroom.status === "En Servicio" ? "active" : "inactive"
-            }`}
-          >
-            {bedroom.status}
-          </span>
-        </p>
-      </header>
+        <div className="rooms-details-content">
+          <section className="rooms-details-gallery">
+            {loading ? (
+              <div className="rooms-details-loading">Cargando imágenes...</div>
+            ) : images.length > 0 ? (
+              <>
+                <div className="rooms-details-main-image-container">
+                  <img
+                    src={`http://localhost:3000/uploads/${images[currentImageIndex].imagePath}`}
+                    alt={`${room.name} - Vista ${currentImageIndex + 1}`}
+                    className="rooms-details-image"
+                  />
 
-      <section className="bedroom-details-gallery">
-        <figure className="bedroom-details-main-image">
-          {images.length > 0 ? (
-            <>
-              <img
-                src={`http://localhost:3000/uploads/${images[currentImageIndex].imagePath}`}
-                alt={`${bedroom.name} - Vista ${currentImageIndex + 1}`}
-              />
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        className="rooms-details-nav-button prev"
+                        onClick={prevImage}
+                        aria-label="Imagen anterior"
+                      >
+                        <ChevronLeft size={24} />
+                      </button>
 
-              <figcaption className="bedroom-details-image-counter">
-                {currentImageIndex + 1} / {images.length}
-              </figcaption>
-            </>
-          ) : (
-            <p className="bedroom-details-no-image">No hay imágenes disponibles</p>
-          )}
+                      <button
+                        className="rooms-details-nav-button next"
+                        onClick={nextImage}
+                        aria-label="Imagen siguiente"
+                      >
+                        <ChevronRight size={24} />
+                      </button>
 
-          {images.length > 1 && (
-            <>
-              <button
-                className="bedroom-details-gallery-nav-button prev"
-                onClick={prevImage}
-                aria-label="Imagen anterior"
-              >
-                <ChevronLeft size={24} />
-              </button>
-
-              <button
-                className="bedroom-details-gallery-nav-button next"
-                onClick={nextImage}
-                aria-label="Imagen siguiente"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </>
-          )}
-        </figure>
-
-        {images.length > 1 && (
-          <nav className="bedroom-details-thumbnails">
-            {images.map((image, index) => (
-              <button
-                key={image.id || index}
-                className={`bedroom-details-thumbnail ${
-                  currentImageIndex === index ? "active" : ""
-                }`}
-                onClick={() => setCurrentImageIndex(index)}
-                aria-label={`Ver imagen ${index + 1}`}
-              >
-                <img
-                  src={`http://localhost:3000/uploads/${image.imagePath}`}
-                  alt={`Miniatura ${index + 1}`}
-                />
-              </button>
-            ))}
-          </nav>
-        )}
-      </section>
-
-      <section className="bedroom-details-info">
-        <article className="bedroom-details-description">
-          <h2>Descripción</h2>
-          <p>{bedroom.description}</p>
-        </article>
-
-        {bedroom.Comforts && bedroom.Comforts.length > 0 ? (
-          <article className="bedroom-details-amenities">
-            <h2>Comodidades</h2>
-            <div className="bedroom-details-comfort-tags">
-              {bedroom.Comforts.map((comfort) => (
-                <div key={comfort.idComfort} className="bedroom-details-comfort-badge">
-                  <span className="bedroom-details-comfort-text">{comfort.name}</span>
-                  <CheckCircle size={18} className="bedroom-details-comfort-icon" />
+                      <div className="rooms-details-image-counter">
+                        {currentImageIndex + 1} / {images.length}
+                      </div>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
-          </article>
-        ) : (
-          <article className="bedroom-details-amenities">
-            <h2>Comodidades</h2>
-            <p>No hay comodidades registradas para esta habitación</p>
-          </article>
-        )}
-      </section>
 
-      <section className="bedroom-details-booking">
-        <button className="bedroom-details-booking-button">Reservar</button>
-      </section>
-    </main>
+                {images.length > 1 && (
+                  <div className="rooms-details-thumbnails-container">
+                    <div className="rooms-details-thumbnails">
+                      {images.map((image, index) => (
+                        <button
+                          key={image.idRoomImage || index}
+                          className={`rooms-details-thumbnail ${
+                            currentImageIndex === index ? "active" : ""
+                          }`}
+                          onClick={() => setCurrentImageIndex(index)}
+                          aria-label={`Ver imagen ${index + 1}`}
+                        >
+                          <img
+                            src={`http://localhost:3000/uploads/${image.imagePath}`}
+                            alt={`Miniatura ${index + 1}`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="rooms-details-no-image">
+                <p>No hay imágenes disponibles</p>
+              </div>
+            )}
+          </section>
+
+          <section className="rooms-details-info">
+            <header className="rooms-details-header">
+              <h1 className="rooms-details-title">{room.name}</h1>
+              <div className="rooms-details-specs">
+                <div className="rooms-details-spec">
+                  <Users size={20} className="rooms-details-spec-icon" />
+                  <span>Capacidad para {room.capacity} personas</span>
+                </div>
+              </div>
+            </header>
+
+            <div className="rooms-details-sections">
+              <article className="rooms-details-description">
+                <h2 className="rooms-section-title">Descripción</h2>
+                <p className="rooms-details-text">
+                  {room.description || "Sin descripción disponible"}
+                </p>
+              </article>
+
+              <article className="rooms-details-amenities">
+                <h2 className="rooms-section-title">Comodidades</h2>
+                {room.Comforts && room.Comforts.length > 0 ? (
+                  <div className="rooms-details-comfort-tags">
+                    {room.Comforts.map((comfort) => (
+                      <div
+                        key={comfort.idComfort}
+                        className="rooms-details-comfort-badge"
+                      >
+                        <CheckCircle
+                          size={16}
+                          className="rooms-details-comfort-icon"
+                        />
+                        <span className="rooms-details-comfort-text">
+                          {comfort.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="rooms-details-no-comforts">
+                    No hay comodidades registradas
+                  </p>
+                )}
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
   );
 };
 

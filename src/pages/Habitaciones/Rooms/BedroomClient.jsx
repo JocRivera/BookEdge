@@ -1,30 +1,38 @@
-import { Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FaBed } from "react-icons/fa";
 import React, { useEffect, useState } from "react";
-import { getBedrooms, getBedroomImages } from "../../../services/BedroomService";
-import { useNavigate } from "react-router-dom";
+import {
+  getBedrooms,
+  getBedroomImages,
+} from "../../../services/BedroomService";
 import "./BedroomClient.css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import BedroomDetailClient from "./BedroomDetails";
 
 function BedroomsClient() {
-  const [bedrooms, setBedrooms] = useState([]);
-  const [bedroomImages, setBedroomImages] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [roomImages, setRoomImage] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const loadBedroomImages = async (bedroomList) => {
+  const loadRoomImages = async (roomList) => {
     const imagesMap = {};
-    for (const bedroom of bedroomList) {
+    for (const room of roomList) {
       try {
-        const images = await getBedroomImages(bedroom.idRoom);
+        const images = await getBedroomImages(room.idRoom);
         const primaryImage = images.find((img) => img.isPrimary) || images[0];
-        imagesMap[bedroom.id] = primaryImage?.imagePath || null;
+        imagesMap[room.idRoom] = primaryImage?.imagePath || null;
       } catch (error) {
-        console.error(`Error cargando imágenes para habitación ${bedroom.id}:`, error);
-        imagesMap[bedroom.id] = null;
+        console.error(
+          `Error cargando imágenes para cabaña ${room.idRoom}:`,
+          error
+        );
+        imagesMap[room.idRoom] = null;
       }
     }
     return imagesMap;
@@ -34,10 +42,12 @@ function BedroomsClient() {
     const fetchData = async () => {
       try {
         const data = await getBedrooms();
-        const activatedBedrooms = data.filter(bedroom => bedroom.status === "En Servicio");
-        setBedrooms(activatedBedrooms);
-        const imageMap = await loadBedroomImages(activatedBedrooms);
-        setBedroomImages(imageMap);
+        const activatedRooms = data.filter(
+          (room) => room.status === "En Servicio"
+        );
+        setRooms(activatedRooms);
+        const imageMap = await loadRoomImages(activatedRooms);
+        setRoomImage(imageMap);
       } catch (error) {
         setError(error.message || "error al conectar la api");
       } finally {
@@ -47,74 +57,88 @@ function BedroomsClient() {
     fetchData();
   }, []);
 
-  // Función para navegar al detalle de la habitación usando el nombre
-  const goToBedroomDetail = (bedroomName) => {
-    navigate(`/bedrooms/${encodeURIComponent(bedroomName)}`);
+  const openModal = (room) => {
+    setSelectedRoom(room);
+    setIsModalOpen(true);
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   return (
-    <section className="swiper-bedroom-container">
-      <h1 className="title-bedroom-home">Nuestras Habitaciones</h1>
-      <div className="swiper-custom-nav">
-        <div className="swiper-button-prev-custom">
-          <ChevronLeft size={30} />
+    <>
+      <section className="swiper-room-container">
+        <div className="swiper-custom-nav">
+          <div className="swiper-button-prev-custom">
+            <ChevronLeft size={30} />
+          </div>
+
+          <div className="swiper-button-next-custom">
+            <ChevronRight size={30} />
+          </div>
         </div>
-        <div className="swiper-button-next-custom">
-          <ChevronRight size={30} />
-        </div>
-      </div>
 
-      <Swiper
-        modules={[Navigation]}
-        navigation={{
-          nextEl: ".swiper-button-next-custom",
-          prevEl: ".swiper-button-prev-custom",
-        }}
-        spaceBetween={20}
-        slidesPerView={1}
-        breakpoints={{
-          768: { slidesPerView: 2 },
-          1024: { slidesPerView: 3 },
-        }}
-      >
-        {bedrooms.map((bedroom) => (
-          <SwiperSlide key={bedroom.id}>
-            <article className="bedroom-card-home">
-              <figure className="bedroom-imagen-container-home">
-                {bedroomImages[bedroom.id] ? (
-                  <img
-                    src={`http://localhost:3000/uploads/${bedroomImages[bedroom.id]}`}
-                    alt={bedroom.name}
-                    className="bedroom-image-home"
-                  />
-                ) : (
-                  <div className="no-image-placeholder">Sin imágenes</div>
-                )}
-                <figcaption className="bedroom-title-home">{bedroom.name}</figcaption>
-              </figure>
+        <Swiper
+          modules={[Navigation]}
+          navigation={{
+            nextEl: ".swiper-button-next-custom",
+            prevEl: ".swiper-button-prev-custom",
+          }}
+          spaceBetween={20}
+          slidesPerView={1}
+          breakpoints={{
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+        >
+          {rooms.map((room) => (
+            <SwiperSlide key={room.idRoom}>
+              <article className="room-card-home">
+                <figure className="room-imagen-container-home">
+                  {roomImages[room.idRoom] ? (
+                    <img
+                      src={`http://localhost:3000/uploads/${
+                        roomImages[room.idRoom]
+                      }`}
+                      alt={room.name}
+                      className="room-image-home"
+                    />
+                  ) : (
+                    <div className="no-image-placeholder">Sin imágenes</div>
+                  )}
+                  <figcaption className="room-title-home">
+                    {room.name}
+                  </figcaption>
 
-              <div className="bedroom-details-home">
-                <div className="bedroom-meta-home">
-                  <span className="meta-item-home">
-                    <Users size={16} className="meta-icon-home" />
-                    {bedroom.capacity} personas
-                  </span>
-                  <span className="status-badge-home">{bedroom.status}</span>
-                </div>
-                <p className="bedroom-description-home">{bedroom.description}</p>
-              </div>
+                  <div className="room-details-home">
+                    <div className="room-meta-home">
+                      <span className="meta-item-home">
+                        <FaBed size={16} className="meta-icon-home" />
+                        {room.capacity} personas
+                      </span>
+                    </div>
+                  </div>
+                  <div className="room-button-container">
+                    <button
+                      className="room-button-home"
+                      onClick={() => openModal(room)}
+                    >
+                      Ver detalles
+                    </button>
+                  </div>
+                </figure>
+              </article>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </section>
 
-              <button 
-                className="bedroom-button-home" 
-                onClick={() => goToBedroomDetail(bedroom.name)}
-              >
-                Ver más
-              </button>
-            </article>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </section>
+      <BedroomDetailClient
+      room={selectedRoom}
+      isOpen={isModalOpen}
+      onClose={closeModal}
+      />
+    </>
   );
 }
 
