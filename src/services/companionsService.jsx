@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_URL_COMPANIONS = "http://localhost:3000/companions";
+//const API_URL_RESERVATIONSCOMPANIONS = "https://localhost:3000/reservationscompanions"
 
 export const getAllCompanions = async () => {
   try {
@@ -11,6 +12,17 @@ export const getAllCompanions = async () => {
     throw new Error('Error al obtener los acompañantes');
   }
 };
+
+
+/*export const getCompanionsReservations = async (idReservation) => {
+  try {
+    const {idReservation} = await axios.get(`${API_URL_RESERVATIONSCOMPANIONS}`)
+    return;
+  }catch(error){
+    console.error("Error al obtener el id de la reserva")
+    throw new Error ('ERROR CON EL ID DE LA RESERVA ')
+  }
+}*/
 
 export const getCompanionById = async (id) => {
   try {

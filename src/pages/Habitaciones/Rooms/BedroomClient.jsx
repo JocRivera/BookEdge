@@ -1,6 +1,6 @@
 import { Users, ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { getBedrooms, getBedroomImages } from "../../services/BedroomService";
+import { getBedrooms, getBedroomImages } from "../../../services/BedroomService";
 import { useNavigate } from "react-router-dom";
 import "./BedroomClient.css";
 import { Swiper, SwiperSlide } from "swiper/react";

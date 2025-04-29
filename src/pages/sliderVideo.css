@@ -1,83 +1,157 @@
-.video-slider{
-    position: relative;
-    width: 100%;
-    height: 600px;
-    overflow: hidden;
+:root {
+  --gold: #D4AF37;
+  --dark: #1A1A1A;
+  --transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.video-wrapper{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+.luxury-video-slider {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  max-height: 800px;
+  overflow: hidden;
 }
 
-.video-element{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.video-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 1;
 }
 
-.overlay{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+.video-wrapper.active {
+  opacity: 1;
+  z-index: 2;
 }
 
-.content-container {
-    position: relative;
-    z-index: 20;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: center;
-    height: 100%;
-    padding: 0 1rem;
-  }
+.video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.8);
+}
 
-  .slider-title {
-    font-size: 3.75rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 1.5rem;
-    max-width: 56rem;
-    animation: fade-in 1s ease-in-out;
-    font-style: italic;
-  }
-  
-  .slider-description {
-    font-size: 1.5rem;
-    color: white;
-    text-align: center;
-    max-width: 4    2rem;
-  }
-  
-  .transition-slide {
-    transition: opacity 1s ease-in-out;
-  }
-  
-  .opacity-full {
-    opacity: 1;
-  }
-  
-  .opacity-zero {
-    opacity: 0;
-  }
-  
-  @media (max-width: 768px) {
-    .slider-title {
-      font-size: 2.5rem;
-    }
-  
-    .slider-description {
-      font-size: 1.25rem;
-    }
-    .video-slider{
-        height: 280px;
-    }
-  }
+.luxury-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
+  z-index: 3;
+}
 
+.luxury-content {
+  position: absolute;
+  bottom: 20%;
+  left: 0;
+  width: 100%;
+  padding: 0 5vw;
+  z-index: 4;
+  color: white;
+  transform: translateY(20px);
+  transition: var(--transition);
+}
+
+.video-wrapper.active ~ .luxury-overlay + .luxury-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.luxury-title {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 300;
+  margin-bottom: 1rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: var(--transition);
+}
+
+.luxury-title .title-part {
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.video-wrapper.active ~ .luxury-overlay + .luxury-content .luxury-title {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.3s;
+}
+
+.luxury-description {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  max-width: 600px;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: var(--transition);
+}
+
+.video-wrapper.active ~ .luxury-overlay + .luxury-content .luxury-description {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.5s;
+}
+
+
+
+.pagination-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 0;
+}
+
+.pagination-dot.active {
+  background: var(--gold);
+  transform: scale(1.3);
+}
+
+/* Efecto de máquina de escribir para el título */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .luxury-video-slider {
+      max-height: 500px;
+  }
   
+  .luxury-content {
+      bottom: 15%;
+      text-align: center;
+  }
+  
+  .luxury-description {
+      max-width: 100%;
+  }
+  
+  .video-pagination {
+      justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .luxury-video-slider {
+      max-height: 400px;
+  }
+  
+  .luxury-content {
+      bottom: 10%;
+      padding: 0 8vw;
+  }
+}

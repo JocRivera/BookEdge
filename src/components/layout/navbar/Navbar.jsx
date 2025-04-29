@@ -1,29 +1,43 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
-import logo from '../../../assets/logo.png';
-import './Navbar.css';
-import { 
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import logo from "../../../assets/logo.png";
+import "./Navbar.css";
+// Iconos de Ionicons 5 (Io...)
+import {
   IoLogOutOutline,
   IoCalendarOutline,
   IoPersonOutline,
   IoHomeOutline,
   IoBedOutline,
   IoMailOutline,
-  IoGridOutline,
-  IoArrowBackOutline
-} from 'react-icons/io5';
+  IoGridOutline 
+} from "react-icons/io5";
+
+import { FiStar, FiChevronDown } from "react-icons/fi";
 
 const Navbar = () => {
-  const { isAuthenticated, isLoadingAuth, user, logout, isClient, isStaff } = useAuth();
+  const { isAuthenticated, isLoadingAuth, user, logout, isClient, isStaff } =
+    useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determinar si estamos en el panel administrativo
-  const isAdminPanel = location.pathname.startsWith('/admin');
+  // Efecto para el scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    document.addEventListener("scroll", handleScroll);
+    return () => document.removeEventListener("scroll", handleScroll);
+  }, [scrolled]);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -33,11 +47,14 @@ const Navbar = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Función para manejar la navegación desde el dropdown
+  // Determinar si estamos en el panel administrativo
+  const isAdminPanel = location.pathname.startsWith("/admin");
+
+  // Función para manejar la navegación
   const handleNavigation = (path) => {
     navigate(path);
     setDropdownOpen(false);
@@ -45,8 +62,12 @@ const Navbar = () => {
   };
 
   const getInitials = (name) => {
-    if (!name) return '?';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
   if (isLoadingAuth) {
@@ -58,79 +79,15 @@ const Navbar = () => {
     );
   }
 
-  // Renderizado del Navbar para el panel administrativo
-  if (isAuthenticated && isStaff() && isAdminPanel) {
-    return (
-      <nav className="Nav admin-panel-nav">
-        <div className="logo-nav">
-          
-          
-          {/* Botón hamburguesa para móviles */}
-          <button 
-            className={`mobile-menu-button ${mobileMenuOpen ? 'active' : ''}`}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Menú móvil"
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </div>
-
-        <div className={`nav-container ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-
-          {/* Dropdown de usuario a la derecha */}
-          <div className="user-dropdown" ref={dropdownRef}>
-            <div 
-              className={`user-info ${dropdownOpen ? 'dropdown-open' : ''}`}
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <div className="user-avatar admin-avatar">
-                {getInitials(user?.name)}
-              </div>
-              <div className="user-details">
-                <span className="user-name">{user?.name || 'Usuario'}</span>
-                <span className="user-role">{user?.role?.name || 'Sin rol'}</span>
-              </div>
-            </div>
-            
-            {dropdownOpen && (
-              <div className="dropdown-actions open">
-                <div 
-                  className="dropdown-item"
-                  onClick={() => handleNavigation('/admin/profile')}
-                >
-                  <IoPersonOutline className="dropdown-item-icon" />
-                  <span>Mi Perfil</span>
-                </div>
-                
-                <button 
-                  onClick={() => logout()} 
-                  className="dropdown-item logout-item"
-                >
-                  <IoLogOutOutline className="dropdown-item-icon" />
-                  <span>Cerrar Sesión</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
-  // Renderizado del Navbar estándar (para sitio principal)
+  // =================================================================
+// NAVBAR PARA ADMINISTRADORES (CON EL NUEVO DROPDOWN UNIFICADO)
+// =================================================================
+if (isAuthenticated && isStaff() && isAdminPanel) {
   return (
-    <nav className={`Nav ${isAuthenticated && !isClient() ? 'staff-nav' : ''}`}>
-      {/* Logo a la izquierda */}
+    <nav className="Nav admin-panel-nav">
       <div className="logo-nav">
-        <Link to="/" className="logo-link">
-          <img src={logo} alt="Logo" className="logo-image" />
-        </Link>
-        
-        {/* Botón hamburguesa para móviles */}
-        <button 
-          className={`mobile-menu-button ${mobileMenuOpen ? 'active' : ''}`}
+        <button
+          className={`mobile-menu-button ${mobileMenuOpen ? "active" : ""}`}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Menú móvil"
         >
@@ -140,151 +97,205 @@ const Navbar = () => {
         </button>
       </div>
 
-      <div className={`nav-container ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-        {isAuthenticated ? (
-          <>
-            <div className="nav-links">
-              <ul className="links">
-                <li>
-                  <div 
-                    className="link" 
-                    onClick={() => handleNavigation('/')}
-                  >
-                    <IoHomeOutline className="link-icon" />
-                    <span>Inicio</span>
-                  </div>
-                </li>
-                <li>
-                  <div 
-                    className="link" 
-                    onClick={() => handleNavigation('/rooms')}
-                  >
-                    <IoBedOutline className="link-icon" />
-                    <span>Habitaciones</span>
-                  </div>
-                </li>
-                <li>
-                  <div 
-                    className="link" 
-                    onClick={() => handleNavigation('/contact')}
-                  >
-                    <IoMailOutline className="link-icon" />
-                    <span>Contacto</span>
-                  </div>
-                </li>
-                
-              
-              </ul>
+      <div className={`nav-container ${mobileMenuOpen ? "mobile-open" : ""}`}>
+        <div className="luxury-user-dropdown" ref={dropdownRef}>
+          <div
+            className="luxury-user-info"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            <div className="luxury-user-avatar admin-avatar">
+              {getInitials(user?.name)}
+            </div>
+            <FiChevronDown className={`dropdown-chevron ${dropdownOpen ? "open" : ""}`} />
             </div>
 
-            {/* Dropdown de usuario a la derecha */}
-            <div className="user-dropdown" ref={dropdownRef}>
-              <div 
-                className={`user-info ${dropdownOpen ? 'dropdown-open' : ''}`}
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                <div className={`user-avatar ${!isClient() ? 'admin-avatar' : ''}`}>
+          {dropdownOpen && (
+            <div className="luxury-dropdown-menu">
+              <div className="luxury-dropdown-header">
+                <div className="luxury-user-avatar large">
                   {getInitials(user?.name)}
                 </div>
-                <div className="user-details">
-                  <span className="user-name">{user?.name || 'Usuario'}</span>
-                  <span className="user-role">{user?.role?.name || 'Sin rol'}</span>
+                <div className="luxury-user-details">
+                  <h4>{user?.name || "Usuario"}</h4>
+                  <p>{user?.email || ""}</p>
+                  <span className="user-role-badge">{user?.role?.name || "Admin"}</span>
                 </div>
               </div>
-              
+
+              <div
+                className="luxury-dropdown-item"
+                onClick={() => handleNavigation("/admin/profile")}
+              >
+                <IoPersonOutline className="dropdown-icon" />
+                <span>Mi Perfil</span>
+              </div>
+
+              <div
+                className="luxury-dropdown-item"
+                onClick={() => handleNavigation("/admin/dashboard")}
+              >
+                <IoGridOutline className="dropdown-icon" />
+                <span>Panel Administrativo</span>
+              </div>
+
+              <div className="luxury-dropdown-divider"></div>
+
+              <button
+                onClick={() => logout()}
+                className="luxury-dropdown-item logout"
+              >
+                <IoLogOutOutline className="dropdown-icon" />
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+
+  }
+  return (
+    <nav
+      className={`luxury-nav ${scrolled ? "scrolled" : ""} ${
+        mobileMenuOpen ? "mobile-open" : ""
+      }`}
+    >
+      <div className="luxury-nav-container">
+        {/* Logo */}
+        <div className="luxury-logo" onClick={() => handleNavigation("/")}>
+          <img
+            src={logo} // Usa tu logo normal
+            alt="Logo"
+            className={`luxury-logo-img ${scrolled ? "" : "logo-light"}`}
+          />
+          <span className="luxury-logo-text">
+            Los <span>Lagos Barbosa</span>
+          </span>
+        </div>
+
+        {/* Menú hamburguesa para móvil */}
+        <button
+          className={`luxury-mobile-menu ${mobileMenuOpen ? "active" : ""}`}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Menú principal */}
+        <div className={`luxury-nav-links ${mobileMenuOpen ? "active" : ""}`}>
+          <div
+            className="luxury-nav-link"
+            onClick={() => handleNavigation("/")}
+          >
+            <IoHomeOutline className="link-icon" />
+            <span>Inicio</span>
+          </div>
+
+          <div
+            className="luxury-nav-link"
+            onClick={() => handleNavigation("/rooms")}
+          >
+            <IoBedOutline className="link-icon" />
+            <span>Habitaciones</span>
+          </div>
+
+          <div
+            className="luxury-nav-link"
+            onClick={() => handleNavigation("/Plans")}
+          >
+            <FiStar className="link-icon" />
+            <span>Planes</span>
+          </div>
+
+          <div
+            className="luxury-nav-link"
+            onClick={() => handleNavigation("/contact")}
+          >
+            <IoMailOutline className="link-icon" />
+            <span>Contacto</span>
+          </div>
+        </div>
+
+        {/* Sección de usuario/reservas */}
+        <div className="luxury-nav-actions">
+          {isAuthenticated ? (
+            <div className="luxury-user-dropdown" ref={dropdownRef}>
+              <div
+                className="luxury-user-info"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <div className="luxury-user-avatar">
+                  {getInitials(user?.name)}
+                </div>
+                <FiChevronDown
+                  className={`dropdown-chevron ${dropdownOpen ? "open" : ""}`}
+                />
+              </div>
+
               {dropdownOpen && (
-                <div className="dropdown-actions open">
-                 <div 
-                    className="dropdown-item"
-                    onClick={() => handleNavigation(isClient() ? '/profile' : '/admin/profile')}
+                <div className="luxury-dropdown-menu">
+                  <div className="luxury-dropdown-header">
+                    <div className="luxury-user-avatar large">
+                      {getInitials(user?.name)}
+                    </div>
+                    <div className="luxury-user-details">
+                      <h4>{user?.name || "Usuario"}</h4>
+                      <p>{user?.email || ""}</p>
+                    </div>
+                  </div>
+
+                  <div
+                    className="luxury-dropdown-item"
+                    onClick={() =>
+                      handleNavigation(isClient() ? "/profile" : "/admin")
+                    }
                   >
-                    <IoPersonOutline className="dropdown-item-icon" />
+                    <IoPersonOutline className="dropdown-icon" />
                     <span>Mi Perfil</span>
                   </div>
-                  
+
                   {isClient() && (
-                    <div 
-                      className="dropdown-item"
-                      onClick={() => handleNavigation('/my-reservations')}
+                    <div
+                      className="luxury-dropdown-item"
+                      onClick={() => handleNavigation("/my-reservations")}
                     >
-                      <IoCalendarOutline className="dropdown-item-icon" />
+                      <IoCalendarOutline className="dropdown-icon" />
                       <span>Mis Reservas</span>
                     </div>
                   )}
-                  
-                  {/* Acceso al panel administrativo también desde el dropdown para staff */}
-                  {isStaff() && (
-                    <div 
-                      className="dropdown-item"
-                      onClick={() => handleNavigation('/admin/dashboard')}
-                    >
-                      <IoGridOutline className="dropdown-item-icon" />
-                      <span>Panel Administrativo</span>
-                    </div>
-                  )}
-                  
-                  <button 
-                    onClick={() => logout()} 
-                    className="dropdown-item logout-item"
+
+                  <div className="luxury-dropdown-divider"></div>
+
+                  <button
+                    onClick={() => logout()}
+                    className="luxury-dropdown-item logout"
                   >
-                    <IoLogOutOutline className="dropdown-item-icon" />
+                    <IoLogOutOutline className="dropdown-icon" />
                     <span>Cerrar Sesión</span>
                   </button>
                 </div>
               )}
             </div>
-          </>
-        ) : (
-          <>
-            {/* Enlaces de navegación centrados para usuarios no autenticados */}
-            <div className="nav-links">
-              <ul className="links">
-                <li>
-                  <div 
-                    className="link" 
-                    onClick={() => handleNavigation('/')}
-                  >
-                    <IoHomeOutline className="link-icon" />
-                    <span>Inicio</span>
-                  </div>
-                </li>
-                <li>
-                  <div 
-                    className="link" 
-                    onClick={() => handleNavigation('/rooms')}
-                  >
-                    <IoBedOutline className="link-icon" />
-                    <span>Habitaciones</span>
-                  </div>
-                </li>
-                <li>
-                  <div 
-                    className="link" 
-                    onClick={() => handleNavigation('/contact')}
-                  >
-                    <IoMailOutline className="link-icon" />
-                    <span>Contacto</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            
-            <div className="auth-section">
-              <div 
-                className="btn-link login" 
-                onClick={() => handleNavigation('/login')}
+          ) : (
+            <>
+              <button
+                className="luxury-nav-button secondary"
+                onClick={() => handleNavigation("/login")}
               >
                 Iniciar Sesión
-              </div>
-              <div 
-                className="btn-link register" 
-                onClick={() => handleNavigation('/register')}
+              </button>
+              <button
+                className="luxury-nav-button primary"
+                onClick={() => handleNavigation("/register")}
               >
-                Registrarse
-              </div>
-            </div>
-          </>
-        )}
+                Reservar Ahora
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
