@@ -42,12 +42,6 @@ export default function App() {
             <Route index element={<Homepage />} />
             <Route path="profile" element={<Profile />} />
 
-            <Route path="cabins">
-              <Route index element={<CabinsClient />} />
-            </Route>
-            <Route path="bedrooms">
-              <Route index element={<BedroomsClient />} />
-            </Route>
           </Route>
           <Route path="/login" element={<Loginform />} />
           <Route path="/register" element={<RegisterForm />} />

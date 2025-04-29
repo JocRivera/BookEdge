@@ -7,7 +7,7 @@ function FiltradorAlojamiento() {
   const [filterActive, setAFilterActive] = useState('cabanas');
 
   return (
-    <main className="container-main-alojamientos">
+    <main className="container-main-alojamientos" >
       <header className="filter-alojamientos">
         <h1 className="filter-title">Nuestros <span>Alojamientos</span></h1>
         <nav className="filter-nav">

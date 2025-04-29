@@ -53,12 +53,46 @@ const Navbar = () => {
 
   // Determinar si estamos en el panel administrativo
   const isAdminPanel = location.pathname.startsWith("/admin");
-
+  
   // Función para manejar la navegación
   const handleNavigation = (path) => {
     navigate(path);
     setDropdownOpen(false);
     setMobileMenuOpen(false);
+  };
+  
+  // Nueva función para scroll a secciones con offset
+  const scrollToSection = (sectionId) => {
+    // Primero verificamos si estamos en la página de inicio
+    if (location.pathname !== '/') {
+      // Si no estamos en la página de inicio, navegamos ahí primero
+      navigate('/');
+      // Usamos setTimeout para dar tiempo a que la página se cargue
+      setTimeout(() => {
+        scrollWithOffset(sectionId);
+      }, 100);
+    } else {
+      // Si ya estamos en la página de inicio, hacemos scroll directamente
+      scrollWithOffset(sectionId);
+    }
+    setMobileMenuOpen(false);
+  };
+  
+  // Función auxiliar para hacer scroll con offset
+  const scrollWithOffset = (sectionId) => {
+    const section = document.getElementById(sectionId);
+    if (section) {
+      // Calculamos la posición del elemento
+      const yOffset = -80; // Ajusta este valor según la altura de tu navbar
+      const elementPosition = section.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset + yOffset;
+      
+      // Hacemos scroll a la posición calculada
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
   };
 
   const getInitials = (name) => {
@@ -196,7 +230,7 @@ if (isAuthenticated && isStaff() && isAdminPanel) {
 
           <div
             className="luxury-nav-link"
-            onClick={() => handleNavigation("/rooms")}
+            onClick={() => scrollToSection("habitaciones")}
           >
             <IoBedOutline className="link-icon" />
             <span>Habitaciones</span>
@@ -204,7 +238,7 @@ if (isAuthenticated && isStaff() && isAdminPanel) {
 
           <div
             className="luxury-nav-link"
-            onClick={() => handleNavigation("/Plans")}
+            onClick={() => scrollToSection("services")}
           >
             <FiStar className="link-icon" />
             <span>Planes</span>

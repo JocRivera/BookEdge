@@ -5,13 +5,13 @@ import FiltroAlojamientos from "./Habitaciones/FiltradorAlojamiento";
 function Homepage() {
   return (
     <>
-
-    
       <VideoSlider />
-      <ServicesClient/>
-      <FiltroAlojamientos/>
-
-    
+      <div id="services">
+        <ServicesClient/>
+      </div>
+      <div id="habitaciones">
+        <FiltroAlojamientos/>
+      </div>
     </>
   );
 }
