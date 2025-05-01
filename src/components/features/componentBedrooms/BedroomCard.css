@@ -1,287 +1,275 @@
-/* Base Container */
-.container-bedrooms {
-  padding: 0.45rem;
-  background-color: #f9fafb;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.06);
+/*error de backend*/
+.error-message {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: block;
+  text-align: left !important;
+  width: 100% !important;
+  padding-left: 0.2rem;
 }
 
-/* Title Styles */
-.title-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-left: 1rem;
+.input-error {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
 }
 
-.title-bedroom {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #2d3748;
-  position: relative;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
-  display: inline-block;
+.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
 }
 
-.title-bedroom::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
+.image-error {
+  margin-bottom: 0.8rem;
+  text-align: center;
   width: 100%;
-  height: 4px;
-  background-color: #4299e1;
-  border-radius: 2px;
 }
 
-/* Search Section */
-.bedroom-search {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  margin-top: -25px;
-  align-items: center;
-  gap: 10px;
-  margin-left: 1rem;
-}
-
-.search-icon {
-  position: absolute;
-  left: 10px;
-  top: 8px;
-  font-size: 16px;
-  color: var(--color-text-light);
-}
-
-.search {
-  padding-left: 30px;
-  border-radius: 10px;
-  min-width: 250px;
-  min-height: 30px;
-}
-
-/* Bedroom List Grid */
-.bedroom-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 15px;
-  justify-items: center;
-}
-
-.bedroom-list .bedroom-card:last-child:only-child {
-  grid-column: 1 / -1;
-  justify-self: center;
-  max-width: 500px;
-}
-
-/* Bedroom Card */
-.bedroom-card {
-  background: #dbeafe;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 100%;
-  max-width: 360px;
-}
-
-.bedroom-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-/* Bedroom Images */
-.image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 180px;
-}
-
-.bedroom-image,
-.preview-image,
-.main-detail-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.image-preview-wrapper:hover img,
-.bedroom-detail-image:hover img {
-  transform: scale(1.05);
-}
-
-.no-image-placeholder,
-.no-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f0f0f0;
-  color: #666;
-  font-style: italic;
-}
-
-.multiple-images-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 12px;
-  z-index: 1; /* Asegura que esté por encima de la imagen */
-}
-
-/* Bedroom Details */
-.bedrooms-details {
-  padding: 15px;
-  text-align: left;
+/* BedroomCard  */
+.bedroom-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #f9f9ff 0%, #f0f2ff 100%);
 }
 
 .bedroom-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 2rem;
+  animation: fadeIn 0.8s ease-out;
 }
 
-.bedroom-header h2 {
-  font-size: 1.3rem;
-  color: #333;
-  font-weight: bold;
+.bedroom-main-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: inline-block;
+  position: relative;
+  color: #000000;
+  padding-bottom: 10px;
 }
 
-/* Status Badges */
-.bedroom-status {
-  font-size: 0.75rem;
-  padding: 5px 10px;
-  border-radius: 10px;
-  font-weight: bold;
-  text-transform: uppercase;
-  white-space: nowrap;
-  margin-left: 10px;
-}
-
-.status-en-servicio {
-  background: #1ef937;
-  color: white;
-}
-
-.status-fuera-de-servicio {
-  background: #ff2e2e;
-  color: white;
-}
-
-.status-en-mantenimiento {
-  background-color: #FFA500;
-  color: white;
-}
-
-/* Bedroom Description */
-.bedroom-description {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 4.2em;
-  line-height: 1.5;
-  word-break: break-word;
-  color: #555;
-}
-
-/* Bedroom Metadata */
-.bedroom-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 10px;
-}
-
-.capacity-info,
-.detail-capacity {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.icon-person {
-  color: #4b5563;
-  font-size: 1rem;
-  margin-right: 4px;
-}
-
-.label {
-  font-weight: bold;
-  color: black;
-}
-
-/* Comforts Section */
-.bedroom-comforts {
-  margin-top: 8px;
-  min-height: 24px;
-}
-
-.comfort-badge {
-  display: inline-flex;
-  align-items: center;
-  background: #007bff;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  white-space: nowrap;
-}
-
-.no-comforts {
-  color: #6b7280;
-  font-style: italic;
-  font-size: 0.85rem;
-}
-
-.more-comforts {
-  font-size: 0.85rem;
-  color: #666;
-  font-weight: bold;
-}
-
-/* Card Actions */
-.bedroom-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 5px;
-}
-
-/* Modal - Common Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+.bedroom-main-title::after {
+  content: "";
+  position: absolute;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #00d4ff, #008cff);
+  border-radius: 3px;
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+}
+
+.bedroom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-wrapper {
+  position: relative;
+  flex-grow: 1;
+  max-width: 500px;
+  background: white;
+  border-radius: 50px;
+  box-shadow: 0 4px 20px rgba(79, 84, 200, 0.15);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.search-wrapper:hover {
+  box-shadow: 0 6px 25px rgba(79, 84, 200, 0.2);
+}
+
+.search-icon-room {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8f94fb;
+  font-size: 1.2rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.8rem 1.5rem 0.8rem 3rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.3);
+}
+
+/* Galería de habitaciones - Efecto galería de lujo */
+.bedroom-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.8rem;
+  margin: 2rem 0;
+}
+
+/* ¡LA CARD QUE HARÁ LLORAR DE EMOCIÓN! */
+.bedroom-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 15px 30px rgba(78, 84, 200, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  border: none;
+}
+
+.bedroom-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(78, 84, 200, 0.2);
+}
+
+.card-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1s ease, filter 0.6s ease;
+  filter: brightness(0.95);
+}
+
+.bedroom-card:hover .card-image {
+  transform: scale(1.08);
+  filter: brightness(1);
+}
+
+/* Efecto de vidrio esmerilado para el placeholder */
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e0e1ff 0%, #f0f1ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  color: #6a6fc9;
+  font-size: 0.9rem;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Animations */
-@keyframes modalFadeIn {
+.image-placeholder::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(30deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(30deg);
+  }
+}
+
+.status-badge {
+  position: absolute;
+  bottom: 1rem;
+  right: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+}
+
+.status-badge.available {
+  background: rgba(46, 213, 115, 0.9);
+  color: white;
+}
+
+.status-badge.maintenance {
+  background: rgba(255, 165, 2, 0.9);
+  color: white;
+}
+
+.status-badge.unavailable {
+  background: rgba(255, 71, 87, 0.9);
+  color: white;
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.room-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2a2d7c;
+  margin-bottom: 0.8rem;
+  position: relative;
+  display: inline-block;
+}
+
+.room-features {
+  margin: 1.2rem 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #5a5faa;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+.feature-icon {
+  color: #8f94fb;
+  font-size: 1.1rem;
+  min-width: 20px;
+}
+
+.card-actions {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.8rem;
+}
+
+.bedroom-card {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/*Fomulario xd*/
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -289,276 +277,372 @@
   }
 }
 
-@keyframes modalEnter {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* Modal Container */
-.modal-container-bedroom {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+/* Modal base */
+.modal-overlay-room {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
   width: 100%;
-  max-width: 1200px;
-  max-height: 100vh;
-  
-  overflow-y: auto;
-  animation: modalFadeIn 0.3s ease-out forwards;
-}
-
-.detail-modal-container {
-  background: white;
-  width: 90%;
-  max-width: 1000px;
-  max-height: 90vh;
-  border-radius: 12px;
-  overflow: hidden;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
   display: flex;
-  flex-direction: column;
-  animation: modalEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  overflow-y: auto;
+  border: none;
 }
 
-/* Modal Header */
-.modal-header {
+.modal-container-bedroom {
+  width: 95%;
+  max-width: 1000px;
+  max-height: 95vh;
+  background-color: #fff;
+  border-radius: 20px;
+  position: relative;
+  margin: 0 auto;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Header del modal */
+.modal-header-bedroom {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  padding: 20px 25px;
   border-bottom: 1px solid #eaeaea;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
 }
 
-.modal-header h2 {
+.modal-header-bedroom h2 {
   margin: 0;
-  font-size: 22px;
-  color: #1a202c;
+  font-size: 1.5rem;
+  color: #2d3748;
   font-weight: 600;
 }
 
-.close-button {
-  background-color: transparent;
+.close-button-bedroom {
   border: none;
-  font-size: 28px;
   cursor: pointer;
   color: #718096;
-  line-height: 1;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
+  background: transparent;
 }
 
-.close-button:hover {
-  color: #2d3748;
+.close-button-bedroom:hover {
+  color: #3e9de5;
 }
 
-
-/* Form Styles */
+/* Estructura del formulario */
 .bedroom-form {
-  padding: 20px;
-}
-
-.form-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-}
-
-.form-inputs {
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
-.form-group {
-  margin-bottom: 16px;
+.form-content-bedroom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  padding: 25px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .form-content-bedroom {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Campos del formulario */
+.form-inputs-bedroom {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.form-group-bedroom {
+  margin-bottom: 20px;
 }
 
 .form-label {
   display: block;
   margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #777;
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 0.95rem;
 }
 
-.form-input {
+.form-input-bedroom {
   width: 100%;
-  padding: 11px 13px;
+  padding: 12px 15px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 15px;
-  color: #272727;
-  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  background-color: #f8fafc;
 }
 
-.form-input:focus {
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+.form-input-bedroom:focus {
   outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  background-color: #fff;
 }
 
-textarea.form-input {
-  min-height: 80px;
+textarea.form-input-bedroom {
+  min-height: 100px;
   resize: vertical;
 }
 
-/* Detail View */
-.detail-content {
-  display: flex;
-  gap: 30px;
-  padding: 30px;
-  background-color: white;
-  flex: 1;
-}
-
-.detail-image-gallery {
-  flex: 1;
-  max-width: 50%;
-  position: relative;
-  border-radius: 12px;
-  max-height: 400px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-}
-
-.detail-info {
-  flex: 1;
+/* Sección de imágenes */
+.image-upload-section-bedroom {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  min-height: 0;
-  overflow: hidden;
 }
 
-.detail-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #1a202c;
-  margin: 0 0 10px 0;
+.existing-images-container-bedroom,
+.new-images-container-bedroom {
+  margin-bottom: 20px;
 }
 
-.detail-status {
-  margin-bottom: 10px;
+.new-images-container-bedroom {
+  margin-top: 20px;
 }
 
-.detail-capacity {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 1rem;
-  color: #1f2937;
+.existing-images-container-bedroom h3,
+.new-images-container-bedroom h3 {
+  margin-top: 0;
   margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: #2d3748;
+  z-index: 1;
 }
 
-.detail-description h3,
-.detail-comforts h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #4a5568;
-  margin: 0 0 10px 0;
-}
-
-.detail-description p,
-.detail-comforts p {
-  color: #4b5563;
-  line-height: 1.6;
+/* Grid de imágenes */
+.images-grid-bedroom {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  padding: 0;
   margin: 0;
+  list-style: none;
 }
 
-.comfort-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-/* Image Gallery */
-.main-image-container {
-  height: 300px;
+.image-item-bedroom {
+  position: relative;
+  width: 100%;
+  height: 120px;
   border-radius: 8px;
   overflow: hidden;
 }
 
-.image-thumbnails {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 8px 0;
-  margin-top: 10px;
-}
-
-.thumbnail {
-  width: 70px;
-  height: 50px;
-  border-radius: 4px;
-  overflow: hidden;
-  cursor: pointer;
+/* Contenedor de vista previa */
+.image-preview-wrapper-bedroom {
   position: relative;
-  opacity: 0.7;
-  transition: all 0.2s ease;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 0;
+  padding: 0;
 }
 
-.thumbnail.active {
-  opacity: 1;
-  box-shadow: 0 0 0 2px #0066cc;
-}
-
-.thumbnail img {
+/* Estilo compartido para todas las imágenes */
+.preview-image-bedroom,
+.upload-images-grid img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.primary-badge {
+/* Acciones sobre las imágenes */
+.image-actions-bedroom {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
-  background-color: gold;
-  border-radius: 50%;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  gap: 5px;
 }
 
-/* Modal Footer */
-.modal-footer-detail {
+/* Botones de acción */
+.image-action-btn-bedroom {
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s;
+}
+
+.image-action-btn-bedroom:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.delete-btn-bedroom:hover {
+  background: rgba(229, 62, 62, 0.8);
+}
+
+.star-btn {
+  background: rgba(245, 158, 11, 0.6);
+}
+
+.star-btn:hover {
+  background: rgba(245, 158, 11, 0.8);
+}
+
+.star-btn.primary {
+  background: rgba(245, 158, 11, 0.9);
+  cursor: default;
+}
+
+/* Grid para carga de imágenes */
+.upload-images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  width: 100%;
+}
+
+/* Campos de carga individual */
+.image-upload-field-bedroom {
+  height: 120px;
+  width: 100%;
+  position: relative;
+}
+
+.upload-single-container-bedroom {
+  height: 100%;
+  width: 100%;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #f8fafc;
+}
+
+.upload-single-container-bedroom:hover {
+  border-color: #4299e1;
+  background-color: #ebf8ff;
+}
+
+.file-input-bedroom {
+  display: none;
+}
+
+.upload-single-label-bedroom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  padding: 10px;
+  color: #4a5568;
+  cursor: pointer;
+}
+
+.upload-single-label-bedroom svg {
+  margin-bottom: 5px;
+  color: #718096;
+}
+
+.upload-single-label-bedroom span {
+  font-size: 0.8rem;
+}
+
+/* Etiqueta de imagen principal */
+.primary-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 0.75rem;
+  padding: 3px 5px;
+  text-align: center;
+}
+
+/* Mensaje de máximo de imágenes */
+.max-images-message-bedroom {
+  background-color: #fffaf0;
+  border-left: 4px solid #dd6b20;
+  padding: 12px;
+  margin-top: 15px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #9c4221;
+}
+
+/* Footer del modal */
+.modal-footer-bedroom {
   display: flex;
   justify-content: flex-end;
+  gap: 15px;
+  padding: 20px 25px;
+  border-top: 1px solid #eaeaea;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+}
+
+/* Botones de acción */
+.cancel-btn-bedroom,
+.submit-btn-bedroom {
   padding: 10px 20px;
-  border-top: 1px solid #e5e7eb;
-  background-color: #f7fafc;
-}
-
-.cancel-btn-detail {
-  background-color: #4299e1;
-  color: white;
-  font-weight: 600;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
+  border-radius: 6px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s;
 }
 
-.cancel-btn-detail:hover {
+.cancel-btn-bedroom {
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
+}
+
+.cancel-btn-bedroom:hover {
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.submit-btn-bedroom {
+  background-color: #4299e1;
+  border: 1px solid #4299e1;
+  color: white;
+}
+
+.submit-btn-bedroom:hover {
   background-color: #3182ce;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 10px -2px rgba(59, 130, 246, 0.3);
+  border-color: #3182ce;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .bedroom-list {
-    grid-template-columns: 1fr;
-  }
-
-  .bedroom-list .bedroom-card:last-child:only-child {
-    max-width: 100%;
-  }
-
-  .detail-content {
-    flex-direction: column;
-  }
-
-  .detail-image-gallery {
-    max-width: 100%;
-  }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

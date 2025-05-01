@@ -25,12 +25,15 @@ export const createBedroom = async (bedroomData) => {
     const response = await axios.post(API_URL, dataToSend);
     return response.data;
   } catch (error) {
+    // Lanza el error completo de la respuesta
     throw error.response?.data || { 
-      message: error.message || "Error al crear la habitación" 
+      message: error.message || "Error al crear la habitación",
+      errors: error.response?.data?.errors // Asegúrate de pasar los errores
     };
   }
 };
 
+// Haz lo mismo para updateBedroom
 export const updateBedroom = async (id, bedroomData) => {
   try {
     const dataToSend = {
@@ -42,11 +45,11 @@ export const updateBedroom = async (id, bedroomData) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { 
-      message: error.message || "Error al actualizar la habitación" 
+      message: error.message || "Error al crear la habitación",
+      errors: error.response?.data?.errors // Asegúrate de pasar los errores
     };
   }
 };
-
 export const deleteBedroom = async (id) => {
   const { data } = await axios.delete(`${API_URL}/${id}`);
   return data;

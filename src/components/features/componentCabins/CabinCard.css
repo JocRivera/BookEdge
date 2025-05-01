@@ -1,287 +1,276 @@
-/* Base Container */
-.container-cabins {
-  padding: 0.45rem;
-  background-color: #f9fafb;
-  border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.06);
+/*error de backend*/
+.error-message-admin {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: block;
+  text-align: left !important;
+  width: 100% !important;
+  padding-left: 0.2rem;
 }
 
-
-/* Title Styles */
-.title-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-left: 1rem;
+.input-error-admin {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
 }
 
-.title-cabin {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #2d3748;
-  position: relative;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+.input-error-admin:focus {
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
+}
+
+.image-error-admin {
+  margin-bottom: 0.8rem;
+  text-align: center;
+  width: 100%;
+}
+
+/* BedroomCard  */
+.cabin-container-admin {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #f9f9ff 0%, #f0f2ff 100%);
+}
+
+.cabin-header-admin {
+  margin-bottom: 2rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.cabin-main-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: inline-block;
+  position: relative;
+  color: #000000;
+
+  padding-bottom: 10px;
 }
 
-.title-cabin::after {
+.cabin-main-title::after {
   content: "";
   position: absolute;
-  left: 0;
   bottom: 0;
+  left: 0;
   width: 100%;
-  height: 4px;
-  background-color: #4299e1;
-  border-radius: 2px;
+  height: 3px;
+  background: linear-gradient(90deg, #00d4ff, #008cff);
+  border-radius: 3px;
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
 }
 
-/* Search Section */
-.cabin-search {
-  position: relative;
+.cabin-controls-admin {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  margin-top: -25px;
   align-items: center;
-  gap: 10px;
-  margin-left: 1rem;
+  justify-content: space-between;
 }
 
-.search-icon {
-  position: absolute;
-  left: 10px;
-  top: 8px;
-  font-size: 16px;
-  color: var(--color-text-light);
-}
-
-.search {
-  padding-left: 30px;
-  border-radius: 10px;
-  min-width: 250px;
-  min-height: 30px;
-}
-
-/* Cabin List Grid */
-.cabin-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 15px;
-  justify-items: center;
-}
-
-.cabin-list .cabin-card:last-child:only-child {
-  grid-column: 1 / -1;
-  justify-self: center;
-  max-width: 500px;
-}
-
-/* Cabin Card */
-.cabin-card {
-  background: #dbeafe;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 100%;
-  max-width: 360px;
-}
-
-.cabin-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-/* Cabin Images */
-.image-wrapper {
+.search-wrapper-admin {
   position: relative;
-  width: 100%;
-  height: 180px;
+  flex-grow: 1;
+  max-width: 500px;
+  background: white;
+  border-radius: 50px;
+  box-shadow: 0 4px 20px rgba(79, 84, 200, 0.15);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.cabin-image,
-.preview-image,
-.main-detail-image {
+.search-wrapper-admin:hover {
+  box-shadow: 0 6px 25px rgba(79, 84, 200, 0.2);
+}
+
+.search-icon-cabin-admin {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8f94fb;
+  font-size: 1.2rem;
+}
+
+.search-input-admin {
+  width: 100%;
+  padding: 0.8rem 1.5rem 0.8rem 3rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.search-input-admin:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.3);
+}
+
+/* Galería de habitaciones - Efecto galería de lujo */
+.cabin-gallery-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.8rem;
+  margin: 2rem 0;
+}
+
+/* ¡LA CARD QUE HARÁ LLORAR DE EMOCIÓN! */
+.cabin-card-admin {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 15px 30px rgba(78, 84, 200, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  border: none;
+}
+
+.cabin-card-admin:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(78, 84, 200, 0.2);
+}
+
+.card-image-container-admin {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.card-image-admin {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 1s ease, filter 0.6s ease;
+  filter: brightness(0.95);
 }
 
-.image-preview-wrapper:hover img,
-.cabin-detail-image:hover img {
-  transform: scale(1.05);
+.cabin-card-admin:hover .card-image-admin {
+  transform: scale(1.08);
+  filter: brightness(1);
 }
 
-.no-image-placeholder,
-.no-image {
+/* Efecto de vidrio esmerilado para el placeholder */
+.image-placeholder-admin {
   width: 100%;
   height: 100%;
+  background: linear-gradient(135deg, #e0e1ff 0%, #f0f1ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0f0f0;
-  color: #666;
-  font-style: italic;
-}
-
-.multiple-images-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 12px;
-}
-
-/* Cabin Details */
-.cabins-details {
-  padding: 15px;
-  text-align: left;
-}
-
-.cabin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.cabin-header h2 {
-  font-size: 1.3rem;
-  color: #333;
-  font-weight: bold;
-}
-
-/* Status Badges */
-.cabin-status {
-  font-size: 0.75rem;
-  padding: 5px 10px;
-  border-radius: 10px;
-  font-weight: bold;
-  text-transform: uppercase;
-  white-space: nowrap;
-  margin-left: 10px;
-}
-
-.status-en-servicio {
-  background: #1ef937;
-  color: white;
-}
-
-.status-fuera-de-servicio {
-  background: #ff2e2e;
-  color: white;
-}
-
-.status-en-mantenimiento {
-  background-color: #FFA500;
-  color: white;
-}
-
-/* Cabin Description */
-.cabin-description {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 4.2em;
-  line-height: 1.5;
-  word-break: break-word;
-  color: #555;
-}
-
-/* Cabin Metadata */
-.cabin-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  color: #6a6fc9;
   font-size: 0.9rem;
-  color: #666;
-  margin-top: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
-.capacity-info,
-.detail-capacity {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.image-placeholder-admin::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shine 3s infinite;
 }
 
-.icon-person {
-  color: #4b5563;
-  font-size: 1rem;
-  margin-right: 4px;
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(30deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(30deg);
+  }
 }
 
-.label {
-  font-weight: bold;
-  color: black;
-}
-
-/* Comforts Section */
-.cabin-comforts {
-  margin-top: 8px;
-  min-height: 24px;
-}
-
-.comfort-badge {
-  display: inline-flex;
-  align-items: center;
-  background: #007bff;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 12px;
+.status-badge {
+  position: absolute;
+  bottom: 1rem;
+  right: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
   font-size: 0.75rem;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  white-space: nowrap;
+  font-weight: 600;
+  text-transform: uppercase;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 2;
 }
 
-.no-comforts {
-  color: #6b7280;
-  font-style: italic;
-  font-size: 0.85rem;
+.status-badge.available {
+  background: rgba(46, 213, 115, 0.9);
+  color: white;
 }
 
-.more-comforts {
-  font-size: 0.85rem;
-  color: #666;
-  font-weight: bold;
+.status-badge.maintenance {
+  background: rgba(255, 165, 2, 0.9);
+  color: white;
 }
 
-/* Card Actions */
-.cabin-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 5px;
+.status-badge.unavailable {
+  background: rgba(255, 71, 87, 0.9);
+  color: white;
 }
 
-/* Modal - Common Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+.card-content-admin {
+  padding: 1.5rem;
+}
+
+.cabin-title-admin {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 0.8rem;
+  position: relative;
+  display: inline-block;
+}
+
+.cabin-features-admin {
+  margin: 1rem 0;
+}
+
+.feature-item-admin {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1000;
+  gap: 0.6rem;
+  color: #5a5faa;
+  font-size: 0.85rem;
+  margin-bottom: 0.6rem;
 }
 
-/* Animations */
-@keyframes modalFadeIn {
+.feature-icon {
+  color: #8f94fb;
+  font-size: 1.1rem;
+  min-width: 20px;
+}
+
+.card-actions-admin {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.8rem;
+}
+
+.cabin-card-admin {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/*Fomulario xd*/
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -289,680 +278,404 @@
   }
 }
 
-@keyframes modalEnter {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-/* Modal Container */
-.modal-container-cabin {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+/* Modal base */
+/* Modal base */
+.modal-overlay-room-admin {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
   width: 100%;
-  max-width: 1200px;
-  max-height: 90vh;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
   overflow-y: auto;
-  animation: modalFadeIn 0.3s ease-out forwards;
+  border: none;
 }
 
-.modal-container.detail-modal {
-  max-width: 900px;
-  background: linear-gradient(145deg, #ffffff, #f3f4f6);
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
-              0 0 0 1px rgba(255, 255, 255, 0.1);
-  animation: modalEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex;
-  flex-direction: column;
-}
-
-.detail-modal-container {
-  background: white;
-  width: 90%;
+.modal-container-cabin-admin {
+  width: 95%;
   max-width: 1000px;
-  max-height: 90vh;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  max-height: 95vh;
+  background-color: #fff;
+  border-radius: 20px;
+  position: relative;
+  margin: 0 auto;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease-out;
 }
 
-/* Modal Header */
-.modal-header {
+/* Header del modal */
+.modal-header-cabin-admin {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  padding: 20px 25px;
   border-bottom: 1px solid #eaeaea;
+  position: sticky;
+  top: 0;
+  background-color: #fff;
 }
 
-.modal-header h2 {
+.modal-header-cabin-admin h2 {
   margin: 0;
-  font-size: 22px;
-  color: #1a202c;
+  font-size: 1.5rem;
+  color: #2d3748;
   font-weight: 600;
 }
 
-.close-button {
-  background-color: transparent;
+.close-button-cabin-admin {
   border: none;
-  font-size: 28px;
   cursor: pointer;
   color: #718096;
-  line-height: 1;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
+  background: transparent;
 }
 
-.close-button:hover {
-  color: #2d3748;
+.close-button-cabin-admin:hover {
+  color: #3e9de5;
 }
 
-/* Form Styles */
-.cabin-form {
-  padding: 20px;
-}
-
-.form-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-}
-
-.form-inputs {
+/* Estructura del formulario */
+.cabin-form-admin {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  width: 100%;
 }
 
-.form-group {
-  margin-bottom: 16px;
+.form-content-cabin-admin {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  padding: 25px;
+  width: 100%;
+  align-items: start;
 }
 
-.form-label {
+@media (max-width: 768px) {
+  .form-content-cabin-admin {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Campos del formulario */
+.form-inputs-cabin-admin {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.form-group-admin,
+.form-group-cabin-admin {
+  margin-bottom: 20px;
+}
+
+.form-label-admin {
   display: block;
   margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #777;
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 0.95rem;
 }
 
-.form-input {
+.form-input-cabin-admin {
   width: 100%;
-  padding: 11px 13px;
+  padding: 12px 15px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 15px;
-  color: #272727;
-  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  background-color: #f8fafc;
 }
 
-.form-input:focus {
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+.form-input-cabin-admin:focus {
   outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  background-color: #fff;
 }
 
-textarea.form-input {
-  min-height: 80px;
+textarea.form-input-cabin-admin {
+  min-height: 100px;
   resize: vertical;
 }
 
-/* Image Upload */
-.image-upload-section {
-  display: flex;
-  flex-direction: column;
-}
-
-.image-upload-container {
-  border: 2px dashed #cbd5e0;
-  border-radius: 12px;
-  height: 280px;
-  position: relative;
-  overflow: hidden;
-  background-color: #f7fafc;
-  transition: all 0.3s ease;
-}
-
-.upload-label {
-  display: block;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-.image-preview-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.change-image-text {
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 8px;
-  border-radius: 4px;
-  margin: 0 auto;
-  width: max-content;
-}
-
-.upload-placeholder {
-  text-align: center;
-  padding: 20px;
-  color: #718096;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.upload-placeholder p {
-  margin: 0 0 8px 0;
-  font-size: 16px;
+/* Errores de formulario */
+.error-message-admin {
+  color: #e74c3c;
+  font-size: 0.85rem;
   font-weight: 500;
+  display: block;
+  text-align: left !important;
+  width: 100% !important;
+  padding-left: 0.2rem;
 }
 
-.upload-placeholder small {
-  font-size: 12px;
-  color: #a0aec0;
+.input-error-admin {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
 }
 
-.upload-icon {
-  color: #cbd5e0;
-  margin-bottom: 10px;
+.input-error-admin:focus {
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
 }
 
-/* Multiple Images Management */
-.images-grid {
+.image-error-admin {
+  margin-bottom: 0.8rem;
+  text-align: center;
+  width: 100%;
+}
+
+/* Sección de imágenes */
+.image-upload-section-cabin-admin {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.existing-images-container-cabin-admin,
+.new-images-container-cabin-admin {
+  margin-bottom: 20px;
+}
+
+.new-images-container-cabin-admin {
+  margin-top: 20px;
+}
+
+.existing-images-container-cabin-admin h3,
+.new-images-container-cabin-admin h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  color: #2d3748;
+  z-index: 1;
+}
+
+/* Grid de imágenes */
+.images-grid-cabin-admin {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 15px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
-.image-item {
+.image-item-cabin-admin {
   position: relative;
+  width: 100%;
+  height: 120px;
   border-radius: 8px;
   overflow: hidden;
-  height: 100px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.image-actions {
+/* Contenedor de vista previa */
+.image-preview-wrapper-cabin-admin {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilo compartido para todas las imágenes */
+.preview-image-cabin-admin,
+.upload-images-grid-admin img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Acciones sobre las imágenes */
+.image-actions-cabin-admin {
   position: absolute;
   top: 5px;
   right: 5px;
   display: flex;
   gap: 5px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
 }
 
-.image-preview-wrapper:hover .image-actions {
-  opacity: 1;
-}
-
-.image-preview-wrapper:hover .preview-image {
-  filter: brightness(0.8);
-}
-
-.image-action-btn {
-  background: rgba(255, 255, 255, 0.8);
+/* Botones de acción */
+.image-action-btn-admin {
+  background: rgba(0, 0, 0, 0.6);
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #333;
-  padding: 0;
+  color: white;
+  transition: all 0.2s;
 }
 
-.delete-btn:hover {
-  background: rgba(255, 0, 0, 0.2);
-  color: #ff0000;
+.image-action-btn-admin:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 
-.star-btn:hover {
-  background: rgba(255, 215, 0, 0.2);
-  color: #ffd700;
+.delete-btn-cabin-admin:hover {
+  background: rgba(229, 62, 62, 0.8);
 }
 
-.star-btn.primary {
-  color: #ffd700;
-  background: rgba(255, 215, 0, 0.2);
+.star-btn-admin {
+  background: rgba(245, 158, 11, 0.6);
 }
 
-.primary-label {
+.star-btn-admin:hover {
+  background: rgba(245, 158, 11, 0.8);
+}
+
+.star-btn-admin.primary-admin {
+  background: rgba(245, 158, 11, 0.9);
+  cursor: default;
+}
+
+/* Grid para carga de imágenes */
+.upload-images-grid-admin {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  width: 100%;
+}
+
+/* Campos de carga individual */
+.image-upload-field-cabin-admin {
+  height: 120px;
+  width: 100%;
+  position: relative;
+}
+
+.upload-single-container-cabin-admin {
+  height: 100%;
+  width: 100%;
+  border: 2px dashed #cbd5e0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #f8fafc;
+}
+
+.upload-single-container-cabin-admin:hover {
+  border-color: #4299e1;
+  background-color: #ebf8ff;
+}
+
+.file-input-cabin-admin {
+  display: none;
+}
+
+.upload-single-label-cabin-admin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  padding: 10px;
+  color: #4a5568;
+  cursor: pointer;
+}
+
+.upload-single-label-cabin-admin svg {
+  margin-bottom: 5px;
+  color: #718096;
+}
+
+.upload-single-label-cabin-admin span {
+  font-size: 0.8rem;
+}
+
+/* Etiqueta de imagen principal */
+.primary-label-admin {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 215, 0, 0.7);
-  color: #333;
-  font-size: 10px;
-  text-align: center;
-  padding: 2px 0;
-}
-
-.existing-images-container,
-.new-images-container {
-  margin-bottom: 16px;
-}
-
-.existing-images-container h4,
-.new-images-container h4 {
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #666;
-}
-
-.upload-container {
-  margin-top: 10px;
-}
-
-/* Buttons */
-.modal-footer,
-.modal-footer-detail {
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  padding: 10px 20px;
-  border-top: 1px solid #e5e7eb;
-  background-color: #f7fafc;
-}
-
-.error-text-cabin {
-  color: #ff3333;
-  font-size: 1rem;
-  font-weight: bold;
-  margin-top: 5px;
-  display: block;
-}
-.submit-btn,
-.cancel-btn-detail {
-  background-color: #4299e1;
-  color: white;
-  font-weight: 600;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
-}
-
-.submit-btn:hover,
-.cancel-btn-detail:hover {
-  background-color: #3182ce;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 10px -2px rgba(59, 130, 246, 0.3);
-}
-
-.cancel-btn {
-  background-color: #f7fafc;
-  color: #4a5568;
-  font-weight: 600;
-  padding: 12px 24px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
-}
-
-.cancel-btn:hover {
-  background-color: #edf2f7;
-  transform: translateY(-2px);
-}
-
-/* Detail View */
-.cabin-detail-content,
-.detail-content {
-  display: flex;
-  gap: 30px;
-  padding: 30px;
-  background-color: white;
-  flex: 1;
-}
-
-.cabin-detail-image,
-.detail-image-gallery {
-  flex: 1;
-  max-width: 50%;
-  position: relative;
-  border-radius: 12px;
-  max-height: 400px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-}
-
-.cabin-detail-info,
-.detail-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  position: relative;
-}
-
-.detail-header h3 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #767699;
-  letter-spacing: -0.5px;
-  line-height: 1.2;
-  position: relative;
-  padding-bottom: 8px;
-}
-
-.detail-section {
-  margin-bottom: 10px;
-  padding: 14px;
-  border-radius: 12px;
-  background-color: #f9fafb;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
-}
-
-.detail-section:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.detail-section h4 {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #111212;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.detail-section p {
-  margin: 0;
-  color: #4b5563;
-  line-height: 1.7;
-  font-size: 1.05rem;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  max-height: 50px;
-  overflow-y: auto;
-  margin-top: 5px;
-  padding-right: 5px;
-}
-
-/* Image Gallery */
-.main-image-container {
-  height: 300px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.image-thumbnails {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-
-.thumbnail {
-  width: 70px;
-  height: 50px;
-  border-radius: 4px;
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-  opacity: 0.7;
-  transition: all 0.2s ease;
-}
-
-.thumbnail.active {
-  opacity: 1;
-  box-shadow: 0 0 0 2px #0066cc;
-}
-
-.thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.primary-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
-  background-color: gold;
-  border-radius: 50%;
-}
-
-/* Custom Scrollbar */
-.detail-section p::-webkit-scrollbar {
-  width: 6px;
-}
-
-.detail-section p::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.detail-section p::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 10px;
-}
-
-.detail-section p::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .cabin-list {
-    grid-template-columns: 1fr;
-  }
-
-  .cabin-list .cabin-card:last-child:only-child {
-    max-width: 100%;
-  }
-
-  .form-content {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
-
-  .submit-btn,
-  .cancel-btn {
-    width: 100%;
-  }
-
-  .detail-content,
-  .cabin-detail-content {
-    flex-direction: column;
-  }
-
-  .cabin-detail-image,
-  .detail-image-gallery {
-    max-width: 100%;
-  }
-}
-/* Estilos para los campos individuales de imagen */
-.individual-image-uploads {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.image-upload-field {
-  border: 1px dashed #ccc;
-  border-radius: 8px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background-color: #f9f9f9;
-  transition: all 0.3s ease;
-}
-
-.image-upload-field:hover {
-  border-color: #999;
-}
-
-.upload-single-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.upload-single-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  text-align: center;
-  padding: 10px;
-  color: #666;
-  transition: all 0.3s ease;
-}
-
-.upload-single-label:hover {
-  color: #333;
-}
-
-.upload-single-label svg {
-  margin-bottom: 5px;
-}
-
-.upload-single-label span {
-  font-size: 0.8rem;
-}
-
-.image-preview-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.image-preview-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-preview-wrapper button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
   background: rgba(0, 0, 0, 0.6);
   color: white;
-  border: none;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 0.75rem;
+  padding: 3px 5px;
+  text-align: center;
 }
 
-.image-preview-wrapper button:hover {
-  background: rgba(0, 0, 0, 0.8);
-  transform: scale(1.1);
-}
-
-.max-images-message {
+/* Mensaje de máximo de imágenes */
+.max-images-message-cabin-admin {
+  background-color: #fffaf0;
+  border-left: 4px solid #dd6b20;
+  padding: 12px;
   margin-top: 15px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  color: #6c757d;
+  border-radius: 4px;
   font-size: 0.9rem;
+  color: #9c4221;
 }
 
-.max-images-message p {
-  margin: 5px 0;
-}
-
-/* Ajustes para el modal */
-.modal-container {
-  max-width: 800px;
-  width: 90%;
-}
-
-.form-content {
+/* Footer del modal */
+.modal-footer-cabin-admin {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-@media (min-width: 768px) {
-  .form-content {
-    flex-direction: row;
-  }
-  
-  .form-inputs {
-    flex: 1;
-  }
-  
-  .image-upload-section {
-    flex: 1;
-  }
-}
-
-/* Estilos existentes para imágenes guardadas */
-.existing-images-container h4 {
-  color: #555;
-  margin-bottom: 10px;
-}
-
-.images-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  justify-content: flex-end;
   gap: 15px;
+  padding: 20px 25px;
+  border-top: 1px solid #eaeaea;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
 }
 
-.image-item {
-  position: relative;
+/* Botones de acción */
+.cancel-btn-cabin-admin,
+.submit-btn-cabin-admin {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.primary-label {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
-  background: rgba(0, 0, 0, 0.7);
+.cancel-btn-cabin-admin {
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
+}
+
+.cancel-btn-cabin-admin:hover {
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.submit-btn-cabin-admin {
+  background-color: #4299e1;
+  border: 1px solid #4299e1;
   color: white;
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-size: 0.7rem;
+}
+
+.submit-btn-cabin-admin:hover {
+  background-color: #3182ce;
+  border-color: #3182ce;
+}
+
+.visually-hidden-admin {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

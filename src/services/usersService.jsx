@@ -6,8 +6,16 @@ export const getUsers = async () => {
 };
 
 export const createUser = async (userData) => {
-  const response = await api.post("/user", userData);
+  try {
+    const response = await api.post("/user", userData);
   return response.data;
+  } catch (error) {
+    throw error.response?.data || { 
+      message: error.message || "Error al crear usuario",
+      errors: error.response?.data?.errors
+    };
+  }
+  
 };
 
 export const updateUser = async (id, userData) => {
@@ -15,7 +23,10 @@ export const updateUser = async (id, userData) => {
     const response = await api.put(`/user/${id}`, userData);
     return response.data;
   } catch (error) {
-    console.log(error);
+    throw error.response?.data || { 
+      message: error.message || "Error al actualizar usuario",
+      errors: error.response?.data?.errors
+    };
   }
 };
 export const deleteUser = async (id) => {
