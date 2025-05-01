@@ -19,15 +19,16 @@ function TableUser() {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const { hasPermission, user } = useAuth();
 
   const filtrarDatos = users.filter((user) =>
-    Object.values(user).some((value) =>
-      value && typeof value === 'object' 
-        ? Object.values(value).some(v => v && v.toString().toLowerCase().includes(searchTerm.toLowerCase()))
-        : value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    `${user.name} ${user.identification} ${user.status} ${user.eps} 
+     ${user.Users?.map((c) => c.name).join(" ") || ""}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
   const itemsPerPage = 6;
@@ -40,11 +41,16 @@ function TableUser() {
   useEffect(() => setCurrentPage(0), [searchTerm]);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const data = await getUsers();
       setUsers(data);
+      setError(null);
     } catch (error) {
-      console.log("Error al obtener usuarios, usando datos de prueba", error);
+      console.error("Error al obtener usuarios:", error);
+      setError(error.message || "Error al cargar usuarios");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,15 +86,17 @@ function TableUser() {
         await updateUser(userData.idUser, userData);
       } else {
         await createUser(userData);
-        
       }
       fetchUsers();
       setIsModalOpen(false);
+      return true;
     } catch (error) {
       console.error(
         "Error al guardar usuario:",
         error.response?.data?.message || error.message
       );
+
+      throw error;
     }
   };
 
@@ -96,7 +104,7 @@ function TableUser() {
     try {
       // Ahora pasamos directamente el estado contrario al actual
       await toggleUserStatus(id, { status: !currentStatus });
-      fetchUsers(); 
+      fetchUsers();
     } catch (error) {
       console.error("Error al cambiar estado:", error);
       alert("No se pudo cambiar el estado");
@@ -109,74 +117,106 @@ function TableUser() {
         <h2 className="user-table-header-title">Tabla de Usuarios</h2>
       </div>
       <div className="user-search-container">
-        <CiSearch className="user-search-icon" />
-        <input
-          type="text"
-          className="user-search-input"
-          value={searchTerm}
-          placeholder="Buscar usuario..."
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className="search-wrapper-user">
+          <CiSearch className="search-icon-user" />
+          <input
+            type="text"
+            className="search-input-user"
+            placeholder="Buscar usuarios..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         {/* {hasPermission("Usuarios", "post") && ( */}
-          <CustomButton variant="primary" icon="add" onClick={handleAdd}>
-            Agregar Usuario
-          </CustomButton>
+        <CustomButton variant="primary" icon="add" onClick={handleAdd}>
+          Agregar Usuario
+        </CustomButton>
         {/* )} */}
       </div>
 
       <div className="user-table-wrapper">
-        <table className="user-table">
-          <thead className="user-table-head">
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Tipo Identificación</th>
-              <th>Identificación</th>
-              <th>Correo Electrónico</th>
-              <th>Teléfono</th>
-              <th>Dirección</th>
-              <th>EPS</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="user-table-body">
-            {currentItems.map((user, index) => (
-              <tr
-                key={user.idUser}
-                className={index % 2 === 0 ? "user-table-row-even" : "user-table-row-odd"}
-              >
-                <td className="user-table-cell">{user.idUser}</td>
-                <td className="user-table-cell">{user.name}</td>
-                <td className="user-table-cell">{user.identificationType}</td>
-                <td className="user-table-cell">{user.identification}</td>
-                <td className="user-table-cell">{user.email}</td>
-                <td className="user-table-cell">{user.cellphone}</td>
-                <td className="user-table-cell">{user.address}</td>
-                <td className="user-table-cell">{user.eps}</td>
-                <td className="user-table-cell">{user.role?.name || "Sin rol"}</td>
-                <td className="user-table-cell">
-                  <Switch
-                    isOn={user.status === true}
-                    handleToggle={() => handleToggleE(user.idUser, user.status)}
-                    id={`status-${user.idUser}`}
-                  />
-                </td>
-                <td className="user-table-cell">
-                  <ActionButtons
-                    onEdit={() => handleEdit(user.idUser)}
-                    onDelete={() => handleDelete(user.idUser)}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {loading ? (
+          <div className="loading-indicator">
+            <div className="loading-spinner"></div>
+            <p>Cargando habitaciones...</p>
+          </div>
+        ) : error ? (
+          <div className="error-message">
+            {searchTerm
+              ? `No se encontraron resultados para "${searchTerm}"`
+              : "Error al cargar los Usuarios"}
+          </div>
+        ) : filtrarDatos.length === 0 ? (
+          <div className="empty-state">
+            {searchTerm
+              ? `No se encontraron resultados para "${searchTerm}"`
+              : "No hay Usuario disponibles"}
+          </div>
+        ) : (
+          <>
+            <table className="user-table">
+              <thead className="user-table-head">
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Tipo Identificación</th>
+                  <th>Identificación</th>
+                  <th>Correo Electrónico</th>
+                  <th>Teléfono</th>
+                  <th>Dirección</th>
+                  <th>EPS</th>
+                  <th>Rol</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="user-table-body">
+                {currentItems.map((user, index) => (
+                  <tr
+                    key={user.idUser}
+                    className={
+                      index % 2 === 0
+                        ? "user-table-row-even"
+                        : "user-table-row-odd"
+                    }
+                  >
+                    <td className="user-table-cell">{user.idUser}</td>
+                    <td className="user-table-cell">{user.name}</td>
+                    <td className="user-table-cell">
+                      {user.identificationType}
+                    </td>
+                    <td className="user-table-cell">{user.identification}</td>
+                    <td className="user-table-cell">{user.email}</td>
+                    <td className="user-table-cell">{user.cellphone}</td>
+                    <td className="user-table-cell">{user.address}</td>
+                    <td className="user-table-cell">{user.eps}</td>
+                    <td className="user-table-cell">
+                      {user.role?.name || "Sin rol"}
+                    </td>
+                    <td className="user-table-cell">
+                      <Switch
+                        isOn={user.status === true}
+                        handleToggle={() =>
+                          handleToggleE(user.idUser, user.status)
+                        }
+                        id={`status-${user.idUser}`}
+                      />
+                    </td>
+                    <td className="user-table-cell">
+                      <ActionButtons
+                        onEdit={() => handleEdit(user.idUser)}
+                        onDelete={() => handleDelete(user.idUser)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+            <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+          </>
+        )}
       </div>
-
       <FormUser
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

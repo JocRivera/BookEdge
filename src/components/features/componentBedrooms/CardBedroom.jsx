@@ -10,7 +10,7 @@ import {
   getBedroomById,
   deleteBedroom,
   getBedroomImages,
-} from "../../../services/bedroomService";
+} from "../../../services/BedroomService";
 import "./BedroomCard.css";
 
 function BedroomCard() {
@@ -26,7 +26,7 @@ function BedroomCard() {
   const [isDetailOpen, setDetailOpen] = useState(false);
 
   // Paginación
-  const itemsPerPage = 3;
+  const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(0);
 
   // Cargar datos de habitaciones e imágenes
@@ -53,7 +53,7 @@ function BedroomCard() {
     for (const bedroom of bedroomsList) {
       try {
         const images = await getBedroomImages(bedroom.idRoom);
-        bedroom.imageCount = images.length; // 👈 Esto es lo que falta
+        bedroom.imageCount = images.length;
         // Encontrar imagen principal
         const primaryImage = images.find((img) => img.isPrimary) || images[0];
         imagesMap[bedroom.idRoom] = primaryImage
@@ -143,19 +143,19 @@ function BedroomCard() {
   };
 
   return (
-    <section className="container-bedrooms">
-      <div className="title-container">
-        <h1 className="title-bedroom">Nuestras Habitaciones</h1>
-      </div>
+    <section className="bedroom-container">
+      <header className="bedroom-header">
+        <h1 className="bedroom-main-title">Nuestras Habitaciones</h1>
+      </header>
 
       {/* Barra de búsqueda y botón de agregar */}
-      <div className="bedroom-search">
-        <div>
-          <CiSearch className="search-icon" />
+      <div className="bedroom-controls">
+        <div className="search-wrapper">
+          <CiSearch className="search-icon-room" />
           <input
             type="text"
-            className="search"
-            placeholder="Buscar ..."
+            className="search-input"
+            placeholder="Buscar habitaciones..."
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -166,17 +166,20 @@ function BedroomCard() {
       </div>
 
       {/* Lista de habitaciones */}
-      <main className="bedroom-list">
+      <main className="bedroom-gallery">
         {loading ? (
-          <div className="loading-state">Cargando habitaciones...</div>
+          <div className="loading-indicator">
+            <div className="loading-spinner"></div>
+            <p>Cargando habitaciones...</p>
+          </div>
         ) : error ? (
-          <div className="no-results">
+          <div className="error-message">
             {searchTerm
               ? `No se encontraron resultados para "${searchTerm}"`
               : "Error al cargar las habitaciones"}
           </div>
         ) : filteredBedrooms.length === 0 ? (
-          <div className="no-results">
+          <div className="empty-state">
             {searchTerm
               ? `No se encontraron resultados para "${searchTerm}"`
               : "No hay habitaciones disponibles"}
@@ -185,96 +188,61 @@ function BedroomCard() {
           currentItems.map((bedroom) => (
             <article key={bedroom.idRoom} className="bedroom-card">
               {/* Imagen de la habitación */}
-              <div className="image-wrapper">
+              <div className="card-image-container">
                 {bedroomImages[bedroom.idRoom] ? (
                   <img
                     src={`http://localhost:3000/uploads/${
                       bedroomImages[bedroom.idRoom]
                     }`}
                     alt={bedroom.name}
-                    className="bedroom-image"
+                    className="card-image"
                     onError={handleImageError}
                   />
                 ) : (
-                  <div className="no-image-placeholder">Sin imágenes</div>
+                  <div className="image-placeholder">Sin imágenes</div>
                 )}
+
                 {bedroom.imageCount > 1 && (
-                  <span className="multiple-images-badge">
+                  <span className="image-counter">
                     +{bedroom.imageCount - 1}
                   </span>
                 )}
+
+                <div
+                  className={`status-badge ${
+                    bedroom.status === "Mantenimiento"
+                      ? "maintenance"
+                      : bedroom.status === "En Servicio"
+                      ? "available"
+                      : "unavailable"
+                  }`}
+                >
+                  {bedroom.status === "En Servicio" ? (
+                    <span className="status-text">Disponible</span>
+                  ) : (
+                    <span className="status-text">{bedroom.status}</span>
+                  )}
+                </div>
               </div>
 
-              {/* Detalles de la habitación */}
-              <section className="bedrooms-details">
-                <header className="bedroom-header">
-                  <h2>{bedroom.name}</h2>
-                  <span
-                    className={`bedroom-status ${
-                      bedroom.status === "Mantenimiento"
-                        ? "status-en-mantenimiento"
-                        : bedroom.status === "En Servicio"
-                        ? "status-en-servicio"
-                        : "status-fuera-de-servicio"
-                    }`}
-                  >
-                    {bedroom.status}
-                  </span>
-                </header>
+              <div className="card-content">
+                <h2 className="room-title">{bedroom.name}</h2>
 
-                <p className="bedroom-description">
-                  {bedroom.description || "Sin descripción"}
-                </p>
-
-                <div className="bedroom-meta">
-                  {/* Capacidad */}
-                  <span className="capacity-info">
-                    <MdPerson className="icon-person" />
-                    <span className="label">Capacidad:</span>{" "}
-                    {bedroom.capacity || "N/A"}
-                  </span>
-
-                  {/* Comodidades */}
-                  <div className="comforts-section">
-                    <div className="comforts-info">
-                      <MdPerson className="icon-person" />
-                      <span className="label">Comodidades:</span>
-                    </div>
-                    <div className="bedroom-comforts">
-                      {bedroom.Comforts && bedroom.Comforts.length > 0 ? (
-                        <>
-                          {bedroom.Comforts.slice(0, 3).map((comfort) => (
-                            <span
-                              key={comfort.idComfort || Math.random()}
-                              className="comfort-badge"
-                            >
-                              {comfort.name}
-                            </span>
-                          ))}
-                          {bedroom.Comforts.length > 3 && (
-                            <span className="comfort-badge more-comforts">
-                              +{bedroom.Comforts.length - 3}
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span className="no-comforts">
-                          Sin comodidades asignadas
-                        </span>
-                      )}
-                    </div>
+                <div className="room-features">
+                  <div className="feature-item">
+                    <MdPerson className="feature-icon" />
+                    <span>Capacidad: {bedroom.capacity || "N/A"}</span>
                   </div>
                 </div>
 
-                {/* Botones de acción */}
-                <footer className="bedroom-actions">
+                <footer className="card-actions">
                   <ActionButtons
                     onEdit={() => handleEditBedroom(bedroom)}
                     onDelete={() => handleDelete(bedroom.idRoom)}
                     onView={() => handleView(bedroom.idRoom)}
                   />
                 </footer>
-              </section>
+              </div>
             </article>
           ))
         )}

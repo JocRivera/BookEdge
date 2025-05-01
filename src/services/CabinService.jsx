@@ -24,9 +24,10 @@ export const createCabin = async (cabinData) => {
     const response = await axios.post(API_URL, dataToSend);
     return response.data;
   } catch (error) {
-    console.error("Errores del backend:", error.response?.data?.errors); // <-- Agrega esto
-    throw error; // ← Aquí propagas el error correctamente
-
+    throw error.response?.data || { 
+      message: error.message || "Error al crear la cabaña",
+      errors: error.response?.data?.errors // Asegúrate de pasar los errores
+    };
   }
 };
 export const updateCabin = async (id, cabinData) => {
@@ -41,7 +42,8 @@ export const updateCabin = async (id, cabinData) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { 
-      message: error.message || "Error al actualizar la cabaña" 
+      message: error.message || "Error al crear la habitación",
+      errors: error.response?.data?.errors // Asegúrate de pasar los errores
     };
   }
 };

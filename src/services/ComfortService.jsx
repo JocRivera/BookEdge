@@ -18,8 +18,11 @@ export const createComfort = async (comfortData) => {
     const response = await axios.post(API_URL, comfortData);
     return response.data;
   } catch (error) {
-    // Nuevo: Lanza el error completo para manejarlo en el componente
-    throw error.response?.data || { message: "Error desconocido" };
+     // Asegurarnos de propagar la respuesta completa del error
+     if (error.response) {
+      throw error.response.data; // Esto propagará { errors: [...] }
+    }
+    throw error;
   }
 };
 
@@ -28,8 +31,10 @@ export const updateComfort = async (id, comfortData) => {
     const response = await axios.put(`${API_URL}/${id}`, comfortData);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: "Error al actualizar" };
-  }
+    throw error.response?.data || { 
+      message: error.message || "Error al crear la comodidad",
+      errors: error.response?.data?.errors 
+    };  }
 };
 export const deleteComfort = async (id) => {
   try {

@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from "react";
 import "./componentConfort.css";
 
-function FormConfort({ comfortData, onClose, onSave, isOpen, backendErrors }) {
+function FormConfort({ comfortData, onClose, onSave, isOpen }) {
   const [formDataComfort, setFormDataComfort] = useState({
     name: "",
   });
   const [errors, setErrors] = useState({ name: "" });
 
   useEffect(() => {
-    if (backendErrors?.name) {
-      setErrors({ name: backendErrors.name });
-    }
-  }, [backendErrors]);
-
-  useEffect(() => {
     if (isOpen) {
+      // Limpiar errores al abrir el modal
+      setErrors({ name: "" });
+      
       if (comfortData) {
         setFormDataComfort({
-          ...comfortData,
           name: comfortData.name || "",
         });
       } else {
@@ -25,66 +21,47 @@ function FormConfort({ comfortData, onClose, onSave, isOpen, backendErrors }) {
           name: "",
         });
       }
-      setErrors({ name: "" }); // Reiniciar errores locales
     }
   }, [isOpen, comfortData]);
-  
-
-  const validateName = (name) => {
-    if (!name.trim()) {
-      return "El nombre es obligatorio";
-    }
-    return "";
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormDataComfort((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-
-    if (name === "name") {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        name: validateName(value),
-      }));
+    setFormDataComfort(prev => ({ ...prev, [name]: value }));
+    
+    // Limpiar error cuando el usuario escribe
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const nameError = validateName(formDataComfort.name);
-    if (nameError) {
-      setErrors({ name: nameError });
+    
+    
+    // Validación básica del frontend
+    const newErrors = {};
+    if (!formDataComfort.name.trim()) {
+      newErrors.name = "El nombre es obligatorio";
+    }
+    
+    setErrors(newErrors);
+    
+    // Si hay errores, no continuar
+    if (Object.keys(newErrors).length > 0) {
       return;
     }
 
-    onSave(formDataComfort);
-    // En CardCabin.jsx o en tu servicio donde manejas errores
-try {
-  // Intenta guardar la cabaña...
-} catch (error) {
-  console.error("ERROR:", error);
-  
-  // Manejar los errores del backend
-  if (error.response?.data?.errors) {
-    const errorMap = {};
-    error.response.data.errors.forEach(err => {
-      errorMap[err.path] = err.msg;
-    });
-    setBackendErrors(errorMap);
-    
-    // Configurar un temporizador para limpiar los errores después de un tiempo
-    setTimeout(() => {
-      setBackendErrors({});
-    }, 5000); // 5 segundos
-  } else {
-    // Manejo general de errores
-    alert(`Error al ${cabinToEdit ? "editar" : "crear"}. Ver consola.`);
-  }
-}
+    try {
+      const backendErrors = await onSave(formDataComfort);
+      
+      if (backendErrors) {
+        setErrors(backendErrors);
+      } else {
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error inesperado:", error);
+    }
   };
 
   if (!isOpen) return null;
@@ -93,12 +70,8 @@ try {
     <div className="comfort-modal-overlay">
       <div className="comfort-modal-container">
         <div className="comfort-modal-header">
-          <h2>
-            {comfortData ? "Editar Comodidad" : "Registrar Nueva Comodidad"}
-          </h2>
-          <button className="comfort-close-button" onClick={onClose}>
-            ×
-          </button>
+          <h2>{comfortData ? "Editar Comodidad" : "Registrar Nueva Comodidad"}</h2>
+          <button className="comfort-close-button" onClick={onClose}>×</button>
         </div>
         <div className="comfort-modal-body">
           <form onSubmit={handleSubmit}>
@@ -111,15 +84,10 @@ try {
                 value={formDataComfort.name}
                 placeholder="Nombre Comodidad"
                 onChange={handleChange}
-                required
-                className={
-                  errors.name || backendErrors.name ? "input-error" : undefined
-                }
+                className={errors.name ? "input-error-admin" : ""}
               />
-
-              {errors.name && <span className="error-text">{errors.name}</span>}
-              {!errors.name && backendErrors.name && (
-                <span className="error-text">{backendErrors.name}</span>
+              {errors.name && (
+                <div className="error-message-admin">{errors.name}</div>
               )}
             </div>
 

@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from "react";
-import "./CabinCard.css";
-import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import React, { useState, useEffect, useCallback } from "react";
 import { CiSearch } from "react-icons/ci";
 import { MdPerson } from "react-icons/md";
+import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import CabinDetail from "./CabinDetails";
 import FormCabins from "./FormCabins";
+import Pagination from "../../common/Paginator/Pagination";
 import {
-  deleteCabin,
   getCabins,
   getCabinById,
+  deleteCabin,
   getCabinImages,
 } from "../../../services/CabinService";
-import Pagination from "../../common/Paginator/Pagination";
-import CabinDetail from "./CabinDetails";
+import "./CabinCard.css";
 
 function CardCabin() {
+  // Estados
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpenModal, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -21,36 +22,43 @@ function CardCabin() {
   const [cabinImages, setCabinImages] = useState({});
   const [error, setError] = useState(null);
   const [selectedCabin, setSelectedCabin] = useState(null);
-  const [loadingDetail, setLoadingDetail] = useState(false);
   const [viewCabin, setViewCabin] = useState(null);
   const [isDetailOpen, setDetailOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchCabins = async () => {
-      try {
-        const data = await getCabins();
-        setCabins(data);
+  // Paginación
+  const itemsPerPage = 4;
+  const [currentPage, setCurrentPage] = useState(0);
 
-        // Cargar imágenes para cada cabaña
-        const imagesMap = await loadCabinImages(data);
-        setCabinImages(imagesMap);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCabins();
+  // Cargar datos de cabañas e imágenes
+  const loadCabinData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getCabins();
+      setCabins(data);
+
+      // Cargar imágenes principales
+      const imagesMap = await loadCabinImages(data);
+      setCabinImages(imagesMap);
+    } catch (error) {
+      setError(error.message || "Error al cargar cabañas");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  // Cargar imágenes para cada cabaña
   const loadCabinImages = async (cabinsList) => {
     const imagesMap = {};
+
     for (const cabin of cabinsList) {
       try {
         const images = await getCabinImages(cabin.idCabin);
-        // Encontrar la imagen principal o la primera disponible
+        cabin.imageCount = images.length;
+        // Encontrar imagen principal
         const primaryImage = images.find((img) => img.isPrimary) || images[0];
-        imagesMap[cabin.idCabin] = primaryImage ? primaryImage.imagePath : null;
+        imagesMap[cabin.idCabin] = primaryImage
+          ? primaryImage.imagePath
+          : null;
       } catch (err) {
         console.error(
           `Error al cargar imágenes para cabaña ${cabin.idCabin}:`,
@@ -58,8 +66,11 @@ function CardCabin() {
         );
       }
     }
+
     return imagesMap;
   };
+
+  // Filtrar cabañas según término de búsqueda
   const filteredCabins = cabins.filter((cabin) =>
     `${cabin.name} ${cabin.description} ${cabin.status} ${cabin.capacity} ${
       cabin.Comforts?.map((c) => c.name).join(" ") || ""
@@ -68,190 +79,175 @@ function CardCabin() {
       .includes(searchTerm.toLowerCase())
   );
 
-  const itemsPerPage = 3;
-  const [currentPage, setCurrentPage] = useState(0);
+  // Calcular elementos para la página actual
   const currentItems = filteredCabins.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
   );
+
   const pageCount = Math.ceil(filteredCabins.length / itemsPerPage);
 
+  // Cargar datos iniciales
+  useEffect(() => {
+    loadCabinData();
+  }, [loadCabinData]);
+
+  // Manejar error de carga de imagen
   const handleImageError = (e) => {
     e.target.style.objectFit = "contain";
     e.target.onerror = null;
   };
 
+  // Editar cabaña
   const handleEditCabin = (cabin) => {
     setSelectedCabin(cabin);
     setModalOpen(true);
   };
 
+  // Eliminar cabaña
   const handleDelete = async (idCabin) => {
+    if (!window.confirm("¿Estás seguro de eliminar esta cabaña?")) return;
+
     try {
       await deleteCabin(idCabin);
       setCabins((prevCabins) =>
         prevCabins.filter((cabin) => cabin.idCabin !== idCabin)
       );
     } catch (error) {
-      console.error("Error al eliminar la cabaña:", error);
+      console.error("Error al eliminar la cabaña", error);
     }
   };
 
+  // Ver detalles de cabaña
   const handleView = async (idCabin) => {
     try {
-      setLoadingDetail(true);
       const cabinData = await getCabinById(idCabin);
       setViewCabin(cabinData);
       setDetailOpen(true);
     } catch (error) {
-      console.error("Error al obtener detalles:", error);
-    } finally {
-      setLoadingDetail(false);
+      console.error("Error al obtener detalles de la cabaña:", error);
     }
   };
 
-  return (
-    <section className="container-cabins">
-      <div className="title-container">
-        <h1 className="title-cabin">Nuestras Cabañas</h1>
-      </div>
+  // Actualizar búsqueda y resetear página
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(0);
+  };
 
-      <div className="cabin-search">
-        <div>
-          <CiSearch className="search-icon" />
+  // Abrir modal para nueva cabaña
+  const handleAddCabin = () => {
+    setSelectedCabin(null);
+    setModalOpen(true);
+  };
+
+  return (
+    <section className="cabin-container-admin">
+      <header className="cabin-header-admin">
+        <h1 className="cabin-main-title">Nuestras Cabañas</h1>
+      </header>
+
+      {/* Barra de búsqueda y botón de agregar */}
+      <div className="cabin-controls-admin">
+        <div className="search-wrapper-admin">
+          <CiSearch className="search-icon-cabin-admin" />
           <input
             type="text"
-            className="search"
-            placeholder="Buscar ..."
+            className="search-input-admin"
+            placeholder="Buscar cabañas..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(0);
-            }}
+            onChange={handleSearch}
           />
         </div>
-        <CustomButton
-          variant="primary"
-          icon="add"
-          onClick={() => {
-            setSelectedCabin(null);
-            setModalOpen(true);
-          }}
-        >
+        <CustomButton variant="primary" icon="add" onClick={handleAddCabin}>
           Agregar Cabaña
         </CustomButton>
       </div>
 
-      <main className="cabin-list">
+      {/* Lista de cabañas */}
+      <main className="cabin-gallery-admin">
         {loading ? (
-          <div className="loading-state">Cargando cabañas...</div>
+          <div className="loading-indicator-admin">
+            <div className="loading-spinner-admin"></div>
+            <p>Cargando cabañas...</p>
+          </div>
         ) : error ? (
-          <div className="no-results">
+          <div className="error-message">
             {searchTerm
               ? `No se encontraron resultados para "${searchTerm}"`
               : "Error al cargar las cabañas"}
           </div>
         ) : filteredCabins.length === 0 ? (
-          <div className="no-results">
+          <div className="empty-state-admin">
             {searchTerm
               ? `No se encontraron resultados para "${searchTerm}"`
               : "No hay cabañas disponibles"}
           </div>
         ) : (
           currentItems.map((cabin) => (
-            <article key={cabin.idCabin} className="cabin-card">
-              <div className="image-wrapper">
+            <article key={cabin.idCabin} className="cabin-card-admin">
+              {/* Imagen de la cabaña */}
+              <div className="card-image-container-admin">
                 {cabinImages[cabin.idCabin] ? (
                   <img
                     src={`http://localhost:3000/uploads/${
                       cabinImages[cabin.idCabin]
                     }`}
                     alt={cabin.name}
-                    className="cabin-image"
+                    className="card-image-admin"
                     onError={handleImageError}
                   />
                 ) : (
-                  <div className="no-image-placeholder">Sin imágenes</div>
+                  <div className="image-placeholder-admin">Sin imágenes</div>
                 )}
-                {/* Indicador de múltiples imágenes */}
+
                 {cabin.imageCount > 1 && (
-                  <span className="multiple-images-badge">
+                  <span className="image-counter-admin">
                     +{cabin.imageCount - 1}
                   </span>
                 )}
+
+                <div
+                  className={`status-badge ${
+                    cabin.status === "Mantenimiento"
+                      ? "maintenance"
+                      : cabin.status === "En Servicio"
+                      ? "available"
+                      : "unavailable"
+                  }`}
+                >
+                  {cabin.status === "En Servicio" ? (
+                    <span className="status-text">Disponible</span>
+                  ) : (
+                    <span className="status-text">{cabin.status}</span>
+                  )}
+                </div>
               </div>
 
-              <section className="cabins-details">
-                <header className="cabin-header">
-                  <h2>{cabin.name}</h2>
-                  <span
-                    className={`cabin-status ${
-                      cabin.status === "Mantenimiento"
-                        ? "status-en-mantenimiento"
-                        : cabin.status === "En Servicio"
-                        ? "status-en-servicio"
-                        : "status-fuera-de-servicio"
-                    }`}
-                  >
-                    {cabin.status}
-                  </span>
-                </header>
+              <div className="card-content-admin">
+                <h2 className="cabin-title-admin">{cabin.name}</h2>
 
-                <p className="cabin-description">
-                  {cabin.description || "Sin descripción"}
-                </p>
-
-                <div className="cabin-meta">
-                  <span className="capacity-info">
-                    <MdPerson className="icon-person" />
-                    <span className="label">Capacidad:</span>{" "}
-                    {cabin.capacity || "N/A"}
-                  </span>
-
-                  <div className="comforts-section">
-                    <div className="comforts-info">
-                      <MdPerson className="icon-person" />
-                      <span className="label">Comodidades:</span>
-                    </div>
-                    <div className="cabin-comforts">
-                      {cabin.Comforts && cabin.Comforts.length > 0 ? (
-                        <>
-                          {cabin.Comforts.slice(0, 3).map((comfort) => (
-                            <span
-                              key={comfort.idComfort}
-                              className="comfort-badge"
-                            >
-                              {comfort.name}
-                            </span>
-                          ))}
-                          {cabin.Comforts.length > 3 && (
-                            <span className="comfort-badge more-comforts">
-                              +{cabin.Comforts.length - 3}
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span className="no-comforts">
-                          Sin comodidades asignadas
-                        </span>
-                      )}
-                    </div>
+                <div className="cabin-features-admin">
+                  <div className="feature-item-admin">
+                    <MdPerson className="feature-icon" />
+                    <span>Capacidad: {cabin.capacity || "N/A"}</span>
                   </div>
                 </div>
 
-                <footer className="cabin-actions">
+                <footer className="card-actions-admin">
                   <ActionButtons
                     onEdit={() => handleEditCabin(cabin)}
                     onDelete={() => handleDelete(cabin.idCabin)}
                     onView={() => handleView(cabin.idCabin)}
                   />
                 </footer>
-              </section>
+              </div>
             </article>
           ))
         )}
       </main>
 
+      {/* Paginación */}
       {pageCount > 1 && (
         <Pagination
           pageCount={pageCount}
@@ -259,26 +255,16 @@ function CardCabin() {
           forcePage={currentPage}
         />
       )}
+
+      {/* Modal de formulario */}
       <FormCabins
         isOpen={isOpenModal}
         onClose={() => setModalOpen(false)}
-        onSave={async () => {
-          setLoading(true);
-          try {
-            const newCabins = await getCabins();
-            setCabins(newCabins);
-
-            const newImagesMap = await loadCabinImages(newCabins);
-            setCabinImages(newImagesMap);
-          } catch (error) {
-            setError(error.message);
-          } finally {
-            setLoading(false);
-          }
-        }}
+        onSave={loadCabinData}
         cabinToEdit={selectedCabin}
       />
 
+      {/* Modal de detalles */}
       <CabinDetail
         isOpen={isDetailOpen}
         onClose={() => setDetailOpen(false)}
