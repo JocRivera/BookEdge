@@ -177,7 +177,7 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
     if (!isOpen) { return null }
     return (
         <div className="modal-overlay" >
-            <div className="modal-container">
+            <div className="config-modal-container">
                 <div className="modal-header">
                     <h2>{setting ? 'Editar Configuracion' : 'Registrar Configuracion'}</h2>
                     <button className="close-button" onClick={onClose}>×</button>
