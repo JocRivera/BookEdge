@@ -3,20 +3,18 @@ import { useState } from 'react';
 import { FaCreditCard, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle, FaExchangeAlt } from 'react-icons/fa';
 import './componentPayments.css';
 
-const PaymentForm = ({ 
-  totalAmount, 
-  onPaymentSubmit,
-  initialData = {}
-}) => {
+const PaymentForm = ({ totalAmount, onPaymentSubmit, initialData = {} }) => {
   const [paymentData, setPaymentData] = useState({
     paymentMethod: initialData.paymentMethod || '',
-    paymentDate: initialData.paymentDate || '',
-    amount: initialData.amount || totalAmount || 0,
+    paymentDate: initialData.paymentDate || new Date().toISOString().split('T')[0],
+    amount: initialData.amount || '',
     status: initialData.status || 'Pendiente',
-    confirmationDate: initialData.confirmationDate || ''
+    confirmationDate: initialData.confirmationDate || '',
+    voucher: initialData.voucher || null
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,7 +22,7 @@ const PaymentForm = ({
       ...prev,
       [name]: value
     }));
-    
+
     // Limpiar error cuando se modifica el campo
     if (errors[name]) {
       setErrors(prev => {
@@ -35,19 +33,36 @@ const PaymentForm = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPaymentData(prev => ({ ...prev, voucher: file }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
-    
+
     if (Object.keys(validationErrors).length === 0) {
-      const completePaymentData = {
-        ...paymentData,
-        amount: parseFloat(paymentData.amount),
-        confirmationDate: paymentData.status === 'Confirmado' 
-          ? new Date().toISOString().split('T')[0] 
-          : paymentData.confirmationDate
-      };
-      onPaymentSubmit(completePaymentData);
+      try {
+        setIsSubmitting(true);
+        await onPaymentSubmit(paymentData); // Devuelve una promesa
+
+        // Resetear formulario después de éxito
+        setPaymentData({
+          paymentMethod: '',
+          paymentDate: new Date().toISOString().split('T')[0],
+          amount: '',
+          status: 'Pendiente',
+          voucher: null
+        });
+      } catch (error) {
+        console.error('Error al guardar el pago:', error);
+        setErrors({ submit: error.message });
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setErrors(validationErrors);
     }
@@ -95,8 +110,13 @@ const PaymentForm = ({
   return (
     <div className="payment-form-container">
       <h3 className="payment-title">Información de Pago</h3>
-      
-      <div onSubmit={handleSubmit} noValidate>
+
+      <div onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit(e);
+      }}
+      >
+
         <div className="payment-summary">
           <div className="payment-total">
             <span>Total a Pagar:</span>
@@ -197,9 +217,30 @@ const PaymentForm = ({
           </div>
         </div>
 
+        <div className="form-group">
+          <label htmlFor="voucher">
+            Comprobante de Pago
+          </label>
+          <input
+            type="file"
+            id="voucher"
+            name="voucher"
+            onChange={handleFileChange}
+            accept="image/*,.pdf"
+          />
+        </div>
+
         <div className="payment-form-actions">
-          <button type="submit" className="submit-btn">
-            Confirmar Pago
+          <button
+            type="button" // Cambiamos a type="button"
+            className="submit-btn"
+            onClick={handleSubmit} // Manejamos el click directamente
+          >
+            {isSubmitting ? (
+              <>
+                <span className="spinner"></span> Procesando...
+              </>
+            ) : 'Confirmar Pago'}
           </button>
         </div>
       </div>
@@ -207,7 +248,6 @@ const PaymentForm = ({
   );
 };
 
-// Validación de propiedades
 PaymentForm.propTypes = {
   totalAmount: PropTypes.number.isRequired,
   onPaymentSubmit: PropTypes.func.isRequired,
