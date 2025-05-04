@@ -337,12 +337,6 @@ export const updateReservation = async (idReservation, reservationData) => {
   }
 }
 
-/**
- * Cambia el estado de una reserva
- * @param {number|string} idReservation - ID de la reserva
- * @param {string} status - Nuevo estado
- * @returns {Promise<Object>} - Reserva actualizada
- */
 export const changeReservationStatus = async (idReservation, status) => {
   try {
     console.log("[DEBUG] Attempting to change status with:", {

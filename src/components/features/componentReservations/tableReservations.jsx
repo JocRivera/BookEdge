@@ -50,15 +50,15 @@ function TableReservations() {
       const enrichedReservations = dataReservations.map((res) => {
         const user = usersData.find((u) => u.idUser === res.idUser);
         const plan = planesData.find((p) => p.idPlan === res.idPlan);
-        
+
         return {
-            ...res,
-            user: user || null,
-            plan: plan || { name: "Plan no disponible", price: 0, salePrice: 0 },
-            // Asegúrate de tomar el precio correcto
-            total: plan?.salePrice || plan?.price || res.total || 0
+          ...res,
+          user: user || null,
+          plan: plan || { name: "Plan no disponible", price: 0, salePrice: 0 },
+          // Asegúrate de tomar el precio correcto
+          total: plan?.salePrice || plan?.price || res.total || 0
         };
-    });
+      });
 
       setReservations(enrichedReservations);
     } catch (error) {
@@ -175,16 +175,16 @@ function TableReservations() {
   const handleViewDetails = async (idReservation) => {
     const id = Number(idReservation);
     const reservationToView = reservations.find(r => r.idReservation === id);
-
+  
     if (reservationToView) {
       try {
         const payments = await getReservationPayments(id);
-        setCurrentPayments(payments);
+        setCurrentPayments(Array.isArray(payments) ? payments : []); // Asegurar que sea array
         setCurrentReservation(reservationToView);
         setIsDetailModalOpen(true);
       } catch (error) {
         console.error("Error cargando pagos:", error);
-        setCurrentPayments([]);
+        setCurrentPayments([]); // En caso de error, establecer array vacío
         setCurrentReservation(reservationToView);
         setIsDetailModalOpen(true);
       }
@@ -396,10 +396,9 @@ function TableReservations() {
                 disabled={isLoading}
                 aria-label="Cerrar"
               >
-                ×
+                &times;
               </button>
             </div>
-
             <div className="modal-body">
               <div className="reservation-details-container">
                 {/* Columna principal - Información de la reserva */}
@@ -411,7 +410,7 @@ function TableReservations() {
                         <label>Cliente</label>
                         <p>
                           {currentReservation.user
-                            ? `${currentReservation.user.name} ${currentReservation.user.lastName}`
+                            ? `${currentReservation.user.name}`
                             : "Cliente no disponible"}
                         </p>
                       </div>
@@ -432,23 +431,20 @@ function TableReservations() {
                     </div>
                   </div>
                 </div>
-
-                {/* Columna secundaria - Pagos y acompañantes apilados */}
                 <div className="reservation-secondary-column">
-                  {/* Sección de Pagos */}
                   <div className="reservation-card">
                     <div className="card-header-with-actions">
                       <h3>Pagos</h3>
                       <div className="payment-summary">
                         <span>Total pagado: {formatCurrency(
-                          currentPayments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0)
+                          Array.isArray(currentPayments)
+                            ? currentPayments.reduce((sum, payment) => sum + (Number(payment?.amount) || 0), 0)
+                            : 0
                         )}</span>
                       </div>
                     </div>
                   </div>
-                  {/* Aquí iría tu componente TablePayments si lo desbloqueas */}
                 </div>
-
                 {/* Sección de Acompañantes */}
                 <div className="reservation-card">
                   <div className="card-header-with-actions">
