@@ -1,55 +1,44 @@
 /* componentsCompanions.css - Versión Mejorada */
 
 :root {
-  /* Colores principales - con efecto premium */
-  --companions-background: linear-gradient(135deg, #f9f9ff 0%, #f0f2ff 100%);
-  --companions-white: #ffffff;
-  --companions-primary: #4e54c8;
-  --companions-primary-dark: #3a3f9e;
-  --companions-primary-light: #8f94fb;
-  --companions-primary-hover: rgba(143, 148, 251, 0.1);
-  
-  /* Colores de texto */
-  --companions-text-dark: #2d3748;
-  --companions-text-normal: #4a5568;
-  --companions-text-light: #718096;
-  
-  /* Sombras y bordes */
-  --companions-border: #e2e8f0;
-  --companions-shadow-light: rgba(78, 84, 200, 0.1);
-  --companions-shadow-medium: rgba(78, 84, 200, 0.15);
-  --companions-shadow-dark: rgba(78, 84, 200, 0.2);
+  /* Colores principales */
+  --payments-primary: #4e54c8;
+  --payments-primary-light: #8f94fb;
+  --payments-primary-dark: #3a3f9e;
+  --payments-background: #f9f9ff;
+  --payments-card-bg: #ffffff;
+  --payments-text-dark: #2d3748;
+  --payments-text-light: #718096;
+  --payments-border: #e2e8f0;
+  --payments-shadow-light: rgba(78, 84, 200, 0.1);
+  --payments-shadow-medium: rgba(78, 84, 200, 0.15);
+  --payments-shadow-dark: rgba(78, 84, 200, 0.2);
 }
 
 /* Contenedor principal - Estilo premium */
 .companions-view-container {
-  margin-top: 50px;
-  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
   padding: 1.5rem;
-  background: var(--companions-background);
-  border-radius: 16px;
-  box-shadow: 0 15px 30px var(--companions-shadow-light);
   font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #f9f9ff 0%, #f0f2ff 100%);
   animation: fadeIn 0.8s ease-out;
 }
 
 /* Encabezado - Estilo mejorado */
 .companions-header {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .companions-header h2 {
   font-size: 2.2rem;
   font-weight: 600;
-  color: var(--companions-text-dark);
-  position: relative;
-  display: inline-block;
-  padding-bottom: 10px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: inline-block;
+  position: relative;
+  color: var(--payments-text-dark);
+  padding-bottom: 10px;
 }
 
 .companions-header h2::after {
@@ -59,8 +48,11 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, #00d4ff, #008cff);
+  background: linear-gradient(90deg,  #8284ca, #0910e1);
   border-radius: 3px;
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
 }
 
@@ -69,17 +61,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1.5rem;
   margin-bottom: 1.5rem;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
 .search-box {
   position: relative;
   flex-grow: 1;
   max-width: 500px;
-  background: var(--companions-white);
+  background: var(--payments-card-bg);
   border-radius: 50px;
-  box-shadow: 0 4px 20px var(--companions-shadow-medium);
+  box-shadow: 0 4px 20px var(--payments-shadow-medium);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -124,10 +117,11 @@
 /* LA TABLA SE MANTIENE IGUAL (NO SE MODIFICA) */
 .companions-table-container {
   overflow-x: auto;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px var(--companions-shadow-medium),
-    0 2px 4px -1px var(--companions-shadow-light);
-  background-color: var(--companions-white);
+  border-radius: 16px;
+  box-shadow: 0 15px 30px var(--payments-shadow-light);
+  background: var(--payments-card-bg);
+  margin-bottom: 2rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .companions-table {
@@ -137,20 +131,22 @@
 }
 
 .companions-table th {
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.5rem;
   text-align: left;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--companions-text-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--payments-primary-dark);
   text-transform: uppercase;
-  background-color: var(--companions-primary-light);
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
 }
 
 .companions-table td {
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  color: var(--companions-text-normal);
-  border-bottom: 1px solid var(--companions-border);
+  padding: 1.2rem 1.5rem;
+  font-size: 0.95rem;
+  color: var(--payments-text-dark);
+  border-bottom: 1px solid var(--payments-border);
+  transition: background-color 0.3s ease;
 }
 
 .companions-table tr:nth-child(even) {
