@@ -1,154 +1,130 @@
 import PropTypes from 'prop-types';
-import { useState, useMemo, useEffect } from "react";
-import { ActionButtons } from "../../common/Button/customButton";
-import Pagination from "../../common/Paginator/Pagination";
-import { CiSearch } from "react-icons/ci";
-import "./componentPayments.css";
-import { getReservationPayments} from '../../../services/paymentsService';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import './componentPayments.css';
 
-function TablePayments({ 
-  reservationId,
-  payments=[],
-  onEditPayment = () => console.warn('Función onEditPayment no proporcionada'), 
-  onDeletePayment = () => console.warn('Función onDeletePayment no proporcionada') 
-}) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [ setPayments] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 6;
-
-  // Función segura para filtrar pagos
-  const filteredData = useMemo(() => {
-    if (!Array.isArray(payments)) {
-      console.error('Payments no es un array válido:', payments);
-      return [];
-    }
-    
-    return payments.filter(payment => {
-      if (!payment) return false;
-      
-      const term = searchTerm?.toLowerCase() || "";
-      return (
-        payment.paymentMethod?.toLowerCase().includes(term) ||
-        payment.status?.toLowerCase().includes(term) ||
-        payment.paymentDate?.includes(searchTerm || "")
-      );
-    });
-  }, [payments, searchTerm]);
-   useEffect(() => {
-    const loadPayments = async () => {
-      if (!reservationId) return;
-      
-      try {
-        const paymentsData = await getReservationPayments(reservationId);
-        setPayments(paymentsData);
-      } catch (error) {
-        console.error("Error cargando pagos:", error);
-        setPayments([]);
-      }
-    };
-
-    loadPayments();
-  }, [reservationId]);
-
-
-  // Cálculo seguro de paginación
-  const { currentItems, pageCount } = useMemo(() => {
-    const safeData = Array.isArray(filteredData) ? filteredData : [];
-    const offset = currentPage * itemsPerPage;
-    const currentItems = safeData.slice(offset, offset + itemsPerPage);
-    const pageCount = Math.max(1, Math.ceil(safeData.length / itemsPerPage));
-    
-    return { currentItems, pageCount };
-  }, [currentPage, filteredData, itemsPerPage]);
-
-  const handlePageClick = ({ selected }) => setCurrentPage(selected);
+const TablePayments = ({ payments, onEditPayment, onDeletePayment, onStatusChange, isLoading }) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('es-ES', options);
+  };
 
   const formatCurrency = (amount) => {
-    return amount && typeof amount === "number" ? `$${amount.toFixed(2)}` : "$0.00";
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
+  };
+
+  const handleStatusChange = (paymentId, e) => {
+    if (onStatusChange) {
+      onStatusChange(paymentId, e.target.value);
+    }
   };
 
   return (
     <div className="payments-table-container">
-      <div className="payments-title-container">
-        <h2 className="payments-table-title">Pagos</h2>
-      </div>
-      
-      <div className="payments-container-search">
-        <div className="payments-search-wrapper">
-          <CiSearch className="payments-search-icon" />
-          <input
-            type="text"
-            className="payments-search"
-            placeholder="Buscar pago..."
-            onChange={(e) => setSearchTerm(e.target.value)}
-            value={searchTerm}
-          />
-        </div>
-      </div>
-
-      <div className="payments-table-wrapper">
-        <table className="payments-table">
-          <thead className="payments-table-header">
+      <table className="payments-table">
+        <thead>
+          <tr>
+            <th>Método</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Comprobante</th>
+            {(onEditPayment || onDeletePayment) && <th>Acciones</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {isLoading ? (
             <tr>
-              <th>Método de Pago</th>
-              <th>Fecha</th>
-              <th>Monto</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <td colSpan={6} className="loading-row">
+                Cargando pagos...
+              </td>
             </tr>
-          </thead>
-          <tbody className="payments-table-body">
-            {currentItems.length > 0 ? (
-              currentItems.map((payment, index) => (
-                <tr
-                  key={`payment-${payment?.id || `payment-${index}-${Date.now()}`}`}
-                  className={
-                    index % 2 === 0 ? "payments-table-row-even" : "payments-table-row-odd"
-                  }
-                >
-                  <td className="payments-table-cell">{payment?.paymentMethod || "N/A"}</td>
-                  <td className="payments-table-cell">{payment?.paymentDate || "N/A"}</td>
-                  <td className="payments-table-cell">{formatCurrency(payment?.amount)}</td>
-                  <td className="payments-table-cell">
-                    <span className={`payment-status ${payment?.status?.toLowerCase() || 'pendiente'}`}>
-                      {payment?.status || "Pendiente"}
+          ) : (!payments || payments.length === 0) ? (
+            <tr>
+              <td colSpan={6} className="no-data-row">
+                No se encontraron pagos
+              </td>
+            </tr>
+          ) : (
+            // En tu archivo tablePayments.jsx, modifica el mapeo de pagos:
+            payments.map((payment) => (
+              <tr key={payment.idPayments || payment.tempId}>
+                <td>{payment.paymentMethod}</td>
+                <td>{formatDate(payment.paymentDate)}</td>
+                <td>{formatCurrency(payment.amount)}</td>
+                <td>
+                  {onStatusChange ? (
+                    <select
+                      value={payment.status}
+                      onChange={(e) => handleStatusChange(payment.idPayments || payment.tempId, e)}
+                      className={`status-select ${(payment.status || 'Pendiente').toLowerCase()}`}
+                      disabled={isLoading || payment.isTemp}
+                    >
+                      <option value="Confirmado">Confirmado</option>
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="Anulado">Anulado</option>
+                    </select>
+                  ) : (
+                    <span className={`status-badge ${(payment.status || 'Pendiente').toLowerCase()}`}>
+                      {payment.status || 'Pendiente'}
                     </span>
-                  </td>
-                  <td className="payments-table-cell">
-                    <ActionButtons
-                      onEdit={() => payment?.id && onEditPayment(payment)}
-                      onDelete={() => payment?.id && onDeletePayment(payment.id)}
-                    />
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="no-results">
-                  {payments.length === 0 ? "No hay pagos registrados" : "No se encontraron resultados"}
+                  )}
                 </td>
+                <td>
+                  {payment.voucher ? (
+                    <a
+                      href={payment.voucher}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="proof-link"
+                    >
+                      Ver
+                    </a>
+                  ) : 'N/A'}
+                </td>
+
+                {(onEditPayment || onDeletePayment) && (
+                  <td className="actions-cell">
+                    {onEditPayment && (
+                      <button
+                        onClick={() => onEditPayment(payment.idPayments || payment.tempId, payment)}
+                        className="action-btn edit-btn"
+                        title="Editar"
+                        disabled={isLoading}
+                      >
+                        <FaEdit />
+                      </button>
+                    )}
+                    {onDeletePayment && (
+                      <button
+                        onClick={() => onDeletePayment(payment.idPayments || payment.tempId)}
+                        className="action-btn delete-btn"
+                        title="Eliminar"
+                        disabled={isLoading}
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
-            )}
-          </tbody>
-        </table>
-        
-        {pageCount > 1 && (
-          <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
-        )}
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
-}
+};
 
 TablePayments.propTypes = {
-  reservationId: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number
-  ]),
-  payments: PropTypes.array,
+  payments: PropTypes.array.isRequired,
   onEditPayment: PropTypes.func,
   onDeletePayment: PropTypes.func,
+  onStatusChange: PropTypes.func,
+  isLoading: PropTypes.bool
 };
 
 export default TablePayments;

@@ -17,7 +17,7 @@ import CabinsPage from "./components/features/componentCabins/CardCabin";
 import BedroomCard from "./components/features/componentBedrooms/CardBedroom";
 import TableReservations from "./components/features/componentReservations/tableReservations";
 import CompanionsView from "./components/features/componentCompanions/companionsView";
-import TablePayments from "./components/features/componentPayments/tablePayments";
+import ViewPayments from "./components/features/componentPayments/viewPayments";
 import Profile from "./components/features/componentAuth/Profile";
 import { AuthProvider } from "./context/AuthContext";
 import Error401 from "./components/common/401&404/401";
@@ -74,7 +74,8 @@ export default function App() {
               />
               <Route
                 path="payments"
-                element={<TablePayments />}
+                element={<ViewPayments />
+              }
               ></Route>
               <Route path="plans" element={<Plan />} />
               <Route path="plansProgramed" element={<PlanProgramed />} />

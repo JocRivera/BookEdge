@@ -254,7 +254,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className={`form-input-admin ${
+                  className={`form-input-cabin-admin ${
                     errors.name ? "input-error-admin" : ""
                   }`}
                 />

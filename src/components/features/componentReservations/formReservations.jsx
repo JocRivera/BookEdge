@@ -3,7 +3,9 @@ import PropTypes from "prop-types"
 import "./componentsReservations.css"
 import CompanionsForm from "../componentCompanions/formCompanions"
 import PaymentForm from "../componentPayments/formPayments"
+import TablePayments from "../componentPayments/tablePayments.jsx"
 import TableCompanions from "../componentCompanions/tableCompanions"
+
 import {
   createReservation,
   getAllPlanes,
@@ -32,11 +34,13 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     total: 0,
     paymentMethod: "Efectivo",
   })
-  const [reservationPayments, setReservationPayments] = useState([])
   const [errors, setErrors] = useState({})
   const [planes, setPlanes] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(false)
+  const [tempPayments, setTempPayments] = useState([]);
+  const [reservationPayments, setReservationPayments] = useState([]);
+
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -44,41 +48,58 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
       if (!isOpen) return;
 
       try {
-        setLoading(true)
+        setLoading(true);
+        console.log("Iniciando carga de datos iniciales...");
+
+        // 1. Cargar datos básicos (planes y usuarios)
         const [planesData, usersData] = await Promise.all([
           getAllPlanes(),
           getUsers()
         ]);
+        setPlanes(planesData);
+        setUsers(usersData);
 
-        setPlanes(planesData)
-        setUsers(usersData)
-
+        // 2. Manejo de reserva existente
         if (reservationData) {
-          console.log("Cargando datos de reserva existente:", reservationData)
-
-          // Obtener datos actualizados de la reserva si existe
-          let freshData = reservationData;
+          console.log("Cargando datos de reserva existente:", reservationData);
           if (reservationData.idReservation) {
             try {
-              freshData = await getReservationById(reservationData.idReservation) || reservationData;
-              console.log("Datos actualizados de la reserva:", freshData)
+              const payments = await getReservationPayments(reservationData.idReservation);
+              setReservationPayments(Array.isArray(payments) ? payments : []);
             } catch (error) {
-              console.warn("No se pudieron obtener datos actualizados de la reserva:", error.message)
-            }
-          }
-
-          // Cargar pagos si existe la reserva
-          if (freshData.idReservation) {
-            try {
-              const payments = await getReservationPayments(freshData.idReservation);
-              setReservationPayments(payments);
-            } catch (error) {
-              console.error("Error cargando pagos:", error);
+              console.error("Error al cargar pagos:", error);
               setReservationPayments([]);
             }
           }
 
-          // Asegurarse de que los companions sean un array
+
+          let freshData = reservationData;
+
+          // 2.1 Obtener datos actualizados de la reserva
+          if (reservationData.idReservation) {
+            try {
+              freshData = await getReservationById(reservationData.idReservation) || reservationData;
+              console.log("Datos actualizados de la reserva:", freshData);
+            } catch (error) {
+              console.warn("Error obteniendo datos actualizados:", error);
+              // Continuamos con los datos originales si falla
+            }
+          }
+
+          if (freshData.idReservation) {
+            try {
+              const payments = await getReservationPayments(freshData.idReservation);
+              const safePayments = (Array.isArray(payments?.data) ? payments.data :
+                (Array.isArray(payments)) ? payments : []);
+
+              setReservationPayments(safePayments.filter(p => p?.id && p?.amount));
+            } catch (error) {
+              console.error("Payment load error:", error);
+              setReservationPayments([]);
+            }
+          }
+
+          // 2.3 Preparar datos del formulario
           const companions = Array.isArray(freshData.companions) ? freshData.companions : [];
 
           setFormData({
@@ -92,9 +113,11 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
             status: freshData.status || "Reservado",
             total: freshData.total || 0,
             paymentMethod: freshData.paymentMethod || "Efectivo",
-          })
-        } else {
-          // Inicializar nueva reserva
+          });
+        }
+        // 3. Inicializar nueva reserva
+        else {
+          console.log("Inicializando nueva reserva");
           setFormData({
             idUser: "",
             idPlan: "",
@@ -106,20 +129,24 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
             status: "Reservado",
             total: 0,
             paymentMethod: "Efectivo",
-          })
-          setReservationPayments([])
+          });
+          setReservationPayments([]);
+          setTempPayments([])
         }
       } catch (error) {
-        console.error("Error inicializando formulario:", error)
-        alert(`Error al cargar datos: ${error.message}`)
+        console.error("Error crítico en fetchInitialData:", {
+          message: error.message,
+          stack: error.stack
+        });
+        alert(`Error al cargar datos: ${error.message}`);
       } finally {
-        setLoading(false)
+        setLoading(false);
+        console.log("Finalizada carga de datos iniciales");
       }
-    }
+    };
 
-    fetchInitialData()
-  }, [isOpen, reservationData])
-
+    fetchInitialData();
+  }, [isOpen, reservationData]);
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
 
@@ -221,7 +248,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     e.preventDefault();
 
     if (!validateStep(3)) {
-      return; // No continuar si hay errores
+      return;
     }
 
     try {
@@ -238,8 +265,6 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         paymentMethod: formData.paymentMethod || "Efectivo",
       };
 
-      console.log("Enviando payload:", payload);
-
       // Guardar la reserva
       let resultado;
       if (reservationData?.idReservation) {
@@ -248,35 +273,40 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         resultado = await createReservation(payload);
       }
 
-      if (!resultado || !resultado.idReservation) {
+      if (!resultado?.idReservation) {
         throw new Error("No se recibió un ID de reserva válido del servidor");
       }
 
       // Guardar acompañantes si existen
       if (formData.hasCompanions && formData.companions.length > 0) {
-        console.log("Guardando acompañantes para la reserva:", resultado.idReservation);
         for (const companion of formData.companions) {
           if (!companion.idCompanions) {
             await handleSaveCompanionInReservation(companion, resultado.idReservation);
           }
         }
       }
-      if (reservationPayments.length > 0) {
-        await Promise.all(
-          reservationPayments.map(payment => {
-            if (!payment.amount || isNaN(payment.amount)) {
-              console.warn("Pago inválido omitido:", payment);
-              return Promise.resolve();
-            }
-            return addPaymentToReservation({
+
+      // Guardar pagos temporales si existen
+      if (tempPayments.length > 0) {
+        const paymentResults = await Promise.allSettled(
+          tempPayments.map(payment =>
+            addPaymentToReservation({
               ...payment,
               idReservation: resultado.idReservation
-            });
-          })
+            })
+          )
         );
+
+        // Manejar resultados de los pagos
+        paymentResults.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(`Error al guardar pago ${tempPayments[index].tempId}:`, result.reason);
+          }
+        });
+
+        setTempPayments([]);
       }
 
-      console.log("Operación completada con resultado:", resultado);
       onClose();
       onSave(resultado);
     } catch (error) {
@@ -331,29 +361,51 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
   };
 
   const handleAddPayment = async (paymentData) => {
-    if (!reservationData?.idReservation) {
-      alert("Debe guardar la reserva antes de registrar pagos");
-      return;
-    }
-    
     try {
       setLoading(true);
-      const paymentWithReservation = { 
-        ...paymentData, 
-        idReservation: reservationData.idReservation 
+
+      // Validaciones básicas
+      if (!paymentData.amount || isNaN(parseFloat(paymentData.amount))) {
+        throw new Error("El monto del pago no es válido");
+      }
+
+      const amount = parseFloat(paymentData.amount);
+      if (amount <= 0) {
+        throw new Error("El monto debe ser mayor que cero");
+      }
+
+      // Crear objeto de pago
+      const newPayment = {
+        ...paymentData,
+        amount: amount,
+        status: paymentData.status || 'Pendiente',
+        paymentDate: paymentData.paymentDate || new Date().toISOString().split('T')[0],
+        paymentMethod: paymentData.paymentMethod || 'Efectivo'
       };
-      
-      // Eliminamos la asignación a newPayment ya que no la usamos
-      await addPaymentToReservation(paymentWithReservation);
-      
-      // Actualizar la lista de pagos localmente y con una llamada al backend
-      const updatedPayments = await getReservationPayments(reservationData.idReservation);
-      setReservationPayments(updatedPayments);
-      
-      alert("Pago registrado correctamente");
+
+      // Si ya tenemos ID de reserva, guardar en el backend
+      if (reservationData?.idReservation) {
+        const savedPayment = await addPaymentToReservation({
+          ...newPayment,
+          idReservation: reservationData.idReservation
+        });
+
+        // Actualizar estado con el pago confirmado
+        setReservationPayments(prev => [...prev, savedPayment]);
+        return savedPayment;
+      } else {
+        // Si no hay ID de reserva, guardar como temporal
+        const tempPayment = {
+          ...newPayment,
+          tempId: `temp-${Date.now()}`,
+          isTemp: true
+        };
+        setTempPayments(prev => [...prev, tempPayment]);
+        return tempPayment;
+      }
     } catch (error) {
-      console.error("Error al registrar pago:", error);
-      alert(`Error al registrar pago: ${error.message}`);
+      console.error("Error al agregar pago:", error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -564,16 +616,55 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
             {step === 3 && (
               <div className="form-step">
-                <PaymentForm
-                  totalAmount={calculateTotal()}
-                  reservationId={reservationData?.idReservation}
-                  initialData={{}}
-                  onPaymentSubmit={handleAddPayment}
-                  disabled={!reservationData?.idReservation || isReadOnly || loading}
-                />
+                {/* Sección de Formulario de Pago */}
+                <div className="payment-form-section">
+                  <h3>Agregar Nuevo Pago</h3>
+                  <PaymentForm
+                    totalAmount={calculateTotal()}
+                    onPaymentSubmit={async (paymentData) => {
+                      try {
+                        await handleAddPayment(paymentData);
+                      } catch (error) {
+                        console.error("Error al agregar pago:", error);
+                      }
+                    }}
+                    disabled={!reservationData?.idReservation || isReadOnly || loading}
+                  />
+                </div>
 
+                {/* Sección de Lista de Pagos */}
+                <div className="payment-list-section">
+                  <h3>Pagos Registrados</h3>
+                  <TablePayments
+                    payments={[...reservationPayments, ...tempPayments]}
+                    isLoading={loading}
+                    isReadOnly={isReadOnly}
+                  />
+
+                  {/* Resumen de Pagos */}
+                  <div className="payment-summary">
+                    <div className="summary-item">
+                      <span>Total Reserva:</span>
+                      <strong>${calculateTotal().toFixed(2)}</strong>
+                    </div>
+                    <div className="summary-item">
+                      <span>Total Pagado:</span>
+                      <strong>${[...reservationPayments, ...tempPayments]
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+                        .toFixed(2)}</strong>
+                    </div>
+                    <div className="summary-item">
+                      <span>Saldo Pendiente:</span>
+                      <strong>${(calculateTotal() -
+                        [...reservationPayments, ...tempPayments]
+                          .reduce((sum, p) => sum + (Number(p.amount) || 0), 0))
+                        .toFixed(2)}</strong>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
+
             <div className="modal-footer">
               {step > 1 && (
                 <button
