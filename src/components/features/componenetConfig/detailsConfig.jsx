@@ -43,7 +43,7 @@ const DetailsConfig = ({ currentConfig, onClose, isOpen }) => {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-container">
+            <div className="config-modal-container">
                 <div className="modal-header">
                     <h2>Detalles del Rol</h2>
                     <button className="close-button" onClick={onClose}>×</button>

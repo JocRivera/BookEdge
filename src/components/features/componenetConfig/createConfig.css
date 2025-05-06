@@ -156,7 +156,7 @@
     z-index: 1000;
 }
 
-.modal-container {
+.config-modal-container {
     background-color: var(--color-white);
     border-radius: 8px;
     box-shadow: 0 4px 20px var(--color-shadow-dark);
