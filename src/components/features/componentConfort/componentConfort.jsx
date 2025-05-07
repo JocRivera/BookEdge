@@ -5,12 +5,13 @@ import {
   updateComfort,
   deleteComfort,
 } from "../../../services/ComfortService";
-import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import { CustomButton } from "../../common/Button/customButton";
 import Pagination from "../../common/Paginator/Pagination";
 import "./componentConfort.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CiSearch } from "react-icons/ci";
+import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import FormConfort from "./formConfort";
 
 function ComponentConfort() {
@@ -20,6 +21,7 @@ function ComponentConfort() {
   const [comforts, setComforts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     const fetchComforts = async () => {
@@ -31,6 +33,7 @@ function ComponentConfort() {
       } catch (error) {
         console.error("Error al obtener las comodidades:", error);
         setError(error.message || "Error al cargar comodidades");
+        toast.error("Error al cargar comodidades");
       } finally {
         setLoading(false);
       }
@@ -39,18 +42,15 @@ function ComponentConfort() {
   }, []);
 
   const filtrarDatos = comforts.filter((comfort) =>
-    `${comfort.name} ${comfort.Comforts?.map((c) => c.name).join(" ") || ""}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    comfort.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  //reiniciar al buscar ps
+  // Resetear página al buscar
   useEffect(() => {
     setCurrentPage(0);
   }, [searchTerm]);
 
   const itemsPerPage = 6;
-  const [currentPage, setCurrentPage] = useState(0);
   const offset = currentPage * itemsPerPage;
   const currentItems = filtrarDatos.slice(offset, offset + itemsPerPage);
   const pageCount = Math.ceil(filtrarDatos.length / itemsPerPage);
@@ -58,7 +58,6 @@ function ComponentConfort() {
 
   const handleAdd = () => {
     setCurrentComfort(null);
-
     setIsModalOpen(true);
   };
 
@@ -71,15 +70,17 @@ function ComponentConfort() {
   };
 
   const handleDelete = async (idComfort) => {
-    try {
-      await deleteComfort(idComfort);
-      setComforts(
-        comforts.filter((comfort) => comfort.idComfort !== idComfort)
-      );
-      toast.success("Comodidad eliminada correctamente");
-      console.log("Comodidad eliminada exitosamente");
-    } catch (error) {
-      console.error("Error al eliminar la comodidad:", error);
+    if (window.confirm("¿Está seguro de que desea eliminar esta comodidad?")) {
+      try {
+        await deleteComfort(idComfort);
+        setComforts(
+          comforts.filter((comfort) => comfort.idComfort !== idComfort)
+        );
+        toast.success("Comodidad eliminada correctamente");
+      } catch (error) {
+        console.error("Error al eliminar la comodidad:", error);
+        toast.error("Error al eliminar la comodidad");
+      }
     }
   };
 
@@ -90,13 +91,14 @@ function ComponentConfort() {
         setComforts((prev) =>
           prev.map((item) => (item.idComfort === data.idComfort ? data : item))
         );
-        toast.success("Comodidad Actualizada correctamente");
+        toast.success("Comodidad actualizada correctamente");
       } else {
         const newComfort = await createComfort(data);
         setComforts((prev) => [...prev, newComfort]);
-        toast.success("Comodidad Creada correctamente");
+        toast.success("Comodidad creada correctamente");
       }
-      return null; 
+      setIsModalOpen(false);
+      return null;
     } catch (error) {
       console.log("Error completo recibido:", JSON.stringify(error, null, 2));
 
@@ -110,17 +112,22 @@ function ComponentConfort() {
         if (Object.keys(formattedErrors).length > 0) {
           return formattedErrors;
         }
-        return { name: "Ocurrió un error al guardar" };
       }
+      toast.error("Error al guardar la comodidad");
+      return { general: "Error al procesar la solicitud" };
     }
   };
 
-  
+  const handleClearSearch = () => {
+    setSearchTerm("");
+  };
+
   return (
     <div className="comfort-table-container">
       <div className="comfort-title-container">
-        <h2 className="comfort-table-title">Tabla de Comodidades</h2>
+        <h2 className="comfort-table-title">Gestión de Comodidades</h2>
       </div>
+
       <div className="comfort-container-search">
         <div className="search-wrapper-comfort">
           <CiSearch className="comfort-search-icon" />
@@ -131,11 +138,21 @@ function ComponentConfort() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={handleClearSearch}
+              aria-label="Limpiar búsqueda"
+            >
+              <FaTimes />
+            </button>
+          )}
         </div>
         <CustomButton variant="primary" icon="add" onClick={handleAdd}>
           Agregar Comodidad
         </CustomButton>
       </div>
+
       <div className="comfort-table-wrapper">
         {loading ? (
           <div className="loading-indicator">
@@ -143,66 +160,76 @@ function ComponentConfort() {
             <p>Cargando comodidades...</p>
           </div>
         ) : error ? (
-          <div className="error-message">{error}</div>
-        ) : filtrarDatos.length === 0 ? (
-          <div className="empty-state">
-            {searchTerm
-              ? `No se encontraron comodidades para "${searchTerm}"`
-              : "No hay comodidades registradas"}
+          <div className="error-message">
+            {error}
+            <button onClick={() => setError(null)}>
+              <FaTimes />
+            </button>
           </div>
         ) : (
           <>
             <table className="comfort-table">
-              <thead className="comfort-table-header">
-                <tr>
+              <thead>
+                <tr className="comfort-table-header">
                   <th>ID</th>
                   <th>Nombre</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody className="comfort-table-body">
-                {currentItems.length > 0 ? (
+                {currentItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="no-data-row">
+                      No se encontraron comodidades
+                    </td>
+                  </tr>
+                ) : (
                   currentItems.map((comfort) => (
                     <tr key={comfort.idComfort} className="comfort-table-row">
-                      <td className="comfort-table-cell">
-                        {comfort.idComfort}
-                      </td>
-                      <td className="comfort-table-cell">{comfort.name}</td>
-                      <td className="comfort-table-cell">
-                        <ActionButtons
-                          onEdit={() => handleEdit(comfort.idComfort)}
-                          onDelete={() => handleDelete(comfort.idComfort)}
-                        />
+                      <td>{comfort.idComfort}</td>
+                      <td>{comfort.name}</td>
+                      <td className="actions-cell">
+                        <button
+                          onClick={() => handleEdit(comfort.idComfort)}
+                          className="action-btn edit-btn"
+                          title="Editar"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(comfort.idComfort)}
+                          className="action-btn delete-btn"
+                          title="Eliminar"
+                        >
+                          <FaTrash />
+                        </button>
                       </td>
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan="3" className="no-results">
-                      No se encontraron resultados
-                    </td>
-                  </tr>
                 )}
               </tbody>
             </table>
-            <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+
+            {pageCount > 1 && (
+              <div className="pagination-container">
+                <Pagination
+                  pageCount={pageCount}
+                  onPageChange={handlePageClick}
+                />
+              </div>
+            )}
           </>
         )}
+      </div>
+
+      {isModalOpen && (
         <FormConfort
           isOpen={isModalOpen}
           comfortData={currentComfort}
-          onClose={() => {
-            setIsModalOpen(false);
-          }}
-          onSave={async (data) => {
-            const errors = await handleSave(data);
-            if (errors) {
-              return errors; // Esto se pasará al FormConfort como backendErrors
-            }
-            return null;
-          }}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSave}
         />
-      </div>
+      )}
     </div>
   );
 }

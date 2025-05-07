@@ -33,14 +33,14 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
     description: "",
     capacity: "",
     status: "",
-    images: ""
+    images: "",
   });
+
   const fileInputRefs = useRef([]);
 
   // Efectos
   useEffect(() => {
     if (!isOpen) return;
-
     resetForm();
 
     if (bedroomToEdit) {
@@ -57,6 +57,42 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
       status: bedroom.status || "En Servicio",
     });
     loadExistingImages(bedroom.idRoom);
+  };
+
+  const validateField = (name, value, allImages = []) => {
+    let error = "";
+
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          error = "El nombre es obligatorio";
+        }
+        break;
+      case "description":
+        if (!value.trim()) {
+          error = "La descripción es requerida";
+        } else if (value.trim().length >= 250) {
+          error = "La descripción debe ser de 250 caracteres";
+        }
+        break;
+      case "capacity":
+        {
+          if (!value) return "La capacidad es obligatoria";
+          if (isNaN(value)) return "Debe ser un número";
+          const numValue = parseInt(value);
+          if (numValue !== 1 && numValue !== 2) {
+            return "La capacidad debe ser 1 o 2";
+          }
+        }
+        break;
+      case "images":
+        return allImages.length === 0 ? "Debes subir al menos una imagen" : "";
+
+      default:
+        break;
+    }
+
+    return error;
   };
 
   const loadExistingImages = async (bedroomId) => {
@@ -86,12 +122,26 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors({}); // Limpiar errores previos
 
+    const newErrors = {};
+    Object.entries(formData).forEach(([field, value]) => {
+      const error = validateField(field, value);
+      if (error) newErrors[field] = error;
+    });
+
+    // Verificar imágenes
+    if (existingImages.length === 0 && !imageFiles.some(Boolean)) {
+      newErrors.images = "Debes subir al menos una imagen";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
     try {
       const bedroomId = bedroomToEdit
         ? await updateBedroomData(bedroomToEdit.idRoom)
@@ -252,7 +302,9 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className={`form-input-bedroom ${errors.name ? "input-error" : ""}`}
+                  className={`form-input-bedroom ${
+                    errors.name ? "input-error" : ""
+                  }`}
                 />
                 {errors.name && (
                   <span className="error-message">{errors.name}</span>
@@ -268,7 +320,10 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  className={`form-input-bedroom ${errors.description ? "input-error" : ""}`}
+                  required
+                  className={`form-input-bedroom ${
+                    errors.description ? "input-error" : ""
+                  }`}
                   rows="4"
                 />
                 {errors.description && (
@@ -288,7 +343,9 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   onChange={handleInputChange}
                   min="1"
                   required
-                  className={`form-input-bedroom ${errors.capacity ? "input-error" : ""}`}
+                  className={`form-input-bedroom ${
+                    errors.capacity ? "input-error" : ""
+                  }`}
                 />
                 {errors.capacity && (
                   <span className="error-message">{errors.capacity}</span>
@@ -304,7 +361,9 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className={`form-input-bedroom ${errors.status ? "input-error" : ""}`}
+                  className={`form-input-bedroom ${
+                    errors.status ? "input-error" : ""
+                  }`}
                 >
                   <option value="En Servicio">En Servicio</option>
                   <option value="Mantenimiento">En Mantenimiento</option>
@@ -320,9 +379,11 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
               <legend className="form-label-bedroom">
                 Imágenes de la habitación (máx. 5)
               </legend>
-              
+
               {errors.images && (
-                <span className="error-message image-error">{errors.images}</span>
+                <span className="error-message image-error">
+                  {errors.images}
+                </span>
               )}
 
               {existingImages.length > 0 && (

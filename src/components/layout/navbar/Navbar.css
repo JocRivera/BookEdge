@@ -120,20 +120,20 @@
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 2px;
-  color: rgb(255, 255, 255);
+  color: rgb(73, 64, 208);
 }
 
 .luxury-logo-text span {
   font-weight: 700;
-  color: #0fa4b1;
+  color: #2466c3;
 }
 
 .luxury-nav.scrolled .luxury-logo-text {
-  color: #0fa4b1;
+  color: #2466c3;
 }
 
 .luxury-nav.scrolled .luxury-logo-text span {
-  color: #0fa4b1;
+  color: #2466c3;
 }
 
 /* ===== ENLACES DE NAVEGACIÓN ===== */
@@ -218,13 +218,13 @@
 .luxury-nav-button.primary:hover {
   background: #7ea1d5;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 5px 15px rgba(42, 83, 185, 0.756);
 }
 
 .luxury-nav-button.secondary {
   background: transparent;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(68, 10, 242, 0.296);
 }
 
 .luxury-nav-button.secondary:hover {
@@ -270,7 +270,7 @@
 
 /* Avatar para cliente */
 .client-avatar {
-  background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%);
+  background: linear-gradient(135deg, #3785d4 0%, #3785d4 100%);
   color: #1A1A1A;
 }
 
@@ -333,19 +333,19 @@
 
 /* Estilos específicos para cliente */
 .luxury-user-dropdown:not(.admin) {
-  border: 2px solid rgba(212, 175, 55, 0.3);
+  border: 2px solid rgb(103, 95, 218);
   border-radius: 50px;
   padding: 4px 4px 4px 12px;
   transition: all 0.3s ease;
 }
 
 .luxury-user-dropdown:not(.admin):hover {
-  border-color: #D4AF37;
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+  border-color: #3785d4;
+  box-shadow: 0 0 0 3px rgb(84, 101, 188);
 }
 
 .luxury-user-dropdown:not(.admin) .dropdown-chevron {
-  color: #D4AF37;
+  color: #3785d4;
 }
 
 /* Contenido del dropdown */
@@ -362,7 +362,7 @@
   display: inline-block;
   margin-top: 5px;
   padding: 3px 10px;
-  background: #D4AF37;
+  background: #3785d4;
   color: #1A1A1A;
   border-radius: 12px;
   font-size: 0.7rem;
@@ -391,7 +391,7 @@
 }
 
 .luxury-dropdown-item:hover {
-  color: #D4AF37;
+  color: #3785d4;
 }
 
 .luxury-dropdown-item:hover .dropdown-icon {

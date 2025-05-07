@@ -33,7 +33,7 @@
   transform: translateX(-50%);
   width: 100%;
   height: 3px;
-  background: #d4af37;
+  background: #3785d4;
 }
 
 .filter-nav{
@@ -80,7 +80,7 @@
 
 .filter-cabin.active,
 .filter-bedrooms.active {
-  background: #D4AF37;
+  background: #3785d4;
   color: white;
   box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
   

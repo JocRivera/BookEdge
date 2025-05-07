@@ -1,5 +1,5 @@
 :root {
-  --gold: #D4AF37;
+  --azure: #3785d4;
   --dark: #1A1A1A;
   --transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -72,11 +72,12 @@
   opacity: 0;
   transform: translateY(30px);
   transition: var(--transition);
+  font-style: italic;
 }
 
 .luxury-title .title-part {
-  font-weight: 700;
-  color: var(--gold);
+  font-weight: 800;
+  color: var(--azure);
 }
 
 .video-wrapper.active ~ .luxury-overlay + .luxury-content .luxury-title {
@@ -115,7 +116,7 @@
 }
 
 .pagination-dot.active {
-  background: var(--gold);
+  background: var(--azure);
   transform: scale(1.3);
 }
 
