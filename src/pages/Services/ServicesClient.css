@@ -1,5 +1,5 @@
 :root {
-    --gold: #D4AF37;
+    --azure: #3785d4;
     --primary: #4a6741;
     --primary-dark: #304a27;
     --text-dark: #333333;
@@ -39,12 +39,12 @@
     transform: translateX(-50%);
     width: 30%; 
     height: 3px;
-    background: var(--gold);
+    background: var(--azure);
     border-radius: 3px;
   }
   .services-title-creative span {
     font-weight: 700;
-    color: var(--gold);
+    color: var(--azure);
   }
   
   /* Track del carrusel */
@@ -87,7 +87,7 @@
   /* Iconos */
   .service-icon {
     font-size: 2.8rem;
-    color: var(--gold);
+    color: var(--azure);
     margin-bottom: 20px;
     transition: transform 0.3s ease;
   }

@@ -77,6 +77,42 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
     setErrors({});
   };
 
+  const validateField = (name, value, allImages = []) => {
+    let error = "";
+
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          error = "El nombre es obligatorio";
+        }
+        break;
+      case "description":
+        if (!value.trim()) {
+          error = "La descripción es requerida";
+        } else if (value.trim().length >= 250) {
+          error = "La descripción debe ser de 250 caracteres";
+        }
+        break;
+      case "capacity":
+        {
+          if (!value) return "La capacidad es obligatoria";
+          if (isNaN(value)) return "Debe ser un número válido";
+
+          const numValue = parseInt(value);
+          if (numValue < 3) return "La capacidad mínima es 3";
+          if (numValue > 7) return "La capacidad máxima es 7";
+        }
+        break;
+      case "images":
+        return allImages.length === 0 ? "Debes subir al menos una imagen" : "";
+
+      default:
+        break;
+    }
+
+    return error;
+  };
+
   // Manejadores de formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,12 +122,25 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors({}); // Limpiar errores previos
+    const newErrors = {};
+    Object.entries(formData).forEach(([field, value]) => {
+      const error = validateField(field, value);
+      if (error) newErrors[field] = error;
+    });
 
+    // Verificar imágenes
+    if (existingImages.length === 0 && !imageFiles.some(Boolean)) {
+      newErrors.images = "Debes subir al menos una imagen";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
     try {
       const cabinId = cabinToEdit
         ? await updateCabinData(cabinToEdit.idCabin)

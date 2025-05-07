@@ -1,11 +1,11 @@
 :root {
-  --gold: #D4AF37;
+  --azure: #3785d4;
   --dark: #1A1A1A;
-  --transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1); --gold: #D4AF37;
+  --transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1); --azure: #3785d4;
   --primary: #4a6741;
   --primary-light: #6a8661;
   --primary-dark: #304a27;
-  --accent: #d4a373;
+  --accent: #3785d4;
   --text-dark: #333333;
   --text-light: #f5f5f5;
   --background-light: #ffffff;
@@ -32,7 +32,7 @@
 
 .title-cabin-home span {
   font-weight: 700;
-  color: var(--gold);
+  color: var(--azure);
 }
 
 .swiper-custom-nav div {
@@ -136,7 +136,7 @@
 
 /* Estilo del botón (mejorado) */
 .cabin-button-home {
-  background: var(--gold);
+  background: var(--azure);
   color: var(--dark);
   border: none;
   padding: 12px 25px;

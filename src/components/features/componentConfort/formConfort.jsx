@@ -4,50 +4,85 @@ import "./componentConfort.css";
 function FormConfort({ comfortData, onClose, onSave, isOpen }) {
   const [formDataComfort, setFormDataComfort] = useState({
     name: "",
+    idComfort: null, 
   });
   const [errors, setErrors] = useState({ name: "" });
+  const [touched, setTouched] = useState({ name: false });
 
   useEffect(() => {
     if (isOpen) {
-      // Limpiar errores al abrir el modal
+      // Limpiar errores y estado de campos tocados al abrir el modal
       setErrors({ name: "" });
+      setTouched({ name: false });
       
       if (comfortData) {
         setFormDataComfort({
           name: comfortData.name || "",
+          idComfort: comfortData.idComfort 
         });
       } else {
         setFormDataComfort({
           name: "",
+          idComfort: null
         });
       }
     }
   }, [isOpen, comfortData]);
 
+  const validateField = (name, value) => {
+    let error = "";
+    
+    if (name === "name") {
+      if (!value.trim()) {
+        error = "El nombre es obligatorio";
+      } else if (value.trim().length < 3) {
+        error = "El nombre debe tener al menos 3 caracteres";
+      } 
+    }
+    
+    return error;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormDataComfort(prev => ({ ...prev, [name]: value }));
     
-    // Limpiar error cuando el usuario escribe
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+    // Marcar el campo como tocado
+    if (!touched[name]) {
+      setTouched(prev => ({ ...prev, [name]: true }));
     }
+    
+    // Validar en tiempo real si el campo ha sido tocado
+    if (touched[name]) {
+      const error = validateField(name, value);
+      setErrors(prev => ({ ...prev, [name]: error }));
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    
+    // Marcar el campo como tocado cuando pierde el foco
+    setTouched(prev => ({ ...prev, [name]: true }));
+    
+    // Validar cuando el campo pierde el foco
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Marcar todos los campos como tocados
+    setTouched({ name: true });
     
-    // Validación básica del frontend
-    const newErrors = {};
-    if (!formDataComfort.name.trim()) {
-      newErrors.name = "El nombre es obligatorio";
-    }
-    
+    // Validar todos los campos antes de enviar
+    const nameError = validateField("name", formDataComfort.name);
+    const newErrors = { name: nameError };
     setErrors(newErrors);
     
     // Si hay errores, no continuar
-    if (Object.keys(newErrors).length > 0) {
+    if (Object.values(newErrors).some(error => error !== "")) {
       return;
     }
 
@@ -84,9 +119,10 @@ function FormConfort({ comfortData, onClose, onSave, isOpen }) {
                 value={formDataComfort.name}
                 placeholder="Nombre Comodidad"
                 onChange={handleChange}
-                className={errors.name ? "input-error-admin" : ""}
+                onBlur={handleBlur}
+                className={errors.name && touched.name ? "input-error-admin" : ""}
               />
-              {errors.name && (
+              {errors.name && touched.name && (
                 <div className="error-message-admin">{errors.name}</div>
               )}
             </div>

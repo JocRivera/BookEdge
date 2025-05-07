@@ -9,8 +9,8 @@ export default function VideoSlider() {
     const videoRefs = useRef([]);
     const videos = [
         { url: video1, title: "SOGAL SOL", description: "Experiencias de lujo inigualables" },
-        { url: video2, title: "SOGAL SOL", description: "Donde el confort se encuentra con la elegancia" },
-        { url: video3, title: "SOGAL SOL", description: "Tu escape premium perfecto" }
+        { url: video2, title: "SEGUNDO TITULO DECORATIVO", description: "Donde el confort se encuentra con la elegancia" },
+        { url: video3, title: "Cabañas para motelear", description: "Tu escape premium perfecto" }
     ];
 
     useEffect(() => {
