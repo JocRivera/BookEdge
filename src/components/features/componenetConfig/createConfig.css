@@ -100,7 +100,7 @@
     transition: all 0.3s ease;
 }
 
-.search:focus {
+.config-search:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.3);
 }
