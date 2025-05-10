@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import "./createConfig.css"
 import { CustomButton, ActionButtons } from "../../common/Button/customButton"
 import { CiSearch } from "react-icons/ci"
+import { FaTimes } from "react-icons/fa"
 import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
@@ -38,6 +39,9 @@ export default function CreateConfig() {
     const pageCount = Math.ceil(filtrarDatos.length / itemsPerPage);
     const handlePageClick = ({ selected }) => setCurrentPage(selected);
 
+    const handleClearSearch = () => {
+        setSearchTerm("");
+    };
     const handleAdd = async () => {
         setCurrentConfig(null);
         setIsModalOpen(true);
@@ -124,17 +128,27 @@ export default function CreateConfig() {
                 <h2 className="table-title">Tabla de Roles</h2>
             </div>
             <div className="container-search">
-                <CiSearch className="absolute left-[10px] text-[16px] text-text-light" />
-
-                <input
-                    type="text"
-                    className="search"
-                    value={searchTerm}
-                    placeholder="Buscar Rol..."
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <div className="search-wrapper-comfort">
+                    <CiSearch className="config-search-icon" />
+                    <input
+                        type="text"
+                        className="config-search"
+                        placeholder="Buscar Rol..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                        <button
+                            className="clear-search"
+                            onClick={handleClearSearch}
+                            aria-label="Limpiar búsqueda"
+                        >
+                            <FaTimes />
+                        </button>
+                    )}
+                </div>
                 <CustomButton variant="primary" icon="add" onClick={handleAdd}>
-                    Agregar Rol
+                    Agregar Comodidad
                 </CustomButton>
             </div>
 
