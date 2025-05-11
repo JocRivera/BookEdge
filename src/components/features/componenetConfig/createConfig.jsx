@@ -80,6 +80,7 @@ export default function CreateConfig() {
     const handleSave = (setting) => {
 
         if (currentConfig) {
+            console.log(currentConfig)
             const notify = () => toast.success('Rol Actualizado correctamente');
             rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
                 setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
