@@ -1,89 +1,93 @@
+/* Modern Register Form Styles */
 .register-container {
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
-  padding: 40px 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .register-form {
   background: white;
   display: flex;
   flex-direction: column;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.07);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
   width: 100%;
-  max-width: 700px; 
-  margin-top: 20px;
+  max-width: 800px;
+  margin-top: 50px;
   transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .title-register {
   text-align: center;
-  color: #2c3e50;
-  margin-bottom: 0.5rem; 
-  font-size: 1.6rem;
-  font-weight: 600;
+  color: #1a1a1a;
+margin-bottom: 20px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .description-register {
   text-align: center;
-  color: #7f8c8d;
-  margin-bottom: 1.5rem; 
-  font-size: 0.9rem;  
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .form-grid-register {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem; 
-  margin-bottom: 1.2rem; 
+  gap: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 @media (max-width: 768px) {
   .form-grid-register {
     grid-template-columns: 1fr;
-    gap: 0.8rem;
+    gap: 1rem;
   }
 
   .register-form {
-    padding: 1.2rem;
+    padding: 1.5rem;
   }
 }
 
 .form-group-register {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.2rem; 
   position: relative;
 }
 
 .form-group-register label {
   display: block;
-  margin-bottom: 0.3rem; 
-  color: #34495e;
-  font-size: 0.85rem; 
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .form-group-register input,
 .form-group-register select {
   width: 100%;
-  padding: 0.7rem 0.8rem; 
-  border: 1px solid #e0e0e0;
-  border-radius: 6px; 
-  font-size: 0.9rem; 
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
   transition: all 0.2s ease;
-  background-color: #f9f9f9;
+  background-color: #fafafa;
 }
 
 .form-group-register input:focus,
 .form-group-register select:focus {
   outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.15); 
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   background-color: #fff;
 }
 
@@ -94,17 +98,17 @@
 }
 
 .password-input-container input {
-  padding-right: 40px; 
+  padding-right: 40px;
 }
 
 .toggle-password {
   position: absolute;
-  right: 10px;
+  right: 12px;
   background: none;
   border: none;
   cursor: pointer;
-  color: #7f8c8d;
-  font-size: 1rem;
+  color: #6b7280;
+  font-size: 1.1rem;
   padding: 0;
   display: flex;
   align-items: center;
@@ -114,36 +118,36 @@
 }
 
 .toggle-password:hover {
-  color: #3498db;
+  color: #4f46e5;
 }
-
 
 .terms-checkbox {
   display: flex;
-  align-items: center;
-  margin: 1rem 0; 
+  align-items: flex-start;
+  margin: 15px 0 25px;
   width: 100%;
-  gap: 8px;
+  gap: 10px;
 }
 
 .terms-checkbox input[type="checkbox"] {
   margin: 0;
   flex-shrink: 0;
-  width: 16px; 
-  height: 16px; 
+  width: 18px;
+  height: 18px;
   appearance: none;
   -webkit-appearance: none;
-  border: 2px solid #e0e0e0;
-  border-radius: 3px; 
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
   outline: none;
   cursor: pointer;
   position: relative;
   transition: all 0.2s;
+  margin-top: 3px;
 }
 
 .terms-checkbox input[type="checkbox"]:checked {
-  background-color: #3498db;
-  border-color: #3498db;
+  background-color: #4f46e5;
+  border-color: #4f46e5;
 }
 
 .terms-checkbox input[type="checkbox"]:checked::after {
@@ -153,48 +157,47 @@
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-size: 10px
+  font-size: 11px;
 }
 
 .terms-checkbox label {
-  font-size: 0.85rem; 
-  color: #7f8c8d;
+  font-size: 0.9rem;
+  color: #4b5563;
   text-align: left;
-  line-height: 1.3; 
+  line-height: 1.5;
   flex-grow: 1;
 }
 
 .terms-checkbox a {
-  color: #3498db;
+  color: #4f46e5;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
 }
 
 .terms-checkbox a:hover {
-  color: #2980b9;
+  color: #4338ca;
   text-decoration: underline;
 }
 
 .register-button {
   width: 100%;
-  padding: 0.8rem; 
-  background-color: #3498db;
+  padding: 0.875rem;
+  background-color: #4f46e5;
   color: white;
   border: none;
-  border-radius: 6px; 
-  font-size: 0.95rem; 
+  border-radius: 8px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
-  margin-top: 0.8rem; 
-  box-shadow: 0 3px 5px rgba(52, 152, 219, 0.2); 
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .register-button:hover {
-  background-color: #2980b9;
-  transform: translateY(-1px); 
-  box-shadow: 0 4px 6px rgba(52, 152, 219, 0.25); 
+  background-color: #4338ca;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 .register-button:active {
@@ -202,39 +205,40 @@
 }
 
 .login-prompt {
-  margin-top: 1rem; 
+  margin-top: 1.5rem;
   text-align: center;
-  color: #7f8c8d;
-  font-size: 0.9rem; 
+  color: #6b7280;
+  font-size: 0.95rem;
 }
 
 .login-link {
-  color: #3498db;
+  color: #4f46e5;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
 }
 
 .login-link:hover {
-  color: #2980b9;
+  color: #4338ca;
   text-decoration: underline;
 }
+
 .error-text {
-  color: #e74c3c;
-  font-size: 0.85rem;
-  position: absolute; 
-  bottom: -1.2rem; 
+  color: #ef4444;
+  font-size: 0.8rem;
+  position: absolute;
   left: 0;
-  margin-top: 0.2rem;
+  margin-top: -0.2rem;
   font-weight: 500;
-  height: 1rem; 
 }
 
-/* Añadir animación cuando el formulario se carga */
-@keyframes fadeIn {
+
+
+/* Modern animations */
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(15px); /* Reducido */
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -243,5 +247,22 @@
 }
 
 .register-form {
-  animation: fadeIn 0.4s ease-out; /* Más rápido */
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Input focus animation */
+.form-group-register input:focus,
+.form-group-register select:focus {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modern floating label effect (optional) */
+.form-group-register {
+  position: relative;
+}
+
+.form-group-register input::placeholder,
+.form-group-register select::placeholder {
+  color: #9ca3af;
+  transition: opacity 0.25s;
 }

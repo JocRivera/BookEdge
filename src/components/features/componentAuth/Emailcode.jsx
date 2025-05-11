@@ -1,4 +1,3 @@
-import AuthNavbar from '../../layout/auth/AuthNavbar';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { resetPassword } from '../../../services/authService'; 
@@ -37,7 +36,6 @@ export default function ResetPassword() {
 
   return (
     <div className="page-container">
-      <AuthNavbar />
       <div className="recovery-container">
         <div className="recovery-card">
           <div className="recovery-header">

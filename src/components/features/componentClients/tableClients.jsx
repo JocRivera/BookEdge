@@ -13,6 +13,7 @@ import Pagination from "../../common/Paginator/Pagination";
 import { CiSearch } from "react-icons/ci";
 import Switch from "../../common/Switch/Switch";
 import { useAuth } from "../../../context/authContext";
+import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 
 function TableUser() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -111,10 +112,14 @@ function TableUser() {
     }
   };
 
+  const handleClearSearch = () => {
+    setSearchTerm("");
+  };
+
   return (
     <div className="user-table-container">
       <div className="user-table-header-container">
-        <h2 className="user-table-header-title">Tabla de Usuarios</h2>
+        <h2 className="user-table-header-title">Gestión de Usuarios</h2>
       </div>
       <div className="user-search-container">
         <div className="search-wrapper-user">
@@ -126,31 +131,34 @@ function TableUser() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={handleClearSearch}
+              aria-label="Limpiar búsqueda"
+            >
+              <FaTimes />
+            </button>
+          )}
         </div>
-        {/* {hasPermission("Usuarios", "post") && ( */}
+
         <CustomButton variant="primary" icon="add" onClick={handleAdd}>
           Agregar Usuario
         </CustomButton>
-        {/* )} */}
       </div>
 
       <div className="user-table-wrapper">
         {loading ? (
           <div className="loading-indicator">
             <div className="loading-spinner"></div>
-            <p>Cargando habitaciones...</p>
+            <p>Cargando comodidades...</p>
           </div>
         ) : error ? (
           <div className="error-message">
-            {searchTerm
-              ? `No se encontraron resultados para "${searchTerm}"`
-              : "Error al cargar los Usuarios"}
-          </div>
-        ) : filtrarDatos.length === 0 ? (
-          <div className="empty-state">
-            {searchTerm
-              ? `No se encontraron resultados para "${searchTerm}"`
-              : "No hay Usuario disponibles"}
+            {error}
+            <button onClick={() => setError(null)}>
+              <FaTimes />
+            </button>
           </div>
         ) : (
           <>
@@ -171,45 +179,65 @@ function TableUser() {
                 </tr>
               </thead>
               <tbody className="user-table-body">
-                {currentItems.map((user, index) => (
-                  <tr
-                    key={user.idUser}
-                    className={
-                      index % 2 === 0
-                        ? "user-table-row-even"
-                        : "user-table-row-odd"
-                    }
-                  >
-                    <td className="user-table-cell">{user.idUser}</td>
-                    <td className="user-table-cell">{user.name}</td>
-                    <td className="user-table-cell">
-                      {user.identificationType}
-                    </td>
-                    <td className="user-table-cell">{user.identification}</td>
-                    <td className="user-table-cell">{user.email}</td>
-                    <td className="user-table-cell">{user.cellphone}</td>
-                    <td className="user-table-cell">{user.address}</td>
-                    <td className="user-table-cell">{user.eps}</td>
-                    <td className="user-table-cell">
-                      {user.role?.name || "Sin rol"}
-                    </td>
-                    <td className="user-table-cell">
-                      <Switch
-                        isOn={user.status === true}
-                        handleToggle={() =>
-                          handleToggleE(user.idUser, user.status)
-                        }
-                        id={`status-${user.idUser}`}
-                      />
-                    </td>
-                    <td className="user-table-cell">
-                      <ActionButtons
-                        onEdit={() => handleEdit(user.idUser)}
-                        onDelete={() => handleDelete(user.idUser)}
-                      />
+                {currentItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="no-data-row">
+                      No se encontraron comodidades
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  currentItems.map((user, index) => (
+                    <tr
+                      key={user.idUser}
+                      className={
+                        index % 2 === 0
+                          ? "user-table-row-even"
+                          : "user-table-row-odd"
+                      }
+                    >
+                      <td className="user-table-cell">{user.idUser}</td>
+                      <td className="user-table-cell">{user.name}</td>
+                      <td className="user-table-cell">
+                        {user.identificationType}
+                      </td>
+                      <td className="user-table-cell">{user.identification}</td>
+                      <td className="user-table-cell">{user.email}</td>
+                      <td className="user-table-cell">{user.cellphone}</td>
+                      <td className="user-table-cell">{user.address}</td>
+                      <td className="user-table-cell">{user.eps}</td>
+                      <td className="user-table-cell">
+                        {user.role?.name || "Sin rol"}
+                      </td>
+                      <td className="user-table-cell">
+                        <Switch
+                          isOn={user.status === true}
+                          handleToggle={() =>
+                            handleToggleE(user.idUser, user.status)
+                          }
+                          id={`status-${user.idUser}`}
+                        />
+                      </td>
+                      <td className="user-table-cell">
+                        <div className="action-buttons-container">
+                          {" "}
+                          {/* Nuevo contenedor */}
+                          <button
+                            onClick={() => handleEdit(user.idUser)}
+                            className="action-btn edit-btn"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(user.idUser)}
+                            className="action-btn delete-btn"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
 
