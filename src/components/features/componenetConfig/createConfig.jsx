@@ -201,24 +201,24 @@ export default function CreateConfig() {
                                                     handleToggle={() => handleToggle(config.idRol)}
                                                 />
                                             </td>
-                                            <td className="actions-cell">
+                                            <td className="config-actions-cell">
                                                 <button
                                                     onClick={() => handleView(config.idRol)}
-                                                    className="action-btn view-btn"
+                                                    className="config-action-btn config-view-btn"
                                                     title="Ver detalles"
                                                 >
                                                     <FaEye />
                                                 </button>
                                                 <button
                                                     onClick={() => handleEdit(config.idRol)}
-                                                    className="action-btn edit-btn"
+                                                    className="config-ction-btn config-edit-btn"
                                                     title="Editar"
                                                 >
                                                     <FaEdit />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(config.idRol)}
-                                                    className="action-btn delete-btn"
+                                                    className="config-action-btn config-delete-btn"
                                                     title="Eliminar"
                                                 >
                                                     <FaTrash />

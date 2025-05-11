@@ -1,17 +1,17 @@
 /* Mantener las variables existentes */
 :root {
     /* Colores principales */
-    --comfort-primary: #4e54c8;
-    --comfort-primary-light: #8f94fb;
-    --comfort-primary-dark: #3a3f9e;
-    --comfort-background: #f9f9ff;
-    --comfort-card-bg: #ffffff;
-    --comfort-text-dark: #2d3748;
-    --comfort-text-light: #718096;
-    --comfort-border: #e2e8f0;
-    --comfort-shadow-light: rgba(78, 84, 200, 0.1);
-    --comfort-shadow-medium: rgba(78, 84, 200, 0.15);
-    --comfort-shadow-dark: rgba(78, 84, 200, 0.2);
+    --config-primary: #4e54c8;
+    --config-primary-light: #8f94fb;
+    --config-primary-dark: #3a3f9e;
+    --config-background: #f9f9ff;
+    --config-card-bg: #ffffff;
+    --config-text-dark: #2d3748;
+    --config-text-light: #718096;
+    --config-border: #e2e8f0;
+    --config-shadow-light: rgba(78, 84, 200, 0.1);
+    --config-shadow-medium: rgba(78, 84, 200, 0.15);
+    --config-shadow-dark: rgba(78, 84, 200, 0.2);
 }
 
 /* Estilos de la tabla general */
@@ -67,7 +67,7 @@
     flex-wrap: wrap;
 }
 
-.search-wrapper-comfort {
+.search-wrapper-config {
     position: relative;
     flex-grow: 1;
     max-width: 500px;
@@ -77,7 +77,7 @@
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.search-wrapper-comfort:hover {
+.search-wrapper-config:hover {
     box-shadow: 0 6px 25px rgba(78, 84, 200, 0.2);
 }
 
@@ -109,14 +109,14 @@
 .table-wraper {
     overflow-x: auto;
     border-radius: 16px;
-    box-shadow: 0 15px 30px var(--comfort-shadow-light);
-    background: var(--comfort-card-bg);
+    box-shadow: 0 15px 30px var(--config-shadow-light);
+    background: var(--config-card-bg);
     margin-bottom: 2rem;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .table-wrapper:hover {
-    box-shadow: 0 25px 50px var(--comfort-shadow-dark);
+    box-shadow: 0 25px 50px var(--config-shadow-dark);
 }
 
 .table {
@@ -134,7 +134,7 @@
     text-align: left;
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--comfort-primary-dark);
+    color: var(--config-primary-dark);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
@@ -147,8 +147,8 @@
 .table-body td {
     padding: 1.2rem 1.5rem;
     font-size: 0.95rem;
-    color: var(--comfort-text-dark);
-    border-bottom: 1px solid var(--comfort-border);
+    color: var(--config-text-dark);
+    border-bottom: 1px solid var(--config-border);
     transition: background-color 0.3s ease;
 }
 
@@ -465,4 +465,75 @@
     .modal-header h2 {
         font-size: 18px;
     }
+}
+
+/* Acciones */
+.config-actions-cell {
+    display: flex;
+    gap: 10px;
+}
+
+.config-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: var(--payments-text-light);
+}
+
+.config-action-btn:hover {
+    transform: scale(1.1);
+    color: var(--payments-primary);
+    background-color: rgba(143, 148, 251, 0.1);
+}
+
+.config-edit-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.config-delete-btn {
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-right: auto;
+}
+
+.config-view-btn {
+    background-color: #38a169;
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.config-edit-btn:hover {
+    color: #ffc107;
+}
+
+.config-delete-btn:hover {
+    color: #ff5252;
+}
+
+.config-view-btn:hover {
+    color: #4caf50;
 }
