@@ -185,13 +185,17 @@
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--color-shadow-overlay);
+    height: 100%;
+    width: 100%;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
     display: flex;
-    align-items: center;
     justify-content: center;
-    z-index: 1000;
+    align-items: center;
+    z-index: 3000;
+    overflow-y: auto;
+    border: none;
 }
 
 .config-modal-container {
@@ -236,16 +240,16 @@
 }
 
 .close-button {
-    background: transparent;
     border: none;
-    font-size: 24px;
     cursor: pointer;
-    color: var(--color-button-cancel-text);
-    line-height: 1;
+    color: #718096;
+    transition: color 0.2s;
+    background: transparent;
+    font-size: 24px;
 }
 
 .close-button:hover {
-    color: var(--color-text-dark);
+    color: #3e9de5;
 }
 
 .config-modal-body {
