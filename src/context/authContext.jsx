@@ -33,12 +33,12 @@ export const AuthProvider = ({ children }) => {
   };
   
   // Limpiar errores después de 5 segundos
-  useEffect(() => {
-    if (errors.length > 0) {
-      const timer = setTimeout(() => setErrors([]), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [errors]);
+useEffect(() => {
+  if (errors.length > 0) {
+    // const timer = setTimeout(() => setErrors([]), 5000);  // <-- Comentado: ya no se autolimpia
+    // return () => clearTimeout(timer);  
+  }
+}, [errors]);
 
   // Escuchar eventos de error de autenticación del interceptor
   useEffect(() => {

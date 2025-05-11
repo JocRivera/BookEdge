@@ -4,9 +4,8 @@ import Switch from "../../common/Switch/Switch";
 import rolesService from "../../../services/RolesService";
 import { toast } from "react-toastify";
 
-
 const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
-  const [activeTab, setActiveTab] = useState('personal');
+  const [activeTab, setActiveTab] = useState("personal");
   const initialFormData = {
     name: "",
     eps: "",
@@ -59,7 +58,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
     } else {
       setFormData(initialFormData);
     }
-    
+
     setErrors({});
     setPasswordError("");
   }, [userData, isOpen]);
@@ -84,11 +83,14 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
     }
 
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
+
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
 
     if (name === "confirmPassword" || name === "password") {
       const password = name === "password" ? value : formData.password;
@@ -133,9 +135,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
       onClose();
     } catch (error) {
       console.log("Error completo:", error);
-     
 
-      
       if (error.errors) {
         const formattedErrors = {};
         error.errors.forEach((err) => {
@@ -143,13 +143,97 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
         });
         setErrors(formattedErrors);
         toast.error("Error al crear usuario Validar los Campos");
-      }
-      else if (error.message) {
+      } else if (error.message) {
         console.error("Error:", error.message);
       } else {
         console.error("Error inesperado:", error);
       }
     }
+  };
+
+  const validateField = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          error = "El nombre es obligatorio";
+        } else if (value.trim().length < 3) {
+          error = "El nombre debe ser mayor a 3 caracteres";
+        }
+        break;
+
+      case "email":
+        if (!value.trim()) {
+          error = "El email es obligatorio";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = "El email no es válido";
+        }
+        break;
+
+      case "password":
+        if (!value.trim()) {
+          error = "La contraseña no puede estar vacía";
+        } else if (value.length < 8) {
+          error = "La contraseña debe tener al menos 8 caracteres";
+        } else if (
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(
+            value
+          )
+        ) {
+          error =
+            "Debe contener al menos una mayúscula, una minúscula, un número y un carácter especial";
+        }
+        break;
+      case "cellphone":
+        if (!value.trim()) {
+          error = "El Número es obligatorio";
+        } else if (value.trim().length < 10) {
+          error = "El número debe tener al menos 10 caracteres";
+        }
+        break;
+      case "identification":
+        if (!value.trim()) {
+          error = "La identificación no puede estar vacía";
+        } else if (value.trim().length < 5) {
+          error = "La identificación debe tener mínimo 5 caracteres";
+        }
+        break;
+      case "birthdate":
+        if (!value) {
+          error = "La fecha de nacimiento es obligatoria";
+        } else {
+          const age = calculateAge(value);
+          if (age < 18) {
+            error = "Debes ser mayor o igual a 18 años";
+          } else if (new Date(value) > new Date()) {
+            error = "La fecha no puede ser futura";
+          }
+        }
+        break;
+      default:
+        break;
+    }
+
+    return error;
+  };
+
+  const calculateAge = (birthdate) => {
+    const birthDate = new Date(birthdate);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Ajustar si aún no ha pasado el mes de cumpleaños o el día exacto
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
   };
 
   if (!isOpen) return null;
@@ -168,21 +252,27 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
           <form onSubmit={handleSubmit}>
             <div className="user-tabs-container">
               <ul className="user-tabs">
-                <li 
-                  className={`user-tab ${activeTab === 'personal' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('personal')}
+                <li
+                  className={`user-tab ${
+                    activeTab === "personal" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("personal")}
                 >
                   Datos Personales
                 </li>
-                <li 
-                  className={`user-tab ${activeTab === 'contact' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('contact')}
+                <li
+                  className={`user-tab ${
+                    activeTab === "contact" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("contact")}
                 >
                   Información de Contacto
                 </li>
-                <li 
-                  className={`user-tab ${activeTab === 'security' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('security')}
+                <li
+                  className={`user-tab ${
+                    activeTab === "security" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("security")}
                 >
                   Seguridad
                 </li>
@@ -190,7 +280,11 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
             </div>
 
             {/* Pestaña de Datos Personales */}
-            <div className={`user-tab-content ${activeTab === 'personal' ? 'active' : ''}`}>
+            <div
+              className={`user-tab-content ${
+                activeTab === "personal" ? "active" : ""
+              }`}
+            >
               <div className="user-form-grid">
                 <div className="user-form-group">
                   <label htmlFor="name">Nombre Completo </label>
@@ -210,26 +304,34 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                 </div>
 
                 <div className="user-form-group">
-                  <label htmlFor="identificationType">Tipo de Identificación </label>
+                  <label htmlFor="identificationType">
+                    Tipo de Identificación{" "}
+                  </label>
                   <select
                     id="identificationType"
                     name="identificationType"
                     value={formData.identificationType}
                     onChange={handleChange}
                     required
-                    className={errors.identificationType ? "input-error-admin" : ""}
+                    className={
+                      errors.identificationType ? "input-error-admin" : ""
+                    }
                   >
                     <option value="">Seleccione</option>
                     <option value="CC">Cédula de Ciudadanía</option>
                     <option value="CE">Cédula de Extranjería</option>
                   </select>
                   {errors.identificationType && (
-                    <span className="error-message-admin">{errors.identificationType}</span>
+                    <span className="error-message-admin">
+                      {errors.identificationType}
+                    </span>
                   )}
                 </div>
 
                 <div className="user-form-group">
-                  <label htmlFor="identification">Número de Identificación </label>
+                  <label htmlFor="identification">
+                    Número de Identificación{" "}
+                  </label>
                   <input
                     type="text"
                     id="identification"
@@ -241,7 +343,9 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                     className={errors.identification ? "input-error-admin" : ""}
                   />
                   {errors.identification && (
-                    <span className="error-message-admin">{errors.identification}</span>
+                    <span className="error-message-admin">
+                      {errors.identification}
+                    </span>
                   )}
                 </div>
 
@@ -257,12 +361,16 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                     className={errors.birthdate ? "input-error-admin" : ""}
                   />
                   {errors.birthdate && (
-                    <span className="error-message-admin">{errors.birthdate}</span>
+                    <span className="error-message-admin">
+                      {errors.birthdate}
+                    </span>
                   )}
                 </div>
 
                 <div className="user-form-group">
-                  <label htmlFor="eps" className="optional">EPS</label>
+                  <label htmlFor="eps" className="optional">
+                    EPS
+                  </label>
                   <input
                     type="text"
                     id="eps"
@@ -302,7 +410,11 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
             </div>
 
             {/* Pestaña de Información de Contacto */}
-            <div className={`user-tab-content ${activeTab === 'contact' ? 'active' : ''}`}>
+            <div
+              className={`user-tab-content ${
+                activeTab === "contact" ? "active" : ""
+              }`}
+            >
               <div className="user-form-grid">
                 <div className="user-form-group">
                   <label htmlFor="email">Correo Electrónico </label>
@@ -334,12 +446,16 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                     className={errors.cellphone ? "input-error-admin" : ""}
                   />
                   {errors.cellphone && (
-                    <span className="error-message-admin">{errors.cellphone}</span>
+                    <span className="error-message-admin">
+                      {errors.cellphone}
+                    </span>
                   )}
                 </div>
 
                 <div className="user-form-group">
-                  <label htmlFor="address" className="optional">Dirección</label>
+                  <label htmlFor="address" className="optional">
+                    Dirección
+                  </label>
                   <input
                     type="text"
                     id="address"
@@ -350,7 +466,9 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                     className={errors.address ? "input-error-admin" : ""}
                   />
                   {errors.address && (
-                    <span className="error-message-admin">{errors.address}</span>
+                    <span className="error-message-admin">
+                      {errors.address}
+                    </span>
                   )}
                 </div>
 
@@ -371,7 +489,11 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
             </div>
 
             {/* Pestaña de Seguridad */}
-            <div className={`user-tab-content ${activeTab === 'security' ? 'active' : ''}`}>
+            <div
+              className={`user-tab-content ${
+                activeTab === "security" ? "active" : ""
+              }`}
+            >
               <div className="user-form-grid">
                 <div className="user-form-group">
                   <label htmlFor="password">
@@ -386,13 +508,17 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder={
-                      userData ? "Dejar vacío para mantener actual" : "Contraseña"
+                      userData
+                        ? "Dejar vacío para mantener actual"
+                        : "Contraseña"
                     }
                     required={!userData}
                     className={errors.password ? "input-error-admin" : ""}
                   />
                   {errors.password && (
-                    <span className="error-message-admin">{errors.password}</span>
+                    <span className="error-message-admin">
+                      {errors.password}
+                    </span>
                   )}
                 </div>
 

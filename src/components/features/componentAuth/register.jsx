@@ -1,9 +1,9 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import AuthNavbar from "../../layout/auth/AuthNavbar";
+import { Link, useNavigate } from "react-router-dom";
 import "./register.css";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { register } from "../../../services/AuthService";
+import logo from "../../../assets/logo.png";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 
 export default function RegisterForm() {
@@ -19,9 +19,11 @@ export default function RegisterForm() {
     identification: "",
     birthdate: "",
   });
-  const [errors, setErrors] = useState({}); // Estado para almacenar errores
+
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,6 +31,16 @@ export default function RegisterForm() {
       ...prevData,
       [name]: value,
     }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: null,
+      }));
+    }
+     const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const togglePasswordVisibility = (field) => {
@@ -39,12 +51,100 @@ export default function RegisterForm() {
     }
   };
 
+  const getMaxBirthdate = () => {
+    const today = new Date();
+    const minAgeDate = new Date();
+    minAgeDate.setFullYear(today.getFullYear() - 18); // Resta 18 años
+    return minAgeDate.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+  };
+
+  const maxBirthdate = getMaxBirthdate(); 
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Basic validation
+    if (!formData.name.trim()) newErrors.name = "Nombre es requerido";
+    if (!formData.email.trim()) newErrors.email = "Email es requerido";
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
+      newErrors.email = "Email inválido";
+
+    if (!formData.password) newErrors.password = "Contraseña es requerida";
+    else if (formData.password.length < 8)
+      newErrors.password = "Mínimo 8 caracteres";
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
+    }
+
+    return newErrors;
+  };
+
+   const validateField = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "name":
+        if (!value.trim()) {
+          error = "El nombre es obligatorio";
+        } else if (value.trim().length < 3) {
+          error = "El nombre debe ser mayor a 3 caracteres";
+        }
+        break;
+
+      case "email":
+        if (!value.trim()) {
+          error = "El email es obligatorio";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = "El email no es válido";
+        }
+        break;
+
+      case "password":
+        if (!value.trim()) {
+          error = "La contraseña no puede estar vacía";
+        } else if (value.length < 8) {
+          error = "La contraseña debe tener al menos 8 caracteres";
+        } else if (
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(
+            value
+          )
+        ) {
+          error =
+            "Debe contener al menos una mayúscula, una minúscula, un número y un carácter especial";
+        }
+        break;
+      case "cellphone":
+        if (!value.trim()) {
+          error = "El Número es obligatorio";
+        } else if (value.trim().length < 10) {
+          error = "El número debe tener al menos 10 caracteres";
+        }
+        break;
+      case "identification":
+        if (!value.trim()) {
+          error = "La identificación no puede estar vacía";
+        } else if (value.trim().length < 5) {
+          error = "La identificación debe tener mínimo 5 caracteres";
+        }
+        break;
+    
+      default:
+        break;
+    }
+
+    return error;
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      return toast.error("Las contraseñas no coinciden");
+    // Client-side validation
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      return;
     }
+
+    setIsSubmitting(true);
 
     const { confirmPassword, ...dataToSend } = formData;
 
@@ -62,32 +162,37 @@ export default function RegisterForm() {
         error.response.data &&
         Array.isArray(error.response.data.errors)
       ) {
-        // Procesar los errores del backend
-        const backendErrors = error.response.data.errors;
-        const formattedErrors = {};
-
-        // Mapear los errores al formato { campo: mensaje }
-        backendErrors.forEach((err) => {
-          formattedErrors[err.path] = err.msg;
+        // Process backend errors
+        const backendErrors = {};
+        error.response.data.errors.forEach((err) => {
+          backendErrors[err.path] = err.msg;
         });
-
-        setErrors(formattedErrors); // Actualizar el estado con los errores del backend
+        setErrors(backendErrors);
       } else {
         toast.error("Ocurrió un error al registrarse");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
-      <AuthNavbar />
-      <Outlet />
+      <div className="simple-navbar">
+        <div className="navbar-content">
+          <div className="brand" onClick={() => navigate("/")}>
+            <img src={logo} alt="Logo" className="navbar-logo" />
+            <h1 className="navbar-title">Los Lagos</h1>
+          </div>
+        </div>
+      </div>
+
       <main className="register-container">
         <form className="register-form" onSubmit={handleSubmit}>
-          <h2 className="title-register">Crear cuenta en BookEdge</h2>
-          <p className="description-register">
-            Completa tus datos para comenzar nuestra hostería.
-          </p>
+          <h2 className="title-register">¡Bienvenido Al Formulario de Registro!</h2>
+          {/* <p className="description-register">
+            Completa tus datos para comenzar a disfrutar de nuestra hostería
+          </p> */}
 
           <div className="form-grid-register">
             <div className="form-column-register">
@@ -128,7 +233,7 @@ export default function RegisterForm() {
               </div>
 
               <div className="form-group-register">
-                <label htmlFor="idNumber">Número de documento</label>
+                <label htmlFor="identification">Número de documento</label>
                 <input
                   type="text"
                   id="identification"
@@ -142,6 +247,7 @@ export default function RegisterForm() {
                   <span className="error-text">{errors.identification}</span>
                 )}
               </div>
+
               <div className="form-group-register">
                 <label htmlFor="cellphone">Número de contacto</label>
                 <input
@@ -149,7 +255,7 @@ export default function RegisterForm() {
                   id="cellphone"
                   name="cellphone"
                   required
-                  placeholder="Ingresa por favor un número válido"
+                  placeholder="Ingresa un número válido"
                   value={formData.cellphone}
                   onChange={handleChange}
                 />
@@ -167,6 +273,7 @@ export default function RegisterForm() {
                   id="birthdate"
                   name="birthdate"
                   required
+                  max={maxBirthdate} 
                   value={formData.birthdate}
                   onChange={handleChange}
                 />
@@ -203,10 +310,6 @@ export default function RegisterForm() {
                     value={formData.password}
                     onChange={handleChange}
                   />
-                  {errors.password && (
-                    <span className="error-text">{errors.password}</span>
-                  )}
-
                   <button
                     type="button"
                     className="toggle-password"
@@ -215,6 +318,9 @@ export default function RegisterForm() {
                     {showPassword ? <IoEye /> : <IoEyeOff />}
                   </button>
                 </div>
+                {errors.password && (
+                  <span className="error-text">{errors.password}</span>
+                )}
               </div>
 
               <div className="form-group-register">
@@ -229,10 +335,6 @@ export default function RegisterForm() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                   />
-                  {errors.confirmPassword && (
-                    <span className="error-text">{errors.confirmPassword}</span>
-                  )}
-
                   <button
                     type="button"
                     className="toggle-password"
@@ -241,6 +343,9 @@ export default function RegisterForm() {
                     {showConfirmPassword ? <IoEye /> : <IoEyeOff />}
                   </button>
                 </div>
+                {errors.confirmPassword && (
+                  <span className="error-text">{errors.confirmPassword}</span>
+                )}
               </div>
             </div>
           </div>
@@ -253,8 +358,12 @@ export default function RegisterForm() {
             </label>
           </div>
 
-          <button type="submit" className="register-button">
-            Crear cuenta
+          <button
+            type="submit"
+            className="register-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Procesando..." : "Crear cuenta"}
           </button>
         </form>
 
