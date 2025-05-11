@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthNavbar from "../../layout/auth/AuthNavbar";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { recoverPassword } from "../../../services/AuthService";
@@ -79,7 +78,6 @@ const RecoveryPassword = () => {
 
   return (
     <div className="page-container">
-      <AuthNavbar />
       <div className="recovery-container">
         <div className="recovery-card">
           <div className="recovery-header">
