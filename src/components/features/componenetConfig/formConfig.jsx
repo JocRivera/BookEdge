@@ -198,6 +198,18 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
             setError("El privilegio de lectura es obligatorio");
             return false;
         }
+        //validar que cada permiso seleccionado tenga almenos el privilegio de lectura
+        if (readPrivilege) {
+            const allPermissionsHaveRead = formData.permissions.every(permId => {
+                const privilegeKey = `privilege-${permId}-${readPrivilege.idPrivilege}`;
+                return formData[privilegeKey] === true;
+            }
+            );
+            if (!allPermissionsHaveRead) {
+                setError("El privilegio de lectura es obligatorio para cada permiso seleccionado");
+                return false;
+            }
+        }
 
         setError(null);
         return true;
