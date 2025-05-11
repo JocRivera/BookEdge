@@ -170,6 +170,34 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
             setError("Al menos un permiso es requerido");
             return false;
         }
+        // Validar que al menos un privilegio esté seleccionado para cada permiso
+        const allPermissionsValid = formData.permissions.every(permId => {
+            return privilege.some(priv => {
+                const privilegeKey = `privilege-${permId}-${priv.idPrivilege}`;
+                return formData[privilegeKey] === true;
+            });
+        });
+        if (!allPermissionsValid) {
+            setError("Al menos un privilegio debe estar seleccionado para cada permiso");
+            return false;
+        }
+        //validar que almenos el privilegio de read este seleccionado
+        const readPrivilege = privilege.find(p =>
+            p.name.toLowerCase() === "read" ||
+            p.name.toLowerCase() === "get"
+        );
+        if (!readPrivilege) {
+            setError("El privilegio de lectura es obligatorio");
+            return false;
+        }
+        const readPrivilegeSelected = formData.permissions.some(permId => {
+            return formData[`privilege-${permId}-${readPrivilege.idPrivilege}`] === true;
+        }
+        );
+        if (!readPrivilegeSelected) {
+            setError("El privilegio de lectura es obligatorio");
+            return false;
+        }
 
         setError(null);
         return true;
@@ -191,7 +219,9 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                     value={formData.name}
                                     onChange={handleChange}
                                 />
-                                {error && <p style={{ color: "red" }}>{error}</p>}
+                                {error && <div
+                                    className='error-message-admin'
+                                >{error}</div>}
                             </div>
                             <div className="permissions-group">
                                 <div className="permissions-table-container">
