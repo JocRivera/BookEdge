@@ -2,25 +2,31 @@ import { useEffect, useState } from "react"
 import "./createConfig.css"
 import { CustomButton, ActionButtons } from "../../common/Button/customButton"
 import { CiSearch } from "react-icons/ci"
-import { FaTimes } from "react-icons/fa"
 import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
 import toast, { Toaster } from 'react-hot-toast';
+import { FaEdit, FaTrash, FaTimes, FaEye } from "react-icons/fa";
 import DetailsConfig from "./detailsConfig";
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [settings, setSettings] = useState([]);
     const [isView, setIsView] = useState(false)
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     useEffect(() => {
         const fetchConfig = async () => {
+            setLoading(true)
             try {
                 const roles = await rolesService.getRoles()
                 setSettings(roles)
             } catch (error) {
                 console.log(error)
+            }
+            finally {
+                setLoading(false)
             }
         }
         fetchConfig()
@@ -125,15 +131,15 @@ export default function CreateConfig() {
     return (
         <div className="table-container">
             <div className="title-container">
-                <h2 className="table-title">Tabla de Roles</h2>
+                <h2 className="table-title">Gestión de Roles</h2>
             </div>
             <div className="container-search">
                 <div className="search-wrapper-comfort">
                     <CiSearch className="config-search-icon" />
                     <input
                         type="text"
-                        className="config-search"
-                        placeholder="Buscar Rol..."
+                        className="comfort-search"
+                        placeholder="Buscar rol..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -148,64 +154,109 @@ export default function CreateConfig() {
                     )}
                 </div>
                 <CustomButton variant="primary" icon="add" onClick={handleAdd}>
-                    Agregar Comodidad
+                    Agregar Rol
                 </CustomButton>
             </div>
 
-            <div className="table-wrapper">
-                <table className="table">
-                    <thead className="table-header">
-                        <tr>
-                            <th>Id</th>
-                            <th>Nombre</th>
-                            <th>Status</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="table-body">
-                        {currentItems.map((config) => (
-                            <tr key={config.idRol}>
-                                <td className="table-cell">{config.idRol}</td>
-                                <td className="table-cell">{config.name}</td>
-                                <td className="table-cell">
-                                    <Switch
-                                        isOn={config.status === true}
-                                        id={config.idRol}
-                                        handleToggle={() => handleToggle(config.idRol)}
-                                    />
-                                </td>
-                                <td className="table-cell">
-                                    <ActionButtons
-                                        onView={() => handleView(config.idRol)}
-                                        onEdit={() => handleEdit(config.idRol)}
-                                        onDelete={() => handleDelete(config.idRol)}
-                                    />
-                                </td>
-                            </tr>
-                        ))}
+            <div className="comfort-table-wrapper">
+                {loading ? (
+                    <div className="loading-indicator">
+                        <div className="loading-spinner"></div>
+                        <p>Cargando roles...</p>
+                    </div>
+                ) : error ? (
+                    <div className="error-message">
+                        {error}
+                        <button onClick={() => setError(null)}>
+                            <FaTimes />
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <table className="comfort-table">
+                            <thead>
+                                <tr className="comfort-table-header">
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody className="comfort-table-body">
+                                {currentItems.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="no-data-row">
+                                            No se encontraron roles
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    currentItems.map((config) => (
+                                        <tr key={config.idRol} className="comfort-table-row">
+                                            <td>{config.idRol}</td>
+                                            <td>{config.name}</td>
+                                            <td>
+                                                <Switch
+                                                    isOn={config.status === true}
+                                                    id={config.idRol}
+                                                    handleToggle={() => handleToggle(config.idRol)}
+                                                />
+                                            </td>
+                                            <td className="actions-cell">
+                                                <button
+                                                    onClick={() => handleView(config.idRol)}
+                                                    className="action-btn view-btn"
+                                                    title="Ver detalles"
+                                                >
+                                                    <FaEye />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEdit(config.idRol)}
+                                                    className="action-btn edit-btn"
+                                                    title="Editar"
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(config.idRol)}
+                                                    className="action-btn delete-btn"
+                                                    title="Eliminar"
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
 
-                        {currentItems.length === 0 && (
-                            <tr>
-                                <td colSpan="4" className="no-data">
-                                    No hay datos disponibles
-                                </td>
-                            </tr>
+                        {pageCount > 1 && (
+                            <div className="pagination-container">
+                                <Pagination
+                                    pageCount={pageCount}
+                                    onPageChange={handlePageClick}
+                                />
+                            </div>
                         )}
-                    </tbody>
-                </table>
-                <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+                    </>
+                )}
             </div>
-            <FormConfig
-                setting={currentConfig}
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSave}
-            />
+
+            {isModalOpen && (
+                <FormConfig
+                    setting={currentConfig}
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleSave}
+                />
+            )}
+
             <DetailsConfig
                 currentConfig={currentConfig}
                 isOpen={isView}
                 onClose={() => setIsView(false)}
             />
+
             <Toaster />
         </div>
 

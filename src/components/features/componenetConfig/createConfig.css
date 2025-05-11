@@ -107,10 +107,16 @@
 
 
 .table-wraper {
-    overflow: hidden;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 6px -1px var(--color-shadow-medium),
-        0 2px 4px -1px var(--color-shadow-light);
+    overflow-x: auto;
+    border-radius: 16px;
+    box-shadow: 0 15px 30px var(--comfort-shadow-light);
+    background: var(--comfort-card-bg);
+    margin-bottom: 2rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.table-wrapper:hover {
+    box-shadow: 0 25px 50px var(--comfort-shadow-dark);
 }
 
 .table {
@@ -124,16 +130,34 @@
 }
 
 .table-header th {
-    padding: 0.75rem 3rem;
+    padding: 1rem 1.5rem;
     text-align: left;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--comfort-primary-dark);
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
 }
 
 .table-body {
     background-color: var(--color-white);
+}
+
+.table-body td {
+    padding: 1.2rem 1.5rem;
+    font-size: 0.95rem;
+    color: var(--comfort-text-dark);
+    border-bottom: 1px solid var(--comfort-border);
+    transition: background-color 0.3s ease;
+}
+
+.table-body tr:last-child td {
+    border-bottom: none;
+}
+
+.table-body tr:hover td {
+    background-color: rgba(143, 148, 251, 0.05);
 }
 
 .table-row-even {
