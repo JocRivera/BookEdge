@@ -200,7 +200,7 @@
 
 .config-modal-container {
     background-color: var(--color-white);
-    border-radius: 8px;
+    border-radius: 16px;
     box-shadow: 0 4px 20px var(--color-shadow-dark);
     width: 90%;
     max-width: 800px;
