@@ -9,6 +9,8 @@ import rolesService from "../../../services/RolesService"
 import toast, { Toaster } from 'react-hot-toast';
 import { FaEdit, FaTrash, FaTimes, FaEye } from "react-icons/fa";
 import DetailsConfig from "./detailsConfig";
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 export default function CreateConfig() {
     const [currentConfig, setCurrentConfig] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -64,18 +66,48 @@ export default function CreateConfig() {
         console.log(config)
     }
     const handleDelete = (idRol) => {
-        const notify = () => toast.success('Rol eliminado corretamente');
-        const notifyError = () => toast.error('Error al eliminar el rol');
-        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este rol?");
-        if (confirmDelete) {
-            rolesService.deleteRole(idRol).then(() => {
-                setSettings(settings.filter((config) => config.idRol !== idRol))
-                notify()
-            }).catch((error) => {
-                console.log(error)
-                notifyError()
-            })
-        }
+        //usar iziToast para mostrar el mensaje de confirmación
+        iziToast.question({
+            timeout: 20000,
+            close: false,
+            overlay: true,
+            displayMode: 'once',
+            id: 'question',
+            class: 'custom-alert',
+            backgroundColor: '#ffffff',
+            zindex: 999,
+            title: 'Confirmación',
+            message: `¿Está seguro de actualizar al rol ${idRol}?`,
+            position: 'topRight',
+            buttons: [
+                ['<button><b>Eliminar</b></button>', function (instance, toast) {
+                    // Aquí va la lógica para eliminar el rol
+                    rolesService.deleteRole(idRol).then((res) => {
+                        setSettings(settings.filter((config) => config.idRol !== idRol))
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                        iziToast.success({
+                            class: 'custom-alert',
+                            title: 'Éxito',
+                            message: 'Rol eliminado correctamente',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    }).catch((error) => {
+                        console.log(error)
+                        iziToast.error({
+                            class: 'custom-alert',
+                            title: 'Error',
+                            message: 'No se pudo eliminar el Rol',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    })
+                }, true],
+                ['<button>Cancelar</button>', function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                }],
+            ],
+        });
     }
     const handleSave = (setting) => {
 
