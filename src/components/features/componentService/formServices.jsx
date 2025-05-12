@@ -32,10 +32,16 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
+            const { name, Description, Price, StatusServices } = formData;
             const updatedService = {
-                ...formData,
-                StatusServices: formData.StatusServices === true ? 1 : 0
+                name,
+                Description,
+                Price,
+                StatusServices
             };
+            if (service) {
+                updatedService.id = service.id;
+            }
             onSave(updatedService);
             setFormData({
                 name: '',
