@@ -113,27 +113,51 @@ export default function CreateConfig() {
 
         if (currentConfig) {
             console.log(currentConfig)
-            const notify = () => toast.success('Rol Actualizado correctamente');
             rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
                 setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
                 // setCurrentConfig(null)
                 // setIsModalOpen(false)
-                notify()
+                iziToast.success({
+                    class: 'custom-alert',
+                    title: 'Éxito',
+                    message: 'Rol actualizado correctamente',
+                    position: 'topRight',
+                    timeout: 5000
+                });
             }).catch((error) => {
                 console.log(error)
-                toast.error(`Error al actualizar
-                     ${error}`)
+                iziToast.error({
+                    class: 'custom-alert',
+                    title: 'Error',
+                    message: 'No se pudo actualizar el Rol',
+                    position: 'topRight',
+                    timeout: 5000
+                });
             }
             )
         }
         else {
-            const notify = () => toast.success('Rol creado correctamente');
             rolesService.createRole(setting).then((res) => {
                 setSettings([...settings, res])
-                notify()
+                setCurrentConfig(null)
+                setIsModalOpen(false)
+                iziToast.success({
+                    class: 'custom-alert',
+                    title: 'Éxito',
+                    message: 'Rol creado correctamente',
+                    position: 'topRight',
+                    timeout: 5000
+                });
             }).catch((error) => {
-                toast.error(`Error al crear,
-                     ${error}`)
+                console.log(error)
+                iziToast.error({
+                    class: 'custom-alert',
+                    title: 'Error',
+                    message: 'No se pudo crear el Rol',
+                    position: 'topRight',
+                    timeout: 5000
+                });
+
             })
         }
         console.log(setting);
