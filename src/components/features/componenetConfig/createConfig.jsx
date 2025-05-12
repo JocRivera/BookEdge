@@ -6,7 +6,6 @@ import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
-import toast, { Toaster } from 'react-hot-toast';
 import { FaEdit, FaTrash, FaTimes, FaEye } from "react-icons/fa";
 import DetailsConfig from "./detailsConfig";
 import iziToast from 'izitoast';
@@ -335,7 +334,6 @@ export default function CreateConfig() {
                 onClose={() => setIsView(false)}
             />
 
-            <Toaster />
         </div>
 
     )
