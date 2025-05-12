@@ -139,27 +139,48 @@ export default function CreateConfig() {
         console.log(setting);
     }
     const handleToggle = async (idRol) => {
-        const confirmDelete = window.confirm("¿Estás seguro de que deseas cambiar el estado de este rol?");
-        if (!confirmDelete) {
-            return;
-        }
-        try {
-            // Encontrar el rol actual
-            const currentRole = settings.find(config => config.idRol === idRol);
-            // Enviar actualización al backend
-            await rolesService.changeStatus(idRol, !currentRole.status);
-
-            // Actualizar estado local después de confirmación del backend
-            setSettings(
-                settings.map((config) =>
-                    config.idRol === idRol ? { ...config, status: !config.status } : config
-                )
-            );
-            toast.success('Estado actualizado correctamente');
-        } catch (error) {
-            console.error("Error al actualizar el estado:", error);
-            toast.error('Error al actualizar el estado');
-        }
+        const config = settings.find((config) => config.idRol === idRol);
+        const updatedConfig = { ...config, status: !config.status };
+        iziToast.question({
+            timeout: 20000,
+            close: false,
+            overlay: true,
+            displayMode: 'once',
+            id: 'question',
+            class: 'custom-alert',
+            backgroundColor: '#ffffff',
+            zindex: 999,
+            title: 'Confirmación',
+            message: `¿Está seguro de actualizar el rol ${idRol}?`,
+            position: 'topRight',
+            buttons: [
+                ['<button><b>Actualizar</b></button>', function (instance, toast) {
+                    rolesService.updateRole(idRol, updatedConfig).then((res) => {
+                        setSettings(settings.map((config) => config.idRol === idRol ? { ...config, status: !config.status } : config))
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                        iziToast.success({
+                            class: 'custom-alert',
+                            title: 'Éxito',
+                            message: 'Rol actualizado correctamente',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    }).catch((error) => {
+                        console.log(error)
+                        iziToast.error({
+                            class: 'custom-alert',
+                            title: 'Error',
+                            message: 'No se pudo actualizar el Rol',
+                            position: 'topRight',
+                            timeout: 5000
+                        });
+                    })
+                }, true],
+                ['<button>Cancelar</button>', function (instance, toast) {
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                }],
+            ],
+        });
     };
     return (
         <div className="table-container">
