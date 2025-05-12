@@ -108,7 +108,7 @@ export default function CreateServices() {
     const handleSave = (service) => {
         if (currentService) {
             serviceService.updateService(currentService.Id_Service, service).then(() => {
-                setServices(services.map((s) => s.Id_Service === currentService.Id_Service ? { ...s, ...service } : s));
+                setServices(services.map((srvc) => srvc.Id_Service === currentService.Id_Service ? { ...srvc, ...service } : srvc));
                 iziToast.success({
                     class: 'custom-alert',
                     title: 'Éxito',
