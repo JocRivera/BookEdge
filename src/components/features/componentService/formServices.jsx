@@ -104,13 +104,17 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                                     value={formData.name}
                                     onChange={handleChange}
                                 />
-                                {errors.name && <p style={{ color: "red" }}>{errors.name}</p>}
+                                {errors.name && <div
+                                    className='error-message-admin'
+                                >{errors.name}</div>}
                                 <label htmlFor="">Descripción</label>
                                 <textarea required placeholder="Agrega una descripción..." name="Description" id="Description"
                                     value={formData.Description}
                                     onChange={handleChange}
                                 />
-                                {errors.Description && <p style={{ color: "red" }}>{errors.Description}</p>}
+                                {errors.Description && <div
+                                    className='error-message-admin'
+                                >{errors.Description}</div>}
 
                             </div>
                             <div className='form-group'>
@@ -119,7 +123,9 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
                                     value={formData.Price}
                                     onChange={handleChange}
                                 />
-                                {errors.Price && <p style={{ color: "red" }}>{errors.Price}</p>}
+                                {errors.Price && <div
+                                    className='error-message-admin'
+                                >{errors.Price}</div>}
                                 <label htmlFor="status">Estado</label>
                                 <Switch
                                     isOn={formData.StatusServices === true}
