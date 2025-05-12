@@ -348,286 +348,285 @@ const PlanProgramed = () => {
                     <div>Vie</div>
                     <div>Sáb</div>
                 </div>
-                    <div className="calendar-days">
-                        {calendarDays.map((day, index) => {
-                            const isCurrentMonth = isSameMonth(day, currentDate)
-                            const isToday = isSameDay(day, new Date())
-                            const plansForDay = getPlansForDate(day)
-                            const hasPlans = plansForDay.length > 0
-                            const dayPosition = getPositionInWeek(day)
+                <div className="calendar-days">
+                    {calendarDays.map((day, index) => {
+                        const isCurrentMonth = isSameMonth(day, currentDate)
+                        const isToday = isSameDay(day, new Date())
+                        const plansForDay = getPlansForDate(day)
+                        const hasPlans = plansForDay.length > 0
+                        const dayPosition = getPositionInWeek(day)
 
-                            return (
-                                <div
-                                    key={index}
-                                    className={`calendar-day ${isCurrentMonth ? "" : "other-month"} ${isToday ? "today" : ""
-                                        } ${hasPlans ? "has-plans" : ""}`}
-                                    onClick={() => openAddModal(day)}
-                                >
-                                    <div className="day-number">{format(day, "d")}</div>
-                                    <div className="day-plans-container">
-                                        {plansForDay.slice(0, 3).map((plan, planIndex) => {
-                                            const planName = getPlanNameById(plan.idPlan)
-                                            const isFirst = isFirstDayOfPlan(day, plan)
-                                            const isLast = isLastDayOfPlan(day, plan)
-                                            const planColor = `hsl(${(plan.idPlan * 75) % 360}, 70%, 65%)`
+                        return (
+                            <div
+                                key={index}
+                                className={`calendar-day ${isCurrentMonth ? "" : "other-month"} ${isToday ? "today" : ""
+                                    } ${hasPlans ? "has-plans" : ""}`}
+                                onClick={() => openAddModal(day)}
+                            >
+                                <div className="day-number">{format(day, "d")}</div>
+                                <div className="day-plans-container">
+                                    {plansForDay.slice(0, 3).map((plan, planIndex) => {
+                                        const planName = getPlanNameById(plan.idPlan)
+                                        const isFirst = isFirstDayOfPlan(day, plan)
+                                        const isLast = isLastDayOfPlan(day, plan)
+                                        const planColor = `hsl(${(plan.idPlan * 75) % 360}, 70%, 65%)`
 
-                                            return (
-                                                <div
-                                                    key={`${plan.idPlanProgramed}-${planIndex}`}
-                                                    className={`day-plan-continuous ${isFirst ? 'plan-start' : ''} ${isLast ? 'plan-end' : ''}`}
-                                                    style={{
-                                                        backgroundColor: planColor,
-                                                        borderRadius: `${isFirst ? '4px' : '0'} ${isLast ? '4px' : '0'} ${isLast ? '4px' : '0'} ${isFirst ? '4px' : '0'}`,
-                                                        marginLeft: isFirst && dayPosition !== 0 ? '0' : '',
-                                                        marginRight: isLast && dayPosition !== 6 ? '0' : '',
-                                                    }}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        openDetailModal(plan)
-                                                    }}
-                                                >
-                                                    {isFirst && (
-                                                        <span className="plan-name-label">{planName}</span>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
-                                        {plansForDay.length > 3 && (
-                                            <div className="more-plans">+{plansForDay.length - 3} más</div>
-                                        )}
-                                    </div>
+                                        return (
+                                            <div
+                                                key={`${plan.idPlanProgramed}-${planIndex}`}
+                                                className={`day-plan-continuous ${isFirst ? 'plan-start' : ''} ${isLast ? 'plan-end' : ''}`}
+                                                style={{
+                                                    backgroundColor: planColor,
+                                                    borderRadius: `${isFirst ? '4px' : '0'} ${isLast ? '4px' : '0'} ${isLast ? '4px' : '0'} ${isFirst ? '4px' : '0'}`,
+                                                    marginLeft: isFirst && dayPosition !== 0 ? '0' : '',
+                                                    marginRight: isLast && dayPosition !== 6 ? '0' : '',
+                                                }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    openDetailModal(plan)
+                                                }}
+                                            >
+                                                {isFirst && (
+                                                    <span className="plan-name-label">{planName}</span>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                    {plansForDay.length > 3 && (
+                                        <div className="more-plans">+{plansForDay.length - 3} más</div>
+                                    )}
                                 </div>
-                            )
-                        })}
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+
+            {isDetailModalOpen && detailPlan && (
+                <div className="calendar-modal-overlay">
+                    <div className="calendar-modal-container">
+                        <div className="calendar-modal-header">
+                            <h2>Detalles del Plan Programado</h2>
+                            <button className="calendar-close-button" onClick={() => setIsDetailModalOpen(false)}>
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="calendar-modal-body">
+                            <div className="calendar-plan-detail-content">
+                                {detailPlan.planDetails && (
+                                    <>
+                                        <div className="calendar-plan-detail-header">
+                                            <h3>{detailPlan.planDetails.name}</h3>
+                                            <span className="calendar-plan-price">${detailPlan.planDetails.salePrice.toLocaleString()}</span>
+                                        </div>
+
+                                        {detailPlan.planDetails.image && (
+                                            <div className="calendar-plan-detail-image">
+                                                <img
+                                                    src={`http://localhost:3000${detailPlan.planDetails.image}`}
+                                                    alt={detailPlan.planDetails.name}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null
+                                                        e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible"
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <p className="calendar-plan-detail-description">{detailPlan.planDetails.description}</p>
+
+                                        <div className="calendar-plan-detail-info">
+                                            <div className="calendar-info-item">
+                                                <FiCalendar className="calendar-info-icon" />
+                                                <div>
+                                                    <strong>Periodo:</strong>
+                                                    <div>
+                                                        {format(detailPlan.startDate, "dd/MM/yyyy")} - {format(detailPlan.endDate, "dd/MM/yyyy")}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="calendar-info-item">
+                                                <FiClock className="calendar-info-icon" />
+                                                <div>
+                                                    <strong>Duración:</strong>
+                                                    <div>
+                                                        {Math.ceil((detailPlan.endDate - detailPlan.startDate) / (1000 * 60 * 60 * 24))} días
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="calendar-info-item">
+                                                <FiUsers className="calendar-info-icon" />
+                                                <div>
+                                                    <strong>Capacidad:</strong>
+                                                    <div>{detailPlan.planDetails.capacity} personas</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="calendar-info-item">
+                                                <div className="switch-container">
+                                                    <label className="switch">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={detailPlan.statusProgramed}
+                                                            onChange={async () => {
+                                                                try {
+                                                                    await updateProgramedPlan(detailPlan.idPlanProgramed, {
+                                                                        ...detailPlan,
+                                                                        statusProgramed: !detailPlan.statusProgramed
+                                                                    });
+                                                                    setDetailPlan({
+                                                                        ...detailPlan,
+                                                                        statusProgramed: !detailPlan.statusProgramed
+                                                                    });
+                                                                } catch (error) {
+                                                                    console.error("Error updating status:", error);
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span className="slider"></span>
+                                                    </label>
+                                                    <span className={`status-label ${detailPlan.statusProgramed ? 'active' : 'inactive'}`}>
+                                                        {detailPlan.statusProgramed ? 'Activo' : 'Inactivo'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                <div className="calendar-plan-detail-actions">
+                                    <button
+                                        className="calendar-edit-btn"
+                                        onClick={() => {
+                                            setIsDetailModalOpen(false)
+                                            openEditModal(detailPlan)
+                                        }}
+                                    >
+                                        Editar
+                                    </button>
+                                    <button
+                                        className="calendar-delete-btn"
+                                        onClick={async () => {
+                                            setIsDetailModalOpen(false)
+                                            setSelectedProgramedPlan(detailPlan)
+                                            await handleDelete()
+                                        }}
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            )}
 
-                {isDetailModalOpen && detailPlan && (
-                    <div className="calendar-modal-overlay">
-                        <div className="calendar-modal-container">
-                            <div className="calendar-modal-header">
-                                <h2>Detalles del Plan Programado</h2>
-                                <button className="calendar-close-button" onClick={() => setIsDetailModalOpen(false)}>
-                                    ×
-                                </button>
-                            </div>
+            {isModalOpen && (
+                <div className="calendar-modal-overlay">
+                    <div className="calendar-modal-container">
+                        <div className="calendar-modal-header">
+                            <h2>{isEditMode ? "Editar Plan Programado" : "Agregar Plan Programado"}</h2>
+                            <button className="calendar-close-button" onClick={() => setIsModalOpen(false)}>
+                                ×
+                            </button>
+                        </div>
 
-                            <div className="calendar-modal-body">
-                                <div className="calendar-plan-detail-content">
-                                    {detailPlan.planDetails && (
-                                        <>
-                                            <div className="calendar-plan-detail-header">
-                                                <h3>{detailPlan.planDetails.name}</h3>
-                                                <span className="calendar-plan-price">${detailPlan.planDetails.salePrice.toLocaleString()}</span>
-                                            </div>
+                        <div
+                            className=
+                            "calendar-modal-body" >
 
-                                            {detailPlan.planDetails.image && (
-                                                <div className="calendar-plan-detail-image">
-                                                    <img
-                                                        src={`http://localhost:3000${detailPlan.planDetails.image}`}
-                                                        alt={detailPlan.planDetails.name}
-                                                        onError={(e) => {
-                                                            e.target.onerror = null
-                                                            e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible"
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
+                            <form onSubmit={handleSubmit}>
+                                <div className="calendar-form-group">
+                                    <label htmlFor="idPlan">Plan</label>
+                                    <select
+                                        id="idPlan"
+                                        name="idPlan"
+                                        value={formData.idPlan}
+                                        onChange={handleInputChange}
+                                        className={formErrors.idPlan ? "calendar-error" : ""}
+                                    >
+                                        <option value="">Seleccionar plan</option>
+                                        {availablePlans.map((plan) => (
+                                            <option key={plan.idPlan} value={plan.idPlan}>
+                                                {plan.name} - ${plan.salePrice.toLocaleString()}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {formErrors.idPlan && <div className="calendar-error-message">{formErrors.idPlan}</div>}
+                                </div>
 
-                                            <p className="calendar-plan-detail-description">{detailPlan.planDetails.description}</p>
+                                {selectedPlan && (
+                                    <div className="calendar-selected-plan-info">
+                                        <div className="calendar-plan-info-item">
+                                            <FiUsers className="calendar-plan-info-icon" />
+                                            <span>Capacidad: {selectedPlan.capacity} personas</span>
+                                        </div>
+                                        <div className="calendar-plan-info-item">
+                                            <FiDollarSign className="calendar-plan-info-icon" />
+                                            <span>Precio: ${selectedPlan.salePrice.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                )}
 
-                                            <div className="calendar-plan-detail-info">
-                                                <div className="calendar-info-item">
-                                                    <FiCalendar className="calendar-info-icon" />
-                                                    <div>
-                                                        <strong>Periodo:</strong>
-                                                        <div>
-                                                            {format(detailPlan.startDate, "dd/MM/yyyy")} - {format(detailPlan.endDate, "dd/MM/yyyy")}
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                <div className="calendar-form-row">
+                                    <div className="calendar-form-group">
+                                        <label htmlFor="startDate">Fecha de inicio</label>
+                                        <input
+                                            type="date"
+                                            id="startDate"
+                                            name="startDate"
+                                            value={formData.startDate}
+                                            onChange={handleInputChange}
+                                            min={format(new Date(), "yyyy-MM-dd")}
+                                            className={formErrors.startDate ? "calendar-error" : ""}
+                                        />
+                                        {formErrors.startDate && <div className="calendar-error-message">{formErrors.startDate}</div>}
+                                    </div>
 
-                                                <div className="calendar-info-item">
-                                                    <FiClock className="calendar-info-icon" />
-                                                    <div>
-                                                        <strong>Duración:</strong>
-                                                        <div>
-                                                            {Math.ceil((detailPlan.endDate - detailPlan.startDate) / (1000 * 60 * 60 * 24))} días
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="calendar-info-item">
-                                                    <FiUsers className="calendar-info-icon" />
-                                                    <div>
-                                                        <strong>Capacidad:</strong>
-                                                        <div>{detailPlan.planDetails.capacity} personas</div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="calendar-info-item">
-                                                    <div className="switch-container">
-                                                        <label className="switch">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={detailPlan.statusProgramed}
-                                                                onChange={async () => {
-                                                                    try {
-                                                                        await updateProgramedPlan(detailPlan.idPlanProgramed, {
-                                                                            ...detailPlan,
-                                                                            statusProgramed: !detailPlan.statusProgramed
-                                                                        });
-                                                                        setDetailPlan({
-                                                                            ...detailPlan,
-                                                                            statusProgramed: !detailPlan.statusProgramed
-                                                                        });
-                                                                    } catch (error) {
-                                                                        console.error("Error updating status:", error);
-                                                                    }
-                                                                }}
-                                                            />
-                                                            <span className="slider"></span>
-                                                        </label>
-                                                        <span className={`status-label ${detailPlan.statusProgramed ? 'active' : 'inactive'}`}>
-                                                            {detailPlan.statusProgramed ? 'Activo' : 'Inactivo'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-
-                                    <div className="calendar-plan-detail-actions">
-                                        <button
-                                            className="calendar-edit-btn"
-                                            onClick={() => {
-                                                setIsDetailModalOpen(false)
-                                                openEditModal(detailPlan)
-                                            }}
-                                        >
-                                            Editar
-                                        </button>
-                                        <button
-                                            className="calendar-delete-btn"
-                                            onClick={async () => {
-                                                setIsDetailModalOpen(false)
-                                                setSelectedProgramedPlan(detailPlan)
-                                                await handleDelete()
-                                            }}
-                                        >
-                                            Eliminar
-                                        </button>
+                                    <div className="calendar-form-group">
+                                        <label htmlFor="endDate">Fecha de fin</label>
+                                        <input
+                                            type="date"
+                                            id="endDate"
+                                            name="endDate"
+                                            value={formData.endDate}
+                                            onChange={handleInputChange}
+                                            min={formData.startDate}
+                                            className={formErrors.endDate ? "calendar-error" : ""}
+                                        />
+                                        {formErrors.endDate && <div className="calendar-error-message">{formErrors.endDate}</div>}
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
-                {isModalOpen && (
-                    <div className="calendar-modal-overlay">
-                        <div className="calendar-modal-container">
-                            <div className="calendar-modal-header">
-                                <h2>{isEditMode ? "Editar Plan Programado" : "Agregar Plan Programado"}</h2>
-                                <button className="calendar-close-button" onClick={() => setIsModalOpen(false)}>
-                                    ×
-                                </button>
-                            </div>
-
-                            <div
-                                className=
-                                "calendar-modal-body" >
-                                (
-                                <form onSubmit={handleSubmit}>
-                                    <div className="calendar-form-group">
-                                        <label htmlFor="idPlan">Plan</label>
-                                        <select
-                                            id="idPlan"
-                                            name="idPlan"
-                                            value={formData.idPlan}
-                                            onChange={handleInputChange}
-                                            className={formErrors.idPlan ? "calendar-error" : ""}
-                                        >
-                                            <option value="">Seleccionar plan</option>
-                                            {availablePlans.map((plan) => (
-                                                <option key={plan.idPlan} value={plan.idPlan}>
-                                                    {plan.name} - ${plan.salePrice.toLocaleString()}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {formErrors.idPlan && <div className="calendar-error-message">{formErrors.idPlan}</div>}
-                                    </div>
-
-                                    {selectedPlan && (
-                                        <div className="calendar-selected-plan-info">
-                                            <div className="calendar-plan-info-item">
-                                                <FiUsers className="calendar-plan-info-icon" />
-                                                <span>Capacidad: {selectedPlan.capacity} personas</span>
-                                            </div>
-                                            <div className="calendar-plan-info-item">
-                                                <FiDollarSign className="calendar-plan-info-icon" />
-                                                <span>Precio: ${selectedPlan.salePrice.toLocaleString()}</span>
-                                            </div>
-                                        </div>
+                                <div className="calendar-modal-footer">
+                                    {isEditMode && (
+                                        <button type="button" className="calendar-delete-btn" onClick={handleDelete} disabled={isLoading}>
+                                            Eliminar
+                                        </button>
                                     )}
-
-                                    <div className="calendar-form-row">
-                                        <div className="calendar-form-group">
-                                            <label htmlFor="startDate">Fecha de inicio</label>
-                                            <input
-                                                type="date"
-                                                id="startDate"
-                                                name="startDate"
-                                                value={formData.startDate}
-                                                onChange={handleInputChange}
-                                                min={format(new Date(), "yyyy-MM-dd")}
-                                                className={formErrors.startDate ? "calendar-error" : ""}
-                                            />
-                                            {formErrors.startDate && <div className="calendar-error-message">{formErrors.startDate}</div>}
-                                        </div>
-
-                                        <div className="calendar-form-group">
-                                            <label htmlFor="endDate">Fecha de fin</label>
-                                            <input
-                                                type="date"
-                                                id="endDate"
-                                                name="endDate"
-                                                value={formData.endDate}
-                                                onChange={handleInputChange}
-                                                min={formData.startDate}
-                                                className={formErrors.endDate ? "calendar-error" : ""}
-                                            />
-                                            {formErrors.endDate && <div className="calendar-error-message">{formErrors.endDate}</div>}
-                                        </div>
-                                    </div>
-
-                                    <div className="calendar-modal-footer">
-                                        {isEditMode && (
-                                            <button type="button" className="calendar-delete-btn" onClick={handleDelete} disabled={isLoading}>
-                                                Eliminar
-                                            </button>
-                                        )}
-                                        <button
-                                            type="button"
-                                            className="calendar-cancel-btn"
-                                            onClick={() => setIsModalOpen(false)}
-                                            disabled={isLoading}
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button type="submit" className="calendar-submit-btn" disabled={isLoading}>
-                                            {isLoading ? "Guardando..." : isEditMode ? "Actualizar" : "Guardar"}
-                                        </button>
-                                    </div>
-                                </form>
-                                )
-                            </div>
+                                    <button
+                                        type="button"
+                                        className="calendar-cancel-btn"
+                                        onClick={() => setIsModalOpen(false)}
+                                        disabled={isLoading}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="calendar-submit-btn" disabled={isLoading}>
+                                        {isLoading ? "Guardando..." : isEditMode ? "Actualizar" : "Guardar"}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                )
-                }
-            </div>
+                </div>
             )
+            }
+        </div>
+    )
 }
 
-            export default PlanProgramed;
+export default PlanProgramed;

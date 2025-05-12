@@ -1,7 +1,8 @@
 import React from 'react';
 import { useState, useEffect } from "react";
+import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { CustomButton, ActionButtons } from "../../common/Button/customButton";
+import { CustomButton} from "../../common/Button/customButton";
 import Switch from "../../common/Switch/Switch";
 import rolesService from "../../../services/RolesService"
 import { getCustomers, postCustomers, updateCustomers, deleteCustomer, changeSatus } from '../../../services/usersService';
@@ -279,14 +280,25 @@ function Customer() {
                 <h2 className="customer-table-header-title">Tabla de Clientes</h2>
             </div>
             <div className="customer-search-container">
-                <CiSearch className="customer-search-icon" />
-                <input
-                    type="text"
-                    className="customer-search-input"
-                    value={searchTerm}
-                    placeholder="Buscar usuario..."
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <div className="search-wrapper-customer">
+                    <CiSearch className="search-icon-customer" />
+                    <input
+                        type="text"
+                        className="search-input-customer"
+                        value={searchTerm}
+                        placeholder="Buscar cliente..."
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                        <button
+                            className="clear-search"
+                            onClick={() => setSearchTerm("")}
+                            aria-label="Limpiar búsqueda"
+                        >
+                            <FaTimes />
+                        </button>
+                    )}
+                </div>
                 <CustomButton variant="primary" icon="add" onClick={() => setIsModalOpen(true)}>
                     Agregar Cliente
                 </CustomButton>
@@ -339,10 +351,20 @@ function Customer() {
                                     />
                                 </td>
                                 <td className="customer-table-cell">
-                                    <ActionButtons
-                                        onEdit={() => handleEdit(customer)}
-                                        onDelete={() => handleDeleteCustomer(customer)}
-                                    />
+                                    <div className="action-buttons-container">
+                                        <button
+                                            onClick={() => handleEdit(customer)}
+                                            className="action-btn edit-btn"
+                                        >
+                                            <FaEdit />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteCustomer(customer)}
+                                            className="action-btn delete-btn"
+                                        >
+                                            <FaTrash />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
