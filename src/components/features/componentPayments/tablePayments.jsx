@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEye } from 'react-icons/fa';
 import './componentPayments.css';
 
-const TablePayments = ({ payments, onEditPayment, onDeletePayment, onStatusChange, isLoading }) => {
+const TablePayments = ({ payments, onDetailPayment, onStatusChange, isLoading }) => {
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -22,6 +22,12 @@ const TablePayments = ({ payments, onEditPayment, onDeletePayment, onStatusChang
     }
   };
 
+  const handleViewDetails = (paymentId, payment) => {
+    if (onDetailPayment) {
+      onDetailPayment(paymentId, payment);
+    }
+  };
+
   return (
     <div className="payments-table-container">
       <table className="payments-table">
@@ -32,7 +38,7 @@ const TablePayments = ({ payments, onEditPayment, onDeletePayment, onStatusChang
             <th>Monto</th>
             <th>Estado</th>
             <th>Comprobante</th>
-            {(onEditPayment || onDeletePayment) && <th>Acciones</th>}
+            {(onDetailPayment) && <th>Acciones</th>}
           </tr>
         </thead>
         <tbody>
@@ -49,7 +55,6 @@ const TablePayments = ({ payments, onEditPayment, onDeletePayment, onStatusChang
               </td>
             </tr>
           ) : (
-            // En tu archivo tablePayments.jsx, modifica el mapeo de pagos:
             payments.map((payment) => (
               <tr key={payment.idPayments || payment.tempId}>
                 <td>{payment.paymentMethod}</td>
@@ -86,28 +91,16 @@ const TablePayments = ({ payments, onEditPayment, onDeletePayment, onStatusChang
                   ) : 'N/A'}
                 </td>
 
-                {(onEditPayment || onDeletePayment) && (
+                {(onDetailPayment) && (
                   <td className="actions-cell">
-                    {onEditPayment && (
-                      <button
-                        onClick={() => onEditPayment(payment.idPayments || payment.tempId, payment)}
-                        className="action-btn edit-btn"
-                        title="Editar"
-                        disabled={isLoading}
-                      >
-                        <FaEdit />
-                      </button>
-                    )}
-                    {onDeletePayment && (
-                      <button
-                        onClick={() => onDeletePayment(payment.idPayments || payment.tempId)}
-                        className="action-btn delete-btn"
-                        title="Eliminar"
-                        disabled={isLoading}
-                      >
-                        <FaTrash />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleViewDetails(payment.idPayments || payment.tempId, payment)}
+                      className="action-btn eye-btn"
+                      title="Ver detalles"
+                      disabled={isLoading}
+                    >
+                      <FaEye />
+                    </button>
                   </td>
                 )}
               </tr>
@@ -121,8 +114,7 @@ const TablePayments = ({ payments, onEditPayment, onDeletePayment, onStatusChang
 
 TablePayments.propTypes = {
   payments: PropTypes.array.isRequired,
-  onEditPayment: PropTypes.func,
-  onDeletePayment: PropTypes.func,
+  onDetailPayment: PropTypes.func,
   onStatusChange: PropTypes.func,
   isLoading: PropTypes.bool
 };
