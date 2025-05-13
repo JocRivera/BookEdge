@@ -2,8 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   getReservationPayments,
-  updatePayment,
-  deletePayment,
   changePaymentStatus,
   getAllPayments
 } from '../../../services/paymentsService';
@@ -11,17 +9,20 @@ import TablePayments from './tablePayments';
 import './componentPayments.css';
 
 const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = false }) => {
-  // Estados
+  // Estados principales
   const [payments, setPayments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
-  const [triggerRefresh,] = useState(0);
-  const [showAnulados, setShowAnulados] = useState(false); // Nuevo estado para mostrar anulados
+  const [showAnulados, setShowAnulados] = useState(false);
   const itemsPerPage = 5;
 
-  // Efecto para cargar pagos
+  // Estados para el modal de detalles
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+
+  // Cargar pagos
   useEffect(() => {
     const fetchPayments = async () => {
       try {
@@ -47,13 +48,10 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
   // Filtrado y paginación
   const { currentItems, pageCount } = useMemo(() => {
     const term = searchTerm.toLowerCase();
-
-    // Filtrar primero por estado (anulados o no)
     const filteredByStatus = showAnulados
       ? payments
       : payments.filter(payment => payment.status !== 'Anulado');
 
-    // Luego aplicar el filtro de búsqueda
     const filtered = filteredByStatus.filter(payment => {
       return (
         payment.paymentMethod?.toLowerCase().includes(term) ||
@@ -70,14 +68,14 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
     };
   }, [payments, searchTerm, currentPage, itemsPerPage, showAnulados]);
 
-  // Cálculo del total pagado (excluyendo anulados)
+  // Total pagado
   const totalPaid = useMemo(() => {
     return payments.reduce((sum, payment) => {
       return payment.status !== 'Anulado' ? sum + (Number(payment.amount) || 0) : sum;
     }, 0);
   }, [payments]);
 
-  // Manejador de cambio de estado
+  // Cambiar estado
   const handleStatusChange = async (paymentId, newStatus) => {
     if (!paymentId || !newStatus) return;
 
@@ -85,7 +83,6 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
       setIsLoading(true);
       const updatedPayment = await changePaymentStatus(paymentId, newStatus);
 
-      // Actualizar el estado local
       setPayments(prev => prev.map(p =>
         p.idPayments === updatedPayment.idPayments ? updatedPayment : p
       ));
@@ -99,84 +96,49 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
     }
   };
 
-  // Manejador de actualización de pago
-  const handleUpdatePayment = async (paymentId, updatedData) => {
-    if (!paymentId || !updatedData) return;
-
-    try {
-      setIsLoading(true);
-
-      // Convertir amount a número si existe
-      if (updatedData.amount) {
-        updatedData.amount = Number(updatedData.amount);
-      }
-
-      const updatedPayment = await updatePayment(paymentId, updatedData);
-
-      // Actualizar el estado local
-      setPayments(prev => prev.map(p =>
-        p.idPayments === updatedPayment.idPayments ? updatedPayment : p
-      ));
-
-      setError(null);
-    } catch (err) {
-      console.error('Error al actualizar pago:', err);
-      setError(`Error al actualizar pago: ${err.response?.data?.message || err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+  // Ver detalles
+  const handleViewDetails = (paymentId, payment) => {
+    setSelectedPayment(payment);
+    setIsDetailModalOpen(true);
   };
 
-  // Manejador de eliminación de pago
-  const handleDeletePayment = async (paymentId) => {
-    if (!paymentId || !window.confirm('¿Estás seguro de eliminar este pago?')) return;
-
-    try {
-      setIsLoading(true);
-      await deletePayment(paymentId);
-
-      // Eliminar del estado local
-      setPayments(prev => prev.filter(p => p.idPayments !== paymentId));
-
-      setError(null);
-    } catch (err) {
-      console.error('Error al eliminar pago:', err);
-      setError(`Error al eliminar pago: ${err.response?.data?.message || err.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+  // Formatear moneda
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
   };
-  // Efecto para actualización periódica (cada 30 segundos)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isLoading) {
-        triggerRefresh();
-      }
-    }, 30000); // 30 segundos
 
-    return () => clearInterval(interval); // Limpieza al desmontar
-  }, [isLoading, triggerRefresh]);
+  // Formatear fecha
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('es-ES', options);
+  };
 
   return (
     <div className="view-payments-container">
+      {/* Encabezado */}
       <div className="payments-header">
         <h2>Gestión de Pagos</h2>
         <div className="payments-summary">
           <div className="summary-item">
             <span>Total Reserva:</span>
-            <strong>${Number(totalAmount).toFixed(2)}</strong>
+            <strong>{formatCurrency(totalAmount)}</strong>
           </div>
           <div className="summary-item">
             <span>Total Pagado:</span>
-            <strong>${totalPaid.toFixed(2)}</strong>
+            <strong>{formatCurrency(totalPaid)}</strong>
           </div>
           <div className="summary-item">
             <span>Saldo Pendiente:</span>
-            <strong>${(Number(totalAmount) - totalPaid).toFixed(2)}</strong>
+            <strong>{formatCurrency(totalAmount - totalPaid)}</strong>
           </div>
         </div>
       </div>
 
+      {/* Controles */}
       <div className="payments-controls">
         <div className="search-container">
           <input
@@ -197,7 +159,6 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
           )}
         </div>
 
-        {/* Botón para mostrar/ocultar anulados */}
         <button
           onClick={() => setShowAnulados(!showAnulados)}
           className={`toggle-anulados ${showAnulados ? 'active' : ''}`}
@@ -206,6 +167,7 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
         </button>
       </div>
 
+      {/* Mensaje de error */}
       {error && (
         <div className="error-message">
           {error}
@@ -213,11 +175,11 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
         </div>
       )}
 
+      {/* Tabla */}
       <div className="payments-table-wrapper">
         <TablePayments
           payments={currentItems}
-          onEditPayment={!isReadOnly ? handleUpdatePayment : null}
-          onDeletePayment={!isReadOnly ? handleDeletePayment : null}
+          onDetailPayment={handleViewDetails}
           onStatusChange={!isReadOnly ? handleStatusChange : null}
           isLoading={isLoading}
         />
@@ -240,6 +202,66 @@ const ViewPayments = ({ idReservation = null, totalAmount = 0, isReadOnly = fals
           </div>
         )}
       </div>
+
+      {/* Modal de detalles */}
+      {isDetailModalOpen && selectedPayment && (
+        <div className="payments-modal-overlay">
+          <div className="payments-modal-container">
+            <div className="modal-header-payments">
+              <h2>Detalles del Pago</h2>
+              <button
+                className="close-button-payments"
+                onClick={() => setIsDetailModalOpen(false)}
+                aria-label="Cerrar"
+              >
+                &times;
+              </button>
+            </div>
+
+
+            <div className="modal-body-payments">
+              <div className="payment-details-grid">
+                <div className="detail-group">
+                  <label>Método de Pago:</label>
+                  <p>{selectedPayment.paymentMethod || 'N/A'}</p>
+                </div>
+
+                <div className="detail-group">
+                  <label>Fecha:</label>
+                  <p>{formatDate(selectedPayment.paymentDate)}</p>
+                </div>
+
+                <div className="detail-group">
+                  <label>Monto:</label>
+                  <p className="amount">{formatCurrency(selectedPayment.amount)}</p>
+                </div>
+
+                <div className="status-badge-container">
+                  <span className={`status-badge ${selectedPayment.status.toLowerCase()}`}>
+                    {selectedPayment.status || 'Pendiente'}
+                  </span>
+                </div>
+
+                <div className="detail-group">
+                  <label>Comprobante:</label>
+                  <p>
+                    {selectedPayment.voucher ? (
+                      <a
+                        href={selectedPayment.voucher}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="proof-link"
+                      >
+                        Ver comprobante
+                      </a>
+                    ) : 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

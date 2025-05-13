@@ -202,26 +202,6 @@ function TableReservations() {
     }
   };
 
-  // Manejo de pagos
-  // const handleDeletePayment = async (paymentId) => {
-  //   if (!window.confirm("¿Estás seguro de eliminar este pago?")) return;
-
-  //   try {
-  //     setIsLoading(true);
-  //     await deletePayment(paymentId);
-  //     // Actualizar pagos después de eliminar
-  //     if (currentReservation?.idReservation) {
-  //       const updatedPayments = await getReservationPayments(currentReservation.idReservation);
-  //       setCurrentPayments(updatedPayments);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error eliminando pago:", error);
-  //     alert(`Error al eliminar pago: ${error.message}`);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const formatCurrency = (amount) => {
     const value = Number(amount) || 0;
     return `$${value.toFixed(2)}`;
@@ -381,14 +361,15 @@ function TableReservations() {
       />
 
       {isDetailModalOpen && currentReservation && (
-        <div className="modal-overlay">
-          <div className="modal-container reservation-details-modal">
+        <div className="reservations-modal-overlay">
+          <div className="reservations-modal-container reservation-details-modal">
             <div className="modal-header">
               <div className="reservation-header-content">
-                <h2>Detalles de la Reserva #{currentReservation.idReservation}</h2>
-                <span className={`status-badge ${currentReservation.status.toLowerCase()}`}>
+              <span className={`status-badge ${currentReservation.status.toLowerCase()}`}>
                   {currentReservation.status}
                 </span>
+
+                <h2>Detalles de la Reserva #{currentReservation.idReservation}</h2>
               </div>
               <button
                 className="close-button"
@@ -405,8 +386,8 @@ function TableReservations() {
                 <div className="reservation-main-column">
                   <div className="reservation-card">
                     <h3>Información Principal</h3>
-                    <div className="reservation-info-grid">
-                      <div className="info-group">
+                    <div className="info-grid-enhanced">
+                      <div className="info-group-enhanced">
                         <label>Cliente</label>
                         <p>
                           {currentReservation.user
@@ -414,15 +395,15 @@ function TableReservations() {
                             : "Cliente no disponible"}
                         </p>
                       </div>
-                      <div className="info-group">
+                      <div className="info-group-enhanced">
                         <label>Plan</label>
                         <p>{currentReservation.plan?.name || "Plan no disponible"}</p>
                       </div>
-                      <div className="info-group">
+                      <div className="info-group-enhanced">
                         <label>Fechas</label>
                         <p>{currentReservation.startDate} a {currentReservation.endDate}</p>
                       </div>
-                      <div className="info-group">
+                      <div className="info-group-enhanced">
                         <label>Total</label>
                         <p className="total-amount">
                           {formatCurrency(currentReservation.total || 0)}

@@ -20,10 +20,6 @@ const validateId = (id, name = "ID") => {
   return numId
 }
 
-/**
- * Obtiene todas las reservas
- * @returns {Promise<Array>} - Lista de reservas
- */
 export const getReservation = async () => {
   try {
     const { data } = await axios.get(API_URL_RESERVATIONS)
@@ -43,11 +39,7 @@ export const getReservation = async () => {
   }
 }
 
-/**
- * Obtiene una reserva por su ID
- * @param {number|string} idReservation - ID de la reserva
- * @returns {Promise<Object>} - Datos de la reserva
- */
+
 export const getReservationById = async (idReservation) => {
   try {
     // Validar ID
@@ -64,10 +56,7 @@ export const getReservationById = async (idReservation) => {
   }
 }
 
-/**
- * Obtiene todos los usuarios
- * @returns {Promise<Array>} - Lista de usuarios
- */
+
 export const getUsers = async () => {
   try {
     const { data } = await axios.get(API_URL_USERS)
@@ -87,10 +76,6 @@ export const getUsers = async () => {
   }
 }
 
-/**
- * Obtiene todos los planes
- * @returns {Promise<Array>} - Lista de planes
- */
 export const getAllPlanes = async () => {
   try {
     const { data } = await axios.get(API_URL_PLANS)
@@ -111,11 +96,7 @@ export const getAllPlanes = async () => {
   }
 }
 
-/**
- * Valida los datos de una reserva
- * @param {Object} reservationData - Datos de la reserva
- * @returns {Object} - Errores encontrados
- */
+
 const validateReservationData = (reservationData) => {
   if (!reservationData) {
     throw new Error("No se proporcionaron datos de reserva")
@@ -171,11 +152,7 @@ const validateReservationData = (reservationData) => {
   return errors
 }
 
-/**
- * Prepara el payload para enviar al servidor
- * @param {Object} reservationData - Datos de la reserva
- * @returns {Object} - Payload preparado
- */
+
 const prepareReservationPayload = (reservationData) => {
   return {
     idUser: Number(reservationData.idUser),
@@ -190,11 +167,7 @@ const prepareReservationPayload = (reservationData) => {
   }
 }
 
-/**
- * Crea una nueva reserva
- * @param {Object} reservationData - Datos de la reserva
- * @returns {Promise<Object>} - Reserva creada
- */
+
 export const createReservation = async (reservationData) => {
   try {
     // Validar datos
@@ -247,12 +220,7 @@ export const createReservation = async (reservationData) => {
   }
 }
 
-/**
- * Actualiza una reserva existente
- * @param {number|string} idReservation - ID de la reserva
- * @param {Object} reservationData - Datos de la reserva
- * @returns {Promise<Object>} - Reserva actualizada
- */
+
 export const updateReservation = async (idReservation, reservationData) => {
   try {
     console.log("Iniciando actualización de reserva con ID:", idReservation, "y datos:", reservationData);
@@ -407,11 +375,7 @@ export const changeReservationStatus = async (idReservation, status) => {
 }
 
 
-/**
- * Obtiene los acompañantes de una reserva
- * @param {number|string} reservationId - ID de la reserva
- * @returns {Promise<Array>} - Lista de acompañantes
- */
+
 export const getReservationCompanions = async (reservationId) => {
   try {
     // Validar ID
@@ -433,15 +397,9 @@ export const getReservationCompanions = async (reservationId) => {
     return []
   }
 }
-// En reservationsService.jsx, actualiza estos métodos:
 
-/**
- * Agrega un acompañante a una reserva
- * @param {number|string} reservationId - ID de la reserva
- * @param {Object} companionData - Datos del acompañante
- * @returns {Promise<Object>} - Acompañante agregado
- */
-// Modificar addCompanionReservation
+
+
 export const addCompanionReservation = async (reservationId, companionData) => {
   try {
     console.log("Intentando asociar acompañante:", { reservationId, companionData });
@@ -481,11 +439,12 @@ export const addCompanionReservation = async (reservationId, companionData) => {
     throw new Error(`Error al asociar acompañante: ${errorMessage}`);
   }
 };
+
 export const associateCompanionToReservation = async (reservationId, companionId) => {
   try {
     const response = await axios.post(
       `/reservations/${reservationId}/companions`,
-      { idCompanions: companionId }, // Asegúrate que coincida con lo que espera tu backend
+      { idCompanions: companionId },
       {
         headers: {
           'Content-Type': 'application/json',
@@ -503,12 +462,7 @@ export const associateCompanionToReservation = async (reservationId, companionId
   }
 };
 
-/**
- * Elimina un acompañante de una reserva
- * @param {number|string} reservationId - ID de la reserva
- * @param {number|string} companionId - ID del acompañante
- * @returns {Promise<Object>} - Respuesta del servidor
- */
+
 export const deleteCompanionReservation = async (reservationId, companionId) => {
   try {
     // Validar IDs
@@ -525,11 +479,8 @@ export const deleteCompanionReservation = async (reservationId, companionId) => 
     throw new Error(`Error al eliminar acompañante: ${error.message}`);
   }
 }
-/**
- * Obtiene los pagos de una reserva
- * @param {number|string} reservationId - ID de la reserva
- * @returns {Promise<Array>} - Lista de pagos
- */
+
+
 export const getReservationPayments = async (reservationId) => {
   try {
     // Validar ID

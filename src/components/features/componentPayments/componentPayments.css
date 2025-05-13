@@ -237,17 +237,17 @@
 
 .status-confirmado {
   background: rgba(46, 213, 115, 0.9);
-  color: white;
+  color: rgba(46, 213, 115, 0.9)
 }
 
 .status-pendiente {
   background: rgba(255, 165, 2, 0.9);
-  color: white;
+  color: rgba(255, 165, 2, 0.9);
 }
 
 .status-anulado {
   background: rgba(255, 71, 87, 0.9);
-  color: white;
+  color: rgba(255, 71, 87, 0.9);
 }
 
 /* Acciones */
@@ -400,5 +400,256 @@
   
   .search-container {
     width: 100%;
+  }
+}
+.payments-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  overflow-y: auto;
+  border: none;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.payments-modal-container {
+  width: 95%;
+  max-width: 600px;
+  max-height: 95vh;
+  background-color: var(--payments-card-bg);
+  border-radius: 20px;
+  position: relative;
+  margin: 0 auto;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px var(--payments-shadow-dark);
+}
+
+/* Header del modal */
+.modal-header-payments {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--payments-border);
+  position: sticky;
+  top: 0;
+  background-color: var(--payments-card-bg);
+  z-index: 1;
+}
+
+.modal-header-payments h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--payments-text-dark);
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.modal-header-payments h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--payments-primary-light), var(--payments-primary-dark));
+  border-radius: 3px;
+}
+
+.close-button-payments {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--payments-text-light);
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-button-payments:hover {
+  color: var(--payments-primary);
+  background-color: rgba(143, 148, 251, 0.1);
+}
+
+/* Cuerpo del modal */
+.modal-body-payments {
+  padding: 25px;
+}
+
+/* Grid de detalles */
+.payment-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.detail-group {
+  margin-bottom: 15px;
+}
+
+.detail-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--payments-text-light);
+  font-size: 0.95rem;
+}
+
+.detail-group p {
+  margin: 0;
+  padding: 12px 15px;
+  background-color: var(--payments-background);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  border: 1px solid var(--payments-border);
+  box-shadow: 0 2px 8px var(--payments-shadow-light);
+}
+
+.detail-group .amount {
+  font-weight: 700;
+  color: var(--payments-primary-dark);
+}
+
+/* Badges de estado */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge.confirmado {
+  background: var(--status-confirmado);
+}
+
+.status-badge.pendiente {
+  background: var(--status-pendiente);
+}
+
+.status-badge.anulado {
+  background: var(--status-anulado);
+}
+
+/* Botones de acción */
+.payment-action-btn {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  box-shadow: 0 4px 15px var(--payments-shadow-medium);
+}
+
+.payment-action-btn .btn-icon {
+  font-size: 1.1rem;
+}
+
+/* Botón primario */
+.payment-confirm-btn {
+  background: linear-gradient(135deg, var(--payments-primary-light) 0%, var(--payments-primary-dark) 100%);
+  color: white;
+}
+
+.payment-confirm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--payments-shadow-dark);
+}
+
+.payment-confirm-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 15px var(--payments-shadow-medium);
+}
+
+/* Botón para comprobante */
+.payment-proof-btn {
+  background: linear-gradient(135deg, #6a6fc9 0%, #3a3f9e 100%);
+  color: white;
+}
+
+.payment-proof-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(106, 111, 201, 0.3);
+}
+
+/* Footer del modal */
+.modal-footer-payments {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding: 20px 25px;
+  border-top: 1px solid var(--payments-border);
+  position: sticky;
+  bottom: 0;
+  background-color: var(--payments-card-bg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .payment-details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-notes {
+    grid-column: span 1;
+  }
+  
+  .modal-footer-payments {
+    flex-direction: column;
+  }
+  
+  .payment-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
   }
 }

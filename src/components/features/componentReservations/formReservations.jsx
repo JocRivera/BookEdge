@@ -3,7 +3,6 @@ import PropTypes from "prop-types"
 import "./componentsReservations.css"
 import CompanionsForm from "../componentCompanions/formCompanions"
 import PaymentForm from "../componentPayments/formPayments"
-import TablePayments from "../componentPayments/tablePayments.jsx"
 import TableCompanions from "../componentCompanions/tableCompanions"
 
 import {
@@ -618,7 +617,6 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
               <div className="form-step">
                 {/* Sección de Formulario de Pago */}
                 <div className="payment-form-section">
-                  <h3>Agregar Nuevo Pago</h3>
                   <PaymentForm
                     totalAmount={calculateTotal()}
                     onPaymentSubmit={async (paymentData) => {
@@ -634,14 +632,6 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
                 {/* Sección de Lista de Pagos */}
                 <div className="payment-list-section">
-                  <h3>Pagos Registrados</h3>
-                  <TablePayments
-                    payments={[...reservationPayments, ...tempPayments]}
-                    isLoading={loading}
-                    isReadOnly={isReadOnly}
-                  />
-
-                  {/* Resumen de Pagos */}
                   <div className="payment-summary">
                     <div className="summary-item">
                       <span>Total Reserva:</span>
