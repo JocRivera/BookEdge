@@ -32,6 +32,9 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     status: "Reservado",
     total: 0,
     paymentMethod: "Efectivo",
+    // Nuevos campos para disponibilidad
+    availabilityChecked: false,
+    availableRooms: []
   })
   const [errors, setErrors] = useState({})
   const [planes, setPlanes] = useState([])
@@ -226,7 +229,11 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
   }
 
   const prevStep = () => {
-    if (step === 3 && !formData.hasCompanions) {
+    if (step === 4 && !formData.hasCompanions) {
+      // Si estamos en pagos (paso 4) y no hay acompañantes, volver al paso 1
+      setStep(1)
+    } else if (step === 3 && !formData.hasCompanions) {
+      // Si estamos en disponibilidad (paso 3) y no hay acompañantes, volver al paso 1
       setStep(1)
     } else {
       setStep(step - 1)
@@ -431,7 +438,12 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         <div className="steps-indicator">
           <div className={`step ${step === 1 ? "active" : ""}`}>1. Datos Reserva</div>
           {formData.hasCompanions && <div className={`step ${step === 2 ? "active" : ""}`}>2. Acompañantes</div>}
-          <div className={`step ${step === 3 ? "active" : ""}`}>{formData.hasCompanions ? "3" : "2"}. Pagos</div>
+          <div className={`step ${step === (formData.hasCompanions ? 3 : 2) ? "active" : ""}`}>
+            {formData.hasCompanions ? "3" : "2"}. Disponibilidad
+          </div>
+          <div className={`step ${step === (formData.hasCompanions ? 4 : 3) ? "active" : ""}`}>
+            {formData.hasCompanions ? "4" : "3"}. Pagos
+          </div>
         </div>
 
         <div className="reservations-modal-body">
@@ -612,8 +624,58 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 </div>
               </div>
             )}
+            {step === (formData.hasCompanions ? 3 : 2) && (
+              <div className="form-step">
+                <h3>Verificar Disponibilidad</h3>
 
-            {step === 3 && (
+                <div className="availability-summary">
+                  <p><strong>Plan seleccionado:</strong> {planes.find(p => p.idPlan === Number(formData.idPlan))?.name || 'No seleccionado'}</p>
+                  <p><strong>Fechas:</strong> {formData.startDate} al {formData.endDate}</p>
+                  <p><strong>Acompañantes:</strong> {formData.companionCount}</p>
+                </div>
+
+                <div className="availability-controls">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={formData.availabilityChecked}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        availabilityChecked: e.target.checked
+                      }))}
+                      disabled={isReadOnly || loading}
+                    />
+                    Confirmo que he verificado la disponibilidad
+                  </label>
+
+                  {/* Espacio para futura integración con la API */}
+                  <div className="availability-results">
+                    {formData.availableRooms.length > 0 ? (
+                      <div className="rooms-available">
+                        <h4>Habitaciones disponibles:</h4>
+                        <ul>
+                          {formData.availableRooms.map(room => (
+                            <li key={room.id}>{room.name} - {room.type}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div className="no-availability-data">
+                        <p>La verificación de disponibilidad se realizará al guardar la reserva.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {errors.availability && (
+                  <div className="error-banner">
+                    <p>{errors.availability}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {step === (formData.hasCompanions ? 4 : 3) && (
               <div className="form-step">
                 {/* Sección de Formulario de Pago */}
                 <div className="payment-form-section">
@@ -667,22 +729,23 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 </button>
               )}
 
-              {step < 3 && (
+              {step < (formData.hasCompanions ? 4 : 3) && (
                 <button
                   type="button"
                   className="submit-btn"
                   onClick={nextStep}
                   disabled={loading}
                 >
-                  {step === 2 ? "Ir a Pago" : "Siguiente"}
+                  {step === (formData.hasCompanions ? 3 : 2) ? "Ir a Pagos" :
+                    step === 2 ? "Verificar Disponibilidad" : "Siguiente"}
                 </button>
               )}
 
-              {!isReadOnly && step === 3 && (
+              {!isReadOnly && step === (formData.hasCompanions ? 4 : 3) && (
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={loading}
+                  disabled={loading || !formData.availabilityChecked}
                 >
                   {loading ? "Guardando..." : "Guardar Reserva"}
                 </button>
