@@ -112,29 +112,11 @@
 }
 
 .luxury-logo-img {
-  height: 40px;
+  height: 60px;
+  width: 60px;
   transition: transform 0.3s ease;
 }
 
-.luxury-logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: rgb(73, 64, 208);
-}
-
-.luxury-logo-text span {
-  font-weight: 700;
-  color: #2466c3;
-}
-
-.luxury-nav.scrolled .luxury-logo-text {
-  color: #2466c3;
-}
-
-.luxury-nav.scrolled .luxury-logo-text span {
-  color: #2466c3;
-}
 
 /* ===== ENLACES DE NAVEGACIÓN ===== */
 .luxury-nav-links {
@@ -201,8 +183,8 @@
 
 .luxury-nav-button {
   padding: 0.8rem 1.8rem;
-  border-radius: 50px;
-  font-weight: 600;
+  border-radius: 30px;
+  font-weight: 700;
   letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -211,18 +193,18 @@
 }
 
 .luxury-nav-button.primary {
-  background: #00d4ff;
-  color: #1A1A1A;
+  background: #ffd60a;
+  color: #000000;
 }
 
 .luxury-nav-button.primary:hover {
-  background: #7ea1d5;
+  background: #f4e409;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(42, 83, 185, 0.756);
+  box-shadow: 0 5px 15px #fdf8e1;
 }
 
 .luxury-nav-button.secondary {
-  background: transparent;
+  background: #1e96fc;
   color: white;
   border: 1px solid rgba(68, 10, 242, 0.296);
 }
@@ -233,7 +215,7 @@
 }
 
 .luxury-nav.scrolled .luxury-nav-button.secondary {
-  color: #09c0e4;
+  color: #f2f3f4;
   border-color: #09c0e4;
 }
 

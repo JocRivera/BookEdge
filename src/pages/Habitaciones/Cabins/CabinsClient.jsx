@@ -111,12 +111,7 @@ function CabinsClient() {
                 </figure>
 
                 <div className="cabin-details-home">
-                  <div className="cabin-meta-home">
-                    <span className="meta-item-home">
-                      <FaBed size={16} className="meta-icon-home" />
-                      {cabin.capacity} personas
-                    </span>
-                  </div>
+                
                 </div>
                 <div className="cabin-button-container">
                   <button

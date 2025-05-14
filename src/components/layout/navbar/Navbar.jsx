@@ -195,18 +195,17 @@ if (isAuthenticated && isStaff() && isAdminPanel) {
         mobileMenuOpen ? "mobile-open" : ""
       }`}
     >
-      <div className="luxury-nav-container">
-        {/* Logo */}
-        <div className="luxury-logo" onClick={() => handleNavigation("/")}>
+       <div className="luxury-logo" onClick={() => handleNavigation("/")}>
           <img
             src={logo} // Usa tu logo normal
             alt="Logo"
             className={`luxury-logo-img ${scrolled ? "" : "logo-light"}`}
           />
-          <span className="luxury-logo-text">
-            Los <span>Lagos Barbosa</span>
-          </span>
+         
         </div>
+      <div className="luxury-nav-container">
+        {/* Logo */}
+       
 
         {/* Menú hamburguesa para móvil */}
         <button
@@ -325,7 +324,7 @@ if (isAuthenticated && isStaff() && isAdminPanel) {
                 className="luxury-nav-button primary"
                 onClick={() => handleNavigation("/register")}
               >
-                Reservar Ahora
+                Registrarse
               </button>
             </>
           )}

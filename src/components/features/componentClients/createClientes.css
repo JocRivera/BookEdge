@@ -1,5 +1,4 @@
 :root {
-  /* Colores principales */
   --comfort-primary: #4e54c8;
   --comfort-primary-light: #8f94fb;
   --comfort-primary-dark: #3a3f9e;
@@ -138,34 +137,33 @@
 
 .user-table {
   width: 100%;
-  border-collapse: separate; 
-    border-spacing: 0;
+  border-collapse: separate;
+  border-spacing: 0;
 
   min-width: 800px;
 }
 
 .user-table-head th {
-  padding: 1rem 0.75rem; 
-  text-align: left;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--comfort-primary-dark);
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+    padding: 0.9rem 0.55rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--comfort-primary-dark);
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .user-table-body td {
-  padding: 0.75rem; /* Aumenta el padding */
-  font-size: 0.95rem;
+  padding: 0.5rem; 
+  font-size: 0.9rem;
   color: var(--comfort-text-dark);
   border-bottom: 1px solid var(--comfort-border);
   transition: background-color 0.3s ease;
-  vertical-align: middle; 
+  vertical-align: middle;
 }
-
 
 .user-table-body tr:hover td {
   background-color: rgba(143, 148, 251, 0.05);
@@ -182,11 +180,9 @@
 }
 .action-buttons-container {
   display: flex;
-  gap: 0.5rem; 
-  justify-content: center; 
+  gap: 0.5rem;
+  justify-content: center;
 }
-
-
 
 /* FORMULARIO CON PESTAÑAS */
 .user-modal-overlay {

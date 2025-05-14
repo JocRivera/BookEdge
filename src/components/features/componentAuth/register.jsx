@@ -265,7 +265,7 @@ export default function RegisterForm() {
               </div>
             </div>
 
-            <div className="form-column">
+            <div className="form-column-register">
               <div className="form-group-register">
                 <label htmlFor="birthdate">Fecha de nacimiento</label>
                 <input

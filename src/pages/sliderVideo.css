@@ -1,6 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Allan:wght@400;700&family=Courgette&family=Fondamento:ital@0;1&family=Henny+Penny&family=Jersey+15&family=Oleo+Script:wght@400;700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Sansita+Swashed:wght@300..900&display=swap");
 :root {
-  --azure: #3785d4;
-  --dark: #1A1A1A;
+  --azure: #ffc300;
+  --dark: #1a1a1a;
   --transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
@@ -8,7 +9,7 @@
   position: relative;
   width: 100%;
   height: 100vh;
-  max-height: 800px;
+  max-height: 820px;
   overflow: hidden;
 }
 
@@ -42,7 +43,11 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
   z-index: 3;
 }
 
@@ -65,6 +70,7 @@
 
 .luxury-title {
   font-size: clamp(2.5rem, 6vw, 5rem);
+  font-family: "Oleo Script", system-ui;
   font-weight: 300;
   margin-bottom: 1rem;
   letter-spacing: 2px;
@@ -87,12 +93,15 @@
 }
 
 .luxury-description {
-  font-size: clamp(1rem, 2vw, 1.5rem);
+  font-size: clamp(2rem, 2vw, 3rem);
   max-width: 600px;
   margin-bottom: 2rem;
   line-height: 1.6;
   opacity: 0;
   transform: translateY(30px);
+  font-family: "Oleo Script", system-ui;
+  font-style: italic;
+
   transition: var(--transition);
 }
 
@@ -102,13 +111,11 @@
   transition-delay: 0.5s;
 }
 
-
-
 .pagination-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
   border: none;
   cursor: pointer;
   transition: var(--transition);
@@ -122,37 +129,41 @@
 
 /* Efecto de máquina de escribir para el título */
 @keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .luxury-video-slider {
-      max-height: 500px;
+    max-height: 500px;
   }
-  
+
   .luxury-content {
-      bottom: 15%;
-      text-align: center;
+    bottom: 15%;
+    text-align: center;
   }
-  
+
   .luxury-description {
-      max-width: 100%;
+    max-width: 100%;
   }
-  
+
   .video-pagination {
-      justify-content: center;
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
   .luxury-video-slider {
-      max-height: 400px;
+    max-height: 400px;
   }
-  
+
   .luxury-content {
-      bottom: 10%;
-      padding: 0 8vw;
+    bottom: 10%;
+    padding: 0 8vw;
   }
 }

@@ -1,448 +1,635 @@
+/* --- START OF FILE Sidebar.css --- */
+
+
+:root {
+  /* --- Paleta Principal (Negro, Blanco, Azul Acento General) --- */
+  --sidebar-bg: #040011;
+  --sidebar-bg-subtle: #1a1a1a;
+  --sidebar-text-color: #e0e0e0;
+  --sidebar-text-color-hover: #ffffff;
+  --sidebar-text-muted: #a0a0a0;
+  --sidebar-text-title-decoration: #4a4a4a;
+
+  --primary-accent-color: #00aeef;
+  --primary-accent-color-darker: #008fc7;
+
+  /* --- Colores Específicos para el Logo "BookEdge" --- */
+  --logo-book-blue: #0077b6;
+  --logo-edge-gold: #daa520;
+
+  /* --- Otros Colores y Variables (Hover, Active, Borders, etc.) --- */
+  --item-bg-hover: rgba(255, 255, 255, 0.05);
+  --item-bg-active: rgba(0, 174, 239, 0.1);
+
+  --border-color-soft: rgba(255, 255, 255, 0.1);
+  --border-color-strong: var(--primary-accent-color);
+
+  /* --- Dimensiones --- */
+  --sidebar-width-expanded: 230px;
+  --sidebar-width-collapsed: 68px;
+  --logo-expanded-height: 90px;
+  --logo-collapsed-height: 36px;
+
+  /* --- Radios y Sombras --- */
+  --border-radius-main: 6px;
+  --border-radius-large: 10px;
+  --shadow-subtle: rgba(0, 0, 0, 0.2);
+  --shadow-medium: rgba(0, 0, 0, 0.3);
+
+  /* --- Espaciados --- */
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 12px;
+  --space-l: 16px;
+  --space-xl: 20px;
+
+  /* --- Tamaños de Fuente --- */
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+
+  /* --- Transiciones --- */
+  --transition-speed: 0.25s;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Estructura Base del Sidebar --- */
 .sidebar {
-  width: 250px;
+  /* ... otros estilos ... */
+  width: var(--sidebar-width-expanded);
   height: 100vh;
-  background: #000000;
-  color: #fff;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text-color);
+  transition: width var(--transition-speed) var(--transition-timing);
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
   overflow-x: hidden;
-  z-index: 100;
-  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3);
-  border-radius: 0 12px 12px 0;
-}
+  z-index: 1000;
+  box-shadow: 4px 0 12px var(--shadow-subtle);
+  border-right: 1px solid var(--sidebar-bg-subtle);
 
+  border-top-right-radius: var(--border-radius-large);
+  border-bottom-right-radius: var(--border-radius-large);
+
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  /* ===================================== */
+}
 .sidebar.collapsed {
-  width: 65px;
+  width: var(--sidebar-width-collapsed);
 }
 
+/* --- Cabecera del Sidebar --- */
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 24px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(0, 0, 0, 0.5);
-  width: 100%;
-  position: relative;
+  justify-content: center;
+  padding: var(--space-l) var(--space-m);
+  border-bottom: 1px solid var(--sidebar-bg-subtle);
+  background: var(--sidebar-bg);
+  min-height: 85px; /* Aumenta para el logo más grande y texto debajo */
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
-.sidebar-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background-color: #605050;
-}
-
-
 .logo {
-  display: flex;
+  display: block !important;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-s);
 }
-
 .logo-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: #4FB4FF;
-  color: #000;
-  border-radius: 10px;
+  background: var(--primary-accent-color);
+  color: var(--sidebar-bg);
+  border-radius: var(--border-radius-main);
   font-weight: bold;
-  font-size: 18px;
-  box-shadow: 0 2px 8px rgba(79, 180, 255, 0.4);
-  transition: all 0.3s ease;
+  font-size: var(--font-size-md);
+  transition: transform var(--transition-speed) ease;
+}
+.logo-logo-stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all var(--transition-speed) ease; /* Para transiciones suaves de tamaño */
+  margin-bottom: -25px;
 }
 
-.sidebar:hover .logo-icon {
-  transform: rotate(-10deg);
+.logo-image-display {
+  transition: height var(--transition-speed) ease,
+              width var(--transition-speed) ease, /* MODIFICADO: Añadido width a la transición */
+              opacity var(--transition-speed) ease;
+  display: block; /* Para evitar espacio extra */
+  border-radius: 50% !important; /* MODIFICADO: Cambiado a 50% para claridad, 15000px también funciona */
+  /* object-fit: cover; Se aplicará en las clases específicas .expanded-logo y .collapsed-logo */
 }
-
-.logo-text {
-  font-size: 18px;
-  font-weight: 700;
+.logo-image-display.expanded-logo {
+  height: var(--logo-expanded-height);
+  width: var(--logo-expanded-height); /* MODIFICADO: Igualar al height para hacerlo círculo */
   opacity: 1;
-  transition: all 0.3s ease;
-  color: #fff;
+  object-fit: cover; /* AÑADIDO: Para que la imagen se ajuste bien */
+}
+
+.logo-image-display.collapsed-logo {
+  height: var(--logo-collapsed-height);
+  width: var(--logo-collapsed-height); /* MODIFICADO: Igualar al height para hacerlo círculo */
+  opacity: 1; /* Asumiendo que quieres mostrarlo así cuando esté colapsado */
+  object-fit: cover; /* AÑADIDO: Para que la imagen se ajuste bien */
+}
+.logo-text-book {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--logo-book-blue);
   letter-spacing: 0.5px;
 }
 
-.collapsed .logo-text {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
+.logo-text-edge {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+
+  color: var(--logo-edge-gold);
+  letter-spacing: 0.5px;
 }
 
-.toggle-btn {
-  background: rgba(79, 180, 255, 0.2);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 16px;
-  height: 28px;
-  width: 28px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 101;
-  position: relative;
-}
-
-.toggle-btn:hover {
-  background: rgba(79, 180, 255, 0.4);
+.sidebar:not(.collapsed):hover .logo-icon {
   transform: scale(1.05);
 }
 
+/* .logo ya estaba definido arriba, esta es una segunda definición. Considera unificar. */
+.logo { 
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+}
+
+/* .logo-icon ya estaba definido arriba. Considera unificar. */
+.logo-icon {
+  /* Este es el icono 'B' que ya tienes */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--primary-accent-color);
+  color: var(--sidebar-bg);
+  border-radius: var(--border-radius-main);
+  font-weight: bold;
+  font-size: var(--font-size-md);
+  transition: transform var(--transition-speed) ease;
+  flex-shrink: 0; /* Para que no se encoja si el logo es muy ancho */
+}
+.sidebar:not(.collapsed):hover .logo-icon {
+  transform: scale(1.05);
+}
+
+/* === NUEVOS ESTILOS PARA TU IMAGEN DE LOGO PRINCIPAL === */
+/* Esta regla parece no aplicar al logo de imagen que estás usando actualmente (`.logo-image-display`) */
+.sidebar.collapsed .logo-image-main {
+  opacity: 0;
+  width: 0; /* Para que no ocupe espacio durante la transición si la hay */
+  overflow: hidden;
+  transform: translateX(-15px); /* Similar a como se ocultaba .logo-text */
+  pointer-events: none;
+}
+.sidebar.collapsed .logo-text {
+  opacity: 0;
+  transform: translateX(-15px);
+  width: 0;
+  overflow: hidden;
+}
+.toggle-btn {
+  position: fixed; /* Fijado a la ventana gráfica */
+  top: var(--toggle-btn-v-offset);
+  /* 'left' se establece dinámicamente mediante el atributo style en JSX */
+  
+  width: var(--toggle-btn-actual-width);
+  height: var(--toggle-btn-actual-width); /* Para un botón cuadrado/circular */
+  
+  background-color: var(--primary-accent-color); /* Azul acento */
+  color: #ffffff; /* Icono blanco para contraste */
+  
+  border: none;
+  border-radius: 50%; /* Botón completamente redondo */
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  z-index: 1005;      /* MUY IMPORTANTE: Mayor que el z-index del .sidebar */
+  
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0,0,0,0.05); /* Sombra sutil */
+  
+  font-size: 20px;    /* Tamaño del icono dentro del botón */
+  
+  /* Transición suave para la propiedad 'left' y otros efectos visuales */
+  transition: left var(--transition-speed) var(--transition-timing), 
+              background-color var(--transition-speed) var(--transition-timing),
+              transform var(--transition-speed) var(--transition-timing),
+              box-shadow var(--transition-speed) var(--transition-timing);
+}
+
+.toggle-btn:hover {
+  background-color: var(--primary-accent-color-darker); /* Azul un poco más oscuro */
+  transform: scale(1.08); /* Efecto de agrandar sutilmente */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+.toggle-btn:active {
+  transform: scale(0.98); /* Efecto al presionar */
+  background-color: var(--primary-accent-color); /* Vuelve al color original o uno un poco más claro */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+/* --- Contenido y Lista Principal del Menú --- */
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 0;
+  padding: var(--space-s) 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(79, 180, 255, 0.3) transparent;
+  scrollbar-color: var(--primary-accent-color-darker) transparent;
 }
-
 .sidebar-content::-webkit-scrollbar {
   width: 4px;
 }
-
 .sidebar-content::-webkit-scrollbar-thumb {
-  background-color: rgba(79, 180, 255, 0.3);
-  border-radius: 10px;
+  background-color: var(--primary-accent-color-darker);
+  border-radius: 8px;
+}
+.sidebar-content::-webkit-scrollbar-track {
+  background: var(--sidebar-bg-subtle);
 }
 
 .menu-list {
   list-style: none;
-  padding: 0 12px;
+  padding: 0;
   margin: 0;
 }
 
-.menu-item {
-  margin-bottom: 8px;
-  position: relative;
-  border-radius: 12px;
-  overflow: visible;
-  transition: all 0.3s ease;
-}
-
-.menu-item a,
-.menu-header {
+/* --- Títulos de Sección --- */
+.menu-section-title-container {
   display: flex;
   align-items: center;
-  padding: 14px 16px;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 12px;
-  position: relative;
-  z-index: 1;
-  margin-bottom: 1px;
+  padding: var(--space-l) var(--space-m) var(--space-xs) var(--space-m);
+  opacity: 1;
+  transition: opacity var(--transition-speed) ease,
+    height var(--transition-speed) ease, padding var(--transition-speed) ease;
+  height: auto;
+  overflow: hidden;
+}
+.menu-section-title-text {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--sidebar-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  text-align: center;
+  padding: 0 var(--space-s);
+  flex-shrink: 0;
+}
+.sidebar:not(.collapsed) .menu-section-title-line {
+  flex-grow: 1;
+  height: 1px;
+  background-color: var(--sidebar-text-title-decoration);
+  opacity: 0.7;
+}
+.sidebar.collapsed .menu-section-title-container {
+  opacity: 0;
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
 }
 
-.menu-header {
+/* --- Ítems del Menú Principal (Sidebar Expandido y Dropdown) --- */
+.menu-item {
+  margin-bottom: 2px;
+  position: relative;
+  padding-left: var(--space-m);
+  padding-right: var(--space-m);
+}
+.menu-item > a,
+.menu-item > .menu-header {
+  display: flex;
+  align-items: center;
+  padding: 10px var(--space-m);
+  text-decoration: none;
+  color: var(--sidebar-text-color);
+  cursor: pointer;
+  transition: background-color var(--transition-speed) ease,
+    color var(--transition-speed) ease;
+  border-radius: var(--border-radius-main);
+  position: relative;
+  overflow: hidden;
+  /* Eliminamos los márgenes negativos que compensaban, ya que el padding está en .menu-item */
+}
+.menu-item > .menu-header {
   justify-content: space-between;
 }
 
-.menu-item:hover a,
-.menu-item:hover .menu-header {
-  color: #fff;
-  background: rgba(79, 180, 255, 0.15);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+.menu-item:hover > a,
+.menu-item:hover > .menu-header {
+  color: var(--sidebar-text-color-hover);
+  background: #023047;
+}
+.menu-item:hover > a .menu-icon,
+.menu-item:hover > .menu-header .menu-icon {
+  color: var(--primary-accent-color);
 }
 
 .menu-icon {
-  margin-right: 15px;
+  margin-right: var(--space-m);
   font-size: 18px;
-  width: 34px;
-  height: 34px;
+  width: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 8px;
-  background: rgba(9, 139, 194, 0.12);
-  padding: 6px;
-  transition: all 0.3s ease;
-  color: rgba(255, 255, 255, 0.9);
-  background-color: rgba(10, 10, 10, 0.7);
-
+  transition: color var(--transition-speed) ease,
+    transform var(--transition-speed) ease;
+  color: var(--sidebar-text-muted);
+  flex-shrink: 0;
   
 }
-
-.menu-item:hover .menu-icon {
-  background: rgba(79, 180, 255, 0.25);
-  transform: scale(1.1);
-  color: #FFFFFF;
-}
-
-.menu-text {
-  flex: 1;
+/* Texto del menú principal (NO flyout) */
+.menu-item > a > .menu-text,
+.menu-item > .menu-header > .menu-text {
+  flex-grow: 1;
   opacity: 1;
-  transition: all 0.3s ease;
+  transition: opacity var(--transition-speed) ease,
+    transform var(--transition-speed) ease;
   white-space: nowrap;
   font-weight: 500;
-  font-size: 14px;
-  letter-spacing: 0.3px;
-}
-
-.collapsed .menu-text {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
-
-.menu-arrow {
-  font-size: 18px;
-  transition: all 0.3s ease;
-  opacity: 0.7;
-}
-
-.menu-item:hover .menu-arrow {
-  color: #fff;
-  opacity: 1;
-}
-
-.collapsed .menu-arrow {
-  opacity: 0;
-  width: 0;
-  overflow: hidden;
-}
-
-.submenu {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 0 36px;
-  background-color: rgba(10, 10, 10, 0.7);
-  overflow: hidden;
-  display: none;
-  transition: all 0.3s ease;
-  transform: translateY(-10px);
-  border-radius: 0 0 10px 10px;
-  border-left: 2px solid rgba(79, 180, 255, 0.4);
-}
-
-.submenu.open {
-  display: block;
-  transform: translateY(0);
-  max-height: 500px;
-}
-
-/* Estilo para submenú flotante apilado */
-.submenu.stacked-buttons {
-  position: absolute;
-  left: 66px;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 200;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateX(-20px);
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  padding: 8px;
-  background: #0A0A0A;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(79, 180, 255, 0.2);
-  margin: 0;
-  width: auto;
-  min-width: 180px;
-}
-
-/* Flecha para el submenu flotante */
-.submenu.stacked-buttons {
-  position: absolute;
-  left: 66px; /* Aseguramos que esté fuera del sidebar */
-  top: 0;
-  display: none; /* Cambiamos de flex a none para que no se muestre hasta que se active */
-  flex-direction: column;
-  gap: 8px;
-  z-index: 200;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateX(-20px);
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  padding: 8px;
-  background: #0A0A0A;
-  border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(79, 180, 255, 0.2);
-  margin: 0;
-  width: auto;
-  min-width: 180px;
-}
-
-.submenu.stacked-buttons.open {
-  display: flex; /* Ahora cambiamos a flex cuando está abierto */
-  opacity: 1;
-  transform: translateX(5px);
-  pointer-events: all;
-}
-
-.submenu.stacked-buttons li {
-  transform: translateX(-30px);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transition-delay: calc(var(--item-index) * 0.08s);
-  width: 100%;
-}
-
-.submenu.stacked-buttons.open li {
+  font-size: 15px;
+  letter-spacing: 0.1px;
   transform: translateX(0);
+  color: var(--sidebar-text-color); /* Asegurar color base */
+}
+.menu-arrow {
+  font-size: 15px;
+  transition: transform var(--transition-speed) ease,
+    opacity var(--transition-speed) ease;
+  opacity: 0.6;
+  margin-left: var(--space-xs);
+  flex-shrink: 0;
+}
+.menu-item:hover .menu-arrow {
+  opacity: 1;
 }
 
-.stacked-buttons li a {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #111111;
-  border-radius: 10px;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
+/* Ocultar texto y flecha en sidebar principal COLAPSADO */
+/* Este selector es MUY específico para el texto del menú principal */
+.sidebar.collapsed .menu-list > .menu-item > .menu-header > .menu-text,
+.sidebar.collapsed .menu-list > .menu-item > a > .menu-text,
+.sidebar.collapsed .menu-list > .menu-item .menu-arrow {
+  display: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+.sidebar.collapsed .menu-item > a,
+.sidebar.collapsed .menu-item > .menu-header {
+  justify-content: center;
+  padding: var(--space-m) 0;
+}
+.sidebar.collapsed .menu-item .menu-icon {
+  margin-right: 0;
+  font-size: 20px;
+}
+
+/* --- Submenú Estilo Dropdown (Sidebar Expandido) --- */
+.submenu-dropdown {
+  list-style: none;
+  padding: var(--space-xs) 0 var(--space-xs) calc(var(--space-s) * 1.5);
+  margin: 0 0 0 var(--space-m);
+  max-height: 0;
   overflow: hidden;
   position: relative;
-  width: 100%;
-  height: auto;
-  border: 1px solid rgba(79, 180, 255, 0.1);
+  transition: max-height var(--transition-speed) ease-in-out,
+    padding var(--transition-speed) ease-in-out;
+}
+.submenu-dropdown::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--border-color-soft);
+  opacity: 0.5;
+}
+.submenu-dropdown.open {
+  max-height: 400px;
+  padding-top: var(--space-s);
+  padding-bottom: var(--space-s);
+}
+.submenu-dropdown li a {
+  padding: 8px var(--space-s);
+  color: var(--sidebar-text-muted);
+  font-size: var(--font-size-sm);
+  border-radius: calc(var(--border-radius-main) - 2px);
+  margin: 1px 0;
+  display: flex;
+  align-items: center;
+  transition: all var(--transition-speed) ease;
+}
+.submenu-dropdown li a .menu-icon {
+  font-size: 16px;
+  color: var(--sidebar-text-muted);
+}
+/* Texto en dropdown (no flyout) */
+.submenu-dropdown li a .menu-text {
+  font-size: 15px;
+  color: var(--sidebar-text-muted);
+  font-weight: 500;
+}
+.submenu-dropdown li a:hover,
+.submenu-dropdown li.active a {
+  color: var(--primary-accent-color);
+  background: var(--item-bg-hover);
+}
+.submenu-dropdown li a:hover .menu-icon,
+.submenu-dropdown li a:hover .menu-text,
+.submenu-dropdown li.active a .menu-icon,
+.submenu-dropdown li.active a .menu-text {
+  color: var(--primary-accent-color);
+}
+.submenu-dropdown li.active a {
+  font-weight: 500;
+}
+
+/* --- Submenú Estilo Flyout (Sidebar Colapsado) --- */
+.submenu-flyout-panel {
+  position: fixed;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1005;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-5px) scale(0.99);
+  transition: opacity calc(var(--transition-speed) * 0.9)
+      var(--transition-timing),
+    transform calc(var(--transition-speed) * 0.9) var(--transition-timing);
+  padding: var(--space-s);
+  background: var(--sidebar-bg-subtle);
+  border-radius: var(--border-radius-large);
+  box-shadow: 0 4px 15px var(--shadow-medium);
+  border: 1px solid var(--border-color-soft);
+  min-width: 200px;
+  list-style: none;
   margin: 0;
 }
-
-.stacked-buttons li a::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: #4FB4FF;
-  transition: all 0.3s ease;
-}
-
-.stacked-buttons li a:hover {
-  background: #1a1a1a;
-  transform: translateX(5px) translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-  border-color: rgba(79, 180, 255, 0.3);
-}
-
-.stacked-buttons li a:hover::before {
-  width: 6px;
-}
-
-.stacked-buttons .menu-icon {
-  margin-right: 15px;
-  font-size: 28px;
-  color: #fff;
-  background: rgba(79, 180, 255, 0.15);
-}
-
-.stacked-buttons li a:hover .menu-icon {
-  background: rgba(79, 180, 255, 0.3);
-}
-
-.stacked-buttons .menu-text {
-  font-size: 14px;
-  font-weight: 500;
+.submenu-flyout-panel.open {
   opacity: 1;
-  width: auto;
+  transform: translateX(0) scale(1);
+  pointer-events: auto;
 }
 
-.submenu li a {
-  padding: 12px 16px;
-  color: rgba(255, 255, 255, 0.7);
+.submenu-flyout-panel li {
+  opacity: 0;
+  transform: translateY(3px);
+  animation: flyoutItemFadeInCompact var(--transition-speed) ease forwards;
+  animation-delay: calc(var(--item-index) * 0.04s + 0.04s);
+}
+@keyframes flyoutItemFadeInCompact {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submenu-flyout-panel li a {
+  /* Contenedor <a> del ítem en flyout */
   display: flex;
-  transition: all 0.3s ease;
-  font-size: 13px;
-  border-radius: 10px;
-  margin: 4px 6px;
+  align-items: center;
+  padding: 9px var(--space-m);
+  background: transparent;
+  border-radius: var(--border-radius-main);
+  /* color: var(--sidebar-text-color); Ya no es necesario aquí, se controla en hijos */
+  transition: background-color var(--transition-speed) ease;
 }
 
-.submenu li a:hover {
-  color: #fff;
-  background: rgba(79, 180, 255, 0.1);
-  transform: translateX(3px);
-}
-
-.submenu li a .menu-icon {
-  margin-right: 10px;
-  background: rgba(79, 180, 255, 0.1);
+.submenu-flyout-panel li a .menu-icon {
+  /* Icono dentro del flyout */
+  margin-right: var(--space-s);
   font-size: 16px;
+  color: var(--sidebar-text-muted); /* Color base del icono */
+  flex-shrink: 0;
+  transition: color var(--transition-speed) ease;
 }
 
-.menu-item.active > a,
-.menu-item.active > .menu-header {
-  color: #fff;
-  background: rgba(79, 180, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-left: 3px solid #4FB4FF;
+/* --- BLOQUE FUNCIONAL PARA TEXTO DEL FLYOUT (REMASTERIZADO) --- */
+.submenu-flyout-panel li a span.menu-text {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  width: auto !important; /* Ajustar al contenido */
+  min-width: 10px !important; /* Evitar colapso total */
+  height: auto !important;
+  overflow: visible !important; /* Mostrar todo el texto */
+  transform: none !important; /* Sin transformaciones raras */
+  position: relative !important; /* O static, para flujo normal */
+  pointer-events: auto !important; /* Que el texto sea clickeable si forma parte del link */
+  z-index: 1 !important; /* Por si acaso, pero debería ser suficiente con position */
+
+  /* Propiedades de Estilo (Aplicando paleta profesional) */
+  font-size: var(--font-size-sm) !important; /* Tamaño definido */
+  font-weight: 500 !important; /* Peso legible, no bold por defecto */
+  color: var(--sidebar-text-color) !important; /* Texto base claro (#E0E0E0) */
+  white-space: nowrap !important; /* Evita saltos de línea no deseados */
+  flex-grow: 1; /* Si 'a' es flex, permite crecer */
+  margin-left: var(--space-s); /* Espacio del icono */
+  padding: 0 !important; /* Sin padding extra en el span mismo */
+  border: none !important; /* Sin borde en el span mismo */
+  background-color: transparent !important; /* Sin fondo en el span mismo */
+  letter-spacing: 0.2px;
+  transition: color var(--transition-speed) ease,
+    font-weight var(--transition-speed) ease;
 }
 
-.menu-item.active .menu-icon {
-  background: rgba(79, 180, 255, 0.25);
-  color: #fff;
+/* Hover para ítems del flyout */
+.submenu-flyout-panel li a:hover {
+  background: var(--item-bg-hover);
+}
+.submenu-flyout-panel li a:hover span.menu-text {
+  /* Texto en hover */
+  color: var(--sidebar-text-color-hover) !important; /* Blanco */
+}
+.submenu-flyout-panel li a:hover .menu-icon {
+  /* Icono en hover */
+  color: var(--primary-accent-color) !important; /* Azul */
 }
 
-/* Efecto de resplandor para elementos al hover */
-.menu-item a:hover::after,
-.menu-header:hover::after {
-  content: '';
+/* Estado Activo para ítems del flyout */
+.submenu-flyout-panel li.active a {
+  background: var(--item-bg-active); /* Fondo azulado sutil */
+}
+.submenu-flyout-panel li.active a span.menu-text {
+  /* Texto en activo */
+  color: var(--sidebar-text-color-hover) !important; /* BLANCO para contraste */
+  font-weight: 600 !important; /* Más destacado */
+}
+.submenu-flyout-panel li.active a .menu-icon {
+  /* Icono en activo */
+  color: var(--sidebar-text-color-hover) !important; /* BLANCO para contraste */
+}
+
+/* --- Estados Activos del Menú Principal (Sidebar) --- */
+.sidebar .menu-list > .menu-item.active > a,
+.sidebar .menu-list > .menu-item.active > .menu-header {
+  color: var(--sidebar-text-color-hover);
+  background: var(--item-bg-active);
+}
+.sidebar .menu-list > .menu-item.active > a .menu-icon,
+.sidebar .menu-list > .menu-item.active > .menu-header .menu-icon {
+  color: var(--primary-accent-color);
+}
+.sidebar:not(.collapsed) .menu-list > .menu-item.active > a::before,
+.sidebar:not(.collapsed) .menu-list > .menu-item.active > .menu-header::before {
+  content: "";
   position: absolute;
-  top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, rgba(79, 180, 255, 0.3) 0%, transparent 70%);
-  opacity: 0.4;
-  z-index: -1;
-  border-radius: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background-color: var(--primary-accent-color);
+  border-radius: 0 2px 2px 0;
+}
+.sidebar.collapsed .menu-list > .menu-item.active > a,
+.sidebar.collapsed .menu-list > .menu-item.active > .menu-header {
+  background: var(--primary-accent-color);
+}
+.sidebar.collapsed .menu-list > .menu-item.active > a .menu-icon,
+.sidebar.collapsed .menu-list > .menu-item.active > .menu-header .menu-icon {
+  color: var(--sidebar-bg);
 }
 
-/* Solución para el botón de toggle siempre visible */
-.sidebar.collapsed .toggle-btn {
-  position: fixed;
-  left: 55px;
-  top: 24px;
-  background-color: #000000;
-}
-.sidebar.collapsed .menu-item.active .submenu.stacked-buttons.open {
-  display: flex !important;
-  position: fixed !important;
-  left: 66px !important;
-}
-
-
-/* Responsive design */
+/* --- Diseño Responsivo --- */
 @media (max-width: 768px) {
   .sidebar {
-    width: 65px;
+    width: var(--sidebar-width-collapsed);
+    border-right: none;
   }
-
-  .sidebar.collapsed {
-    width: 0;
-    padding: 0;
+  .sidebar.collapsed .logo-text,
+  .sidebar.collapsed .menu-list > .menu-item .menu-text, /* Texto principal oculto */
+  .sidebar.collapsed .menu-list > .menu-item .menu-arrow,
+  .sidebar.collapsed .menu-section-title-container {
+    display: none !important;
   }
-  
-  .sidebar.collapsed .toggle-btn {
-    left: 10px;
-    opacity: 0.8;
-  }
-
-  .sidebar:not(.collapsed):hover {
-    width: 250px;
-  }
-
-  .sidebar:not(.collapsed):hover .logo-text,
-  .sidebar:not(.collapsed):hover .menu-text,
-  .sidebar:not(.collapsed):hover .menu-arrow {
-    opacity: 1;
-    width: auto;
+  .sidebar-header {
+    padding: var(--space-m) var(--space-s);
   }
 }
