@@ -182,7 +182,7 @@ function TableUser() {
                 {currentItems.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="no-data-row">
-                      No se encontraron comodidades
+                      No se encontraron usuarios
                     </td>
                   </tr>
                 ) : (

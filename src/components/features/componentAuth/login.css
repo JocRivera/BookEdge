@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Henny+Penny&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Henny+Penny&display=swap");
 
 * {
   margin: 0;
@@ -7,7 +7,7 @@
 }
 
 :root {
-  --primary-color: #2b9ad6; 
+  --primary-color: #2b9ad6;
   --primary-gradient: linear-gradient(135deg, #2b9ad6, #1e6ca0);
   --secondary-color: #f9f9f9;
   --text-color: #333;
@@ -18,7 +18,7 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   background-color: #f5f9fc;
   color: var(--text-color);
 }
@@ -38,7 +38,7 @@ body {
 }
 
 .navbar-content {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
@@ -107,49 +107,48 @@ body {
 }
 
 .brand-side {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #2b9ad6, #1e6ca0);
-    color: white;
-    padding: 0; 
-    position: relative;
-    overflow: hidden;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2b9ad6, #1e6ca0);
+  color: white;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
 }
 .image-carousel {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-  }
-  
-  .carousel-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Para que la imagen cubra todo el espacio */
-    opacity: 0;
-    transition: opacity 1.5s ease-in-out;
-  }
-  
-  .carousel-image.active {
-    opacity: 1;
-  }
-  
-  .brand-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-  }
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
 
+.carousel-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Para que la imagen cubra todo el espacio */
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.carousel-image.active {
+  opacity: 1;
+}
+
+.brand-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
 
 .brand-decoration {
   position: absolute;
@@ -165,35 +164,31 @@ body {
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
 }
 
-
 .brand-decoration:before {
   display: none;
 }
 
-
 .logo-carousel {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-  }
-  
-  .logo-carousel img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    transition: opacity 0.8s ease-in-out;
-  }
-  
-  .logo-carousel img.active {
-    opacity: 1;
-  }
+  position: relative;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
 
+.logo-carousel img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
 
+.logo-carousel img.active {
+  opacity: 1;
+}
 
 /* Form Styles */
 .login-form {
@@ -214,12 +209,12 @@ body {
 }
 
 .input-group {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .form-input {
   position: relative;
-  margin-bottom: 20px;
+  border: none !important;
 }
 
 .form-input input {
@@ -229,41 +224,35 @@ body {
   border-radius: 8px;
   font-size: 16px;
   transition: var(--transition);
-  background: transparent;
-  z-index: 1;
+  background: transparent; 
+
+  margin-top: 5px;
 }
 
-.form-input label {
-  position: absolute;
-  left: 15px;
-  top: 12px;
-  color: #888;
-  transition: var(--transition);
-  pointer-events: none;
-  font-size: 16px;
-  background: transparent;
-  padding: 0 5px;
+
+.form-input.focused input { 
+  border-color: var(--primary-color) !important; 
+  border: none;
+  
 }
 
-.form-input.focused input {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.1);
+.form-input.focused label { 
+  color: var(--primary-color) !important; 
+
 }
 
-.form-input.focused label,
+
 .label-active {
-  top: -10px;
-  left: 10px;
-  font-size: 12px;
-  color: var(--primary-color);
-  background: white;
-  z-index: 2;
+  color: var(--primary-color) !important; 
 }
+
+
+
 
 .login-button {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #2b9ad6, #1e6ca0) !important; 
+  background: #00a6ff !important;
   color: white;
   border: none;
   border-radius: 8px;
@@ -303,7 +292,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .forgot-password {
@@ -360,16 +351,15 @@ body {
   text-decoration: underline;
 }
 
-.error-container {
+.error-container- {
   background-color: rgba(231, 76, 60, 0.1);
-  border-left: 4px solid var(--error-color);
   padding: 12px;
   margin-bottom: 20px;
   border-radius: 4px;
 }
 
-.error-text {
-  color: var(--error-color);
+.error-text-ss {
+  color: red;
   font-size: 0.9em;
 }
 
@@ -378,7 +368,7 @@ body {
   .brand-side {
     display: none;
   }
-  
+
   .login-card {
     max-width: 500px;
     margin: 0 auto;
@@ -389,19 +379,19 @@ body {
   .form-side {
     padding: 30px 20px;
   }
-  
+
   .form-title {
     font-size: 1.8em;
   }
-  
+
   .form-subtitle {
     font-size: 0.9em;
   }
-  
+
   .navbar-logo {
     height: 30px;
   }
-  
+
   .navbar-title {
     font-size: 1.3rem;
   }

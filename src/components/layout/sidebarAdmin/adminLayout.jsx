@@ -4,8 +4,15 @@ import Sidebar from './sidebar';
 import Navbar from "../navbar/Navbar";
 import './adminLayaout.css';
 
+const getInitialCollapsedState = () => {
+  const manuallyCollapsed = localStorage.getItem('sidebarManuallyCollapsed') === 'true';
+  if (manuallyCollapsed) {
+    return true;
+  }
+  return window.innerWidth < 768;
+};
 const AdminLayout = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(getInitialCollapsedState()); 
 
   useEffect(() => {
     const handleSidebarToggle = (event) => {

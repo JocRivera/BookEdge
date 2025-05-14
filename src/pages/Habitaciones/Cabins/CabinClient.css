@@ -76,32 +76,21 @@
 
 .cabin-title-home {
   position: absolute;
-  bottom: 120px;
+  bottom: 80px;
   left: 0;
   width: 100%;
   font-size: 2rem;
   font-weight: 700;
   color: white;
-  transform: translateY(30px);
-  opacity: 0;
-  transition: var(--transition);
+  text-align: center;
   z-index: 2;
 }
 
 .cabin-card-home:hover .cabin-title-home {
-  transform: translateY(0);
   opacity: 1;
 }
 
-.cabin-meta-home {
-  position: absolute;
-  bottom: 80px; 
-  display: flex;
-  gap: 10px;
-  transform: translateY(30px);
-  opacity: 0;
-  transition: var(--transition);
-}
+
 
 .cabin-card-home:hover .cabin-meta-home {
   transform: translateY(0);
@@ -123,10 +112,7 @@
   position: absolute;
   width: 100%;
   bottom: 10px;
-  transform: translateY(50px);
-  opacity: 0;
-  transition: var(--transition);
-  z-index: 2;
+
 }
 
 .cabin-card-home:hover .cabin-button-container {

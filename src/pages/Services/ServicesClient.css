@@ -1,7 +1,5 @@
 :root {
-    --azure: #3785d4;
-    --primary: #4a6741;
-    --primary-dark: #304a27;
+    --azure1: #ffd60a !important;
     --text-dark: #333333;
     --background-dark: #f8f8f8;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -39,12 +37,12 @@
     transform: translateX(-50%);
     width: 30%; 
     height: 3px;
-    background: var(--azure);
+    background: var(--azure1);
     border-radius: 3px;
   }
   .services-title-creative span {
     font-weight: 700;
-    color: var(--azure);
+    color: var(--azure1);
   }
   
   /* Track del carrusel */
@@ -87,7 +85,7 @@
   /* Iconos */
   .service-icon {
     font-size: 2.8rem;
-    color: var(--azure);
+    color: var(--azure1);
     margin-bottom: 20px;
     transition: transform 0.3s ease;
   }
@@ -99,7 +97,7 @@
   /* Texto */
   .service-name {
     font-size: 1.4rem;
-    color: var(--primary-dark);
+    color: black;
     margin-bottom: 15px;
     text-align: center;
     font-weight: 600;
