@@ -452,15 +452,19 @@
   justify-content: space-between;
   padding-top: 1.5rem;
   border-top: 1px solid var(--reservations-border);
+
 }
 
 .modal-footer button {
-  padding: 0.8rem 1.5rem;
-  border-radius: 50px;
-  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
+  font-size: 0.9rem;
 }
 
 .modal-footer .reservations-cancel-btn {
@@ -470,21 +474,25 @@
 }
 
 .modal-footer .reservations-cancel-btn:hover {
-  background: var(--reservations-primary-hover);
-  color: var(--reservations-primary-dark);
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
 }
 
 .modal-footer .submit-btn {
-  background: var(--reservations-primary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #4299e1;
+  border: 1px solid #4299e1;
   color: white;
-  border: none;
-  box-shadow: 0 4px 15px var(--reservations-shadow-medium);
+  font-size: 0.9rem;
 }
 
 .modal-footer .submit-btn:hover {
-  background: var(--reservations-primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--reservations-shadow-dark);
+   background-color: #3182ce;
+  border-color: #3182ce;
 }
 
 /* Estilos para la búsqueda */
