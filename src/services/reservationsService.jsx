@@ -3,7 +3,7 @@ import axios from "axios"
 const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
 const API_URL_USERS = "http://localhost:3000/user"
 const API_URL_PLANS = "http://localhost:3000/plan"
-
+const API_URL_CABINS = "http://localhost:3000/cabins"
 
 /**
  * Función auxiliar para validar IDs
@@ -96,6 +96,23 @@ export const getAllPlanes = async () => {
   }
 }
 
+export const getCabins = async () => {
+  try {
+    const { data } = await axios.get(`${API_URL_CABINS}`);
+    
+    // Aseguramos que el estado tenga el formato correcto
+    const normalizedCabins = data.map(cabin => ({
+      ...cabin,
+      status: cabin.status?.trim() || "No Disponible" // Normaliza espacios
+    }));
+    
+    console.log("Cabañas normalizadas:", normalizedCabins);
+    return normalizedCabins;
+  } catch (error) {
+    console.error("Error al obtener cabañas:", error);
+    return []; // Siempre retorna array
+  }
+};
 
 const validateReservationData = (reservationData) => {
   if (!reservationData) {
@@ -334,6 +351,7 @@ export const changeReservationStatus = async (idReservation, status) => {
     const payload = {
       idUser: currentReservation.idUser,
       idPlan: currentReservation.idPlan,
+      idCabin: currentReservation.idCabin,
       startDate: currentReservation.startDate,
       endDate: currentReservation.endDate,
       status: status, // Actualizar solo el estado
