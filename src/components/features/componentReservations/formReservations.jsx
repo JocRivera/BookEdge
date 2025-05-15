@@ -12,12 +12,13 @@ import {
   updateReservation,
   getReservationById,
   addCompanionReservation,
-} from "../../../services/reservationsService.jsx"
-import { createCompanion, deleteCompanion } from "../../../services/companionsService.jsx"
+  getCabins
+} from "../../../services/reservationsService"
+import { createCompanion, deleteCompanion } from "../../../services/companionsService"
 import {
   addPaymentToReservation,
   getReservationPayments,
-} from "../../../services/paymentsService.jsx";
+} from "../../../services/paymentsService";
 
 function FormReservation({ reservationData = null, onClose, onSave, isOpen, isReadOnly = false }) {
   const [step, setStep] = useState(1)
@@ -32,13 +33,15 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     status: "Reservado",
     total: 0,
     paymentMethod: "Efectivo",
-    // Nuevos campos para disponibilidad
-    availabilityChecked: false,
-    availableRooms: []
+    cabins: "",
+    availableCabins: [],
+    selectedCabin: null
   })
   const [errors, setErrors] = useState({})
   const [planes, setPlanes] = useState([])
   const [users, setUsers] = useState([])
+  const [cabins, setCabins] = useState([])
+
   const [loading, setLoading] = useState(false)
   const [tempPayments, setTempPayments] = useState([]);
   const [reservationPayments, setReservationPayments] = useState([]);
@@ -54,12 +57,39 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         console.log("Iniciando carga de datos iniciales...");
 
         // 1. Cargar datos básicos (planes y usuarios)
-        const [planesData, usersData] = await Promise.all([
+        const [planesData, usersData, cabinsData] = await Promise.all([
           getAllPlanes(),
-          getUsers()
+          getUsers(),
+          getCabins()
         ]);
         setPlanes(planesData);
         setUsers(usersData);
+        setCabins(cabinsData)
+        const availableCabins = cabinsData.filter(cabin => {
+          // Verificación exacta del estado (case-sensitive)
+          const isAvailable = cabin.status === "En Servicio";
+
+          // Verificación de capacidad (con protección contra NaN)
+          const requiredCapacity = Number(formData.companionCount) + 1;
+          const cabinCapacity = Number(cabin.capacity) || 0;
+          const hasCapacity = cabinCapacity >= requiredCapacity;
+
+          console.log(`Cabaña: ${cabin.name} | Estado: ${cabin.status} | Cumple: ${isAvailable && hasCapacity}`);
+
+          return isAvailable && hasCapacity;
+        });
+        console.log("Datos brutos de cabañas:", cabinsData);
+
+        setFormData(prev => {
+          const newAvailableCabins = availableCabins;
+          console.log("Actualizando estado con:", newAvailableCabins);
+
+          return {
+            ...prev,
+            availableCabins: newAvailableCabins,
+            updateFlag: !prev.updateFlag
+          };
+        });
 
         // 2. Manejo de reserva existente
         if (reservationData) {
@@ -107,6 +137,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
           setFormData({
             idUser: freshData.idUser ? Number(freshData.idUser) : "",
             idPlan: freshData.idPlan ? Number(freshData.idPlan) : "",
+            idCabin: freshData.idCabin ? Number(freshData.idCabin) : "",
             startDate: freshData.startDate || "",
             endDate: freshData.endDate || "",
             hasCompanions: companions.length > 0,
@@ -123,6 +154,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
           setFormData({
             idUser: "",
             idPlan: "",
+            idCabin: "",
             startDate: "",
             endDate: "",
             hasCompanions: false,
@@ -212,6 +244,11 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
       } else if (formData.companions.length !== formData.companionCount) {
         newErrors.companions = `Debe agregar ${formData.companionCount} acompañantes (actualmente: ${formData.companions.length})`
       }
+      if (step === (formData.hasCompanions ? 3 : 2)) {
+        if (!formData.selectedCabin) {
+          newErrors.selectedCabin = "Debe seleccionar una cabaña";
+        }
+      }
     }
 
     setErrors(newErrors)
@@ -264,6 +301,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
       const payload = {
         idUser: Number(formData.idUser),
         idPlan: Number(formData.idPlan),
+        idCabin: Number(formData.selectedCabin),
         startDate: formData.startDate,
         endDate: formData.endDate,
         status: formData.status || "Reservado",
@@ -321,6 +359,15 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCabinChange = (e) => {
+    const { value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      selectedCabin: value,
+      idCabin: value, // Actualiza el idCabin en el formulario
+    }));
   };
 
   const handleSaveCompanionInReservation = async (companionData, reservationId) => {
@@ -624,54 +671,112 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 </div>
               </div>
             )}
+
             {step === (formData.hasCompanions ? 3 : 2) && (
               <div className="form-step">
-                <h3>Verificar Disponibilidad</h3>
+                <h3>Selecciona tu cabaña</h3>
+                <p className="availability-subtitle">
+                  Disponibles para {formData.companionCount + 1} personas
+                </p>
 
-                <div className="availability-summary">
-                  <p><strong>Plan seleccionado:</strong> {planes.find(p => p.idPlan === Number(formData.idPlan))?.name || 'No seleccionado'}</p>
-                  <p><strong>Fechas:</strong> {formData.startDate} al {formData.endDate}</p>
-                  <p><strong>Acompañantes:</strong> {formData.companionCount}</p>
+                {/* Contenedor de cabañas con validación */}
+                <div className="cabins-grid">
+                  {formData.availableCabins?.length > 0 ? (
+                    formData.availableCabins.map((cabin) => {
+                      console.log("Renderizando cabaña:", cabin);
+                      return (
+                        <div
+                          key={`cabin-${cabin.idCabin}`}
+                          className={`cabin-card ${formData.selectedCabin === cabin.idCabin ? "selected" : ""
+                            }`}
+                          onClick={() =>
+                            handleCabinChange({
+                              target: {
+                                value: cabin.idCabin,
+                                name: "selectedCabin"
+                              }
+                            })
+                          }
+                        >
+                          <div className="cabin-header">
+                            <h4>{cabin.name}</h4>
+                            <span className="cabin-capacity">
+                              👥 {cabin.capacity} personas
+                            </span>
+                          </div>
+
+                          <div className="cabin-description">
+                            {cabin.description || "Cabaña con todas las comodidades"}
+                          </div>
+
+
+                          <button
+                            className="select-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCabinChange({
+                                target: {
+                                  value: cabin.idCabin,
+                                  name: "selectedCabin"
+                                }
+                              });
+                            }}
+                          >
+                            {formData.selectedCabin === cabin.idCabin
+                              ? "✓ Seleccionada"
+                              : "Seleccionar"}
+                          </button>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="no-cabins-message">
+                      {loading ? (
+                        <p>Cargando cabañas disponibles...</p>
+                      ) : (
+                        <p>
+                          No hay cabañas disponibles que cumplan con los criterios actuales.
+                          <br />
+                          <small>
+                            Estado requerido: &apos;En Servicio&apos; | Capacidad mínima:{" "}
+                            {formData.companionCount + 1} personas
+                          </small>
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                <div className="availability-controls">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={formData.availabilityChecked}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        availabilityChecked: e.target.checked
-                      }))}
-                      disabled={isReadOnly || loading}
-                    />
-                    Confirmo que he verificado la disponibilidad
-                  </label>
-
-                  {/* Espacio para futura integración con la API */}
-                  <div className="availability-results">
-                    {formData.availableRooms.length > 0 ? (
-                      <div className="rooms-available">
-                        <h4>Habitaciones disponibles:</h4>
-                        <ul>
-                          {formData.availableRooms.map(room => (
-                            <li key={room.id}>{room.name} - {room.type}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="no-availability-data">
-                        <p>La verificación de disponibilidad se realizará al guardar la reserva.</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {errors.availability && (
-                  <div className="error-banner">
-                    <p>{errors.availability}</p>
+                {/* Mensaje de error */}
+                {errors.selectedCabin && (
+                  <div className="error-message" style={{ marginTop: "10px" }}>
+                    {errors.selectedCabin}
                   </div>
                 )}
+
+                {/* Detalles de la cabaña seleccionada */}
+                {formData.selectedCabin && (
+                  <div className="selected-cabin-details">
+                    <h4>Detalles de tu selección:</h4>
+                    <p>
+                      {cabins.find((c) => c.idCabin === Number(formData.selectedCabin))
+                        ?.description || "Descripción no disponible"}
+                    </p>
+                  </div>
+                )}
+
+
+                {/* Debug (puedes eliminar esto en producción) */}
+                <div style={{ display: "none" }}>
+                  Debug Data:
+                  <pre>
+                    {JSON.stringify(
+                      {
+                        availableCabins: formData.availableCabins,
+                        selectedCabin: formData.selectedCabin,
+                        cabinsData: cabins
+                      }, null, 2)}</pre>
+                </div>
               </div>
             )}
 
