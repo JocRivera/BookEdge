@@ -11,7 +11,7 @@ import {
   IoHomeOutline,
   IoBedOutline,
   IoMailOutline,
-  IoGridOutline 
+  IoGridOutline
 } from "react-icons/io5";
 
 import { FiStar, FiChevronDown } from "react-icons/fi";
@@ -53,14 +53,14 @@ const Navbar = () => {
 
   // Determinar si estamos en el panel administrativo
   const isAdminPanel = location.pathname.startsWith("/admin");
-  
+
   // Función para manejar la navegación
   const handleNavigation = (path) => {
     navigate(path);
     setDropdownOpen(false);
     setMobileMenuOpen(false);
   };
-  
+
   // Nueva función para scroll a secciones con offset
   const scrollToSection = (sectionId) => {
     // Primero verificamos si estamos en la página de inicio
@@ -77,7 +77,7 @@ const Navbar = () => {
     }
     setMobileMenuOpen(false);
   };
-  
+
   // Función auxiliar para hacer scroll con offset
   const scrollWithOffset = (sectionId) => {
     const section = document.getElementById(sectionId);
@@ -86,7 +86,7 @@ const Navbar = () => {
       const yOffset = -80; // Ajusta este valor según la altura de tu navbar
       const elementPosition = section.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset + yOffset;
-      
+
       // Hacemos scroll a la posición calculada
       window.scrollTo({
         top: offsetPosition,
@@ -114,98 +114,97 @@ const Navbar = () => {
   }
 
   // =================================================================
-// NAVBAR PARA ADMINISTRADORES (CON EL NUEVO DROPDOWN UNIFICADO)
-// =================================================================
-if (isAuthenticated && isStaff() && isAdminPanel) {
-  return (
-    <nav className="Nav admin-panel-nav">
-      <div className="logo-nav">
-        <button
-          className={`mobile-menu-button ${mobileMenuOpen ? "active" : ""}`}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Menú móvil"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-
-      <div className={`nav-container ${mobileMenuOpen ? "mobile-open" : ""}`}>
-        <div className="luxury-user-dropdown" ref={dropdownRef}>
-          <div
-            className="luxury-user-info"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
+  // NAVBAR PARA ADMINISTRADORES (CON EL NUEVO DROPDOWN UNIFICADO)
+  // =================================================================
+  if (isAuthenticated && isStaff() && isAdminPanel) {
+    return (
+      <nav className="Nav admin-panel-nav">
+        <div className="logo-nav">
+          <button
+            className={`mobile-menu-button ${mobileMenuOpen ? "active" : ""}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menú móvil"
           >
-            <div className="luxury-user-avatar admin-avatar">
-              {getInitials(user?.name)}
-            </div>
-            <FiChevronDown className={`dropdown-chevron ${dropdownOpen ? "open" : ""}`} />
-            </div>
-
-          {dropdownOpen && (
-            <div className="luxury-dropdown-menu">
-              <div className="luxury-dropdown-header">
-                <div className="luxury-user-avatar large">
-                  {getInitials(user?.name)}
-                </div>
-                <div className="luxury-user-details">
-                  <h4>{user?.name || "Usuario"}</h4>
-                  <p>{user?.email || ""}</p>
-                  <span className="user-role-badge">{user?.role?.name || "Admin"}</span>
-                </div>
-              </div>
-
-              <div
-                className="luxury-dropdown-item"
-                onClick={() => handleNavigation("/admin/profile")}
-              >
-                <IoPersonOutline className="dropdown-icon" />
-                <span>Mi Perfil</span>
-              </div>
-
-              <div
-                className="luxury-dropdown-item"
-                onClick={() => handleNavigation("/admin/dashboard")}
-              >
-                <IoGridOutline className="dropdown-icon" />
-                <span>Panel Administrativo</span>
-              </div>
-
-              <div className="luxury-dropdown-divider"></div>
-
-              <button
-                onClick={() => logout()}
-                className="luxury-dropdown-item logout"
-              >
-                <IoLogOutOutline className="dropdown-icon" />
-                <span>Cerrar Sesión</span>
-              </button>
-            </div>
-          )}
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
-      </div>
-    </nav>
-  );
+
+        <div className={`nav-container ${mobileMenuOpen ? "mobile-open" : ""}`}>
+          <div className="luxury-user-dropdown" ref={dropdownRef}>
+            <div
+              className="luxury-user-info"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <div className="luxury-user-avatar admin-avatar">
+                {getInitials(user?.name)}
+              </div>
+              <FiChevronDown className={`dropdown-chevron ${dropdownOpen ? "open" : ""}`} />
+            </div>
+
+            {dropdownOpen && (
+              <div className="luxury-dropdown-menu">
+                <div className="luxury-dropdown-header">
+                  <div className="luxury-user-avatar large">
+                    {getInitials(user?.name)}
+                  </div>
+                  <div className="luxury-user-details">
+                    <h4>{user?.name || "Usuario"}</h4>
+                    <p>{user?.email || ""}</p>
+                    <span className="user-role-badge">{user?.role?.name || "Admin"}</span>
+                  </div>
+                </div>
+
+                <div
+                  className="luxury-dropdown-item"
+                  onClick={() => handleNavigation("/admin/profile")}
+                >
+                  <IoPersonOutline className="dropdown-icon" />
+                  <span>Mi Perfil</span>
+                </div>
+
+                <div
+                  className="luxury-dropdown-item"
+                  onClick={() => handleNavigation("/admin")}
+                >
+                  <IoGridOutline className="dropdown-icon" />
+                  <span>Panel Administrativo</span>
+                </div>
+
+                <div className="luxury-dropdown-divider"></div>
+
+                <button
+                  onClick={() => logout()}
+                  className="luxury-dropdown-item logout"
+                >
+                  <IoLogOutOutline className="dropdown-icon" />
+                  <span>Cerrar Sesión</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+    );
 
   }
   return (
     <nav
-      className={`luxury-nav ${scrolled ? "scrolled" : ""} ${
-        mobileMenuOpen ? "mobile-open" : ""
-      }`}
+      className={`luxury-nav ${scrolled ? "scrolled" : ""} ${mobileMenuOpen ? "mobile-open" : ""
+        }`}
     >
-       <div className="luxury-logo" onClick={() => handleNavigation("/")}>
-          <img
-            src={logo} // Usa tu logo normal
-            alt="Logo"
-            className={`luxury-logo-img ${scrolled ? "" : "logo-light"}`}
-          />
-         
-        </div>
+      <div className="luxury-logo" onClick={() => handleNavigation("/")}>
+        <img
+          src={logo} // Usa tu logo normal
+          alt="Logo"
+          className={`luxury-logo-img ${scrolled ? "" : "logo-light"}`}
+        />
+
+      </div>
       <div className="luxury-nav-container">
         {/* Logo */}
-       
+
 
         {/* Menú hamburguesa para móvil */}
         <button
