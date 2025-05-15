@@ -27,6 +27,16 @@ export const getCabinsPerCapacity = async () => {
     })
     return uniqueCapacities
 }
+export const getBedroomsPerCapacity = async () => {
+    const {data} = await axios.get(`${API_URL_PLANES}/uniqueCapacitiesBedroom`)
+    let uniqueCapacities = []
+    data.forEach((item) => {
+        if (!uniqueCapacities.some((capacity) => capacity.capacity === item.capacity)) {
+            uniqueCapacities.push({id: generateUniqueId(uniqueCapacities), name: "Bedroom", capacity: item.capacity});
+        }
+    })
+    return uniqueCapacities
+}
 
 export const getServicesPerPlan = async () => {
     const {data} = await axios.get(`${API_URL_PLANES}/servicesPerPlan`)

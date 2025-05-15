@@ -1,326 +1,253 @@
-.detail-modal {
-    width: 95%;
-    max-width: 1200px;
-    max-height: 90vh;
-    background: var(--color-white);
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.detail-content {
-    padding: 2rem;
-    overflow-y: auto;
-}
-
-.detail-section {
-    background: var(--color-white);
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 6px var(--color-shadow-light);
-}
-
-.detail-section:last-child {
-    margin-bottom: 0;
-}
-
-.basic-info {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 2rem;
-    align-items: start;
-}
-
-.plan-image-container {
-    width: 100%;
-    aspect-ratio: 16/9;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px var(--color-shadow-light);
-}
-
-.plan-detail-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.plan-info h4 {
-    font-size: 1.5rem;
-    color: var(--color-primary);
-    margin-bottom: 1rem;
-}
-
-.description {
-    color: var(--color-text-normal);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-}
-
-.meta-info {
-    display: flex;
-    gap: 2rem;
-    color: var(--color-text-normal);
-}
-
-.meta-info span {
+.bookEdge-planDetail-modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(30, 34, 54, 0.55);
+    /* Más oscuro y opaco */
+    z-index: 1200;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    /* Evita scroll en el fondo */
+    overscroll-behavior: contain;
 }
 
-.detail-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-top: 1rem;
+.bookEdge-planDetail-modal {
+    background: #fff;
+    border-radius: 18px;
+    max-width: 900px;
+    width: 95vw;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(44, 51, 73, 0.18);
+    animation: fadeIn 0.3s;
+    padding-bottom: 1.5rem;
 }
 
-.detail-table th,
-.detail-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.detail-table th {
-    background-color: var(--color-primary-light);
-    color: var(--color-primary);
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
-
-.assigned-cabins {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.assigned-cabins li {
-    padding: 0.25rem 0;
-}
-
-.total-label {
-    text-align: right;
-    font-weight: 600;
-    color: var(--color-primary);
-}
-
-.total-amount {
-    font-weight: 600;
-    color: var(--color-primary);
-    font-size: 1.1rem;
-}
-
-.close-btn {
-    padding: 0.75rem 2rem;
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.close-btn:hover {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
-    .basic-info {
-        grid-template-columns: 1fr;
-    }
-
-    .detail-table {
-        font-size: 0.9rem;
-    }
-
-    .detail-section {
-        padding: 1rem;
-    }
-}
-
-/* Contenedor principal del modal de detalle */
-.plan-detail-modal {
-    width: 95%;
-    max-width: 1200px;
-    height: 90vh;
-    background: var(--color-white);
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-/* Header del modal */
-.plan-detail-modal-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: white;
-    padding: 1.25rem;
-    border-bottom: 1px solid #e5e7eb;
+.bookEdge-planDetail-modalHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1.2rem 2rem 1rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-.plan-detail-modal-header h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
+.bookEdge-planDetail-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #4e54c8;
     margin: 0;
 }
 
-.plan-detail-close-button {
-    background: transparent;
+.bookEdge-planDetail-closeButton {
+    background: none;
     border: none;
-    font-size: 1.5rem;
-    color: #6b7280;
+    font-size: 2rem;
+    color: #4e54c8;
     cursor: pointer;
-    padding: 0.5rem;
-    transition: color 0.2s ease;
+    transition: color 0.2s;
 }
 
-.plan-detail-close-button:hover {
-    color: #1f2937;
+.bookEdge-planDetail-closeButton:hover {
+    color: #222;
 }
 
-/* Contenido principal con scroll */
-.plan-detail-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
+.bookEdge-planDetail-content {
+    padding: 2rem;
 }
 
-/* Secciones individuales */
-.plan-detail-section {
-    background: white;
+.bookEdge-planDetail-section {
+    margin-bottom: 2.2rem;
+}
+
+.bookEdge-planDetail-sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1rem;
+}
+
+.bookEdge-planDetail-basicInfo {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.bookEdge-planDetail-imageContainer {
+    width: 220px;
+    height: 160px;
     border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.plan-detail-section:last-child {
-    margin-bottom: 0;
-}
-
-/* Información básica */
-.plan-detail-basic-info {
-    display: grid;
-    grid-template-columns: minmax(200px, 300px) 1fr;
-    gap: 1.5rem;
-    align-items: start;
-}
-
-.plan-detail-image-container {
-    width: 100%;
-    aspect-ratio: 16/9;
-    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: #f5f6fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(78, 84, 200, 0.08);
 }
 
-.plan-detail-image {
+.bookEdge-planDetail-imageContainer img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
+    background: #fff;
 }
 
-/* Tablas */
-.plan-detail-table-container {
-    overflow-x: auto;
-    margin: 1rem -0.5rem;
-    padding: 0 0.5rem;
-}
-
-.plan-detail-table {
+.bookEdge-planDetail-imagePlaceholder {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    min-width: 600px;
+    text-align: center;
+    color: #b0b4c1;
+    font-size: 1rem;
+    padding: 2.5rem 0;
 }
 
-.plan-detail-table th,
-.plan-detail-table td {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
+.bookEdge-planDetail-info {
+    flex: 1;
+    min-width: 220px;
 }
 
-.plan-detail-table th {
-    background-color: #f8fafc;
-    color: #2563eb;
+.bookEdge-planDetail-name {
+    font-size: 1.3rem;
     font-weight: 600;
-    font-size: 0.875rem;
+    margin: 0 0 0.5rem 0;
+    color: #4e54c8;
 }
 
-/* Footer del modal */
-.plan-detail-modal-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    background: white;
-    padding: 1rem 1.5rem;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
+.bookEdge-planDetail-description {
+    color: #444;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    max-width: 100%;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-line;
+    /* Limita la altura si es muy larga */
+    max-height: 120px;
+    overflow-y: auto;
 }
 
-.plan-detail-close-btn {
-    padding: 0.5rem 1rem;
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.plan-detail-close-btn:hover {
-    background-color: #1d4ed8;
-}
-
-/* Elementos de meta información */
-.plan-detail-meta {
+.bookEdge-planDetail-metaInfo {
     display: flex;
     gap: 1.5rem;
-    margin-top: 1rem;
+    font-size: 1rem;
+    color: #718096;
 }
 
-.plan-detail-meta-item {
+.bookEdge-planDetail-capacity i,
+.bookEdge-planDetail-price i {
+    margin-right: 0.4em;
+    color: #4e54c8;
+}
+
+.bookEdge-planDetail-tableContainer {
+    overflow-x: auto;
+    background: #fafbff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(44, 51, 73, 0.06);
+    padding: 1rem;
+}
+
+.bookEdge-planDetail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.98rem;
+    background: transparent;
+}
+
+.bookEdge-planDetail-table th,
+.bookEdge-planDetail-table td {
+    padding: 0.7rem 0.6rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.bookEdge-planDetail-table th {
+    background: #f0f2ff;
+    color: #4e54c8;
+    font-weight: 600;
+}
+
+.bookEdge-planDetail-table tr:last-child td {
+    border-bottom: none;
+}
+
+.bookEdge-planDetail-assignedList {
+    margin: 0;
+    padding-left: 1.2em;
+    list-style: disc;
+    color: #2d3748;
+    font-size: 0.97rem;
+}
+
+.bookEdge-planDetail-totalLabel {
+    text-align: right;
+    font-weight: 600;
+    color: #4e54c8;
+    background: #f0f2ff;
+}
+
+.bookEdge-planDetail-totalAmount {
+    font-weight: bold;
+    color: #2d3748;
+    background: #f0f2ff;
+}
+
+.bookEdge-planDetail-modalFooter {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #4b5563;
-    font-size: 0.875rem;
+    justify-content: flex-end;
+    padding: 1.2rem 2rem 0 2rem;
+    border-top: 1px solid #e2e8f0;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .plan-detail-modal {
-        width: 100%;
-        height: 100vh;
-        border-radius: 0;
+.bookEdge-planDetail-closeBtn {
+    background: #4e54c8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 2.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.bookEdge-planDetail-closeBtn:hover {
+    background: #3a3f9e;
+}
+
+@media (max-width: 700px) {
+    .bookEdge-planDetail-modal {
+        padding: 0;
+        max-width: 99vw;
     }
 
-    .plan-detail-basic-info {
-        grid-template-columns: 1fr;
-    }
-
-    .plan-detail-section {
+    .bookEdge-planDetail-content {
         padding: 1rem;
     }
 
-    .plan-detail-table th,
-    .plan-detail-table td {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
+    .bookEdge-planDetail-basicInfo {
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .bookEdge-planDetail-modalHeader,
+    .bookEdge-planDetail-modalFooter {
+        padding: 1rem;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
