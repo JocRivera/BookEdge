@@ -1,45 +1,61 @@
-import React from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-ChartJS.register(
+import {
+    Chart as ChartJS,
     CategoryScale,
     LinearScale,
     BarElement,
     Title,
     Tooltip,
-    Legend
-);
-const BarsChart = () => {
-    return (
-        <div className='barChart'>
-            <Bar
-                data={{
+    Legend,
+} from 'chart.js';
+import { getTopPlans } from '../../../services/DashboardService.jsx';
 
-                    labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'],
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const BarsChart = () => {
+    const [chartData, setChartData] = useState({
+        labels: [],
+        datasets: []
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const plans = await getTopPlans();
+
+                const labels = plans.map(p => p.name);
+                const data = plans.map(p => p.clientCount);
+
+                setChartData({
+                    labels,
                     datasets: [
                         {
-                            label: 'Ventas Romantico',
-                            data: [3, 2, 2, 1, 5, 6, 7],
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Ventas Día de sol',
-                            data: [1, 3, 2, 2, 6, 3, 4],
-                            backgroundColor: 'rgba(255, 206, 86, 0.6)',
-                            borderColor: 'rgba(255, 206, 86, 1)',
+                            label: 'Reservas por plan',
+                            data,
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
                             borderWidth: 1
                         }
                     ]
-                }}
-                height={400}
-                width={600}
+                });
+            } catch (error) {
+                console.error("Error al cargar los datos del gráfico", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    return (
+        <div className="barChart" style={{ height: "400px" }}>
+            <Bar
+                data={chartData}
                 options={{
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Planes más vendidos',
+                            text: 'Top 5 planes más reservados',
                             padding: {
                                 top: 10,
                                 bottom: 30,
@@ -52,11 +68,10 @@ const BarsChart = () => {
                             beginAtZero: true
                         }
                     }
-
                 }}
             />
         </div>
-    )
-}
+    );
+};
 
 export default BarsChart;

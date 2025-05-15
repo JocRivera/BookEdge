@@ -79,7 +79,7 @@ const Sidebar = () => {
           const flyoutHeightEstimate = 150;
           const windowHeight = window.innerHeight;
           const rootStyle = getComputedStyle(document.documentElement);
-          const sidebarCollapsedWidth = parseInt(rootStyle.getPropertyValue("--sidebar-width-collapsed").replace("px","")) || 68;
+          const sidebarCollapsedWidth = parseInt(rootStyle.getPropertyValue("--sidebar-width-collapsed").replace("px", "")) || 68;
           const spaceXs = parseInt(rootStyle.getPropertyValue("--space-xs").replace("px", "")) || 4;
 
           if (topPosition + flyoutHeightEstimate > windowHeight - 10) {
@@ -128,23 +128,23 @@ const Sidebar = () => {
       const sidebarWidthCollapsedPx = parseInt(rootStyle.getPropertyValue('--sidebar-width-collapsed').replace('px', '')) || 68;
       const toggleBtnWidthPx = parseInt(rootStyle.getPropertyValue('--toggle-btn-actual-width').replace('px', '')) || 40;
       let newLeft;
-        if (window.innerWidth < 768 || (isCollapsed && manuallyCollapsed)) { // Considera el estado actual de isCollapsed
-            newLeft = `${sidebarWidthCollapsedPx - (toggleBtnWidthPx / 2)}px`;
-        } else {
-            newLeft = `${sidebarWidthExpandedPx - (toggleBtnWidthPx / 2)}px`;
-        }
+      if (window.innerWidth < 768 || (isCollapsed && manuallyCollapsed)) { // Considera el estado actual de isCollapsed
+        newLeft = `${sidebarWidthCollapsedPx - (toggleBtnWidthPx / 2)}px`;
+      } else {
+        newLeft = `${sidebarWidthExpandedPx - (toggleBtnWidthPx / 2)}px`;
+      }
       setToggleButtonLeft(newLeft);
 
     };
     window.addEventListener("resize", handleResize);
     // Ejecutar handleResize una vez al montar para establecer la posición inicial correcta del botón
-    handleResize(); 
+    handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, [isCollapsed]); // Añadimos isCollapsed a las dependencias de resize
 
   const menuItemsStructure = [
     { type: "title", text: "Principal" },
-    { path: "/admin/dashboard", icon: <LuLayoutDashboard />, text: "Dashboard" },
+    { path: "/admin", icon: <LuLayoutDashboard />, text: "Dashboard" },
     { type: "title", text: "Gestión" },
     { path: "/admin/users", icon: <LuUsers />, text: "Usuarios" },
     { path: "/admin/customer", icon: <LuUsers />, text: "Clientes" },
@@ -177,7 +177,7 @@ const Sidebar = () => {
     { path: "/admin/config", icon: <LuSettings />, text: "Configuración" },
   ];
 
-  const isActiveRoute = (path) => path && (location.pathname === path || (path !== "/admin/dashboard" && location.pathname.startsWith(path + "/")));
+  const isActiveRoute = (path) => path && (location.pathname === path || (path !== "/admin" && location.pathname.startsWith(path + "/")));
   const isSubmenuParentActive = (subItems) => Array.isArray(subItems) && subItems.some((item) => isActiveRoute(item.path));
 
   const renderSubmenuItems = (subItems, isFlyout = false) => {
