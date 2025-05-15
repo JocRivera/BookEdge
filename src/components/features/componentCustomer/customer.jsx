@@ -5,6 +5,7 @@ import { CiSearch } from "react-icons/ci";
 import { CustomButton} from "../../common/Button/customButton";
 import Switch from "../../common/Switch/Switch";
 import rolesService from "../../../services/RolesService"
+import {getReservation} from "../../../services/reservationsService"
 import { getCustomers, postCustomers, updateCustomers, deleteCustomer, changeSatus } from '../../../services/usersService';
 import FormCustomer from './customerForm'
 import Pagination from "../../common/Paginator/Pagination"; // Asegúrate de importar tu paginador
@@ -18,6 +19,7 @@ function Customer() {
     const [formData, setFormData] = useState(null);
     const [rolExistence, setRolExistence] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [usersWithReservations, setUsersWithReservations] = useState([]);
 
     // --- NUEVO: estados para buscador y paginador ---
     const [searchTerm, setSearchTerm] = useState("");
@@ -67,9 +69,31 @@ function Customer() {
         }
     }
 
+    // Cargar IDs de usuarios con reservas
+    const fetchUsersWithReservations = async () => {
+        try {
+            const reservations = await getReservation();
+            // Extrae los idUser únicos de las reservas
+            const userIds = [
+                ...new Set(
+                    reservations
+                        .map(res => res.user?.idUser)
+                        .filter(id => id !== undefined && id !== null)
+                ),
+            ];
+            setUsersWithReservations(userIds);
+        } catch (error) {
+            console.error("Error al obtener reservas:", error);
+        }
+    };
+
     useEffect(() => {
         fecthCustomers();
     }, [rolExistence]);
+
+    useEffect(() => {
+        fetchUsersWithReservations();
+    }, []);
 
     const handleEdit = (customer) => {
         setFormData(customer)
@@ -274,10 +298,15 @@ function Customer() {
         });
     };
 
+    const handleGoToReservations = (idUser) => {
+        console.log(`Ir a reservas del usuario con ID: ${idUser}`);
+        // Aquí puedes implementar la lógica para redirigir o mostrar las reservas del usuario
+    };
+
     return (
         <div className="customer-table-container">
             <div className="customer-table-header-container">
-                <h2 className="customer-table-header-title">Tabla de Clientes</h2>
+                <h2 className="customer-table-header-title">Gestión de Clientes</h2>
             </div>
             <div className="customer-search-container">
                 <div className="search-wrapper-customer">
@@ -364,6 +393,15 @@ function Customer() {
                                         >
                                             <FaTrash />
                                         </button>
+                                        {usersWithReservations.includes(customer.idUser) && (
+                                            <button
+                                                className="action-btn reservation-btn"
+                                                onClick={() => handleGoToReservations(customer.idUser)}
+                                                title="Ir a reserva(s)"
+                                            >
+                                                Ir a reserva(s)
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
