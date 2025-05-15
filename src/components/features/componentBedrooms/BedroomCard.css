@@ -278,7 +278,7 @@
 }
 
 /* Modal base */
-.modal-overlay-room {
+.modal-overlay-room-admin {
   position: fixed;
   top: 0;
   left: 0;
@@ -295,7 +295,7 @@
   border: none;
 }
 
-.modal-container-bedroom {
+.modal-container-bedroom-admin {
   width: 95%;
   max-width: 1000px;
   max-height: 95vh;
@@ -308,7 +308,7 @@
 }
 
 /* Header del modal */
-.modal-header-bedroom {
+.modal-header-bedroom-admin {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -319,14 +319,14 @@
   background-color: #fff;
 }
 
-.modal-header-bedroom h2 {
+.modal-header-bedroom-admin h2 {
   margin: 0;
   font-size: 1.5rem;
   color: #2d3748;
   font-weight: 600;
 }
 
-.close-button-bedroom {
+.close-button-bedroom-admin {
   border: none;
   cursor: pointer;
   color: #718096;
@@ -334,42 +334,45 @@
   background: transparent;
 }
 
-.close-button-bedroom:hover {
+.close-button-bedroom-admin:hover {
   color: #3e9de5;
 }
 
 /* Estructura del formulario */
-.bedroom-form {
+.bedroom-form-admin {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
-.form-content-bedroom {
+.form-content-bedroom-admin {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 30px;
   padding: 25px;
+  width: 100%;
   align-items: start;
 }
 
 @media (max-width: 768px) {
-  .form-content-bedroom {
+  .form-content-bedroom-admin {
     grid-template-columns: 1fr;
   }
 }
 
 /* Campos del formulario */
-.form-inputs-bedroom {
+.form-inputs-bedroom-admin {
   border: none;
   padding: 0;
   margin: 0;
 }
 
-.form-group-bedroom {
-  margin-bottom: 20px;
+.form-group-bedroom,
+.form-group-bedroom-admin {
+  margin-bottom: 25px;
 }
 
-.form-label {
+.form-label-bedroom {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
@@ -377,7 +380,7 @@
   font-size: 0.95rem;
 }
 
-.form-input-bedroom {
+.form-input-bedroom-admin {
   width: 100%;
   padding: 12px 15px;
   border: 1px solid #e2e8f0;
@@ -387,36 +390,143 @@
   background-color: #f8fafc;
 }
 
-.form-input-bedroom:focus {
+.form-input-bedroom-admin:focus {
   outline: none;
   border-color: #4299e1;
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
   background-color: #fff;
 }
 
-textarea.form-input-bedroom {
+/* Estilos para la nueva columna derecha y sección de comodidades */
+.form-column-right-bedroom-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* Espacio entre la sección de comodidades y la de imágenes */
+}
+
+.comforts-section-bedroom-admin{
+  border: none; /* O un borde sutil si prefieres: 1px solid #e2e8f0; */
+  padding: 0; /* O un padding ligero: 15px; */
+  margin: 0;
+  border-radius: 8px; /* Si añades borde/fondo */
+  /* background-color: #f9fafb;  Si quieres un fondo sutil */
+}
+
+.comforts-section-bedroom-admin legend.form-label-admin {
+  font-size: 1.1rem; /* Hacer el título de la sección un poco más grande */
+  color: #2d3748;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  /* border-bottom: 1px solid #e2e8f0; */ /* Opcional: línea divisoria bajo el legend */
+}
+
+.comforts-checkbox-group-admin{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Ajusta minmax según el largo de tus nombres de comodidades */
+  gap: 10px 15px; /* Espacio vertical y horizontal entre checkboxes */
+  max-height: 200px; /* Altura máxima para el scroll si hay muchas comodidades */
+  overflow-y: auto; /* Scroll vertical */
+  padding: 5px; /* Pequeño padding interno */
+  border: 1px solid #e2e8f0; /* Borde sutil alrededor del grupo */
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.comfort-checkbox-item-admin {
+  display: flex;
+  align-items: center;
+  padding: 8px 5px; /* Espacio alrededor de cada item */
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.comfort-checkbox-item-admin:hover {
+  background-color: #f0f4f8; /* Un hover sutil */
+}
+
+.comfort-checkbox-admin {
+  margin-right: 10px;
+  width: 18px; /* Tamaño del checkbox */
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4299e1; /* Color del check cuando está marcado (navegadores modernos) */
+}
+
+.comfort-label-admin {
+  font-size: 0.9rem;
+  color: #4a5568;
+  cursor: pointer;
+  flex-grow: 1; /* Para que el label ocupe el espacio y sea clickeable */
+}
+
+.no-comforts-message-admin {
+  font-size: 0.9rem;
+  color: #718096;
+  padding: 10px;
+  text-align: center;
+  background-color: #f8fafc;
+  border: 1px dashed #e2e8f0;
+  border-radius: 6px;
+}
+
+/* Para el mensaje de error general al final del formulario */
+.general-error-admin {
+  text-align: center;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+}
+textarea.form-input-bedroom-admin {
   min-height: 100px;
   resize: vertical;
 }
 
+/* Errores de formulario */
+.error-message-admin {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: block;
+  text-align: left !important;
+  width: 100% !important;
+  padding-left: 0.2rem;
+}
+
+.input-error-admin {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
+}
+
+.input-error-admin:focus {
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
+}
+
+.image-error-admin {
+  margin-bottom: 0.8rem;
+  text-align: center;
+  width: 100%;
+}
+
 /* Sección de imágenes */
-.image-upload-section-bedroom {
-  height: 100%;
+.image-upload-section-bedroom-admin {
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.existing-images-container-bedroom,
-.new-images-container-bedroom {
+.existing-images-container-bedroom-admin,
+.new-images-container-bedroom-admin {
   margin-bottom: 20px;
 }
 
-.new-images-container-bedroom {
+.new-images-container-bedroom-admin {
   margin-top: 20px;
 }
 
-.existing-images-container-bedroom h3,
-.new-images-container-bedroom h3 {
+.existing-images-container-bedroom-admin h3,
+.new-images-container-bedroom-admin h3 {
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 1.1rem;
@@ -425,7 +535,7 @@ textarea.form-input-bedroom {
 }
 
 /* Grid de imágenes */
-.images-grid-bedroom {
+.images-grid-bedroom-admin {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 15px;
@@ -434,16 +544,17 @@ textarea.form-input-bedroom {
   list-style: none;
 }
 
-.image-item-bedroom {
+.image-item-bedroom-admin {
   position: relative;
   width: 100%;
   height: 120px;
   border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Contenedor de vista previa */
-.image-preview-wrapper-bedroom {
+.image-preview-wrapper-bedroom-admin {
   position: relative;
   width: 100%;
   height: 100%;
@@ -454,8 +565,8 @@ textarea.form-input-bedroom {
 }
 
 /* Estilo compartido para todas las imágenes */
-.preview-image-bedroom,
-.upload-images-grid img {
+.preview-image-bedroom-admin,
+.upload-images-grid-admin img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -463,7 +574,7 @@ textarea.form-input-bedroom {
 }
 
 /* Acciones sobre las imágenes */
-.image-actions-bedroom {
+.image-actions-bedroom-admin {
   position: absolute;
   top: 5px;
   right: 5px;
@@ -472,7 +583,7 @@ textarea.form-input-bedroom {
 }
 
 /* Botones de acción */
-.image-action-btn-bedroom {
+.image-action-btn-admin {
   background: rgba(0, 0, 0, 0.6);
   border: none;
   border-radius: 50%;
@@ -486,29 +597,29 @@ textarea.form-input-bedroom {
   transition: all 0.2s;
 }
 
-.image-action-btn-bedroom:hover {
+.image-action-btn-admin:hover {
   background: rgba(0, 0, 0, 0.8);
 }
 
-.delete-btn-bedroom:hover {
+.delete-btn-bedroom-admin:hover {
   background: rgba(229, 62, 62, 0.8);
 }
 
-.star-btn {
+.star-btn-admin {
   background: rgba(245, 158, 11, 0.6);
 }
 
-.star-btn:hover {
+.star-btn-admin:hover {
   background: rgba(245, 158, 11, 0.8);
 }
 
-.star-btn.primary {
+.star-btn-admin.primary-admin {
   background: rgba(245, 158, 11, 0.9);
   cursor: default;
 }
 
 /* Grid para carga de imágenes */
-.upload-images-grid {
+.upload-images-grid-admin {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
@@ -516,13 +627,13 @@ textarea.form-input-bedroom {
 }
 
 /* Campos de carga individual */
-.image-upload-field-bedroom {
+.image-upload-field-bedroom-admin {
   height: 120px;
   width: 100%;
   position: relative;
 }
 
-.upload-single-container-bedroom {
+.upload-single-container-bedroom-admin {
   height: 100%;
   width: 100%;
   border: 2px dashed #cbd5e0;
@@ -536,16 +647,16 @@ textarea.form-input-bedroom {
   background-color: #f8fafc;
 }
 
-.upload-single-container-bedroom:hover {
+.upload-single-container-bedroom-admin:hover {
   border-color: #4299e1;
   background-color: #ebf8ff;
 }
 
-.file-input-bedroom {
+.file-input-bedroom-admin {
   display: none;
 }
 
-.upload-single-label-bedroom {
+.upload-single-label-bedroom-admin {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -558,17 +669,17 @@ textarea.form-input-bedroom {
   cursor: pointer;
 }
 
-.upload-single-label-bedroom svg {
+.upload-single-label-bedroom-admin svg {
   margin-bottom: 5px;
   color: #718096;
 }
 
-.upload-single-label-bedroom span {
+.upload-single-label-bedroom-admin span {
   font-size: 0.8rem;
 }
 
 /* Etiqueta de imagen principal */
-.primary-label {
+.primary-label-admin {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -581,7 +692,7 @@ textarea.form-input-bedroom {
 }
 
 /* Mensaje de máximo de imágenes */
-.max-images-message-bedroom {
+.max-images-message-bedroom-admin {
   background-color: #fffaf0;
   border-left: 4px solid #dd6b20;
   padding: 12px;
@@ -592,7 +703,7 @@ textarea.form-input-bedroom {
 }
 
 /* Footer del modal */
-.modal-footer-bedroom {
+.modal-footer-bedroom-admin {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
@@ -604,8 +715,8 @@ textarea.form-input-bedroom {
 }
 
 /* Botones de acción */
-.cancel-btn-bedroom,
-.submit-btn-bedroom {
+.cancel-btn-bedroom-admin,
+.submit-btn-bedroom-admin {
   padding: 10px 20px;
   border-radius: 6px;
   font-weight: 500;
@@ -613,29 +724,29 @@ textarea.form-input-bedroom {
   transition: all 0.2s;
 }
 
-.cancel-btn-bedroom {
+.cancel-btn-bedroom-admin {
   background-color: #fff;
   border: 1px solid #e2e8f0;
   color: #4a5568;
 }
 
-.cancel-btn-bedroom:hover {
+.cancel-btn-bedroom-bedroom:hover {
   background-color: #f7fafc;
   border-color: #cbd5e0;
 }
 
-.submit-btn-bedroom {
+.submit-btn-bedroom-admin {
   background-color: #4299e1;
   border: 1px solid #4299e1;
   color: white;
 }
 
-.submit-btn-bedroom:hover {
+.submit-btn-bedroom-admin:hover {
   background-color: #3182ce;
   border-color: #3182ce;
 }
 
-.visually-hidden {
+.visually-hidden-admin {
   position: absolute;
   width: 1px;
   height: 1px;

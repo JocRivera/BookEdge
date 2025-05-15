@@ -154,8 +154,7 @@ const Sidebar = () => {
       subItems: [
         { path: "/admin/cabins", icon: <LuHotel />, text: "Cabañas" },
         { path: "/admin/rooms", icon: <LuBedDouble />, text: "Habitaciones" },
-        { path: "/admin/AssignAmenities", icon: <LuHotel />, text: "Comodidades Habit." },
-        { path: "/admin/accommodations", icon: <LuHotel />, text: "Lista Comodidades" },
+        { path: "/admin/accommodations", icon: <LuHotel />, text: " Comodidades" },
       ],
     },
     { type: "title", text: "Planes & Reservas" },
