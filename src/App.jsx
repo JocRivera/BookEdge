@@ -43,8 +43,8 @@ export default function App() {
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/recoveryPassword" element={<RecoveryPassword />} />
           <Route path="/Emailcode" element={<Emailcode />} />
-         
-          
+
+
           {/* Página de error 401 */}
           <Route path="/unauthorized" element={<Error401 />} />
           {/* Página de error 404 */}
@@ -61,7 +61,7 @@ export default function App() {
               <Route path="config" element={<CreateConfig />} />
               <Route path="cabins" element={<CabinsPage />} />
               <Route path="rooms" element={<BedroomCard />} />
-              <Route path="dashboard" element={<DashboardManagement />} />
+              <Route path="" element={<DashboardManagement />} />
               <Route path="reservations" element={<TableReservations />} />
               <Route
                 path="companions"
@@ -70,7 +70,7 @@ export default function App() {
               <Route
                 path="payments"
                 element={<ViewPayments />
-              }
+                }
               ></Route>
               <Route path="plans" element={<Plan />} />
               <Route path="plansProgramed" element={<PlanProgramed />} />
