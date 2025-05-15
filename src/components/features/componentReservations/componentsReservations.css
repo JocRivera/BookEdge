@@ -586,6 +586,36 @@
   color: #ff4757;
 }
 
+/* Badges de estado */
+.detail-reserva-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgb(255, 255, 255);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.detail-reserva-status-badge.confirmado {
+  background: rgba(46, 213, 115, 0.9);
+}
+
+.detail-reserva-status-badge.pendiente {
+  background: rgba(255, 165, 2, 0.9);
+}
+
+.detail-reserva-status-badge.anulado {
+  background: rgba(255, 71, 87, 0.9);
+}
+.detail-reserva-status-badge.reservado {
+  background: rgba(143, 148, 251, 0.1);
+  color: var(--reservations-primary);
+}
+
 .reservation-details-container {
   display: grid;
   grid-template-columns: 2fr 1fr;

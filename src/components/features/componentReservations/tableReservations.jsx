@@ -175,7 +175,7 @@ function TableReservations() {
   const handleViewDetails = async (idReservation) => {
     const id = Number(idReservation);
     const reservationToView = reservations.find(r => r.idReservation === id);
-  
+
     if (reservationToView) {
       try {
         const payments = await getReservationPayments(id);
@@ -365,9 +365,7 @@ function TableReservations() {
           <div className="reservations-modal-container reservation-details-modal">
             <div className="modal-header">
               <div className="reservation-header-content">
-              <span className={`status-badge ${currentReservation.status.toLowerCase()}`}>
-                  {currentReservation.status}
-                </span>
+
 
                 <h2>Detalles de la Reserva #{currentReservation.idReservation}</h2>
               </div>
@@ -435,7 +433,16 @@ function TableReservations() {
                     </span>
                   </div>
                 </div>
+
               </div>
+              <div className="flex justify-between">
+                <div></div>
+                <div className="detail-reserva-status-badge">
+                  <span className={`detail-reserva-status-badge ${currentReservation.status.toLowerCase()}`}>
+                    {currentReservation.status}
+                  </span>
+                </div></div>
+
             </div>
           </div>
         </div>

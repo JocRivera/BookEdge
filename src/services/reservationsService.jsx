@@ -5,13 +5,6 @@ const API_URL_USERS = "http://localhost:3000/user"
 const API_URL_PLANS = "http://localhost:3000/plan"
 const API_URL_CABINS = "http://localhost:3000/cabins"
 
-/**
- * Función auxiliar para validar IDs
- * @param {any} id - ID a validar
- * @param {string} name - Nombre del campo para el mensaje de error
- * @returns {number} - ID convertido a número
- * @throws {Error} - Si el ID no es válido
- */
 const validateId = (id, name = "ID") => {
   const numId = Number(id)
   if (isNaN(numId) || numId <= 0) {
@@ -98,19 +91,19 @@ export const getAllPlanes = async () => {
 
 export const getCabins = async () => {
   try {
-    const { data } = await axios.get(`${API_URL_CABINS}`);
+    const { data } = await axios.get(`${API_URL_RESERVATIONS}/cabinReservations`)
     
-    // Aseguramos que el estado tenga el formato correcto
+
     const normalizedCabins = data.map(cabin => ({
       ...cabin,
-      status: cabin.status?.trim() || "No Disponible" // Normaliza espacios
-    }));
+      status: cabin.status?.trim() || "En Servicio" 
+    }))
     
     console.log("Cabañas normalizadas:", normalizedCabins);
     return normalizedCabins;
   } catch (error) {
     console.error("Error al obtener cabañas:", error);
-    return []; // Siempre retorna array
+    return []; 
   }
 };
 
