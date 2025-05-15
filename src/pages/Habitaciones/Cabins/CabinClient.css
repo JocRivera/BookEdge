@@ -1,148 +1,221 @@
 :root {
+  /* ... (tus variables CSS se mantienen, puedes ajustar --radius si quieres más redondez) ... */
   --azure: #3785d4;
-  --dark: #1A1A1A;
-  --transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1); --azure: #3785d4;
+  --dark: #1a1a1a; /* Usaremos este para el texto del botón, o blanco si el botón es oscuro */
+  --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición un poco más suave */
   --primary: #4a6741;
   --primary-light: #6a8661;
   --primary-dark: #304a27;
-  --accent: #3785d4;
+  --accent: #3785d4; /* Podríamos usar este para el botón "Ver detalles" */
   --text-dark: #333333;
-  --text-light: #f5f5f5;
+  --text-light: #f0f0f0; /* Un blanco un poco más suave para el texto sobre la imagen */
   --background-light: #ffffff;
   --background-dark: #f8f8f8;
   --border-color: #e0e0e0;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  --transition: all 0.3s ease;
-  --radius: 12px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra más sutil y elevada */
+  --radius: 16px; /* Esquinas más redondeadas como en la imagen de ejemplo */
 }
+
 .swiper-cabin-container {
-  padding: 20px 10px;
-  background: white;
+  padding: 30px 15px; /* Más padding vertical */
+  background: var(
+    --background-dark
+  ); /* Un fondo ligeramente oscuro para el contenedor */
   position: relative;
   overflow: hidden;
 }
 
 .title-cabin-home {
-  font-size: 42px;
-  font-weight: 300;
+  font-size: clamp(28px, 5vw, 38px); /* Tamaño de fuente adaptable */
+  font-weight: 300; /* Mantenemos ligero */
   text-align: center;
-  margin-bottom: 40px;
-  letter-spacing: 2px;
+  margin-bottom: 50px; /* Más espacio */
+  letter-spacing: 1px;
+  color: var(--text-dark);
 }
 
 .title-cabin-home span {
   font-weight: 700;
-  color: var(--azure);
+  color: var(--accent); /* Usar la variable accent */
+}
+
+/* Swiper Nav - Puede que no lo necesites si el diseño es como el ejemplo (sin nav visible) */
+.swiper-custom-nav {
+  /* Si decides mantenerlos, asegúrate que no interfieran con el diseño de la card */
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px; /* Para que no estén pegados a los bordes */
+  z-index: 10; /* Encima de las cards */
 }
 
 .swiper-custom-nav div {
-  width: 50px;
-  height: 50px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(5px);
+  width: 44px; /* Ligeramente más pequeños */
+  height: 44px;
+  background: rgba(255, 255, 255, 0.9); /* Un poco más opaco */
+  backdrop-filter: blur(4px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--dark);
+  color: var(--text-dark); /* Color de ícono más oscuro */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: var(--transition);
+}
+.swiper-custom-nav div:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.1);
 }
 
-
+/* --- NUEVO DISEÑO PARA CABIN CARD --- */
 .cabin-card-home {
-  height: 500px;
+  height: 480px; /* Altura similar al ejemplo */
   position: relative;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: var(--radius); /* Usar la variable de radio */
   cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex; /* Para el gradiente y contenido */
+  flex-direction: column; /* Apilar imagen y contenido */
 }
 
-.cabin-imagen-container-home {
+.cabin-card-home:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.cabin-image-container-home {
+  /* Cambiado de cabin-imagen-container-home */
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  transition: var(--transition);
+  z-index: 1; /* Detrás del contenido */
 }
 
 .cabin-image-home {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.9);
-  transition: var(--transition);
+  transition: transform 0.6s ease; /* Transición más larga para el zoom */
 }
 
 .cabin-card-home:hover .cabin-image-home {
-  transform: scale(1.05);
+  transform: scale(1.1); /* Zoom más pronunciado al hacer hover */
+}
+
+/* Gradiente sobre la imagen */
+.cabin-card-home::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70%; /* Altura del gradiente, ajustar según necesidad */
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  z-index: 2; /* Encima de la imagen, debajo del texto */
+  border-radius: 0 0 var(--radius) var(--radius); /* Para que coincida con la card */
+}
+
+.cabin-content-overlay-home {
+  position: absolute; /* <<< CAMBIO CLAVE: Posicionar absolutamente para cubrir la card */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3; /* Encima del gradiente e imagen */
+  padding: 20px; /* Ajusta este padding */
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column; /* Apila .cabin-text-content y .cabin-details-button-home */
+  justify-content: flex-end; /* <<< CAMBIO CLAVE: Alinea todo el bloque de contenido hacia abajo */
+  box-sizing: border-box;
 }
 
 .cabin-title-home {
-  position: absolute;
-  bottom: 80px;
-  left: 0;
-  width: 100%;
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  text-align: center;
-  z-index: 2;
+  font-size: clamp(1.8rem, 4vw, 2.1rem); /* Ajusta el tamaño según el espacio */
+  font-weight: 600;
+  margin-bottom: 6px; /* Menos espacio si la descripción es más prominente */
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7); /* Sombra un poco más fuerte */
 }
 
-.cabin-card-home:hover .cabin-title-home {
-  opacity: 1;
+.cabin-description-home {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  margin-bottom: 16px;
+  opacity: 0.9;
+  color: #e0e0e0;
+
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-
-
-.cabin-card-home:hover .cabin-meta-home {
-  transform: translateY(0);
-  opacity: 1;
+.cabin-meta-tags-home {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px; /* Espacio ANTES del botón */
 }
-.meta-item-home {
+
+.meta-tag-home {
+  /* Estilo para cada etiqueta */
   display: flex;
   align-items: center;
-  gap: 8px; 
-  font-size: 12px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 5px 10px;
-  border-radius: 20px;
-  
+  gap: 6px;
+  font-size: 0.8rem; /* Más pequeño */
+  background: rgba(255, 255, 255, 0.15); /* Fondo translúcido */
+  padding: 6px 12px;
+  border-radius: 20px; /* Muy redondeado */
+  font-weight: 500;
+  backdrop-filter: blur(2px); /* Efecto vidrio esmerilado sutil */
+}
+.meta-tag-home svg {
+  /* Para íconos dentro de las etiquetas */
+  font-size: 0.9rem;
 }
 
-
-.cabin-button-container {
-  position: absolute;
-  width: 100%;
-  bottom: 10px;
-
-}
-
-.cabin-card-home:hover .cabin-button-container {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-/* Estilo del botón (mejorado) */
-.cabin-button-home {
-  background: var(--azure);
-  color: var(--dark);
+/* Botón "Ver detalles" (antes cabin-button-home) */
+.cabin-details-button-home {
+  /* Renombrado para claridad */
+  background: var(--background-light); /* Botón blanco como en el ejemplo */
+  color: var(--text-dark); /* Texto oscuro */
   border: none;
-  padding: 12px 25px;
+  padding: 14px 20px; /* Más padding vertical */
   font-weight: 600;
   cursor: pointer;
   width: 100%;
   transition: var(--transition);
-  border-radius: 4px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-size: 14px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border-radius: calc(
+    var(--radius) - 4px
+  ); /* Ligeramente menos redondeado que la card, o igual */
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.cabin-button-home:hover {
-  background: white;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+.cabin-details-button-home:hover {
+  background: #f0f0f0; /* Un gris muy claro al hacer hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
-
 
 /* Modal Overlay */
 .cabin-modal-overlay {
@@ -282,7 +355,7 @@
 
 .cabin-details-thumbnails-container {
   height: 100px;
-  background: #f5f5f0; 
+  background: #f5f5f0;
   padding: 0px;
   display: flex;
   align-items: center;
@@ -292,12 +365,9 @@
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent) rgba(0, 0, 0, 0.1);
+
   padding: 2px;
 }
-
-
 
 .cabin-details-thumbnail {
   flex: 0 0 auto;
@@ -388,7 +458,6 @@
   gap: 20px;
 }
 
-
 .cabin-details-description {
   border: 1px solid #e6e6e6;
   border-radius: 10px;
@@ -398,9 +467,8 @@
   transition: var(--transition);
   display: flex;
   flex-direction: column;
-  max-height: 200px;
+  max-height: 250px;
 }
-
 
 .cabin-details-amenities {
   border: 1px solid #e6e6e6;
@@ -410,8 +478,6 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
   transition: var(--transition);
 }
-
-
 
 .section-title {
   font-size: 1.5rem !important;
@@ -424,7 +490,7 @@
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -1px;
   left: 0;
@@ -437,31 +503,17 @@
   color: #555;
   line-height: 1.7;
   font-size: 1rem;
-  max-height: 150px; 
-  overflow-y: auto; 
+  max-height: 150px;
+  word-wrap: break-word;
   padding-right: 10px;
-  scrollbar-width: thin; 
+
 }
 
-
-.cabin-details-text::-webkit-scrollbar {
-  width: 6px;
-}
-
-.cabin-details-text::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 10px;
-}
-
-.cabin-details-text::-webkit-scrollbar-thumb {
-  background-color: var(--accent);
-  border-radius: 10px;
-}
 
 
 .cabin-details-comfort-tags {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas de igual fracción */
   gap: 10px;
   margin-top: 5px;
 }
@@ -478,6 +530,8 @@
   color: var(--text-dark);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   border: 1px solid #eee;
+   overflow-wrap: break-word; 
+
 }
 
 .cabin-details-comfort-badge:hover {
@@ -512,11 +566,11 @@
     height: auto;
     max-height: 90vh;
   }
-  
+
   .cabin-details-gallery {
     height: 50vh;
   }
-  
+
   .cabin-details-info {
     max-height: 40vh;
   }
@@ -527,24 +581,24 @@
     width: 95%;
     max-height: 95vh;
   }
-  
+
   .cabin-details-title {
     font-size: 1.8rem;
   }
-  
+
   .cabin-details-gallery {
     height: 40vh;
   }
-  
+
   .cabin-details-main-image-container {
     height: calc(40vh - 110px);
   }
-  
+
   .cabin-details-nav-button {
     width: 36px;
     height: 36px;
   }
-  
+
   .cabin-details-description,
   .cabin-details-amenities {
     padding: 15px;
@@ -555,25 +609,25 @@
   .cabin-modal-overlay {
     padding: 10px;
   }
-  
+
   .cabin-modal-container-client {
     width: 100%;
   }
-  
+
   .cabin-details-info {
     padding: 20px;
   }
-  
+
   .cabin-details-thumbnails-container {
     height: 90px;
     padding: 10px;
   }
-  
+
   .cabin-details-thumbnail {
     width: 60px;
     height: 60px;
   }
-  
+
   .cabin-details-close-button {
     top: 10px;
     right: 10px;
