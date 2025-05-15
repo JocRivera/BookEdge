@@ -178,7 +178,7 @@ const Sidebar = () => {
     { path: "/admin/config", icon: <LuSettings />, text: "Configuración" },
   ];
 
-  const isActiveRoute = (path) => path && (location.pathname === path || (path !== "/admin/dashboard" && location.pathname.startsWith(path + "/")));
+  const isActiveRoute = (path) => path && (location.pathname === path || (path !== "/admin" && location.pathname.startsWith(path + "/")));
   const isSubmenuParentActive = (subItems) => Array.isArray(subItems) && subItems.some((item) => isActiveRoute(item.path));
 
   const renderSubmenuItems = (subItems, isFlyout = false) => {
