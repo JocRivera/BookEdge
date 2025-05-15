@@ -30,6 +30,8 @@ import DashboardManagement from "./components/features/componentDashboard/main";
 import CabinsClient from "./pages/Habitaciones/Cabins/CabinsClient"
 import BedroomsClient from "./pages/Habitaciones/Rooms/BedroomClient";
 
+import '../src/components/features/componentPlans/componentPlan.css';
+
 
 import Customer from "./components/features/componentCustomer/customer";
 export default function App() {
