@@ -289,6 +289,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("ugyuguygugu")
 
     if (!validateStep(3)) {
       return;
@@ -848,9 +849,10 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
               {!isReadOnly && step === (formData.hasCompanions ? 4 : 3) && (
                 <button
-                  type="submit"
+                  type="button"
                   className="btn btn-primary"
-                  disabled={loading || !formData.availabilityChecked}
+                  disabled={loading}
+                  onClick={handleSubmit}
                 >
                   {loading ? "Guardando..." : "Guardar Reserva"}
                 </button>
