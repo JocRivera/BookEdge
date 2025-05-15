@@ -5,18 +5,18 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
     if (!isOpen || !plan) return null;
 
     return (
-        <div className="modal-overlay">
-            <div className="plan-detail-modal">
-                <div className="plan-detail-modal-header">
-                    <h2>Detalle del Plan</h2>
-                    <button className="plan-detail-close-button" onClick={onClose}>×</button>
+        <div className="bookEdge-planDetail-modalOverlay">
+            <div className="bookEdge-planDetail-modal">
+                <div className="bookEdge-planDetail-modalHeader">
+                    <h2 className="bookEdge-planDetail-title">Detalle del Plan</h2>
+                    <button className="bookEdge-planDetail-closeButton" onClick={onClose}>×</button>
                 </div>
-                <div className="plan-detail-content">
+                <div className="bookEdge-planDetail-content">
                     {/* Sección de información básica */}
-                    <section className="plan-detail-section">
-                        <h3 className="section-title">Información Básica</h3>
-                        <div className="basic-info">
-                            <div className="plan-image-container">
+                    <section className="bookEdge-planDetail-section">
+                        <h3 className="bookEdge-planDetail-sectionTitle">Información Básica</h3>
+                        <div className="bookEdge-planDetail-basicInfo">
+                            <div className="bookEdge-planDetail-imageContainer">
                                 {plan.image ? (
                                     <img
                                         src={`http://localhost:3000${plan.image}`}
@@ -27,19 +27,19 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                                         }}
                                     />
                                 ) : (
-                                    <div className="image-placeholder">
+                                    <div className="bookEdge-planDetail-imagePlaceholder">
                                         <span>Sin imagen</span>
                                     </div>
                                 )}
                             </div>
-                            <div className="plan-info">
-                                <h4>{plan.name}</h4>
-                                <p className="description">{plan.description}</p>
-                                <div className="meta-info">
-                                    <span className="capacity">
+                            <div className="bookEdge-planDetail-info">
+                                <h4 className="bookEdge-planDetail-name">{plan.name}</h4>
+                                <p className="bookEdge-planDetail-description">{plan.description}</p>
+                                <div className="bookEdge-planDetail-metaInfo">
+                                    <span className="bookEdge-planDetail-capacity">
                                         <i className="far fa-user"></i> {plan.capacity} personas
                                     </span>
-                                    <span className="price">
+                                    <span className="bookEdge-planDetail-price">
                                         <i className="fas fa-tag"></i> ${plan.salePrice.toLocaleString()}
                                     </span>
                                 </div>
@@ -48,15 +48,15 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                     </section>
 
                     {/* Sección de cabañas */}
-                    <section className="plan-detail-section">
-                        <h3 className="section-title">Cabañas Asignadas</h3>
-                        <div className="table-container">
-                            <table className="detail-table">
+                    <section className="bookEdge-planDetail-section">
+                        <h3 className="bookEdge-planDetail-sectionTitle">Cabañas Disponibles</h3>
+                        <div className="bookEdge-planDetail-tableContainer">
+                            <table className="bookEdge-planDetail-table">
                                 <thead>
                                     <tr>
                                         <th>Capacidad</th>
                                         <th>Cantidad Solicitada</th>
-                                        <th>Cabañas Asignadas</th>
+                                        <th>Cabañas Disponibles</th>
                                         <th>Capacidad Total</th>
                                     </tr>
                                 </thead>
@@ -66,7 +66,7 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                                             <td>{dist.capacity} personas</td>
                                             <td>{dist.requestedQuantity}</td>
                                             <td>
-                                                <ul className="assigned-cabins">
+                                                <ul className="bookEdge-planDetail-assignedList">
                                                     {dist.assignedCabins.map(cabin => (
                                                         <li key={cabin.idCabin}>{cabin.name}</li>
                                                     ))}
@@ -81,15 +81,15 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                     </section>
 
                     {/* Sección de bedrooms */}
-                    <section className="plan-detail-section">
-                        <h3 className="section-title">Habitaciones Asignadas</h3>
-                        <div className="table-container">
-                            <table className="detail-table">
+                    <section className="bookEdge-planDetail-section">
+                        <h3 className="bookEdge-planDetail-sectionTitle">Habitaciones Disponibles</h3>
+                        <div className="bookEdge-planDetail-tableContainer">
+                            <table className="bookEdge-planDetail-table">
                                 <thead>
                                     <tr>
                                         <th>Capacidad</th>
                                         <th>Cantidad Solicitada</th>
-                                        <th>Habitaciones Asignadas</th>
+                                        <th>Habitaciones Disponibles</th>
                                         <th>Capacidad Total</th>
                                     </tr>
                                 </thead>
@@ -99,7 +99,7 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                                             <td>{dist.capacity} personas</td>
                                             <td>{dist.requestedQuantity}</td>
                                             <td>
-                                                <ul className="assigned-cabins">
+                                                <ul className="bookEdge-planDetail-assignedList">
                                                     {dist.assignedBedrooms.map(bedroom => (
                                                         <li key={bedroom.idRoom}>{bedroom.name}</li>
                                                     ))}
@@ -114,10 +114,10 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                     </section>
 
                     {/* Sección de servicios */}
-                    <section className="plan-detail-section">
-                        <h3 className="section-title">Servicios Incluidos</h3>
-                        <div className="table-container">
-                            <table className="detail-table">
+                    <section className="bookEdge-planDetail-section">
+                        <h3 className="bookEdge-planDetail-sectionTitle">Servicios Incluidos</h3>
+                        <div className="bookEdge-planDetail-tableContainer">
+                            <table className="bookEdge-planDetail-table">
                                 <thead>
                                     <tr>
                                         <th>Servicio</th>
@@ -140,16 +140,16 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colSpan="3" className="total-label">Total Servicios:</td>
-                                        <td className="total-amount">${plan.total.toLocaleString()}</td>
+                                        <td colSpan="3" className="bookEdge-planDetail-totalLabel">Total Servicios:</td>
+                                        <td className="bookEdge-planDetail-totalAmount">${plan.total.toLocaleString()}</td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </section>
                 </div>
-                <div className="plan-detail-modal-footer">
-                    <button className="plan-detail-close-btn" onClick={onClose}>Cerrar</button>
+                <div className="bookEdge-planDetail-modalFooter">
+                    <button className="bookEdge-planDetail-closeBtn" onClick={onClose}>Cerrar</button>
                 </div>
             </div>
         </div>

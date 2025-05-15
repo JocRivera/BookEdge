@@ -2,17 +2,17 @@
 
 :root {
   /* Colores principales */
-  --payments-primary: #4e54c8;
-  --payments-primary-light: #8f94fb;
-  --payments-primary-dark: #3a3f9e;
-  --payments-background: #f9f9ff;
-  --payments-card-bg: #ffffff;
-  --payments-text-dark: #2d3748;
-  --payments-text-light: #718096;
-  --payments-border: #e2e8f0;
-  --payments-shadow-light: rgba(78, 84, 200, 0.1);
-  --payments-shadow-medium: rgba(78, 84, 200, 0.15);
-  --payments-shadow-dark: rgba(78, 84, 200, 0.2);
+  --companions-primary:  #4e54c8;
+  --companions-primary-light: #8f94fb;
+  --companions-primary-dark: #3a3f9e;
+  --companions-background: #f9f9ff;
+  --companions-card-bg: #ffffff;
+  --companions-text-dark: #2d3748;
+  --companions-text-light: #718096;
+  --companions-border: #e2e8f0;
+  --companions-shadow-light: rgba(78, 84, 200, 0.1);
+  --companions-shadow-medium: rgba(78, 84, 200, 0.15);
+  --companions-shadow-dark: rgba(78, 84, 200, 0.2);
 }
 
 /* Contenedor principal - Estilo premium */
@@ -37,7 +37,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: inline-block;
   position: relative;
-  color: var(--payments-text-dark);
+  color: var(--companions-text-dark);
   padding-bottom: 10px;
 }
 
@@ -70,9 +70,9 @@
   position: relative;
   flex-grow: 1;
   max-width: 500px;
-  background: var(--payments-card-bg);
+  background: var(--companions-card-bg);
   border-radius: 50px;
-  box-shadow: 0 4px 20px var(--payments-shadow-medium);
+  box-shadow: 0 4px 20px var(--companions-shadow-medium);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -118,8 +118,8 @@
 .companions-table-container {
   overflow-x: auto;
   border-radius: 16px;
-  box-shadow: 0 15px 30px var(--payments-shadow-light);
-  background: var(--payments-card-bg);
+  box-shadow: 0 15px 30px var(--companions-shadow-light);
+  background: var(--companions-card-bg);
   margin-bottom: 2rem;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -135,7 +135,7 @@
   text-align: left;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--payments-primary-dark);
+  color: var(--companions-primary-dark);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
@@ -144,8 +144,8 @@
 .companions-table td {
   padding: 1.2rem 1.5rem;
   font-size: 0.95rem;
-  color: var(--payments-text-dark);
-  border-bottom: 1px solid var(--payments-border);
+  color: var(--companions-text-dark);
+  border-bottom: 1px solid var(--companions-border);
   transition: background-color 0.3s ease;
 }
 
@@ -177,8 +177,8 @@
   border-radius: 16px;
   box-shadow: 0 15px 30px var(--companions-shadow-light);
   margin-top: 2rem;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
 
 .companion-form:hover {
   box-shadow: 0 25px 50px var(--companions-shadow-dark);
@@ -204,7 +204,9 @@
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
+  min-width: 200px;
+  flex: 1 0 auto;
 }
 
 .form-group label {
@@ -218,19 +220,20 @@
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.8rem 1.2rem;
+  padding: 0.6rem 1rem;
   border: 1px solid var(--companions-border);
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
   background-color: #f8fafc;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  height: 38px; 
 }
 
 .form-group input:focus,
 .form-group select:focus {
   border-color: var(--companions-primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.2);
+  box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.2);
   background-color: var(--companions-white);
 }
 
@@ -256,21 +259,20 @@
 }
 
 .btn-primary {
-  padding: 0.8rem 1.5rem;
-  background: linear-gradient(135deg, var(--companions-primary) 0%, var(--companions-primary-dark) 100%);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
+ padding: 8px 16px;
+  border-radius: 6px;
   font-weight: 500;
-  font-size: 0.95rem;
-  box-shadow: 0 4px 15px var(--companions-shadow-medium);
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #4299e1;
+  border: 1px solid #4299e1;
+  color: white;
+  font-size: 0.9rem;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--companions-shadow-dark);
+ background-color: #3182ce;
+  border-color: #3182ce;
 }
 
 /* Versión compacta - Estilo mejorado */

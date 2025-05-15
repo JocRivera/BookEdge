@@ -26,7 +26,7 @@ import ProtectedRoutes from "./ProtectedRutes";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
 import DashboardManagement from "./components/features/componentDashboard/main";
-
+import '../src/components/features/componentPlans/componentPlan.css';
 import Customer from "./components/features/componentCustomer/customer";
 export default function App() {
   return (
