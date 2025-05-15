@@ -25,14 +25,8 @@ import Error404 from "./components/common/401&404/404";
 import ProtectedRoutes from "./ProtectedRutes";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
-import ComfortAssignmentSelector from "./components/features/componentAssignment/selectorAssing";
 import DashboardManagement from "./components/features/componentDashboard/main";
-import CabinsClient from "./pages/Habitaciones/Cabins/CabinsClient"
-import BedroomsClient from "./pages/Habitaciones/Rooms/BedroomClient";
-
 import '../src/components/features/componentPlans/componentPlan.css';
-
-
 import Customer from "./components/features/componentCustomer/customer";
 export default function App() {
   return (
@@ -67,7 +61,6 @@ export default function App() {
               <Route path="config" element={<CreateConfig />} />
               <Route path="cabins" element={<CabinsPage />} />
               <Route path="rooms" element={<BedroomCard />} />
-              <Route path="AssignAmenities" element={<ComfortAssignmentSelector />} />
               <Route path="dashboard" element={<DashboardManagement />} />
               <Route path="reservations" element={<TableReservations />} />
               <Route

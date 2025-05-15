@@ -397,7 +397,89 @@
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
   background-color: #fff;
 }
+/* ... (tus estilos existentes) ... */
 
+/* Estilos para la nueva columna derecha y sección de comodidades */
+.form-column-right-cabin-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* Espacio entre la sección de comodidades y la de imágenes */
+}
+
+.comforts-section-cabin-admin {
+  border: none; /* O un borde sutil si prefieres: 1px solid #e2e8f0; */
+  padding: 0; /* O un padding ligero: 15px; */
+  margin: 0;
+  border-radius: 8px; /* Si añades borde/fondo */
+  /* background-color: #f9fafb;  Si quieres un fondo sutil */
+}
+
+.comforts-section-cabin-admin legend.form-label-admin {
+  font-size: 1.1rem; /* Hacer el título de la sección un poco más grande */
+  color: #2d3748;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  /* border-bottom: 1px solid #e2e8f0; */ /* Opcional: línea divisoria bajo el legend */
+}
+
+.comforts-checkbox-group-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Ajusta minmax según el largo de tus nombres de comodidades */
+  gap: 10px 15px; /* Espacio vertical y horizontal entre checkboxes */
+  max-height: 200px; /* Altura máxima para el scroll si hay muchas comodidades */
+  overflow-y: auto; /* Scroll vertical */
+  padding: 5px; /* Pequeño padding interno */
+  border: 1px solid #e2e8f0; /* Borde sutil alrededor del grupo */
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.comfort-checkbox-item-admin {
+  display: flex;
+  align-items: center;
+  padding: 8px 5px; /* Espacio alrededor de cada item */
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.comfort-checkbox-item-admin:hover {
+  background-color: #f0f4f8; /* Un hover sutil */
+}
+
+.comfort-checkbox-admin {
+  margin-right: 10px;
+  width: 18px; /* Tamaño del checkbox */
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4299e1; /* Color del check cuando está marcado (navegadores modernos) */
+}
+
+.comfort-label-admin {
+  font-size: 0.9rem;
+  color: #4a5568;
+  cursor: pointer;
+  flex-grow: 1; /* Para que el label ocupe el espacio y sea clickeable */
+}
+
+.no-comforts-message-admin {
+  font-size: 0.9rem;
+  color: #718096;
+  padding: 10px;
+  text-align: center;
+  background-color: #f8fafc;
+  border: 1px dashed #e2e8f0;
+  border-radius: 6px;
+}
+
+/* Para el mensaje de error general al final del formulario */
+.general-error-admin {
+  text-align: center;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+}
 textarea.form-input-cabin-admin {
   min-height: 100px;
   resize: vertical;
@@ -431,7 +513,6 @@ textarea.form-input-cabin-admin {
 
 /* Sección de imágenes */
 .image-upload-section-cabin-admin {
-  height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;

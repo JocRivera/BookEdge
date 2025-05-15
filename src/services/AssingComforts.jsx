@@ -1,21 +1,16 @@
-import api from "./api";
 
-export const getAllComfortsForCabins = async () => {
-    const response = await api.get("/cabin-comforts/all");
-    return response.data;
-  };
-export const getCabinsWithoutComforts = async () => {
-  const response = await api.get("/cabin-comforts/cabins-without-comforts");
-  return response.data;
+
+import api from "./api"; 
+
+
+export const assignComfortsToCabin = async (idCabin, comfortsArray) => { 
+  
+  const response = await api.post(`/cabin-comforts/${idCabin}/comforts`, { comforts: comfortsArray });
+  return response.data; 
 };
 
-
-export const assignComfortsToCabin = async (data) => {
-  const response = await api.post("/cabin-comforts/assign", data);
-  return response.data;
+export const updateCabinComforts = async (idCabin, comfortsArray) => { 
+  const response = await api.put(`/cabin-comforts/${idCabin}/comforts`, { comforts: comfortsArray });
+  return response.data; 
 };
 
-export const updateComfortsToCabin = async (data,id) => {
-  const response = await api.put("/cabin-comforts/update", data,id);
-  return response.data;
-};
