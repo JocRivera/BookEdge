@@ -32,7 +32,6 @@ export const createCabin = async (cabinData) => {
 };
 export const updateCabin = async (id, cabinData) => {
   try {
-    // Convertimos capacity a número si existe
     const dataToSend = {
       ...cabinData,
       capacity: cabinData.capacity ? Number(cabinData.capacity) : undefined
