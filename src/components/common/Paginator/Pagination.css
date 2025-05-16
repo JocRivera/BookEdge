@@ -1,10 +1,8 @@
-/* Pagination.css */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 4px;
-  margin: 40px 0 20px; /* 40px arriba, 0 a los lados, 20px abajo */
   list-style: none;
   padding: 0;
   user-select: none;
