@@ -282,20 +282,10 @@ export default function CreateServices() {
                                                 />
                                             </td>
                                             <td className="config-actions-cell">
-                                                <button
-                                                    onClick={() => handleEdit(service.Id_Service)}
-                                                    className="config-action-btn config-edit-btn"
-                                                    title="Editar"
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(service.Id_Service)}
-                                                    className="config-action-btn config-delete-btn"
-                                                    title="Eliminar"
-                                                >
-                                                    <FaTrash />
-                                                </button>
+                                                <ActionButtons
+                                                    onEdit={() => handleEdit(service.Id_Service)}
+                                                    onDelete={() => handleDelete(service.Id_Service)}
+                                                />
                                             </td>
                                         </tr>
                                     ))

@@ -279,27 +279,11 @@ export default function CreateConfig() {
                                                 />
                                             </td>
                                             <td className="config-actions-cell">
-                                                <button
-                                                    onClick={() => handleView(config.idRol)}
-                                                    className="config-action-btn config-view-btn"
-                                                    title="Ver detalles"
-                                                >
-                                                    <FaEye />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleEdit(config.idRol)}
-                                                    className="config-ction-btn config-edit-btn"
-                                                    title="Editar"
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(config.idRol)}
-                                                    className="config-action-btn config-delete-btn"
-                                                    title="Eliminar"
-                                                >
-                                                    <FaTrash />
-                                                </button>
+                                                <ActionButtons
+                                                    onEdit={() => handleEdit(config.idRol)}
+                                                    onDelete={() => handleDelete(config.idRol)}
+                                                    onView={() => handleView(config.idRol)}
+                                                />
                                             </td>
                                         </tr>
                                     ))
