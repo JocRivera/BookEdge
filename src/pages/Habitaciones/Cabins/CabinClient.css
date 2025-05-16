@@ -1,67 +1,64 @@
 :root {
-  /* ... (tus variables CSS se mantienen, puedes ajustar --radius si quieres más redondez) ... */
   --azure: #3785d4;
-  --dark: #1a1a1a; /* Usaremos este para el texto del botón, o blanco si el botón es oscuro */
-  --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición un poco más suave */
+  --dark: #1a1a1a; 
+  --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   --primary: #4a6741;
   --primary-light: #6a8661;
   --primary-dark: #304a27;
-  --accent: #3785d4; /* Podríamos usar este para el botón "Ver detalles" */
+  --accent: #3785d4; 
   --text-dark: #333333;
-  --text-light: #f0f0f0; /* Un blanco un poco más suave para el texto sobre la imagen */
+  --text-light: #f0f0f0; 
   --background-light: #ffffff;
   --background-dark: #f8f8f8;
   --border-color: #e0e0e0;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra más sutil y elevada */
-  --radius: 16px; /* Esquinas más redondeadas como en la imagen de ejemplo */
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --radius: 16px; 
 }
 
 .swiper-cabin-container {
-  padding: 30px 15px; /* Más padding vertical */
+  padding: 30px 15px; 
   background: var(
     --background-dark
-  ); /* Un fondo ligeramente oscuro para el contenedor */
+  ); 
   position: relative;
   overflow: hidden;
 }
 
 .title-cabin-home {
-  font-size: clamp(28px, 5vw, 38px); /* Tamaño de fuente adaptable */
-  font-weight: 300; /* Mantenemos ligero */
+  font-size: clamp(28px, 5vw, 38px); 
+  font-weight: 300; 
   text-align: center;
-  margin-bottom: 50px; /* Más espacio */
+  margin-bottom: 50px; 
   letter-spacing: 1px;
   color: var(--text-dark);
 }
 
 .title-cabin-home span {
   font-weight: 700;
-  color: var(--accent); /* Usar la variable accent */
+  color: var(--accent);
 }
 
-/* Swiper Nav - Puede que no lo necesites si el diseño es como el ejemplo (sin nav visible) */
 .swiper-custom-nav {
-  /* Si decides mantenerlos, asegúrate que no interfieran con el diseño de la card */
   position: absolute;
   top: 50%;
   width: 100%;
   transform: translateY(-50%);
   display: flex;
   justify-content: space-between;
-  padding: 0 10px; /* Para que no estén pegados a los bordes */
-  z-index: 10; /* Encima de las cards */
+  padding: 0 10px; 
+  z-index: 10; 
 }
 
 .swiper-custom-nav div {
-  width: 44px; /* Ligeramente más pequeños */
+  width: 44px; 
   height: 44px;
-  background: rgba(255, 255, 255, 0.9); /* Un poco más opaco */
+  background: rgba(255, 255, 255, 0.9); 
   backdrop-filter: blur(4px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-dark); /* Color de ícono más oscuro */
+  color: var(--text-dark); 
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: var(--transition);
 }
@@ -71,17 +68,16 @@
   transform: scale(1.1);
 }
 
-/* --- NUEVO DISEÑO PARA CABIN CARD --- */
 .cabin-card-home {
-  height: 480px; /* Altura similar al ejemplo */
+  height: 480px; 
   position: relative;
   overflow: hidden;
-  border-radius: var(--radius); /* Usar la variable de radio */
+  border-radius: var(--radius); 
   cursor: pointer;
   box-shadow: var(--shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: flex; /* Para el gradiente y contenido */
-  flex-direction: column; /* Apilar imagen y contenido */
+  display: flex; 
+  flex-direction: column; 
 }
 
 .cabin-card-home:hover {
@@ -90,62 +86,60 @@
 }
 
 .cabin-image-container-home {
-  /* Cambiado de cabin-imagen-container-home */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1; /* Detrás del contenido */
+  z-index: 1;
 }
 
 .cabin-image-home {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s ease; /* Transición más larga para el zoom */
+  transition: transform 0.6s ease; 
 }
 
 .cabin-card-home:hover .cabin-image-home {
-  transform: scale(1.1); /* Zoom más pronunciado al hacer hover */
+  transform: scale(1.1);
 }
 
-/* Gradiente sobre la imagen */
+
 .cabin-card-home::after {
   content: "";
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 70%; /* Altura del gradiente, ajustar según necesidad */
+  height: 70%;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.85) 0%,
     rgba(0, 0, 0, 0) 100%
   );
-  z-index: 2; /* Encima de la imagen, debajo del texto */
-  border-radius: 0 0 var(--radius) var(--radius); /* Para que coincida con la card */
+  z-index: 2; 
+  border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .cabin-content-overlay-home {
-  position: absolute; /* <<< CAMBIO CLAVE: Posicionar absolutamente para cubrir la card */
+  position: absolute; 
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 3; /* Encima del gradiente e imagen */
-  padding: 20px; /* Ajusta este padding */
+  z-index: 3; 
+  padding: 20px; 
   color: var(--text-light);
   display: flex;
-  flex-direction: column; /* Apila .cabin-text-content y .cabin-details-button-home */
-  justify-content: flex-end; /* <<< CAMBIO CLAVE: Alinea todo el bloque de contenido hacia abajo */
-  box-sizing: border-box;
+  flex-direction: column; 
+  justify-content: flex-end; 
 }
 
 .cabin-title-home {
-  font-size: clamp(1.8rem, 4vw, 2.1rem); /* Ajusta el tamaño según el espacio */
+  font-size: clamp(1.8rem, 4vw, 2.1rem); 
   font-weight: 600;
-  margin-bottom: 6px; /* Menos espacio si la descripción es más prominente */
+  margin-bottom: 6px; 
   line-height: 1.2;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7); /* Sombra un poco más fuerte */
 }
@@ -171,40 +165,37 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 20px; /* Espacio ANTES del botón */
+  margin-bottom: 20px; 
 }
 
 .meta-tag-home {
-  /* Estilo para cada etiqueta */
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem; /* Más pequeño */
-  background: rgba(255, 255, 255, 0.15); /* Fondo translúcido */
+  font-size: 0.8rem; 
+  background: rgba(255, 255, 255, 0.15); 
   padding: 6px 12px;
-  border-radius: 20px; /* Muy redondeado */
+  border-radius: 20px; 
   font-weight: 500;
-  backdrop-filter: blur(2px); /* Efecto vidrio esmerilado sutil */
+  backdrop-filter: blur(2px); 
 }
 .meta-tag-home svg {
-  /* Para íconos dentro de las etiquetas */
+
   font-size: 0.9rem;
 }
 
-/* Botón "Ver detalles" (antes cabin-button-home) */
 .cabin-details-button-home {
-  /* Renombrado para claridad */
-  background: var(--background-light); /* Botón blanco como en el ejemplo */
-  color: var(--text-dark); /* Texto oscuro */
+  background: var(--background-light); 
+  color: var(--text-dark); 
   border: none;
-  padding: 14px 20px; /* Más padding vertical */
+  padding: 14px 20px; 
   font-weight: 600;
   cursor: pointer;
   width: 100%;
   transition: var(--transition);
   border-radius: calc(
     var(--radius) - 4px
-  ); /* Ligeramente menos redondeado que la card, o igual */
+  ); 
   letter-spacing: 0.5px;
   font-size: 0.9rem;
   text-align: center;
@@ -212,7 +203,7 @@
 }
 
 .cabin-details-button-home:hover {
-  background: #f0f0f0; /* Un gris muy claro al hacer hover */
+  background: #f0f0f0; 
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
@@ -423,14 +414,7 @@
   line-height: 1.2;
 }
 
-.cabin-details-location {
-  color: #666;
-  font-size: 1rem;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+
 
 .cabin-details-specs {
   display: flex;
