@@ -26,7 +26,7 @@ function CardCabin() {
   const [isDetailOpen, setDetailOpen] = useState(false);
 
   // Paginación
-  const itemsPerPage = 4;
+  const itemsPerPage = 3;
   const [currentPage, setCurrentPage] = useState(0);
 
   // Cargar datos de cabañas e imágenes

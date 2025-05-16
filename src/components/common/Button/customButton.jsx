@@ -2,6 +2,8 @@
 import React from 'react';
 import './CustomButton.css';
 import { FaEye, FaEdit, FaTrash, FaPlus,  } from 'react-icons/fa';
+import { TiEdit } from "react-icons/ti";
+
 
 export const CustomButton = ({ 
   children, 
