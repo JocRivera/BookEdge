@@ -3,7 +3,8 @@ import axios from "axios"
 const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
 const API_URL_USERS = "http://localhost:3000/user"
 const API_URL_PLANS = "http://localhost:3000/plan"
-const API_URL_CABINS = "http://localhost:3000/cabins"
+// const API_URL_CABINS = "http://localhost:3000/cabins"
+
 
 const validateId = (id, name = "ID") => {
   const numId = Number(id)
@@ -88,22 +89,27 @@ export const getAllPlanes = async () => {
     return []
   }
 }
-
+// En reservationsService.jsx
 export const getCabins = async () => {
   try {
-    const { data } = await axios.get(`${API_URL_RESERVATIONS}/cabinReservations`)
+    const { data } = await axios.get(`${API_URL_RESERVATIONS}/cabins`);
     
-
-    const normalizedCabins = data.map(cabin => ({
-      ...cabin,
-      status: cabin.status?.trim() || "En Servicio" 
-    }))
-    
-    console.log("Cabañas normalizadas:", normalizedCabins);
-    return normalizedCabins;
+    // Normalizar datos
+    return data.map(cabin => ({
+      idCabin: cabin.idCabin,
+      name: cabin.name || `Cabaña ${cabin.idCabin}`,
+      capacity: Number(cabin.capacity) || 0,
+      status: (cabin.status || 'En Servicio').trim(),
+      description: cabin.description || 'Sin descripción',
+      price: Number(cabin.price) || 0
+    }));
   } catch (error) {
-    console.error("Error al obtener cabañas:", error);
-    return []; 
+    console.error("Error al obtener cabañas:", {
+      url: error.config?.url,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    return [];
   }
 };
 

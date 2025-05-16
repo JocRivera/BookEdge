@@ -48,139 +48,139 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
 
   // Cargar datos iniciales
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      if (!isOpen) return;
+ useEffect(() => {
+  let isMounted = true;
 
-      try {
-        setLoading(true);
-        console.log("Iniciando carga de datos iniciales...");
+  const fetchInitialData = async () => {
+    if (!isOpen || !isMounted) return;
 
-        // 1. Cargar datos básicos (planes y usuarios)
-        const [planesData, usersData, cabinsData] = await Promise.all([
-          getAllPlanes(),
-          getUsers(),
-          getCabins()
-        ]);
-        setPlanes(planesData);
-        setUsers(usersData);
-        setCabins(cabinsData)
-        const availableCabins = cabinsData.filter(cabin => {
-          // Verificación exacta del estado (case-sensitive)
-          const isAvailable = cabin.status === "En Servicio";
+    try {
+      setLoading(true);
+      console.log("Iniciando carga de datos iniciales...");
 
-          // Verificación de capacidad (con protección contra NaN)
-          const requiredCapacity = Number(formData.companionCount) + 1;
-          const cabinCapacity = Number(cabin.capacity) || 0;
-          const hasCapacity = cabinCapacity >= requiredCapacity;
+      // 1. Cargar todos los datos necesarios
+      const [planesData, usersData, cabinsData] = await Promise.all([
+        getAllPlanes(),
+        getUsers(),
+        getCabins()
+      ]);
+      setPlanes(planesData);
+      setUsers(usersData);
+      setCabins(cabinsData);
 
-          console.log(`Cabaña: ${cabin.name} | Estado: ${cabin.status} | Cumple: ${isAvailable && hasCapacity}`);
+      if (!isMounted) return;
 
-          return isAvailable && hasCapacity;
-        });
-        console.log("Datos brutos de cabañas:", cabinsData);
+      // 2. Calcular disponibilidad
+      const companionCount = reservationData?.companions?.length || 0;
+      const requiredCapacity = companionCount + 1;
+      
+      const availableCabins = cabinsData.filter(cabin => 
+        String(cabin.status).toLowerCase() === 'en servicio' && 
+        Number(cabin.capacity) >= requiredCapacity
+      );
 
-        setFormData(prev => {
-          const newAvailableCabins = availableCabins;
-          console.log("Actualizando estado con:", newAvailableCabins);
+      console.log("Datos de cabañas:", {
+        todas: cabinsData,
+        disponibles: availableCabins,
+        capacidadRequerida: requiredCapacity,
+        estadoRequerido: "en servicio"
+      });
 
-          return {
-            ...prev,
-            availableCabins: newAvailableCabins,
-            updateFlag: !prev.updateFlag
-          };
-        });
+      // 3. Manejo de reserva existente
+      let freshData = reservationData;
+      let reservationPaymentsData = [];
+      
+      if (reservationData?.idReservation) {
+        try {
+          // Obtener datos actualizados de la reserva
+          freshData = await getReservationById(reservationData.idReservation) || reservationData;
+          console.log("Datos actualizados de la reserva:", freshData);
 
-        // 2. Manejo de reserva existente
-        if (reservationData) {
-          console.log("Cargando datos de reserva existente:", reservationData);
-          if (reservationData.idReservation) {
-            try {
-              const payments = await getReservationPayments(reservationData.idReservation);
-              setReservationPayments(Array.isArray(payments) ? payments : []);
-            } catch (error) {
-              console.error("Error al cargar pagos:", error);
-              setReservationPayments([]);
-            }
-          }
-
-
-          let freshData = reservationData;
-
-          // 2.1 Obtener datos actualizados de la reserva
-          if (reservationData.idReservation) {
-            try {
-              freshData = await getReservationById(reservationData.idReservation) || reservationData;
-              console.log("Datos actualizados de la reserva:", freshData);
-            } catch (error) {
-              console.warn("Error obteniendo datos actualizados:", error);
-              // Continuamos con los datos originales si falla
-            }
-          }
-
-          if (freshData.idReservation) {
-            try {
-              const payments = await getReservationPayments(freshData.idReservation);
-              const safePayments = (Array.isArray(payments?.data) ? payments.data :
-                (Array.isArray(payments)) ? payments : []);
-
-              setReservationPayments(safePayments.filter(p => p?.id && p?.amount));
-            } catch (error) {
-              console.error("Payment load error:", error);
-              setReservationPayments([]);
-            }
-          }
-
-          // 2.3 Preparar datos del formulario
-          const companions = Array.isArray(freshData.companions) ? freshData.companions : [];
-
-          setFormData({
-            idUser: freshData.idUser ? Number(freshData.idUser) : "",
-            idPlan: freshData.idPlan ? Number(freshData.idPlan) : "",
-            idCabin: freshData.idCabin ? Number(freshData.idCabin) : "",
-            startDate: freshData.startDate || "",
-            endDate: freshData.endDate || "",
-            hasCompanions: companions.length > 0,
-            companionCount: companions.length,
-            companions: companions,
-            status: freshData.status || "Reservado",
-            total: freshData.total || 0,
-            paymentMethod: freshData.paymentMethod || "Efectivo",
-          });
+          // Cargar pagos existentes
+          const payments = await getReservationPayments(reservationData.idReservation);
+          reservationPaymentsData = Array.isArray(payments?.data) ? payments.data :
+                                (Array.isArray(payments)) ? payments : [];
+          reservationPaymentsData = reservationPaymentsData.filter(p => p?.id && p?.amount);
+        } catch (error) {
+          console.error("Error cargando datos de reserva:", error);
         }
-        // 3. Inicializar nueva reserva
-        else {
-          console.log("Inicializando nueva reserva");
-          setFormData({
-            idUser: "",
-            idPlan: "",
-            idCabin: "",
-            startDate: "",
-            endDate: "",
-            hasCompanions: false,
-            companionCount: 0,
-            companions: [],
-            status: "Reservado",
-            total: 0,
-            paymentMethod: "Efectivo",
-          });
-          setReservationPayments([]);
-          setTempPayments([])
-        }
-      } catch (error) {
-        console.error("Error crítico en fetchInitialData:", {
-          message: error.message,
-          stack: error.stack
+      }
+
+      // 4. Preparar el estado final
+      if (!isMounted) return;
+
+      const baseFormData = {
+        // Datos principales
+        idUser: "",
+        idPlan: "",
+        idCabin: "",
+        startDate: "",
+        endDate: "",
+        hasCompanions: false,
+        companionCount: 0,
+        companions: [],
+        status: "Reservado",
+        total: 0,
+        paymentMethod: "Efectivo",
+        
+        // Datos cargados
+        planes: planesData,
+        users: usersData,
+        cabins: cabinsData,
+        availableCabins: availableCabins, // Siempre definido
+        selectedCabin: null
+      };
+
+      if (freshData) {
+        const companions = Array.isArray(freshData.companions) ? freshData.companions : [];
+        setFormData({
+          ...baseFormData,
+          idUser: freshData.idUser ? Number(freshData.idUser) : "",
+          idPlan: freshData.idPlan ? Number(freshData.idPlan) : "",
+          idCabin: freshData.idCabin ? Number(freshData.idCabin) : "",
+          startDate: freshData.startDate || "",
+          endDate: freshData.endDate || "",
+          hasCompanions: companions.length > 0,
+          companionCount: companions.length,
+          companions: companions,
+          status: freshData.status || "Reservado",
+          total: freshData.total || 0,
+          paymentMethod: freshData.paymentMethod || "Efectivo",
         });
+      } else {
+        // Nueva reserva
+        setFormData(baseFormData);
+      }
+
+      setReservationPayments(reservationPaymentsData);
+      setTempPayments([]);
+
+    } catch (error) {
+      console.error("Error crítico en fetchInitialData:", error);
+      if (isMounted) {
+        setFormData(prev => ({
+          ...prev,
+          availableCabins: [] // Asegurar array vacío en caso de error
+        }));
         alert(`Error al cargar datos: ${error.message}`);
-      } finally {
+      }
+    } finally {
+      if (isMounted) {
         setLoading(false);
         console.log("Finalizada carga de datos iniciales");
       }
-    };
+    }
+  };
 
-    fetchInitialData();
-  }, [isOpen, reservationData]);
+  fetchInitialData();
+
+  return () => {
+    isMounted = false;
+  };
+}, [isOpen, reservationData]);
+
+
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
 
@@ -256,14 +256,22 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
   }
 
   const nextStep = () => {
-    if (validateStep(step)) {
+    console.log("Intentando avanzar al paso:", step + 1);
+    const isValid = validateStep(step);
+    console.log("Validación del paso actual:", isValid);
+
+    if (isValid) {
       if (step === 1 && !formData.hasCompanions) {
-        setStep(3)
+        console.log("Saltando directamente al paso 3 (pagos)");
+        setStep(3);
       } else {
-        setStep(step + 1)
+        console.log("Avanzando al siguiente paso normal");
+        setStep(step + 1);
       }
+    } else {
+      console.log("Validación fallida, errores:", errors);
     }
-  }
+  };
 
   const prevStep = () => {
     if (step === 4 && !formData.hasCompanions) {
@@ -362,14 +370,14 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     }
   };
 
-  const handleCabinChange = (e) => {
-    const { value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      selectedCabin: value,
-      idCabin: value, // Actualiza el idCabin en el formulario
-    }));
-  };
+  // const handleCabinChange = (e) => {
+  //   const { value } = e.target;
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     selectedCabin: value,
+  //     idCabin: value, // Actualiza el idCabin en el formulario
+  //   }));
+  // };
 
   const handleSaveCompanionInReservation = async (companionData, reservationId) => {
     try {
@@ -466,7 +474,11 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
   };
 
   if (!isOpen) return null;
-
+  console.log("Render final - Estado completo:", {
+    availableCabins: formData.availableCabins,
+    cabins: formData.cabins,
+    loading
+  });
   return (
     <div className="reservations-modal-overlay">
       <div className="reservations-modal-container">
@@ -680,47 +692,44 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                   Disponibles para {formData.companionCount + 1} personas
                 </p>
 
-                {/* Contenedor de cabañas con validación */}
+                {/* Contenedor simplificado de cabañas */}
                 <div className="cabins-grid">
-                  {formData.availableCabins?.length > 0 ? (
-                    formData.availableCabins.map((cabin) => {
-                      console.log("Renderizando cabaña:", cabin);
-                      return (
-                        <div
-                          key={`cabin-${cabin.idCabin}`}
-                          className={`cabin-card ${formData.selectedCabin === cabin.idCabin ? "selected" : ""
-                            }`}
-                          onClick={() =>
-                            handleCabinChange({
-                              target: {
-                                value: cabin.idCabin,
-                                name: "selectedCabin"
-                              }
-                            })
-                          }
-                        >
-                          <div className="cabin-header">
-                            <h4>{cabin.name}</h4>
-                            <span className="cabin-capacity">
-                              👥 {cabin.capacity} personas
-                            </span>
+                  {((formData.availableCabins || []).length > 0) ? (
+                    formData.availableCabins.map((cabin) => (
+                      <div
+                        key={`cabin-${cabin.idCabin}`}
+                        className={`cabin-card ${formData.selectedCabin === cabin.idCabin ? "selected" : ""}`}
+                        onClick={() => {
+                          console.log("Cabaña clickeada:", cabin.idCabin);
+                          setFormData(prev => ({
+                            ...prev,
+                            selectedCabin: cabin.idCabin,
+                            idCabin: cabin.idCabin
+                          }));
+                        }}
+                      >
+                        <div className="cabin-header">
+                          <h4>{cabin.name}</h4>
+                          <div className="cabin-meta">
+                            <span className="cabin-capacity">👥 {cabin.capacity} personas</span>
+                            <span className="cabin-status">{cabin.status}</span>
                           </div>
+                        </div>
 
-                          <div className="cabin-description">
-                            {cabin.description || "Cabaña con todas las comodidades"}
-                          </div>
+                        <div className="cabin-description">
+                          {cabin.description || "Cabaña con todas las comodidades"}
+                        </div>
 
-
+                        <div className="cabin-footer">
                           <button
                             className="select-button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleCabinChange({
-                                target: {
-                                  value: cabin.idCabin,
-                                  name: "selectedCabin"
-                                }
-                              });
+                              setFormData(prev => ({
+                                ...prev,
+                                selectedCabin: cabin.idCabin,
+                                idCabin: cabin.idCabin
+                              }));
                             }}
                           >
                             {formData.selectedCabin === cabin.idCabin
@@ -728,56 +737,46 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                               : "Seleccionar"}
                           </button>
                         </div>
-                      );
-                    })
+                      </div>
+                    ))
                   ) : (
                     <div className="no-cabins-message">
                       {loading ? (
                         <p>Cargando cabañas disponibles...</p>
                       ) : (
-                        <p>
-                          No hay cabañas disponibles que cumplan con los criterios actuales.
-                          <br />
-                          <small>
-                            Estado requerido: &apos;En Servicio&apos; | Capacidad mínima:{" "}
-                            {formData.companionCount + 1} personas
-                          </small>
-                        </p>
+                        <>
+                          <p>No hay cabañas disponibles que cumplan con los criterios actuales.</p>
+                          <div className="debug-info">
+                            <p>Información para diagnóstico:</p>
+                            <ul>
+                              <li>Cabañas totales: {cabins.length}</li>
+                              <li>Cabañas disponibles: {formData.availableCabins?.length || 0}</li>
+                              <li>{`Estado requerido: 'En Servicio'`}</li>
+                              <li>Capacidad requerida: {formData.companionCount + 1} personas</li>
+                            </ul>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* Mensaje de error */}
+                {/* Mensaje de error y detalles de selección */}
                 {errors.selectedCabin && (
                   <div className="error-message" style={{ marginTop: "10px" }}>
                     {errors.selectedCabin}
                   </div>
                 )}
 
-                {/* Detalles de la cabaña seleccionada */}
                 {formData.selectedCabin && (
                   <div className="selected-cabin-details">
                     <h4>Detalles de tu selección:</h4>
                     <p>
-                      {cabins.find((c) => c.idCabin === Number(formData.selectedCabin))
-                        ?.description || "Descripción no disponible"}
+                      {formData.availableCabins?.find(c => c.idCabin === Number(formData.selectedCabin))?.description ||
+                        "Descripción no disponible"}
                     </p>
                   </div>
                 )}
-
-
-                {/* Debug (puedes eliminar esto en producción) */}
-                <div style={{ display: "none" }}>
-                  Debug Data:
-                  <pre>
-                    {JSON.stringify(
-                      {
-                        availableCabins: formData.availableCabins,
-                        selectedCabin: formData.selectedCabin,
-                        cabinsData: cabins
-                      }, null, 2)}</pre>
-                </div>
               </div>
             )}
 
