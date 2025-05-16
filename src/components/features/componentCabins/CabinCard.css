@@ -278,7 +278,6 @@
 }
 
 /* Modal base */
-/* Modal base */
 .modal-overlay-room-admin {
   position: fixed;
   top: 0;
@@ -299,7 +298,7 @@
 .modal-container-cabin-admin {
   width: 95%;
   max-width: 1000px;
-  max-height: 95vh;
+  max-height: 94vh;
   background-color: #fff;
   border-radius: 20px;
   position: relative;

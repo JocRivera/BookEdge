@@ -153,7 +153,6 @@
     background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
     position: sticky;
     top: 0;
-    z-index: 10;
 }
 
 .user-table-body td {
