@@ -1,9 +1,11 @@
+// --- START OF FILE Navbar.jsx (Completo y Modificado) ---
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext";
-import logo from "../../../assets/logo.png";
-import "./Navbar.css";
-// Iconos de Ionicons 5 (Io...)
+import { useAuth } from "../../../context/AuthContext"; 
+import logo from "../../../assets/logo.png"; 
+import "./Navbar.css"; 
+
+// Iconos
 import {
   IoLogOutOutline,
   IoCalendarOutline,
@@ -11,22 +13,22 @@ import {
   IoHomeOutline,
   IoBedOutline,
   IoMailOutline,
-  IoGridOutline
+  IoGridOutline,      // Para el panel de admin
+  IoSettingsOutline,  // Para configuración
+  IoReturnUpBackOutline // Para volver al sitio público
 } from "react-icons/io5";
-
-import { FiStar, FiChevronDown } from "react-icons/fi";
+import { FiStar, FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 const Navbar = () => {
-  const { isAuthenticated, isLoadingAuth, user, logout, isClient, isStaff } =
-    useAuth();
+  const { isAuthenticated, isLoadingAuth, user, logout, isClient, isStaff } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const dropdownRef = useRef(null);
+  const userDropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Efecto para el scroll
+  // Efecto para el scroll del navbar público
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
@@ -34,298 +36,215 @@ const Navbar = () => {
         setScrolled(isScrolled);
       }
     };
-
-    document.addEventListener("scroll", handleScroll);
-    return () => document.removeEventListener("scroll", handleScroll);
-  }, [scrolled]);
+    if (!isAdminPanel) { // Solo aplicar scroll effect al navbar público
+      document.addEventListener("scroll", handleScroll);
+      return () => document.removeEventListener("scroll", handleScroll);
+    }
+  }, [scrolled, location.pathname]); // Añadir location.pathname para re-evaluar
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Determinar si estamos en el panel administrativo
   const isAdminPanel = location.pathname.startsWith("/admin");
 
-  // Función para manejar la navegación
   const handleNavigation = (path) => {
     navigate(path);
-    setDropdownOpen(false);
-    setMobileMenuOpen(false);
+    setUserDropdownOpen(false);
+    setMobileMenuOpen(false); // También cierra el menú móvil
   };
 
-  // Nueva función para scroll a secciones con offset
   const scrollToSection = (sectionId) => {
-    // Primero verificamos si estamos en la página de inicio
     if (location.pathname !== '/') {
-      // Si no estamos en la página de inicio, navegamos ahí primero
       navigate('/');
-      // Usamos setTimeout para dar tiempo a que la página se cargue
-      setTimeout(() => {
-        scrollWithOffset(sectionId);
-      }, 100);
+      setTimeout(() => scrollWithOffset(sectionId), 100);
     } else {
-      // Si ya estamos en la página de inicio, hacemos scroll directamente
       scrollWithOffset(sectionId);
     }
     setMobileMenuOpen(false);
+    setUserDropdownOpen(false);
   };
 
-  // Función auxiliar para hacer scroll con offset
   const scrollWithOffset = (sectionId) => {
     const section = document.getElementById(sectionId);
     if (section) {
-      // Calculamos la posición del elemento
-      const yOffset = -80; // Ajusta este valor según la altura de tu navbar
+      const yOffset = -80; // Ajusta según la altura de tu navbar fijo
       const elementPosition = section.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset + yOffset;
-
-      // Hacemos scroll a la posición calculada
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
     }
   };
 
   const getInitials = (name) => {
     if (!name) return "?";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase();
   };
 
+  // Estado de Carga
   if (isLoadingAuth) {
     return (
-      <div className="Nav loading">
+      <nav className={`navbar-loading-state ${isAdminPanel ? "admin" : "public"}`}>
         <div className="loading-spinner"></div>
-        <p>Cargando experiencia...</p>
-      </div>
+        {/* Opcional: <p>Cargando...</p> */}
+      </nav>
     );
   }
 
   // =================================================================
-  // NAVBAR PARA ADMINISTRADORES (CON EL NUEVO DROPDOWN UNIFICADO)
+  //       NAVBAR PARA EL PANEL DE ADMINISTRADOR
   // =================================================================
   if (isAuthenticated && isStaff() && isAdminPanel) {
     return (
-      <nav className="Nav admin-panel-nav">
-        <div className="logo-nav">
-          <button
-            className={`mobile-menu-button ${mobileMenuOpen ? "active" : ""}`}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Menú móvil"
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </div>
+      <nav className="navbar-admin">
+        <div className="navbar-admin-content">
+          
 
-        <div className={`nav-container ${mobileMenuOpen ? "mobile-open" : ""}`}>
-          <div className="luxury-user-dropdown" ref={dropdownRef}>
-            <div
-              className="luxury-user-info"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <div className="luxury-user-avatar admin-avatar">
-                {getInitials(user?.name)}
-              </div>
-              <FiChevronDown className={`dropdown-chevron ${dropdownOpen ? "open" : ""}`} />
+          <div className="navbar-admin-actions">
+            <div className="admin-user-dropdown" ref={userDropdownRef}>
+              <button
+                className="admin-user-dropdown-toggle"
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                aria-expanded={userDropdownOpen}
+                aria-label="Menú de usuario"
+              >
+                <div className="admin-user-avatar">{getInitials(user?.name)}</div>
+                <span className="admin-user-name">{user?.name || "Staff"}</span>
+                {userDropdownOpen ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
+              </button>
+
+              {userDropdownOpen && (
+                <div className="admin-dropdown-menu">
+                  <div className="admin-dropdown-header">
+                    <div className="admin-user-avatar large">{getInitials(user?.name)}</div>
+                    <div className="admin-user-details">
+                      <strong>{user?.name}</strong>
+                      <span>{user?.email}</span>
+                      <span className="admin-role-badge">{user?.role?.name || "Staff"}</span>
+                    </div>
+                  </div>
+                  
+                  <Link to="/admin/profile" className="admin-dropdown-item" onClick={() => setUserDropdownOpen(false)}>
+                    <IoPersonOutline /> Mi Perfil
+                  </Link>
+                  
+                  <Link to="/admin/settings" className="admin-dropdown-item" onClick={() => setUserDropdownOpen(false)}>
+                    <IoSettingsOutline /> Configuración
+                  </Link>
+                  <Link to="/" className="admin-dropdown-item" onClick={() => setUserDropdownOpen(false)}>
+                    <IoReturnUpBackOutline /> Volver al Sitio Público
+                  </Link>
+                  <div className="admin-dropdown-divider"></div>
+                  <button onClick={logout} className="admin-dropdown-item logout">
+                    <IoLogOutOutline /> Cerrar Sesión
+                  </button>
+                </div>
+              )}
             </div>
-
-            {dropdownOpen && (
-              <div className="luxury-dropdown-menu">
-                <div className="luxury-dropdown-header">
-                  <div className="luxury-user-avatar large">
-                    {getInitials(user?.name)}
-                  </div>
-                  <div className="luxury-user-details">
-                    <h4>{user?.name || "Usuario"}</h4>
-                    <p>{user?.email || ""}</p>
-                    <span className="user-role-badge">{user?.role?.name || "Admin"}</span>
-                  </div>
-                </div>
-
-                <div
-                  className="luxury-dropdown-item"
-                  onClick={() => handleNavigation("/admin/profile")}
-                >
-                  <IoPersonOutline className="dropdown-icon" />
-                  <span>Mi Perfil</span>
-                </div>
-
-                <div
-                  className="luxury-dropdown-item"
-                  onClick={() => handleNavigation("/admin")}
-                >
-                  <IoGridOutline className="dropdown-icon" />
-                  <span>Panel Administrativo</span>
-                </div>
-
-                <div className="luxury-dropdown-divider"></div>
-
-                <button
-                  onClick={() => logout()}
-                  className="luxury-dropdown-item logout"
-                >
-                  <IoLogOutOutline className="dropdown-icon" />
-                  <span>Cerrar Sesión</span>
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </nav>
     );
-
   }
+
+  // =================================================================
+  //       NAVBAR PÚBLICO (PARA CLIENTES Y VISITANTES)
+  // =================================================================
   return (
-    <nav
-      className={`luxury-nav ${scrolled ? "scrolled" : ""} ${mobileMenuOpen ? "mobile-open" : ""
-        }`}
-    >
-      <div className="luxury-logo" onClick={() => handleNavigation("/")}>
-        <img
-          src={logo} // Usa tu logo normal
-          alt="Logo"
-          className={`luxury-logo-img ${scrolled ? "" : "logo-light"}`}
-        />
-
-      </div>
-      <div className="luxury-nav-container">
-        {/* Logo */}
-
-
-        {/* Menú hamburguesa para móvil */}
-        <button
-          className={`luxury-mobile-menu ${mobileMenuOpen ? "active" : ""}`}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-
-        {/* Menú principal */}
-        <div className={`luxury-nav-links ${mobileMenuOpen ? "active" : ""}`}>
-          <div
-            className="luxury-nav-link"
-            onClick={() => handleNavigation("/")}
-          >
-            <IoHomeOutline className="link-icon" />
-            <span>Inicio</span>
-          </div>
-
-          <div
-            className="luxury-nav-link"
-            onClick={() => scrollToSection("habitaciones")}
-          >
-            <IoBedOutline className="link-icon" />
-            <span>Habitaciones</span>
-          </div>
-
-          <div
-            className="luxury-nav-link"
-            onClick={() => scrollToSection("services")}
-          >
-            <FiStar className="link-icon" />
-            <span>Planes</span>
-          </div>
-
-          <div
-            className="luxury-nav-link"
-            onClick={() => handleNavigation("/contact")}
-          >
-            <IoMailOutline className="link-icon" />
-            <span>Contacto</span>
-          </div>
+    <nav className={`navbar-public ${scrolled ? "scrolled" : ""} ${mobileMenuOpen ? "mobile-open" : ""}`}>
+      <div className="navbar-public-container">
+        <div className="navbar-public-logo" onClick={() => handleNavigation("/")}>
+          <img src={logo} alt="Bookedge Logo" className="public-logo-img" />
         </div>
 
-        {/* Sección de usuario/reservas */}
-        <div className="luxury-nav-actions">
+        <button
+          className={`navbar-mobile-menu-button ${mobileMenuOpen ? "active" : ""}`}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileMenuOpen}
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <div className={`navbar-public-links ${mobileMenuOpen ? "active" : ""}`}>
+          <div className="navbar-public-link" onClick={() => scrollToSection("inicio")}> {/* Cambia 'inicio' por el ID real de tu sección de inicio */}
+            <IoHomeOutline /> Inicio
+          </div>
+          <div className="navbar-public-link" onClick={() => scrollToSection("habitaciones")}>
+            <IoBedOutline /> Habitaciones
+          </div>
+          <div className="navbar-public-link" onClick={() => scrollToSection("services")}> {/* O "planes" */}
+            <FiStar /> Planes
+          </div>
+          <div className="navbar-public-link" onClick={() => handleNavigation("/contact")}>
+            <IoMailOutline /> Contacto
+          </div>
+          {/* Opciones de login/registro si el menú móvil está abierto y no autenticado */}
+          {mobileMenuOpen && !isAuthenticated && (
+            <div className="navbar-mobile-auth-actions">
+              <button className="navbar-public-button secondary" onClick={() => handleNavigation("/login")}>Iniciar Sesión</button>
+              <button className="navbar-public-button primary" onClick={() => handleNavigation("/register")}>Registrarse</button>
+            </div>
+          )}
+        </div>
+
+        <div className="navbar-public-actions">
           {isAuthenticated ? (
-            <div className="luxury-user-dropdown" ref={dropdownRef}>
-              <div
-                className="luxury-user-info"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+            <div className="public-user-dropdown" ref={userDropdownRef}>
+              <button
+                className="public-user-dropdown-toggle"
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                aria-expanded={userDropdownOpen}
+                aria-label="Menú de usuario"
               >
-                <div className="luxury-user-avatar">
-                  {getInitials(user?.name)}
-                </div>
-                <FiChevronDown
-                  className={`dropdown-chevron ${dropdownOpen ? "open" : ""}`}
-                />
-              </div>
-
-              {dropdownOpen && (
-                <div className="luxury-dropdown-menu">
-                  <div className="luxury-dropdown-header">
-                    <div className="luxury-user-avatar large">
-                      {getInitials(user?.name)}
-                    </div>
-                    <div className="luxury-user-details">
-                      <h4>{user?.name || "Usuario"}</h4>
-                      <p>{user?.email || ""}</p>
+                <div className="public-user-avatar">{getInitials(user?.name)}</div>
+                <span className="public-user-name-desktop">{user?.name}</span> {/* Visible en desktop */}
+                {userDropdownOpen ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
+              </button>
+              {userDropdownOpen && (
+                <div className="public-dropdown-menu">
+                  <div className="public-dropdown-header">
+                    <div className="public-user-avatar large">{getInitials(user?.name)}</div>
+                    <div className="public-user-details">
+                      <strong>{user?.name}</strong>
+                      <span>{user?.email}</span>
                     </div>
                   </div>
-
-                  <div
-                    className="luxury-dropdown-item"
-                    onClick={() =>
-                      handleNavigation(isClient() ? "/profile" : "/admin")
-                    }
-                  >
-                    <IoPersonOutline className="dropdown-icon" />
-                    <span>Mi Perfil</span>
-                  </div>
+                  
+                  <Link to={isClient() ? "/profile" : "/admin"} className="public-dropdown-item" onClick={() => setUserDropdownOpen(false)}>
+                    <IoPersonOutline /> {isClient() ? "Mi Perfil" : (isAdminPanel ? "Mi Perfil Admin" : "Panel Admin")}
+                  </Link>
 
                   {isClient() && (
-                    <div
-                      className="luxury-dropdown-item"
-                      onClick={() => handleNavigation("/my-reservations")}
-                    >
-                      <IoCalendarOutline className="dropdown-icon" />
-                      <span>Mis Reservas</span>
-                    </div>
+                    <Link to="/my-reservations" className="public-dropdown-item" onClick={() => setUserDropdownOpen(false)}>
+                      <IoCalendarOutline /> Mis Reservas
+                    </Link>
                   )}
+                  
+                    
 
-                  <div className="luxury-dropdown-divider"></div>
-
-                  <button
-                    onClick={() => logout()}
-                    className="luxury-dropdown-item logout"
-                  >
-                    <IoLogOutOutline className="dropdown-icon" />
-                    <span>Cerrar Sesión</span>
+                  <div className="public-dropdown-divider"></div>
+                  <button onClick={logout} className="public-dropdown-item logout">
+                    <IoLogOutOutline /> Cerrar Sesión
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <>
-              <button
-                className="luxury-nav-button secondary"
-                onClick={() => handleNavigation("/login")}
-              >
+            <div className="navbar-public-auth-buttons-desktop">
+              <button className="navbar-public-button secondary" onClick={() => handleNavigation("/login")}>
                 Iniciar Sesión
               </button>
-              <button
-                className="luxury-nav-button primary"
-                onClick={() => handleNavigation("/register")}
-              >
+              <button className="navbar-public-button primary" onClick={() => handleNavigation("/register")}>
                 Registrarse
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -334,3 +253,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+// --- END OF FILE Navbar.jsx ---
