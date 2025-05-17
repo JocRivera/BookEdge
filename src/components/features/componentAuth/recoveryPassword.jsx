@@ -5,6 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { recoverPassword } from "../../../services/AuthService";
 import { useAuth } from "../../../context/AuthContext"; 
 import "./recoveryPassword.css"
+import logo from "../../../assets/logo.png";
+
 
 const RecoveryPassword = () => {
   const { loading, setLoading } = useAuth(); 
@@ -77,7 +79,16 @@ const RecoveryPassword = () => {
   };
 
   return (
+      
     <div className="page-container">
+              <div className="simple-navbar">
+            <div className="navbar-content">
+              <div className="brand" onClick={() => navigate("/")}>
+                <img src={logo} alt="Logo" className="navbar-logo" />
+                <h1 className="navbar-title">Los Lagos</h1>
+              </div>
+            </div>
+          </div>
       <div className="recovery-container">
         <div className="recovery-card">
           <div className="recovery-header">

@@ -1,33 +1,32 @@
-
 .custom-button {
-
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 6px 12px;
-  border: 1px solid transparent; 
-  border-radius: 20px; 
-  font-size: 15px; 
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.custom-button:hover:not(:disabled) { 
+.custom-button:hover:not(:disabled) {
   opacity: 0.9;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .custom-button:focus {
-  outline: none; 
+  outline: none;
 }
 
 .custom-button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); 
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
 
-.custom-button:disabled { 
+.custom-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -35,10 +34,10 @@
 .custom-button.primary {
   background-color: #f2f3f4;
   color: #3b82f6;
-  border-color: #3b82f6; 
+  border-color: #3b82f6;
 }
 .custom-button.primary:hover:not(:disabled) {
-  background-color: #e0e7ff; 
+  background-color: #e0e7ff;
 }
 
 .custom-button.secondary {
@@ -62,40 +61,39 @@
 .custom-button.danger {
   background-color: #f2f3f4;
   color: #ef4444;
-  border-color: #ef4444; 
+  border-color: #ef4444;
 }
 .custom-button.danger:hover:not(:disabled) {
-  background-color: #fee2e2; 
+  background-color: #fee2e2;
 }
 
 .custom-button.warning {
   background-color: #f2f3f4;
   color: #f59e0b;
-  border-color: #f59e0b; 
+  border-color: #f59e0b;
 }
 .custom-button.warning:hover:not(:disabled) {
-  background-color: #fffbeb; 
+  background-color: #fffbeb;
 }
 
 .custom-button.icon-only {
   padding: 6px;
   width: 32px;
   height: 32px;
-  gap: 0; 
- 
+  gap: 0;
 }
 
 .action-buttons {
   display: flex;
-  gap: 8px; 
+  gap: 8px;
 }
 
 .button-icon {
-  display: flex; 
-  align-items: center; 
+  display: flex;
+  align-items: center;
 }
 
 .button-icon > svg {
-  width: 1.15em; 
+  width: 1.15em;
   height: 1.15em;
 }
