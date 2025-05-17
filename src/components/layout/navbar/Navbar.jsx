@@ -35,6 +35,23 @@ const Navbar = () => {
 
   // ----- EFECTOS (useEffect) -----
 
+  //SCROOLL PUBLICO
+  useEffect(() => {
+    if (isProfileModalOpen) {
+      // Cuando el modal se abre, deshabilita el scroll del body
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Cuando el modal se cierra, restaura el scroll del body
+      document.body.style.overflow = 'visible'; // O 'auto' si prefieres
+    }
+
+    // Función de limpieza para asegurarse de que el scroll se restaure si el componente se desmonta con el modal abierto
+    return () => {
+      document.body.style.overflow = 'visible'; // O 'auto'
+    };
+  }, [isProfileModalOpen]); // Este efecto se ejecuta cada vez que 'isProfileModalOpen' cambia
+
+
   // Efecto para el scroll del navbar público (se añade/quita transparencia)
   useEffect(() => {
     const handleScroll = () => {

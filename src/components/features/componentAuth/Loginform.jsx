@@ -7,7 +7,6 @@ import imagen1 from "../../../assets/lagos4.png"
 import imagen2 from "../../../assets/lagos1.png"
 import imagen3 from "../../../assets/lagos2.png"
 import imagen4 from "../../../assets/lagos3.png"
-import { IoEye, IoEyeOff } from "react-icons/io5";
 
 
 export default function LoginForm() {
