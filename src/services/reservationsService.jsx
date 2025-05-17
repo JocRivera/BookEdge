@@ -5,7 +5,6 @@ const API_URL_USERS = "http://localhost:3000/user"
 const API_URL_PLANS = "http://localhost:3000/plan"
 // const API_URL_CABINS = "http://localhost:3000/cabins"
 
-
 const validateId = (id, name = "ID") => {
   const numId = Number(id)
   if (isNaN(numId) || numId <= 0) {
@@ -33,7 +32,6 @@ export const getReservation = async () => {
   }
 }
 
-
 export const getReservationById = async (idReservation) => {
   try {
     // Validar ID
@@ -49,7 +47,6 @@ export const getReservationById = async (idReservation) => {
     throw new Error(`Error al obtener reserva: ${error.message}`)
   }
 }
-
 
 export const getUsers = async () => {
   try {
@@ -92,26 +89,26 @@ export const getAllPlanes = async () => {
 // En reservationsService.jsx
 export const getCabins = async () => {
   try {
-    const { data } = await axios.get(`${API_URL_RESERVATIONS}/cabins`);
-    
+    const { data } = await axios.get(`${API_URL_RESERVATIONS}/cabins`)
+
     // Normalizar datos
-    return data.map(cabin => ({
+    return data.map((cabin) => ({
       idCabin: cabin.idCabin,
       name: cabin.name || `Cabaña ${cabin.idCabin}`,
       capacity: Number(cabin.capacity) || 0,
-      status: (cabin.status || 'En Servicio').trim(),
-      description: cabin.description || 'Sin descripción',
-      price: Number(cabin.price) || 0
-    }));
+      status: (cabin.status || "En Servicio").trim(),
+      description: cabin.description || "Sin descripción",
+      price: Number(cabin.price) || 0,
+    }))
   } catch (error) {
     console.error("Error al obtener cabañas:", {
       url: error.config?.url,
       status: error.response?.status,
-      data: error.response?.data
-    });
-    return [];
+      data: error.response?.data,
+    })
+    return []
   }
-};
+}
 
 const validateReservationData = (reservationData) => {
   if (!reservationData) {
@@ -168,11 +165,11 @@ const validateReservationData = (reservationData) => {
   return errors
 }
 
-
 const prepareReservationPayload = (reservationData) => {
   return {
     idUser: Number(reservationData.idUser),
     idPlan: Number(reservationData.idPlan),
+    idCabin: Number(reservationData.idCabin), // Añadir esta línea
     startDate: reservationData.startDate,
     endDate: reservationData.endDate,
     status: reservationData.status || "Reservado",
@@ -182,7 +179,6 @@ const prepareReservationPayload = (reservationData) => {
     paymentMethod: reservationData.paymentMethod || "Efectivo",
   }
 }
-
 
 export const createReservation = async (reservationData) => {
   try {
@@ -236,20 +232,19 @@ export const createReservation = async (reservationData) => {
   }
 }
 
-
 export const updateReservation = async (idReservation, reservationData) => {
   try {
-    console.log("Iniciando actualización de reserva con ID:", idReservation, "y datos:", reservationData);
-    
+    console.log("Iniciando actualización de reserva con ID:", idReservation, "y datos:", reservationData)
+
     // Validar ID - asegurar que sea un número entero positivo
-    const reservationId = Number(idReservation);
-    
+    const reservationId = Number(idReservation)
+
     if (isNaN(reservationId) || !Number.isInteger(reservationId) || reservationId <= 0) {
-      throw new Error("El ID de la reserva debe ser un número entero positivo");
+      throw new Error("El ID de la reserva debe ser un número entero positivo")
     }
 
     // Validar datos de la reserva
-    const errors = validateReservationData(reservationData);
+    const errors = validateReservationData(reservationData)
 
     // Si hay errores, lanzar excepción
     if (errors.missingFields.length > 0 || errors.typeErrors.length > 0 || errors.businessErrors.length > 0) {
@@ -259,25 +254,25 @@ export const updateReservation = async (idReservation, reservationData) => {
         errors.businessErrors.length > 0 ? `Errores de negocio: ${errors.businessErrors.join(", ")}` : "",
       ]
         .filter(Boolean)
-        .join(" | ");
+        .join(" | ")
 
-      throw new Error(errorMessages);
+      throw new Error(errorMessages)
     }
 
     // Verificar primero si la reserva existe
-    console.log(`Verificando si existe la reserva con ID ${reservationId}...`);
+    console.log(`Verificando si existe la reserva con ID ${reservationId}...`)
     try {
-      const { data } = await axios.get(`${API_URL_RESERVATIONS}/${reservationId}`);
+      const { data } = await axios.get(`${API_URL_RESERVATIONS}/${reservationId}`)
       if (!data || !data.idReservation) {
-        throw new Error(`La reserva con ID ${reservationId} no existe`);
+        throw new Error(`La reserva con ID ${reservationId} no existe`)
       }
-      console.log("Reserva encontrada:", data);
+      console.log("Reserva encontrada:", data)
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        throw new Error(`La reserva con ID ${reservationId} no existe`);
+        throw new Error(`La reserva con ID ${reservationId} no existe`)
       }
-      console.error("Error al verificar existencia de reserva:", error.message);
-      throw error;
+      console.error("Error al verificar existencia de reserva:", error.message)
+      throw error
     }
 
     // Preparar payload
@@ -285,10 +280,10 @@ export const updateReservation = async (idReservation, reservationData) => {
       ...prepareReservationPayload(reservationData),
       // Incluir el ID de la reserva en el payload si es requerido por el API
       idReservation: reservationId,
-    };
+    }
 
-    console.log(`Enviando PUT a ${API_URL_RESERVATIONS}/${reservationId}`);
-    console.log("Payload:", payload);
+    console.log(`Enviando PUT a ${API_URL_RESERVATIONS}/${reservationId}`)
+    console.log("Payload:", payload)
 
     // Enviar solicitud
     const response = await axios.put(`${API_URL_RESERVATIONS}/${reservationId}`, payload, {
@@ -297,27 +292,27 @@ export const updateReservation = async (idReservation, reservationData) => {
         Accept: "application/json",
       },
       timeout: 10000,
-    });
+    })
 
-    console.log("Respuesta del servidor:", response.data);
-    return response.data;
+    console.log("Respuesta del servidor:", response.data)
+    return response.data
   } catch (error) {
     console.error("Error detallado en updateReservation:", {
       message: error.message,
       response: error.response?.data,
       request: error.config?.data,
-    });
+    })
 
-    let errorMessage = "Error al actualizar la reserva";
+    let errorMessage = "Error al actualizar la reserva"
     if (error.response?.data?.message) {
-      errorMessage = error.response.data.message;
+      errorMessage = error.response.data.message
     } else if (error.response?.data?.errors) {
-      errorMessage = error.response.data.errors.map((e) => e.msg).join(", ");
+      errorMessage = error.response.data.errors.map((e) => e.msg).join(", ")
     } else {
-      errorMessage = error.message;
+      errorMessage = error.message
     }
 
-    throw new Error(errorMessage);
+    throw new Error(errorMessage)
   }
 }
 
@@ -391,8 +386,6 @@ export const changeReservationStatus = async (idReservation, status) => {
   }
 }
 
-
-
 export const getReservationCompanions = async (reservationId) => {
   try {
     // Validar ID
@@ -415,47 +408,40 @@ export const getReservationCompanions = async (reservationId) => {
   }
 }
 
-
-
 export const addCompanionReservation = async (reservationId, companionData) => {
   try {
-    console.log("Intentando asociar acompañante:", { reservationId, companionData });
-    
-    const id = validateId(reservationId, "ID de reserva");
-    
+    console.log("Intentando asociar acompañante:", { reservationId, companionData })
+
+    const id = validateId(reservationId, "ID de reserva")
+
     if (!companionData?.idCompanions) {
-      throw new Error("Falta el ID del acompañante");
+      throw new Error("Falta el ID del acompañante")
     }
 
     const payload = {
-      idCompanions: Number(companionData.idCompanions)
-    };
+      idCompanions: Number(companionData.idCompanions),
+    }
 
-    const response = await axios.post(
-      `${API_URL_RESERVATIONS}/${id}/companions`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        }
-      }
-    );
-    
-    console.log("Respuesta del servidor:", response.data);
-    return response.data;
-    
+    const response = await axios.post(`${API_URL_RESERVATIONS}/${id}/companions`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    console.log("Respuesta del servidor:", response.data)
+    return response.data
   } catch (error) {
     console.error("Error detallado:", {
       url: error.config?.url,
       data: error.config?.data,
       status: error.response?.status,
-      response: error.response?.data
-    });
-    
-    let errorMessage = error.response?.data?.message || error.message;
-    throw new Error(`Error al asociar acompañante: ${errorMessage}`);
+      response: error.response?.data,
+    })
+
+    const errorMessage = error.response?.data?.message || error.message
+    throw new Error(`Error al asociar acompañante: ${errorMessage}`)
   }
-};
+}
 
 export const associateCompanionToReservation = async (reservationId, companionId) => {
   try {
@@ -464,39 +450,37 @@ export const associateCompanionToReservation = async (reservationId, companionId
       { idCompanions: companionId },
       {
         headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    );
-    return response.data;
+          "Content-Type": "application/json",
+        },
+      },
+    )
+    return response.data
   } catch (error) {
     console.error("Error en associateCompanionToReservation:", {
       reservationId,
       companionId,
-      error: error.response?.data || error.message
-    });
-    throw error;
+      error: error.response?.data || error.message,
+    })
+    throw error
   }
-};
-
+}
 
 export const deleteCompanionReservation = async (reservationId, companionId) => {
   try {
     // Validar IDs
-    const resId = validateId(reservationId, "ID de reserva");
-    const compId = validateId(companionId, "ID de acompañante");
+    const resId = validateId(reservationId, "ID de reserva")
+    const compId = validateId(companionId, "ID de acompañante")
 
-    const { data } = await axios.delete(`${API_URL_RESERVATIONS}/${resId}/companions/${compId}`);
-    return data;
+    const { data } = await axios.delete(`${API_URL_RESERVATIONS}/${resId}/companions/${compId}`)
+    return data
   } catch (error) {
     console.error(`Error al eliminar acompañante ${companionId} de reserva ${reservationId}:`, {
       message: error.message,
       response: error.response?.data,
-    });
-    throw new Error(`Error al eliminar acompañante: ${error.message}`);
+    })
+    throw new Error(`Error al eliminar acompañante: ${error.message}`)
   }
 }
-
 
 export const getReservationPayments = async (reservationId) => {
   try {
