@@ -5,7 +5,7 @@ import {
   updateComfort,
   deleteComfort,
 } from "../../../services/ComfortService";
-import { CustomButton } from "../../common/Button/customButton";
+import { CustomButton, ActionButtons } from "../../common/Button/customButton";
 import Pagination from "../../common/Paginator/Pagination";
 import "./componentConfort.css";
 import { toast } from "react-toastify";
@@ -189,20 +189,10 @@ function ComponentConfort() {
                       <td>{comfort.idComfort}</td>
                       <td>{comfort.name}</td>
                       <td className="actions-cell">
-                        <button
-                          onClick={() => handleEdit(comfort.idComfort)}
-                          className="action-btn edit-btn"
-                          title="Editar"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(comfort.idComfort)}
-                          className="action-btn delete-btn"
-                          title="Eliminar"
-                        >
-                          <FaTrash />
-                        </button>
+                        <ActionButtons
+                          onEdit={() => handleEdit(comfort.idComfort)}
+                          onDelete={() => handleDelete(comfort.idComfort)}
+                        />
                       </td>
                     </tr>
                   ))

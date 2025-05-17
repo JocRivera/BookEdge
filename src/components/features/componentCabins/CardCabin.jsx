@@ -56,9 +56,7 @@ function CardCabin() {
         cabin.imageCount = images.length;
         // Encontrar imagen principal
         const primaryImage = images.find((img) => img.isPrimary) || images[0];
-        imagesMap[cabin.idCabin] = primaryImage
-          ? primaryImage.imagePath
-          : null;
+        imagesMap[cabin.idCabin] = primaryImage ? primaryImage.imagePath : null;
       } catch (err) {
         console.error(
           `Error al cargar imágenes para cabaña ${cabin.idCabin}:`,
@@ -186,7 +184,7 @@ function CardCabin() {
         ) : (
           currentItems.map((cabin) => (
             <article key={cabin.idCabin} className="cabin-card-admin">
-              {/* Imagen de la cabaña */}
+              {/* Sección de la Imagen y Badge de Estado */}
               <div className="card-image-container-admin">
                 {cabinImages[cabin.idCabin] ? (
                   <img
@@ -201,14 +199,16 @@ function CardCabin() {
                   <div className="image-placeholder-admin">Sin imágenes</div>
                 )}
 
+                {/* Contador de imágenes (si hay más de una) */}
                 {cabin.imageCount > 1 && (
-                  <span className="image-counter-admin">
-                    +{cabin.imageCount - 1}
+                  <span className="image-counter-badge-admin">
+                    {" "}
+                    {cabin.imageCount - 1} más
                   </span>
                 )}
 
                 <div
-                  className={`status-badge ${
+                  className={`status-badge-cabin ${
                     cabin.status === "Mantenimiento"
                       ? "maintenance"
                       : cabin.status === "En Servicio"
@@ -216,32 +216,27 @@ function CardCabin() {
                       : "unavailable"
                   }`}
                 >
-                  {cabin.status === "En Servicio" ? (
-                    <span className="status-text">Disponible</span>
-                  ) : (
-                    <span className="status-text">{cabin.status}</span>
-                  )}
+                  {cabin.status === "En Servicio" ? "Disponible" : cabin.status}
                 </div>
               </div>
 
-              <div className="card-content-admin">
+              <div className="card-body-admin">
                 <h2 className="cabin-title-admin">{cabin.name}</h2>
-
-                <div className="cabin-features-admin">
+                <div className="cabin-meta-details-admin">
                   <div className="feature-item-admin">
                     <MdPerson className="feature-icon" />
-                    <span>Capacidad: {cabin.capacity || "N/A"}</span>
+                    <span>Capacidad: {cabin.capacity || "N/A"} personas</span>
                   </div>
                 </div>
-
-                <footer className="card-actions-admin">
-                  <ActionButtons
-                    onEdit={() => handleEditCabin(cabin)}
-                    onDelete={() => handleDelete(cabin.idCabin)}
-                    onView={() => handleView(cabin.idCabin)}
-                  />
-                </footer>
               </div>
+
+              <footer className="card-footer-actions-admin">
+                <ActionButtons
+                  onEdit={() => handleEditCabin(cabin)}
+                  onDelete={() => handleDelete(cabin.idCabin)}
+                  onView={() => handleView(cabin.idCabin)}
+                />
+              </footer>
             </article>
           ))
         )}

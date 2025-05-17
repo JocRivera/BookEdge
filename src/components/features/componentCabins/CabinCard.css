@@ -24,11 +24,10 @@
   width: 100%;
 }
 
-/* BedroomCard  */
-.cabin-container-admin {
+  .cabin-container-admin {
   max-width: 100%;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1rem;
   font-family: "Poppins", sans-serif;
   background: linear-gradient(135deg, #f9f9ff 0%, #f0f2ff 100%);
 }
@@ -39,7 +38,7 @@
 }
 
 .cabin-main-title {
- font-size: 2.2rem;
+  font-size: 2.2rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -50,7 +49,7 @@
 }
 
 .cabin-main-title::after {
- content: "";
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -108,7 +107,6 @@
   box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.3);
 }
 
-/* Galería de habitaciones - Efecto galería de lujo */
 .cabin-gallery-admin {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -116,154 +114,155 @@
   margin: 2rem 0;
 }
 
-/* ¡LA CARD QUE HARÁ LLORAR DE EMOCIÓN! */
+.cabin-gallery-admin {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(340px, 1fr)
+  ); 
+  gap: 2rem; 
+  margin: 2.5rem 0;
+}
+
 .cabin-card-admin {
-  background: white;
-  border-radius: 16px;
+  background: #ffffff;
+  border-radius: 12px; 
+  box-shadow: 0 6px 18px rgba(38, 38, 91, 0.07); 
   overflow: hidden;
-  box-shadow: 0 15px 30px rgba(78, 84, 200, 0.1);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative;
-  border: none;
+  display: flex;
+  flex-direction: column; 
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.6s ease-out forwards; 
+  opacity: 0; 
+  min-height: 380px; 
 }
 
 .cabin-card-admin:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 50px rgba(78, 84, 200, 0.2);
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(38, 38, 91, 0.1);
 }
 
 .card-image-container-admin {
   position: relative;
-  height: 200px;
+  height: 220px; 
   overflow: hidden;
+  background-color: #f0f2ff; 
 }
 
 .card-image-admin {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1s ease, filter 0.6s ease;
-  filter: brightness(0.95);
+  transition: transform 0.4s ease;
 }
 
 .cabin-card-admin:hover .card-image-admin {
-  transform: scale(1.08);
-  filter: brightness(1);
+  transform: scale(1.05); 
 }
 
-/* Efecto de vidrio esmerilado para el placeholder */
 .image-placeholder-admin {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #e0e1ff 0%, #f0f1ff 100%);
+  /* Tus estilos existentes están bien, asegúrate que llenen el contenedor */
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
   color: #6a6fc9;
-  font-size: 0.9rem;
-  position: relative;
-  overflow: hidden;
 }
 
-.image-placeholder-admin::before {
-  content: "";
+.status-badge-cabin {
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    to bottom right,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: rotate(30deg);
-  animation: shine 3s infinite;
-}
+  right: 1rem; 
+    top: 1rem; 
 
-@keyframes shine {
-  0% {
-    transform: translateX(-100%) rotate(30deg);
-  }
-  100% {
-    transform: translateX(100%) rotate(30deg);
-  }
-}
-
-.status-badge {
-  position: absolute;
-  bottom: 1rem;
-  right: 0.5rem;
-  padding: 0.4rem 1rem;
-  border-radius: 50px;
-  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
-  backdrop-filter: blur(5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  color: white;
   z-index: 2;
+  backdrop-filter: blur(5px) saturate(150%);
+  -webkit-backdrop-filter: blur(5px) saturate(100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.status-badge-cabin.available {
+  background-color: #fffbeb !important;
+  color: #10b981 !important;
+  border-color: #fffbeb !important;
+}
+.status-badge-cabin.available:hover:not(:disabled) {
+  background-color: #059669 !important;
+}
+.status-badge-cabin.maintenance {
+  background: rgba(255, 165, 2, 0.85);
+}
+.status-badge-cabin.unavailable {
+  background: rgba(255, 71, 87, 0.85);
 }
 
-.status-badge.available {
-  background: rgba(46, 213, 115, 0.9);
+.image-counter-badge-admin {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: rgba(0, 0, 0, 0.6);
   color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  z-index: 2;
+  backdrop-filter: blur(3px);
 }
 
-.status-badge.maintenance {
-  background: rgba(255, 165, 2, 0.9);
-  color: white;
-}
-
-.status-badge.unavailable {
-  background: rgba(255, 71, 87, 0.9);
-  color: white;
-}
-
-.card-content-admin {
-  padding: 1.5rem;
+.card-body-admin {
+  padding: 1.25rem 1.5rem;
+  flex-grow: 1;
+  display: inline-block;
+  
 }
 
 .cabin-title-admin {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 0.8rem;
-  position: relative;
-  display: inline-block;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.2rem;
+  line-height: 1.3;
 }
 
-.cabin-features-admin {
-  margin: 1rem 0;
+.cabin-meta-details-admin {
+  margin-top: auto;
+  padding-top: 0.5rem;
 }
 
 .feature-item-admin {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  color: #5a5faa;
-  font-size: 0.85rem;
-  margin-bottom: 0.6rem;
+  gap: 0.7rem;
+  color: #4a5568;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
 }
 
 .feature-icon {
-  color: #8f94fb;
-  font-size: 1.1rem;
+  color: #8284ca;
+  font-size: 1.2rem;
   min-width: 20px;
 }
 
-.card-actions-admin {
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
+.card-footer-actions-admin {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eef0f5;
+  background-color: #fdfdff;
   display: flex;
-  gap: 0.8rem;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.cabin-card-admin {
-  animation: fadeIn 0.6s ease-out forwards;
-  opacity: 0;
-}
+
+
+
 
 /*Fomulario xd*/
 @keyframes fadeIn {
@@ -396,39 +395,37 @@
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
   background-color: #fff;
 }
-/* ... (tus estilos existentes) ... */
 
-/* Estilos para la nueva columna derecha y sección de comodidades */
 .form-column-right-cabin-admin {
   display: flex;
-  flex-direction: column;
-  gap: 30px; /* Espacio entre la sección de comodidades y la de imágenes */
+  flex-direction: column
 }
 
 .comforts-section-cabin-admin {
-  border: none; /* O un borde sutil si prefieres: 1px solid #e2e8f0; */
-  padding: 0; /* O un padding ligero: 15px; */
+  border: none;
+  padding: 0;
   margin: 0;
-  border-radius: 8px; /* Si añades borde/fondo */
-  /* background-color: #f9fafb;  Si quieres un fondo sutil */
+  border-radius: 8px;
 }
 
 .comforts-section-cabin-admin legend.form-label-admin {
-  font-size: 1.1rem; /* Hacer el título de la sección un poco más grande */
+  font-size: 1.1rem; 
   color: #2d3748;
   margin-bottom: 15px;
   padding-bottom: 5px;
-  /* border-bottom: 1px solid #e2e8f0; */ /* Opcional: línea divisoria bajo el legend */
 }
 
 .comforts-checkbox-group-admin {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Ajusta minmax según el largo de tus nombres de comodidades */
-  gap: 10px 15px; /* Espacio vertical y horizontal entre checkboxes */
-  max-height: 200px; /* Altura máxima para el scroll si hay muchas comodidades */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(150px, 1fr)
+  );
+  gap: 10px 15px;
+  max-height: 200px; 
   overflow-y: auto; /* Scroll vertical */
-  padding: 5px; /* Pequeño padding interno */
-  border: 1px solid #e2e8f0; /* Borde sutil alrededor del grupo */
+  padding: 5px; 
+  border: 1px solid #e2e8f0; 
   border-radius: 6px;
   background-color: #fff;
 }
@@ -436,13 +433,13 @@
 .comfort-checkbox-item-admin {
   display: flex;
   align-items: center;
-  padding: 8px 5px; /* Espacio alrededor de cada item */
+  padding: 8px 5px; 
   border-radius: 4px;
   transition: background-color 0.2s ease-in-out;
 }
 
 .comfort-checkbox-item-admin:hover {
-  background-color: #f0f4f8; /* Un hover sutil */
+  background-color: #f0f4f8; 
 }
 
 .comfort-checkbox-admin {

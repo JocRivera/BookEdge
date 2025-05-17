@@ -219,20 +219,10 @@ function TableUser() {
                       </td>
                       <td className="user-table-cell">
                         <div className="action-buttons-container">
-                          {" "}
-                          {/* Nuevo contenedor */}
-                          <button
-                            onClick={() => handleEdit(user.idUser)}
-                            className="action-btn edit-btn"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(user.idUser)}
-                            className="action-btn delete-btn"
-                          >
-                            <FaTrash />
-                          </button>
+                          <ActionButtons
+                            onEdit={() => handleEdit(user.idUser)}
+                            onDelete={() => handleDelete(user.idUser)}
+                          />
                         </div>
                       </td>
                     </tr>

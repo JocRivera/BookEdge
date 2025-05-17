@@ -1,6 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { resetPassword } from '../../../services/authService'; 
+import logo from "../../../assets/logo.png";
+
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -35,7 +37,16 @@ export default function ResetPassword() {
   };
 
   return (
+    
     <div className="page-container">
+          <div className="simple-navbar">
+        <div className="navbar-content">
+          <div className="brand" onClick={() => navigate("/")}>
+            <img src={logo} alt="Logo" className="navbar-logo" />
+            <h1 className="navbar-title">Los Lagos</h1>
+          </div>
+        </div>
+      </div>
       <div className="recovery-container">
         <div className="recovery-card">
           <div className="recovery-header">
