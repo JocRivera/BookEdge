@@ -1,18 +1,36 @@
+
+.input-error-profile {
+  border-color: #e53e3e !important; 
+  background-color: #fff5f5 !important; 
+}
+.input-error-profile:focus {
+  box-shadow: 0 0 0 2.5px rgba(229, 62, 62, 0.25) !important; 
+}
+
+
+.error-message-profile {
+  color: #c53030; 
+  font-size: 0.75rem; 
+  margin-top: 0.2rem; 
+  display: block; 
+}
+
 .profile-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(30, 41, 59, 0.6); /* Un gris oscuro traslúcido */
+  background-color: rgba(30, 41, 59, 0.6); 
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1050; /* Asegúrate que sea alto */
-  padding: 20px; /* Espacio para que el modal no toque los bordes */
+  z-index: 1050; 
+  padding: 20px; 
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   animation: overlayFadeIn 0.3s ease-out;
+  overflow: hidden;
 }
 
 @keyframes overlayFadeIn {

@@ -1,4 +1,3 @@
-/* --- START OF FILE Navbar.css (COMPLETO Y ACTUALIZADO) --- */
 :root {
   --admin-primary-color: #34495e; /* Azul oscuro/grisáceo para admin */
   --admin-accent-color: #5dade2; /* Un azul más claro para acentos en admin */
@@ -464,7 +463,7 @@
   color: var(--public-text-light);
 }
 .navbar-public.scrolled .public-user-name-desktop {
-  color: var(--public-text-dark);
+  color: black
 }
 @media (min-width: 992px) {
   .public-user-name-desktop {
@@ -479,7 +478,7 @@
   font-size: 1rem;
 }
 .navbar-public.scrolled .public-user-dropdown-toggle svg {
-  color: var(--public-text-dark);
+  color: #000000;
 }
 .public-user-dropdown-toggle[aria-expanded="true"] svg {
   transform: rotate(180deg);
