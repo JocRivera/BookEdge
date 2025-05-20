@@ -35,47 +35,34 @@ export default function DashboardManagement() {
     ];
 
     return (
-        <div className="gap-4 mb-6"> {/* Este div padre principal */}
-
-            {/* Stats Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                {/* Usamos mb-6 para separar de los charts de abajo */}
-                {statsData.map((stat, index) => (
-                    <StatsCard
-                        key={index}
-                        title={stat.title}
-                        value={stat.value}
-                        change={stat.change}
-                        isPositive={stat.isPositive}
-                    />
-                ))}
+        <div className="gap-4 mb-6"> 
+            <div className="title-container">
+                <h2 className="table-title">Gestión de Dashboard</h2>
             </div>
-
-            {/* Contenedor principal para los charts, ahora con un margin-bottom para separarse de lo de abajo si hubiera */}
-            <div className="flex flex-col gap-4 mb-6"> {/* Usamos flex-col y gap-4 para apilar las secciones de charts */}
-
-                {/* Primera fila de charts: BarsChart y DoughnutsChart */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4"> {/* Este grid para la fila superior */}
-                    {/* BarsChart ocupa 2 de 3 columnas */}
+            <div className="flex flex-col gap-4 mb-6"> 
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    {statsData.map((stat, index) => (
+                        <StatsCard
+                            key={index}
+                            title={stat.title}
+                            value={stat.value}
+                            change={stat.change}
+                            isPositive={stat.isPositive}
+                        />
+                    ))}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4"> 
                     <div className='lg:col-span-2 border-1 border-gray-800 bg-gray-900 rounded-lg shadow p-4'>
                         <BarsChart />
                     </div>
-                    {/* DoughnutsChart ocupa 1 de 3 columnas */}
                     <div className="border-1 border-gray-800 bg-gray-900 rounded-lg shadow p-4">
                         <DoughnutsChart />
                     </div>
                 </div>
-
-                {/* Segunda "fila" de charts: LinesChart ocupa todo el ancho */}
-                {/* Aquí LinesChart está en su propio div, que por defecto ocupa el 100% del ancho del padre (flex-col) */}
                 <div className="border-1 border-gray-800 bg-gray-900 rounded-lg shadow p-4">
                     <LinesChart />
                 </div>
-
             </div>
-
-            {/* Cualquier otro contenido iría aquí, separado por el mb-6 del contenedor de charts */}
-
         </div>
     );
 }
