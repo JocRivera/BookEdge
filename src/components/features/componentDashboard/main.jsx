@@ -35,11 +35,11 @@ export default function DashboardManagement() {
     ];
 
     return (
-        <div className="gap-4 mb-6"> 
+        <div className="gap-4 mb-6">
             <div className="title-container">
                 <h2 className="table-title">Gestión de Dashboard</h2>
             </div>
-            <div className="flex flex-col gap-4 mb-6"> 
+            <div className="flex flex-col gap-4 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     {statsData.map((stat, index) => (
                         <StatsCard
@@ -51,15 +51,15 @@ export default function DashboardManagement() {
                         />
                     ))}
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4"> 
-                    <div className='lg:col-span-2 border-1 border-gray-800 bg-gray-900 rounded-lg shadow p-4'>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className='lg:col-span-2 bg-gray-100  shadow-indigo-300 rounded-lg shadow-2xl p-4'>
                         <BarsChart />
                     </div>
-                    <div className="border-1 border-gray-800 bg-gray-900 rounded-lg shadow p-4">
+                    <div className=" bg-gray-100 rounded-lg p-4  shadow-indigo-300 shadow-2xl ">
                         <DoughnutsChart />
                     </div>
                 </div>
-                <div className="border-1 border-gray-800 bg-gray-900 rounded-lg shadow p-4">
+                <div className=" bg-gray-100 rounded-lg shadow-2xl p-4  shadow-indigo-300 ">
                     <LinesChart />
                 </div>
             </div>
