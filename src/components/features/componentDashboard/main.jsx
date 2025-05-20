@@ -7,12 +7,14 @@ import DoughnutsChart from './Doughnut.jsx';
 
 // Stats Card Component
 const StatsCard = ({ title, value, change, isPositive }) => (
-    <div className="bg-gray-900 rounded-lg shadow p-6 border border-gray-800">
-        <h3 className="text-sm font-medium text-gray-400">{title}</h3>
-        <p className="text-xl font-bold mt-2 text-white">{value}</p>
-        <p className={`text-xs ${isPositive ? 'text-green-500' : 'text-red-500'} mt-1`}>
-            {isPositive ? '↑' : '↓'} {change}
-        </p>
+    <div className="bg-gray-100 rounded-lg shadow-2xl p-6 border border-gray-400 shadow-indigo-300 hover:shadow-lg transition-shadow duration-300 ">
+        <div className="flex flex-col items-center">
+            <h3 className="text-sm font-medium text-gray-900 ">{title}</h3>
+            <p className="text-xl font-bold mt-2 text-gray-600">{value}</p>
+            <p className={`text-xs ${isPositive ? 'text-green-700' : 'text-rose-500'} mt-1`}>
+                {isPositive ? '↑' : '↓'} {change}
+            </p>
+        </div>
     </div>
 );
 export default function DashboardManagement() {
@@ -42,14 +44,14 @@ export default function DashboardManagement() {
                     ))}
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className='lg:col-span-2 bg-gray-100  shadow-indigo-300 rounded-lg p-4 shadow-2xl'>
+                    <div className='lg:col-span-2 bg-gray-100  shadow-indigo-300 rounded-lg p-4 shadow-2xl  hover:shadow-lg transition-shadow duration-300'>
                         <BarsChart />
                     </div>
-                    <div className=" bg-gray-100 rounded-lg p-4  shadow-indigo-300 shadow-2xl ">
+                    <div className=" bg-gray-100 rounded-lg p-4  shadow-indigo-300 shadow-2xl  hover:shadow-lg transition-shadow duration-300 ">
                         <DoughnutsChart />
                     </div>
                 </div>
-                <div className=" bg-gray-100 rounded-lg shadow-2xl p-4  shadow-indigo-300 ">
+                <div className=" bg-gray-100 rounded-lg shadow-2xl p-4  shadow-indigo-300  hover:shadow-lg transition-shadow duration-300 ">
                     <LinesChart />
                 </div>
             </div>
