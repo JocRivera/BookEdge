@@ -259,16 +259,14 @@
 /* CORRECCIÓN: Arreglado el grid para que ocupe todo el ancho en el caso del formulario de configuración */
 .form-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
     padding: 20px;
+    width: 100%;
+    align-items: start;
 }
 
 .form-group {
-    grid-column: 1 / -1;
-    /* Ocupa todo el ancho disponible */
-    border-radius: 6px;
-    padding: 7px;
     margin-bottom: 16px;
 }
 
