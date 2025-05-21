@@ -239,7 +239,7 @@
     color: var(--color-text-dark);
 }
 
-.close-button {
+.config-close-button {
     border: none;
     cursor: pointer;
     color: #718096;
@@ -248,7 +248,7 @@
     font-size: 24px;
 }
 
-.close-button:hover {
+.config-close-button:hover {
     color: #3e9de5;
 }
 
@@ -259,15 +259,14 @@
 /* CORRECCIÓN: Arreglado el grid para que ocupe todo el ancho en el caso del formulario de configuración */
 .form-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 6px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    align-items: start;
 }
 
 .form-group {
-    grid-column: 1 / -1;
-    /* Ocupa todo el ancho disponible */
-    border-radius: 6px;
-    padding: 7px;
     margin-bottom: 16px;
 }
 
@@ -280,7 +279,8 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--color-border);
@@ -290,7 +290,8 @@
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
     outline: none;

@@ -235,6 +235,19 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                     className='error-message-admin'
                                 >{error}</div>}
                             </div>
+                            <div className='form-group' >
+                                <label htmlFor="status">Estado</label>
+                                <Switch
+                                    isOn={formData.status === true}
+                                    handleToggle={() =>
+                                        setFormData((prevState) => ({
+                                            ...prevState,
+                                            status: prevState.status === true ? false : true
+                                        }))
+                                    }
+                                    id="status"
+                                />
+                            </div>
                             <div className="permissions-group">
                                 <div className="permissions-table-container">
                                     <table className="permissions-table">
@@ -291,19 +304,6 @@ const FormConfig = ({ isOpen, onClose, onSave, setting }) => {
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-                            <div className='form-group' >
-                                <label htmlFor="status">Estado</label>
-                                <Switch
-                                    isOn={formData.status === true}
-                                    handleToggle={() =>
-                                        setFormData((prevState) => ({
-                                            ...prevState,
-                                            status: prevState.status === true ? false : true
-                                        }))
-                                    }
-                                    id="status"
-                                />
                             </div>
                         </div>
                         <div className="modal-footer">

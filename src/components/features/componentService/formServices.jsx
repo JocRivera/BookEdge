@@ -93,7 +93,7 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
             <div className="modal-container">
                 <div className="modal-header">
                     <h2>{service ? 'Editar Servicio' : 'Registrar Servicio'}</h2>
-                    <button className="close-button" onClick={onClose}>×</button>
+                    <button className="config-close-button" onClick={onClose}>×</button>
                 </div>
                 <div className='config-modal-body'>
                     <form onSubmit={handleSubmit}>
