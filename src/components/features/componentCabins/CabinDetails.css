@@ -1,0 +1,443 @@
+/* === Global Variables (Adopted from CabinClient for consistency) === */
+:root {
+  --azure: #3785d4;
+  --dark: #1a1a1a;
+  --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --primary: #4a6741; /* Main theme color */
+  --primary-light: #6a8661;
+  --primary-dark: #304a27;
+  --accent: #3785d4; /* Accent color, often for buttons or highlights */
+  --text-dark: #333333;
+  --text-light: #f0f0f0; /* For text on dark backgrounds */
+  --text-muted: #6c757d; /* For less important text */
+  --background-light: #ffffff;
+  --background-medium: #f8f8f8; /* Slightly off-white for sections */
+  --background-dark: #222222; /* For dark sections like image gallery bg */
+  --border-color: #e0e0e0;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --radius: 12px; /* Consistent border radius */
+
+  /* Status Colors (from original CabinDetails) */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+}
+
+/* === Modal Overlay (From CabinClient) === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85); /* Darker, blurred overlay */
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other page content */
+  padding: 20px;
+  overflow-y: auto; /* Allow scrolling for the overlay if modal is very tall */
+}
+
+/* === Modal Container (Adapted from CabinClient) === */
+.detail-modal-container {
+  width: 95%;
+  max-width: 1000px; /* Slightly increased max-width */
+  max-height: 90vh;
+  background: var(--background-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden; /* Important for child layout and border-radius */
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.4s ease forwards;
+}
+
+/* === Modal Header (Styling for CabinDetail.jsx's existing header) === */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem; /* Standard padding */
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--background-medium); /* Light background for header */
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.3rem; /* Adjusted size */
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Close Button (Adapted from CabinClient, for CabinDetail.jsx's button) */
+.close-button {
+  background: rgba(0, 0, 0, 0.1); /* Subtle background */
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-muted);
+  padding: 0; /* Remove default padding */
+}
+
+.close-button:hover {
+  color: white;
+  transform: rotate(90deg);
+}
+
+/* === Main Content Area (Adapted from CabinClient) === */
+.detail-content {
+  display: flex;
+  flex-grow: 1; /* Allow content to fill available space */
+  overflow: hidden; /* Key for two-pane scrolling layout */
+  min-height: 0; /* Essential for flex children that need to scroll */
+}
+
+/* === Image Gallery (Adapted from CabinClient styles) === */
+.detail-image-gallery {
+  flex: 1.2; /* Gives more space to gallery */
+  min-width: 0; /* Flexbox fix */
+  display: flex;
+  flex-direction: column;
+  background: var(--background-dark); /* Dark background for gallery */
+  overflow: hidden;
+}
+
+.main-image-container {
+  flex: 1; /* Main image takes most space in gallery */
+  position: relative;
+  overflow: hidden;
+  min-height: 0; /* Flexbox fix */
+  background-color: var(--background-dark); /* Ensure bg for no-image */
+}
+
+.main-detail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover to fill, can be 'contain' if aspect ratio is critical */
+  display: block;
+}
+
+.no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-light);
+  background: var(--background-dark); /* Match gallery bg */
+  font-size: 1rem;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* Thumbnails (Adapted from CabinClient with original primary-badge) */
+.image-thumbnails {
+  height: 100px; /* Fixed height for thumbnail bar */
+  background: var(--background-medium); /* Slightly lighter than gallery main bg */
+  padding: 12px; /* Padding around thumbnails */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.thumbnail {
+  flex: 0 0 auto; /* Prevent shrinking/growing, auto width based on content */
+  width: 80px;
+  height: 70px; /* Adjusted height */
+  border: 3px solid transparent; /* Thicker border for active state */
+  border-radius: calc(var(--radius) / 2); /* Softer radius */
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  transition: var(--transition);
+  opacity: 0.7;
+  position: relative; /* For primary badge */
+}
+
+.thumbnail:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.thumbnail.active {
+  opacity: 1;
+  border-color: var(--accent);
+  transform: scale(1.05) translateY(-1px); /* Combined effect */
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.primary-badge { /* Retained from original CabinDetails.css */
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* === Info Area (Adapted from CabinClient styles) === */
+.detail-info {
+  flex: 1; /* Info section takes remaining space */
+  padding: 20px 25px; /* More padding */
+  overflow-y: auto; /* Allow this pane to scroll independently */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Spacing between elements in info */
+  background: var(--background-light);
+}
+
+.detail-title { /* Cabin Name */
+  font-size: clamp(1.8rem, 4vw, 2.2rem); /* Responsive font size */
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0; /* Reduced margin, rely on gap */
+  line-height: 1.2;
+}
+
+/* Status Display (Retained and styled from original CabinDetails.css) */
+.detail-status {
+  margin-top: 5px; /* Space from title */
+  margin-bottom: 10px; /* Space before capacity */
+}
+
+.cabin-status {
+  padding: 0.5em 1em;
+  border-radius: 50px; /* Pill shape */
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block; /* To respect padding */
+}
+
+.status-en-servicio {
+  background-color: var(--success-color);
+}
+.status-en-mantenimiento {
+  background-color: var(--warning-color);
+  color: var(--text-dark); /* Better contrast on yellow */
+}
+.status-fuera-de-servicio {
+  background-color: var(--danger-color);
+}
+/* End of Status Display */
+
+.detail-capacity { /* Adapted from CabinClient .cabin-details-spec */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-dark);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.icon-person { /* Original MdPerson icon */
+  color: var(--primary);
+  font-size: 1.4rem; /* Slightly larger */
+}
+
+/* Description and Comforts Sections (Adapted from CabinClient structure) */
+.detail-description,
+.detail-comforts {
+  border: 1px solid var(--border-color);
+  border-radius: calc(var(--radius) / 1.5);
+  padding: 18px;
+  background-color: var(--background-medium);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  transition: var(--transition);
+  /* For 1fr behavior if needed, but client uses natural height + scroll on info pane */
+  /* flex: 1; min-height: 0; display: flex; flex-direction: column; */
+}
+
+.detail-description:hover,
+.detail-comforts:hover {
+    border-color: #ccc; /* Subtle hover effect */
+}
+
+.detail-description h3,
+.detail-comforts h3 { /* Section Titles (like section-title from Client) */
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 15px 0; /* Reset margin and add bottom */
+  position: relative;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.detail-description h3::after,
+.detail-comforts h3::after { /* Underline accent for section titles */
+  content: "";
+  position: absolute;
+  bottom: -1px; /* Align with border-bottom */
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+}
+
+.detail-description p,
+.detail-comforts p { /* For text content and "no comforts" message */
+  color: #555; /* Slightly lighter dark text */
+  line-height: 1.7;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* For 1fr behavior: flex-grow: 1; overflow-y: auto; min-height: 0; */
+}
+
+/* Comfort Tags (Grid layout from Client) */
+.comfort-tags {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive columns */
+  gap: 12px; /* Gap between badges */
+  margin-top: 5px;
+  /* For 1fr behavior: flex-grow: 1; overflow-y: auto; min-height: 0; */
+}
+
+.comfort-badge { /* Adapted from CabinClient .cabin-details-comfort-badge */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--background-light);
+  padding: 10px 15px;
+  border-radius: calc(var(--radius) / 2);
+  font-size: 0.9rem;
+  transition: var(--transition);
+  color: var(--text-dark);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+  text-align: left; /* Changed from center for potentially longer text */
+  word-break: break-word;
+}
+
+.comfort-badge:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-light);
+}
+/* If you want to add an icon to comfort-badge like in client, you'd add an <i> or <svg> in JSX
+   and style it like .cabin-details-comfort-icon */
+
+
+/* Animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Responsive Design (Adapted from CabinClient) === */
+@media (max-width: 1100px) {
+  .detail-content {
+    flex-direction: column; /* Stack gallery and info */
+    overflow-y: auto; /* Allow entire content to scroll if needed */
+  }
+
+  .detail-image-gallery {
+    height: 50vh; /* Fixed height for gallery on medium screens */
+    flex: none; /* Override flex-grow */
+  }
+
+  .detail-info {
+    max-height: none; /* Allow info to take its natural height */
+    overflow-y: visible; /* No separate scroll for info pane */
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 10px; /* Reduce padding on smaller screens */
+  }
+  .detail-modal-container {
+    max-height: 95vh; /* Allow more height */
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+  .close-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .detail-title {
+    font-size: 1.6rem;
+  }
+
+  .detail-image-gallery {
+    height: 45vh; /* Adjust gallery height */
+  }
+  
+  .main-image-container {
+    /* Keep flex:1 or set explicit height if needed */
+  }
+  
+  .image-thumbnails {
+    height: 90px;
+    padding: 10px;
+  }
+  .thumbnail {
+    width: 70px;
+    height: 60px;
+  }
+
+  .comfort-tags {
+    grid-template-columns: 1fr; /* Single column for comfort tags on small screens */
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-overlay {
+    padding: 0; /* Edge-to-edge modal on very small screens */
+  }
+  .detail-modal-container {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0; /* Full screen */
+  }
+  .modal-header {
+    padding: 0.75rem 1rem;
+  }
+  .detail-info {
+    padding: 15px;
+    gap: 15px;
+  }
+  .detail-description h3,
+  .detail-comforts h3 {
+    font-size: 1.1rem;
+  }
+  .detail-description p,
+  .detail-comforts p,
+  .comfort-badge {
+    font-size: 0.85rem;
+  }
+}

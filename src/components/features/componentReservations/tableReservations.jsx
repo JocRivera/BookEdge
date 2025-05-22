@@ -1,24 +1,27 @@
-import { useState, useMemo, useEffect } from "react"
-import { ActionButtons, CustomButton } from "../../common/Button/customButton"
-import Pagination from "../../common/Paginator/Pagination"
-import { CiSearch } from "react-icons/ci"
-import "./componentsReservations.css"
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { ActionButtons, CustomButton } from "../../common/Button/customButton";
+import Pagination from "../../common/Paginator/Pagination";
+import { CiSearch } from "react-icons/ci";
+import "./componentsReservations.css";
 // import TablePayments from "../componentPayments/tablePayments"
-import TableCompanions from "../componentCompanions/tableCompanions"
-import FormReservation from "./formReservations"
+import TableCompanions from "../componentCompanions/tableCompanions";
+import FormReservation from "./formReservations";
 import {
   getReservation,
   getAllPlanes,
   getUsers,
   changeReservationStatus,
   deleteCompanionReservation,
-} from "../../../services/reservationsService"
+} from "../../../services/reservationsService";
 import {
   getReservationPayments,
   // deletePayment
 } from "../../../services/paymentsService.jsx";
 
 function TableReservations() {
+  const [searchParams] = useSearchParams();
+  const clienteId = searchParams.get("cliente");
   // Estados principales
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,10 +29,11 @@ function TableReservations() {
   const [reservations, setReservations] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPayments, setCurrentPayments] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(clienteId? clienteId : "");
   const [showAnuladas, setShowAnuladas] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 6;
+
 
   // Cargar datos de reservas
   const loadReservationData = async () => {
@@ -38,7 +42,7 @@ function TableReservations() {
       const [dataReservations, usersData, planesData] = await Promise.all([
         getReservation(),
         getUsers(),
-        getAllPlanes()
+        getAllPlanes(),
       ]);
 
       // Validar datos
@@ -56,7 +60,7 @@ function TableReservations() {
           user: user || null,
           plan: plan || { name: "Plan no disponible", price: 0, salePrice: 0 },
           // Asegúrate de tomar el precio correcto
-          total: plan?.salePrice || plan?.price || res.total || 0
+          total: plan?.salePrice || plan?.price || res.total || 0,
         };
       });
 
@@ -76,10 +80,12 @@ function TableReservations() {
 
   // Filtrar datos
   const filteredData = useMemo(() => {
-    const safeSearchTerm = String(searchTerm || "").toLowerCase().trim();
+    const safeSearchTerm = clienteId ? String(clienteId) : String(searchTerm || "")
+      .toLowerCase()
+      .trim();
 
     return reservations
-      .filter(reservation => showAnuladas || reservation.status !== "Anulado")
+      .filter((reservation) => showAnuladas || reservation.status !== "Anulado")
       .filter((reservation) => {
         if (!reservation) return false;
         if (!safeSearchTerm) return true;
@@ -88,19 +94,21 @@ function TableReservations() {
         const searchFields = [
           String(reservation.idReservation),
           reservation.user?.name?.toLowerCase() || "",
+          reservation.user?.identification?.toLowerCase() || "",
           reservation.user?.lastName?.toLowerCase() || "",
           reservation.plan?.name?.toLowerCase() || "",
           reservation.startDate,
           reservation.endDate,
           reservation.status?.toLowerCase() || "",
           String(reservation.total || 0),
-          ...(Array.isArray(reservation.companions))
-            ? reservation.companions.map(c =>
-              `${c.name} ${c.lastName} ${c.documentNumber}`.toLowerCase())
-            : []
+          ...(Array.isArray(reservation.companions)
+            ? reservation.companions.map((c) =>
+                `${c.name} ${c.lastName} ${c.documentNumber}`.toLowerCase()
+              )
+            : []),
         ];
 
-        return searchFields.some(field => field.includes(safeSearchTerm));
+        return searchFields.some((field) => field.includes(safeSearchTerm));
       });
   }, [reservations, searchTerm, showAnuladas]);
 
@@ -110,7 +118,7 @@ function TableReservations() {
     const offset = currentPage * itemsPerPage;
     return {
       currentItems: safeData.slice(offset, offset + itemsPerPage),
-      pageCount: Math.max(1, Math.ceil(safeData.length / itemsPerPage))
+      pageCount: Math.max(1, Math.ceil(safeData.length / itemsPerPage)),
     };
   }, [currentPage, filteredData]);
 
@@ -124,7 +132,7 @@ function TableReservations() {
     const id = Number(idReservation);
     if (isNaN(id) || id <= 0) return;
 
-    const reservationToEdit = reservations.find(r => r.idReservation === id);
+    const reservationToEdit = reservations.find((r) => r.idReservation === id);
     if (reservationToEdit) {
       setCurrentReservation(reservationToEdit);
       setIsModalOpen(true);
@@ -132,7 +140,10 @@ function TableReservations() {
   };
 
   const handleSaveReservation = async (updatedReservation) => {
-    console.log("[TABLE] Recibida reserva para actualizar:", updatedReservation);
+    console.log(
+      "[TABLE] Recibida reserva para actualizar:",
+      updatedReservation
+    );
     console.log("Recibido en onSave:", updatedReservation);
 
     if (!updatedReservation) {
@@ -174,7 +185,7 @@ function TableReservations() {
   // Manejo de detalles
   const handleViewDetails = async (idReservation) => {
     const id = Number(idReservation);
-    const reservationToView = reservations.find(r => r.idReservation === id);
+    const reservationToView = reservations.find((r) => r.idReservation === id);
 
     if (reservationToView) {
       try {
@@ -194,7 +205,10 @@ function TableReservations() {
   // Manejo de acompañantes
   const handleDeleteCompanion = async (reservationId, companionId) => {
     try {
-      await deleteCompanionReservation(Number(reservationId), Number(companionId));
+      await deleteCompanionReservation(
+        Number(reservationId),
+        Number(companionId)
+      );
       await loadReservationData(); // Recargar datos actualizados
     } catch (error) {
       console.error("Error al eliminar acompañante:", error);
@@ -246,10 +260,10 @@ function TableReservations() {
 
         <button
           onClick={() => setShowAnuladas(!showAnuladas)}
-          className={`reservation-filter-btn ${showAnuladas ? 'active' : ''}`}
+          className={`reservation-filter-btn ${showAnuladas ? "active" : ""}`}
           disabled={isLoading}
         >
-          {showAnuladas ? 'Ocultar anuladas' : 'Mostrar anuladas'}
+          {showAnuladas ? "Ocultar anuladas" : "Mostrar anuladas"}
         </button>
       </div>
 
@@ -275,19 +289,30 @@ function TableReservations() {
               currentItems.map((reservation, index) => (
                 <tr
                   key={`reservation-${reservation.idReservation}`}
-                  className={index % 2 === 0 ? "reservations-table-row-even" : "reservations-table-row-odd"}
+                  className={
+                    index % 2 === 0
+                      ? "reservations-table-row-even"
+                      : "reservations-table-row-odd"
+                  }
                 >
-                  <td className="reservations-table-cell">{reservation.idReservation}</td>
+                  <td className="reservations-table-cell">
+                    {reservation.idReservation}
+                  </td>
                   <td className="reservations-table-cell">
                     {reservation.user?.name || "Cliente no disponible"}
                   </td>
                   <td className="reservations-table-cell">
                     {reservation.plan?.name || "Plan no disponible"}
                   </td>
-                  <td className="reservations-table-cell">{reservation.startDate}</td>
-                  <td className="reservations-table-cell">{reservation.endDate}</td>
                   <td className="reservations-table-cell">
-                    {Array.isArray(reservation.companions) && reservation.companions.length > 0 ? (
+                    {reservation.startDate}
+                  </td>
+                  <td className="reservations-table-cell">
+                    {reservation.endDate}
+                  </td>
+                  <td className="reservations-table-cell">
+                    {Array.isArray(reservation.companions) &&
+                    reservation.companions.length > 0 ? (
                       <div className="companions-list">
                         <TableCompanions
                           companions={reservation.companions}
@@ -304,7 +329,12 @@ function TableReservations() {
                   <td className="reservations-table-cell">
                     <select
                       value={reservation.status}
-                      onChange={(e) => handleStatusChange(reservation.idReservation, e.target.value)}
+                      onChange={(e) =>
+                        handleStatusChange(
+                          reservation.idReservation,
+                          e.target.value
+                        )
+                      }
                       className={`status-select ${reservation.status.toLowerCase()}`}
                       disabled={isLoading}
                     >
@@ -315,17 +345,28 @@ function TableReservations() {
                     </select>
                   </td>
                   <td className="reservations-table-cell">
-                    {formatCurrency(reservation.plan.salePrice || reservation.plan?.price || reservation.total || 0)}
+                    {formatCurrency(
+                      reservation.plan.salePrice ||
+                        reservation.plan?.price ||
+                        reservation.total ||
+                        0
+                    )}
                   </td>
                   <td className="reservations-table-cell">
                     <ActionButtons
                       onEdit={() => handleEdit(reservation.idReservation)}
-                      onView={() => handleViewDetails(reservation.idReservation)}
+                      onView={() =>
+                        handleViewDetails(reservation.idReservation)
+                      }
                       additionalActions={[
                         {
                           icon: "receipt",
                           tooltip: "Generar factura",
-                          action: () => console.log("Generar factura", reservation.idReservation),
+                          action: () =>
+                            console.log(
+                              "Generar factura",
+                              reservation.idReservation
+                            ),
                         },
                       ]}
                       disabled={isLoading}
@@ -365,9 +406,9 @@ function TableReservations() {
           <div className="reservations-modal-container reservation-details-modal">
             <div className="modal-header">
               <div className="reservation-header-content">
-
-
-                <h2>Detalles de la Reserva #{currentReservation.idReservation}</h2>
+                <h2>
+                  Detalles de la Reserva #{currentReservation.idReservation}
+                </h2>
               </div>
               <button
                 className="close-button"
@@ -395,11 +436,17 @@ function TableReservations() {
                       </div>
                       <div className="info-group-enhanced">
                         <label>Plan</label>
-                        <p>{currentReservation.plan?.name || "Plan no disponible"}</p>
+                        <p>
+                          {currentReservation.plan?.name ||
+                            "Plan no disponible"}
+                        </p>
                       </div>
                       <div className="info-group-enhanced">
                         <label>Fechas</label>
-                        <p>{currentReservation.startDate} a {currentReservation.endDate}</p>
+                        <p>
+                          {currentReservation.startDate} a{" "}
+                          {currentReservation.endDate}
+                        </p>
                       </div>
                       <div className="info-group-enhanced">
                         <label>Total</label>
@@ -415,11 +462,18 @@ function TableReservations() {
                     <div className="card-header-with-actions">
                       <h3>Pagos</h3>
                       <div className="payment-summary">
-                        <span>Total pagado: {formatCurrency(
-                          Array.isArray(currentPayments)
-                            ? currentPayments.reduce((sum, payment) => sum + (Number(payment?.amount) || 0), 0)
-                            : 0
-                        )}</span>
+                        <span>
+                          Total pagado:{" "}
+                          {formatCurrency(
+                            Array.isArray(currentPayments)
+                              ? currentPayments.reduce(
+                                  (sum, payment) =>
+                                    sum + (Number(payment?.amount) || 0),
+                                  0
+                                )
+                              : 0
+                          )}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -429,26 +483,29 @@ function TableReservations() {
                   <div className="card-header-with-actions">
                     <h3>Acompañantes</h3>
                     <span className="companions-count">
-                      {Array.isArray(currentReservation.companions) ? currentReservation.companions.length : 0} personas
+                      {Array.isArray(currentReservation.companions)
+                        ? currentReservation.companions.length
+                        : 0}{" "}
+                      personas
                     </span>
                   </div>
                 </div>
-
               </div>
               <div className="flex justify-between">
                 <div></div>
                 <div className="detail-reserva-status-badge">
-                  <span className={`detail-reserva-status-badge ${currentReservation.status.toLowerCase()}`}>
+                  <span
+                    className={`detail-reserva-status-badge ${currentReservation.status.toLowerCase()}`}
+                  >
                     {currentReservation.status}
                   </span>
-                </div></div>
-
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }
 

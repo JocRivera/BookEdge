@@ -547,7 +547,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                       <option value="">Seleccione un cliente</option>
                       {users.map((user) => (
                         <option key={user.idUser} value={user.idUser}>
-                          {user.name} {user.lastName} - ({user.identification})
+                          {user.name} - ({user.identification})
                         </option>
                       ))}
                     </select>

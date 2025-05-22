@@ -1,7 +1,8 @@
 import axios from "axios"
+import api from "./api"
 
 const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
-const API_URL_USERS = "http://localhost:3000/user"
+// const API_URL_USERS = "http://localhost:3000/user"
 const API_URL_PLANS = "http://localhost:3000/plan"
 // const API_URL_CABINS = "http://localhost:3000/cabins"
 
@@ -48,24 +49,28 @@ export const getReservationById = async (idReservation) => {
   }
 }
 
+// export const getUsers = async () => {
+//   try {
+//     const { data } = await axios.get(API_URL_USERS)
+
+//     // if (!Array.isArray(data)) {
+//     //   console.log("La respuesta del servidor no es un array:", data)
+//     //   return []
+//     // }
+
+//     return data
+//   } catch (error) {
+//     console.error("Error al obtener usuarios:", {
+//       message: error.message,
+//       response: error.response?.data,
+//     })
+//     return []
+//   }
+// }
 export const getUsers = async () => {
-  try {
-    const { data } = await axios.get(API_URL_USERS)
-
-    if (!Array.isArray(data)) {
-      console.warn("La respuesta del servidor no es un array:", data)
-      return []
-    }
-
-    return data
-  } catch (error) {
-    console.error("Error al obtener usuarios:", {
-      message: error.message,
-      response: error.response?.data,
-    })
-    return []
-  }
-}
+  const response = await api.get("/user");
+  return response.data;
+};
 
 export const getAllPlanes = async () => {
   try {
