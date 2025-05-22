@@ -8,9 +8,10 @@ export default function VideoSlider() {
     const [currentVideo, setCurrentVideo] = useState(0);
     const videoRefs = useRef([]);
     const videos = [
-        { url: video1, title: "SOGAL SOL", description: "Experiencias de lujo inigualables" },
-        { url: video2, title: "SEGUNDO TITULO DECORATIVO", description: "Donde el confort se encuentra con la elegancia" },
-        { url: video3, title: "Cabañas para motelear", description: "Tu escape premium perfecto" }
+        { url: video1, title: "Los Lagos", description: "Experiencias de lujo inigualables" },
+        { url: video2, title: "Pasa dias de sol divertidisimos en los lagos", description: "Donde el confort se encuentra con la elegancia" },
+        { url: video3, title: 
+            "Cabaña de tranquilidad", description: "Tu escape premium perfecto" }
     ];
 
     useEffect(() => {

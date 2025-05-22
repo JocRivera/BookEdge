@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import { CustomButton} from "../../common/Button/customButton";
@@ -25,6 +26,8 @@ function Customer() {
     const [searchTerm, setSearchTerm] = useState("");
     const itemsPerPage = 6;
     const [currentPage, setCurrentPage] = useState(0);
+
+    const navigate = useNavigate()
 
     // --- FILTRADO ---
     const filtrarDatos = customers.filter((customer) =>
@@ -298,9 +301,9 @@ function Customer() {
         });
     };
 
-    const handleGoToReservations = (idUser) => {
-        console.log(`Ir a reservas del usuario con ID: ${idUser}`);
-        // Aquí puedes implementar la lógica para redirigir o mostrar las reservas del usuario
+    const handleGoToReservations = (customer) => {
+        // Redirige a la ruta de reservas con el parámetro del cliente
+        navigate(`/admin/reservations?cliente=${customer.identification}`);
     };
 
     return (
@@ -396,7 +399,7 @@ function Customer() {
                                         {usersWithReservations.includes(customer.idUser) && (
                                             <button
                                                 className="action-btn reservation-btn"
-                                                onClick={() => handleGoToReservations(customer.idUser)}
+                                                onClick={() => handleGoToReservations(customer)}
                                                 title="Ir a reserva(s)"
                                             >
                                                 Ir a reserva(s)

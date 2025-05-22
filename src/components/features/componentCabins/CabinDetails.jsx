@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MdClose, MdPerson } from "react-icons/md";
 import { getCabinImages } from "../../../services/CabinService";
-import "./Cabincard.css";
+import "./CabinDetails.css";
 
 const CabinDetail = ({ isOpen, onClose, cabin }) => {
   const [images, setImages] = useState([]);

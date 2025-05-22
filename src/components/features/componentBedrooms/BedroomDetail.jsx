@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdClose, MdPerson } from "react-icons/md";
-import "./BedroomCard.css";
+import "./BedroomDetails.css";
 import { getBedroomImages } from "../../../services/BedroomService";
 
 const BedroomDetail = ({ isOpen, onClose, bedroom, loading }) => {
@@ -140,11 +140,7 @@ const BedroomDetail = ({ isOpen, onClose, bedroom, loading }) => {
           </div>
         )}
 
-        <div className="modal-footer-detail">
-          <button className="cancel-btn-detail" onClick={onClose}>
-            Cerrar
-          </button>
-        </div>
+     
       </div>
     </div>
   );
