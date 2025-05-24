@@ -124,15 +124,7 @@
     pointer-events: none;
   }
   
-  .services-track::before {
-    left: 0;
-    background: linear-gradient(to right, var(--background-dark) 0%, rgba(248, 248, 248, 0) 100%);
-  }
-  
-  .services-track::after {
-    right: 0;
-    background: linear-gradient(to left, var(--background-dark) 0%, rgba(248, 248, 248, 0) 100%);
-  }
+ 
   
   /* Efecto hover en el track */
   .services-track:hover .services-infinite-scroll {

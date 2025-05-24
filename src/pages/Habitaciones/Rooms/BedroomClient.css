@@ -16,7 +16,7 @@
 }
 .swiper-room-container {
   padding: 30px 15px;
-  background: var(--background-dark);
+  background: var(--background-light);
   overflow: hidden;
 }
 .swiper-custom-nav-room {
