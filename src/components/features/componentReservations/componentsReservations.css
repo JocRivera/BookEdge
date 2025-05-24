@@ -420,19 +420,19 @@
 .checkbox-group {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1px;
 }
 
 .checkbox-group label {
   display: flex;
   align-items: center;
   cursor: pointer;
-  margin-bottom: 0;
+  margin-bottom: 1px;
 }
 
 .checkbox-group input {
-  margin-right: 0.5rem;
-  width: auto;
+  margin-right: 0.5px;
+  width: 10px;
 }
 
 .error-message {
@@ -1078,4 +1078,344 @@
   padding: 15px;
   border-radius: 8px;
   margin-top: 20px;
+}
+/* Estilos para habitaciones y servicios */
+.bedrooms-grid,
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.bedroom-card,
+.service-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bedroom-card:hover,
+.service-card:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.bedroom-card.selected,
+.service-card.selected {
+  border-color: #4299e1;
+  background-color: #ebf8ff;
+}
+
+.bedroom-header,
+.service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.bedroom-meta,
+.service-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 0.875rem;
+}
+
+.bedroom-capacity,
+.bedroom-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bedroom-description,
+.service-description {
+  font-size: 0.875rem;
+  color: #4a5568;
+  flex-grow: 1;
+}
+
+.bedroom-footer,
+.service-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.select-button {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.select-button:hover {
+  background-color: #3182ce;
+}
+
+.bedroom-card.selected .select-button,
+.service-card.selected .select-button {
+  background-color: #2c5282;
+}
+
+.no-bedrooms-message,
+.no-services-message {
+  grid-column: 1 / -1;
+  padding: 16px;
+  text-align: center;
+  color: #718096;
+  background-color: #f7fafc;
+  border-radius: 8px;
+  border: 1px dashed #e2e8f0;
+}
+
+.selected-details {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+}
+
+.selected-cabin-details,
+.selected-bedroom-details,
+.selected-services-details {
+  margin-bottom: 16px;
+}
+
+.selected-services-details ul {
+  margin-top: 8px;
+  padding-left: 20px;
+}
+
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
+.availability-subtitle {
+  color: #718096;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+
+/* Estilos para información de depuración */
+.debug-info {
+  margin: 16px 0;
+  padding: 12px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.debug-info p {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.debug-info ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.debug-info li {
+  margin-bottom: 4px;
+}
+.accommodation-info-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.accommodation-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.accommodation-icon.cabin-icon {
+  color: #8b5a3c;
+}
+
+.accommodation-icon.bedroom-icon {
+  color: #4a90e2;
+}
+
+.accommodation-icon.no-accommodation-icon {
+  color: #999;
+}
+
+.accommodation-name {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Estilos para el modal de detalles */
+.accommodation-details {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e9ecef;
+}
+
+.accommodation-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.accommodation-header .accommodation-icon {
+  font-size: 24px;
+}
+
+.accommodation-main-info {
+  flex: 1;
+}
+
+.accommodation-title {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.accommodation-type {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.accommodation-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.spec-item label {
+  font-weight: 500;
+  color: #666;
+  font-size: 14px;
+}
+
+.spec-item span {
+  font-weight: 600;
+  color: #333;
+}
+
+.accommodation-description {
+  margin-top: 12px;
+}
+
+.accommodation-description label {
+  display: block;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.accommodation-description p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* Estilos para servicios adicionales */
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.service-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.service-price {
+  background: #e8f5e8;
+  color: #2e7d32;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.service-description {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.no-services {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .accommodation-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .accommodation-specs {
+    grid-template-columns: 1fr;
+  }
+
+  .service-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }
