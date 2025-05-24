@@ -108,176 +108,185 @@
   box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.3);
 }
 
-.bedroom-gallery { 
+.bedroom-gallery { /* Usando tu clase existente */
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 2rem;
   margin: 2.5rem 0;
 }
 
-
-.bedroom-card-admin { 
+.bedroom-card-admin { /* Usando tu clase existente */
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(38, 38, 91, 0.07);
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06), 0 3px 7px rgba(0,0,0,0.04);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  animation: fadeIn 0.6s ease-out forwards; 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.5s ease-out forwards; /* Asegúrate que fadeIn esté definido una sola vez en este archivo */
   opacity: 0;
-  min-height: 450px; 
+  border: 1px solid #f0f0f7;
 }
 
 .bedroom-card-admin:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(38, 38, 91, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.07), 0 6px 10px rgba(0,0,0,0.05);
 }
 
+/* Reusamos .card-image-container-admin de CabinCard.css o creamos una nueva si es necesario */
+/* Por simplicidad, si quieres que sean IDÉNTICOS, puedes reusar las clases genéricas */
+/* Si quieres total separación, entonces .bedroom-card-image-container-admin */
+/* Asumiré que podemos reusar para minimizar duplicación, pero puedes renombrar si prefieres */
 
-.card-image-container-admin { 
+.card-image-container-admin { /* Si vas a tener estilos diferentes, usa .bedroom-card-image-container-admin */
   position: relative;
-  height: 220px;
+  height: 230px;
   overflow: hidden;
-  background-color: #f0f2ff;
+  background-color: #f8f9fc;
 }
 
-.card-image-admin { 
+.card-image-admin { /* Si vas a tener estilos diferentes, usa .bedroom-card-image-admin */
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.35s ease;
 }
 
-.bedroom-card-admin:hover .card-image-admin { 
-  transform: scale(1.05);
+.bedroom-card-admin:hover .card-image-admin { /* Específico para el hover de bedroom card */
+  transform: scale(1.07);
 }
 
-.image-placeholder-admin {
+.image-placeholder-admin { /* Reusable */
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
   font-size: 1rem;
-  color: #6a6fc9;
-}
-@keyframes shine { 
-  0% { transform: translateX(-100%) rotate(30deg); }
-  100% { transform: translateX(100%) rotate(30deg); }
+  color: #a0aec0;
+  background-color: #f8f9fc;
 }
 
-
-.status-badge-bedroom {
+/* Badges de Estado y Contador de Imágenes */
+.status-badge-bedroom, /* Tu clase específica */
+.image-counter-badge-admin { /* Reusable, o .bedroom-image-counter-badge-admin */
   position: absolute;
   top: 1rem;
-  right: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px; 
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: white;
+  padding: 0.35rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 500;
   z-index: 2;
   backdrop-filter: blur(5px) saturate(150%);
   -webkit-backdrop-filter: blur(5px) saturate(150%);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  color: #333;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
 }
-.status-badge-bedroom.available { 
-  background-color: #fffbeb !important;
-  color: #10b981 !important;
-  
+
+.status-badge-bedroom { /* Tu clase específica */
+  right: 1rem;
 }
-.status-badge-bedroom.available:hover:not(:disabled) { 
-  background-color: #059669 !important;
+
+/* Colores para .status-badge-bedroom, replicando los de .status-badge-cabin */
+.status-badge-bedroom.available {
+  background-color: #29bf12 !important; /* Verde de tu CabinCard */
+  color: #ffffff !important;
 }
 .status-badge-bedroom.maintenance {
-  background: rgba(255, 165, 2, 0.85);
-  color: white; 
+  background: rgba(251, 191, 36, 0.85) !important; /* Amarillo de tu CabinCard */
+  color: #3a2503 !important;
 }
 .status-badge-bedroom.unavailable {
-  background: rgba(255, 71, 87, 0.85);
-  color: white;
+  background: rgba(239, 68, 68, 0.85) !important; /* Rojo de tu CabinCard */
+  color: white !important;
 }
 
-.image-counter-badge-admin { 
-  position: absolute;
-  top: 1rem;
+.image-counter-badge-admin { /* Reusable */
   left: 1rem;
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 0.4rem 0.8rem;
-  border-radius: 15px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  z-index: 2;
-  backdrop-filter: blur(3px);
+  background-color: rgba(50, 60, 70, 0.75);
+  color: #ffffff;
 }
 
-.card-body-admin { 
-  padding: 1.25rem 1.5rem;
+/* Cuerpo de la tarjeta */
+.card-body-admin { /* Reusable, o .bedroom-card-body-admin */
+  padding: 1.5rem;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  justify-content: space-between;
 }
 
-.bedroom-title-admin { 
+.bedroom-card-content-top { /* Nueva clase para agrupar contenido superior */
+  /* No necesita margin-bottom si el .card-body-admin ya maneja el espacio */
+}
+
+.bedroom-title-admin { /* Tu clase específica */
   font-size: 1.4rem;
   font-weight: 600;
-  color: #2d3748; 
-  margin-bottom: 0.2rem;
-  line-height: 1.3;
+  color: #2d3748;
+  margin-bottom: 0.6rem;
+  line-height: 1.35;
 }
 
-.bedroom-description-admin { 
-  font-size: 0.9rem;
-  color: #5a6474;
-  line-height: 1.6;
-  max-height: calc(1.6em * 4); 
-  overflow-y: auto;
-  overflow-wrap: break-word;
-  word-break: break-word;
+.bedroom-description-admin { /* Tu clase específica - con truncado */
+    font-size: 0.9rem;
+    color: #5a6872;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: calc(0.9rem * 1.5 * 2); /* = 2.7rem */
+    word-wrap: break-word; /* o overflow-wrap: break-word; */
+    /* hyphens: auto; */ /* Opcional, puede ayudar con palabras largas si el idioma lo permite */
 }
 
-.bedroom-meta-details-admin { 
-  margin-top: auto;
-  padding-top: 0.5rem;
+.bedroom-meta-details-admin { /* Tu clase específica */
+  /* Estilos que tenías para .cabin-meta-details-admin */
 }
 
-.feature-item-admin { 
-  align-items: center;
-  gap: 0.7rem;
-  color: #4a5568; 
-  font-size: 0.9rem;
-  margin-bottom: 0.4rem; 
-}
-
-.feature-icon { 
-  color: #8284ca; 
-  font-size: 1.2rem; 
-  min-width: 20px;
-}
-
-.card-footer-actions-admin {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #eef0f5;
-  background-color: #fdfdff;
+.feature-item-admin { /* Reusable */
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+  margin-bottom: 0.4rem;
 }
-@keyframes fadeIn {
+
+.feature-icon { /* Reusable */
+  color: #8284ca;
+  font-size: 1.2rem;
+}
+
+/* Footer para los ActionButtons */
+.card-footer-actions-admin { /* Reusable, o .bedroom-card-footer-actions-admin */
+  padding-top: 1rem;
+  border-top: 1px solid #eef0f5;
+  
+  display: flex !important;
+  justify-content: space-evenly !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+/* Asegúrate que @keyframes fadeIn esté definido solo UNA VEZ en todo el archivo BedroomCard.css */
+/* Si ya lo tienes definido en otra parte del archivo, elimina esta duplicación. */
+/* @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
+} */
 
 /* Modal base */
 .modal-overlay-room-admin {

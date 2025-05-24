@@ -456,7 +456,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
 
               <fieldset className="image-upload-section-bedroom-admin">
                 <legend className="form-label-bedroom-admin">
-                  Imágenes (máx. 5)
+                  Imágenes (máx. 5) {/* Título único y simple */}
                 </legend>
                 {errors.images && (
                   <span className="error-message-admin image-error-admin">
@@ -464,147 +464,224 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   </span>
                 )}
 
-                {existingImages.length > 0 && (
-                  <section className="existing-images-container-bedroom-admin">
-                    <h3>Imágenes guardadas ({existingImages.length}/5)</h3>
-                    <ul
-                      className="images-grid-bedroom-admin"
-                      aria-label="Imágenes existentes"
-                    >
-                      {existingImages.map((image) => (
-                        <li
-                          key={image.idRoomImage}
-                          className="image-item-bedroom-admin"
-                        >
-                          <figure className="image-preview-wrapper-bedroom-admin">
-                            <img
-                              src={`http://localhost:3000/uploads/${image.imagePath}`}
-                              alt={`Habitación ${formData.name || "imagen"}`}
-                              className="preview-image-bedroom-admin"
-                            />
-                            <figcaption className="visually-hidden-admin">
-                              Imagen de la habitación
-                            </figcaption>
-                            <div className="image-actions-bedroom-admin">
+                <div className="upload-images-grid-admin">
+                  {/* Siempre un loop de 5 para representar los 5 slots visuales */}
+                  {Array(5)
+                    .fill(null)
+                    .map((_, slotIndex) => {
+                      // slotIndex va de 0 a 4
+
+                      // Prioridad 1: Mostrar una imagen EXISTENTE si corresponde a este slot
+                      // y no hay una NUEVA imagen seleccionada para este mismo slot.
+                      const existingImageForThisSlot =
+                        bedroomToEdit &&
+                        slotIndex < existingImages.length && // Solo si el slot está dentro del rango de imágenes existentes
+                        !imagePreviews[slotIndex] // Y no hay una nueva preview para este slot
+                          ? existingImages[slotIndex]
+                          : null;
+
+                      // Prioridad 2: Mostrar una VISTA PREVIA DE IMAGEN NUEVA si existe para este slot
+                      const newImagePreviewForThisSlot =
+                        imagePreviews[slotIndex];
+
+                      if (newImagePreviewForThisSlot) {
+                        // CASO A: Hay una nueva imagen seleccionada (o reemplazando una existente)
+                        return (
+                          <div
+                            key={`slot-new-preview-${slotIndex}`}
+                            className="image-upload-field-bedroom-admin"
+                          >
+                            <figure className="image-preview-wrapper-bedroom-admin">
+                              <img
+                                src={newImagePreviewForThisSlot}
+                                alt={`Vista previa ${slotIndex + 1}`}
+                                className="preview-image-bedroom-admin"
+                              />
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleRemoveExistingImage(image.idRoomImage)
-                                }
+                                onClick={() => handleRemoveImage(slotIndex)} // Usa tu handleRemoveImage actual
                                 className="image-action-btn-admin delete-btn-bedroom-admin"
-                                aria-label="Eliminar imagen"
+                                aria-label="Quitar imagen seleccionada"
                               >
                                 <MdDelete />
                               </button>
-                              {bedroomToEdit && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleSetPrimary(image.idRoomImage)
-                                  }
-                                  className={`image-action-btn-admin star-btn-admin ${
-                                    image.isPrimary ? "primary-admin" : ""
-                                  }`}
-                                  aria-label={
-                                    image.isPrimary
-                                      ? "Imagen principal"
-                                      : "Establecer como principal"
-                                  }
-                                  disabled={image.isPrimary}
-                                >
-                                  {image.isPrimary ? (
-                                    <MdStar />
-                                  ) : (
-                                    <MdStarBorder />
-                                  )}
-                                </button>
-                              )}
-                            </div>
-                          </figure>
-                          {image.isPrimary && (
-                            <span className="primary-label-admin">
-                              Principal
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                )}
-
-                {availableSlotsForNewImages > 0 && (
-                  <section className="new-images-container-bedroom-admin">
-                    <h3>
-                      Agregar nuevas imágenes ({availableSlotsForNewImages}{" "}
-                      disponibles)
-                    </h3>
-                    <div className="upload-images-grid-admin">
-                      {Array(availableSlotsForNewImages)
-                        .fill(null)
-                        .map((_, slotIndex) => (
+                            </figure>
+                          </div>
+                        );
+                      } else if (existingImageForThisSlot) {
+                        // CASO B: Hay una imagen existente y no hay una nueva preview para este slot
+                        return (
                           <div
-                            key={`new-image-slot-${slotIndex}`}
+                            key={`slot-existing-${existingImageForThisSlot.idRoomImage}`}
                             className="image-upload-field-bedroom-admin"
                           >
-                            {imagePreviews[slotIndex] ? (
-                              <figure className="image-preview-wrapper-bedroom-admin">
-                                <img
-                                  src={imagePreviews[slotIndex]}
-                                  alt={`Vista previa ${slotIndex + 1}`}
-                                  className="preview-image-bedroom-admin"
-                                />
+                            <figure className="image-preview-wrapper-bedroom-admin">
+                              <img
+                                src={`http://localhost:3000/uploads/${existingImageForThisSlot.imagePath}`}
+                                alt={`Habitación ${formData.name || "imagen"} ${
+                                  slotIndex + 1
+                                }`}
+                                className="preview-image-bedroom-admin"
+                              />
+                              <figcaption className="visually-hidden-admin">
+                                Imagen de la habitación {slotIndex + 1}
+                              </figcaption>
+                              <div className="image-actions-bedroom-admin">
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveImage(slotIndex)}
+                                  // Al borrar una existente, también debe limpiar el preview y file de ese slot
+                                  onClick={() => {
+                                    handleRemoveExistingImage(
+                                      existingImageForThisSlot.idRoomImage
+                                    );
+                                    // Adicionalmente, si quieres que se convierta en un slot de carga:
+                                    handleRemoveImage(slotIndex); // Esto limpiará imageFiles[slotIndex] e imagePreviews[slotIndex]
+                                  }}
                                   className="image-action-btn-admin delete-btn-bedroom-admin"
-                                  aria-label="Quitar imagen"
+                                  aria-label="Eliminar imagen existente"
                                 >
                                   <MdDelete />
                                 </button>
-                              </figure>
-                            ) : (
-                              <div className="upload-single-container-bedroom-admin">
-                                <input
-                                  type="file"
-                                  ref={(el) =>
-                                    (fileInputRefs.current[slotIndex] = el)
-                                  }
-                                  onChange={(e) =>
-                                    handleImageChange(slotIndex, e)
-                                  }
-                                  accept="image/*"
-                                  className="file-input-bedroom-admin"
-                                  id={`bedroom-image-upload-${slotIndex}`}
-                                  aria-labelledby={`bedroom-image-label-${slotIndex}`}
-                                />
-                                <label
-                                  id={`bedroom-image-label-${slotIndex}`}
-                                  htmlFor={`bedroom-image-upload-${slotIndex}`}
-                                  className="upload-single-label-bedroom-admin"
-                                >
-                                  <MdImage size={24} />
-                                  <span>
-                                    Imagen{" "}
-                                    {existingImages.length + slotIndex + 1}
-                                  </span>
-                                </label>
+                                {bedroomToEdit && ( // Esta condición ya la tenías, es correcta
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleSetPrimary(
+                                        existingImageForThisSlot.idRoomImage
+                                      )
+                                    }
+                                    className={`image-action-btn-admin star-btn-admin ${
+                                      existingImageForThisSlot.isPrimary
+                                        ? "primary-admin"
+                                        : ""
+                                    }`}
+                                    aria-label={
+                                      existingImageForThisSlot.isPrimary
+                                        ? "Imagen principal"
+                                        : "Establecer como principal"
+                                    }
+                                    disabled={
+                                      existingImageForThisSlot.isPrimary
+                                    }
+                                  >
+                                    {existingImageForThisSlot.isPrimary ? (
+                                      <MdStar />
+                                    ) : (
+                                      <MdStarBorder />
+                                    )}
+                                  </button>
+                                )}
                               </div>
+                            </figure>
+                            {existingImageForThisSlot.isPrimary && (
+                              <span className="primary-label-admin">
+                                Principal
+                              </span>
                             )}
                           </div>
-                        ))}
-                    </div>
-                  </section>
-                )}
+                        );
+                      } else {
+                        // CASO C: Slot vacío, mostrar placeholder para cargar imagen
+                        // Esto solo ocurrirá si no hay existente Y no hay nueva preview para este slotIndex
+                        // Y si el número total de imágenes (existentes no borradas + nuevas seleccionadas) es menor que 5.
+                        const currentTotalImages =
+                          existingImages.length +
+                          imageFiles.filter(Boolean).length;
+                        if (
+                          currentTotalImages < 5 ||
+                          (bedroomToEdit &&
+                            slotIndex >= existingImages.length) ||
+                          !bedroomToEdit
+                        ) {
+                          // ^^^ Esta condición asegura que solo mostramos el uploader si realmente hay un slot disponible ^^^
+                          // o si estamos en un slot que va después de las imágenes existentes.
+                          // En modo "agregar", siempre se mostrarán los 5.
+                          // En modo "editar", si tienes 2 existentes y 0 nuevas, slotIndex 0 y 1 mostrarán existentes,
+                          // slotIndex 2, 3, 4 mostrarán el uploader.
+                          // Si tienes 2 existentes y seleccionas 3 nuevas, todos los slots estarán ocupados por previews o existentes.
 
-                {existingImages.length >= 5 &&
-                  availableSlotsForNewImages === 0 && (
-                    <div
-                      className="max-images-message-bedroom-admin"
-                      role="alert"
-                    >
-                      <p>Límite máximo de 5 imágenes alcanzado.</p>
-                    </div>
-                  )}
+                          // Corrección: El slot de carga debería aparecer si el slotIndex es >= que el número de imágenes
+                          // existentes (que no tienen una preview nueva) y menor que 5.
+                          // O si estamos en modo crear.
+                          let showUploader = false;
+                          if (!bedroomToEdit) {
+                            showUploader = true;
+                          } else {
+                            // En modo editar, un slot es para uploader si:
+                            // 1. No hay imagen existente para este slot Y no hay preview nueva. (Esto ya lo maneja la lógica de arriba)
+                            // 2. O si el slotIndex es >= al número de imágenes existentes efectivas.
+                            //    (imágenes existentes que no tienen una preview de reemplazo)
+                            const effectiveExistingCount =
+                              existingImages.filter(
+                                (img, idx) => !imagePreviews[idx]
+                              ).length;
+                            if (slotIndex >= effectiveExistingCount) {
+                              showUploader = true;
+                            }
+                          }
+                          // Y además, el número total de imágenes (nuevas seleccionadas + existentes no reemplazadas) no debe ser 5 aun.
+                          const newFilesCount =
+                            imageFiles.filter(Boolean).length;
+                          const existingNotReplacedCount =
+                            existingImages.filter(
+                              (img, i) => !imagePreviews[i]
+                            ).length;
+
+                          if (
+                            newFilesCount + existingNotReplacedCount < 5 &&
+                            showUploader
+                          ) {
+                            return (
+                              <div
+                                key={`slot-empty-${slotIndex}`}
+                                className="image-upload-field-bedroom-admin"
+                              >
+                                <div className="upload-single-container-bedroom-admin">
+                                  <input
+                                    type="file"
+                                    ref={(el) =>
+                                      (fileInputRefs.current[slotIndex] = el)
+                                    }
+                                    onChange={(e) =>
+                                      handleImageChange(slotIndex, e)
+                                    } // handleImageChange usa slotIndex
+                                    accept="image/*"
+                                    className="file-input-bedroom-admin"
+                                    id={`bedroom-image-upload-${slotIndex}`}
+                                    aria-labelledby={`bedroom-image-label-${slotIndex}`}
+                                  />
+                                  <label
+                                    id={`bedroom-image-label-${slotIndex}`}
+                                    htmlFor={`bedroom-image-upload-${slotIndex}`}
+                                    className="upload-single-label-bedroom-admin"
+                                  >
+                                    <MdImage size={24} />
+                                    <span>Imagen {slotIndex + 1}</span>
+                                  </label>
+                                </div>
+                              </div>
+                            );
+                          } else {
+                            // Si se alcanzó el límite y este slot no tiene ni existente ni preview, no mostrar nada.
+                            // O podrías mostrar un slot "deshabilitado" visualmente. Por ahora, null.
+                            return null;
+                          }
+                        }
+                      }
+                    })}
+                </div>
+
+                {/* Mensaje de límite alcanzado (basado en conteo total) */}
+                {existingImages.filter((img, i) => !imagePreviews[i]).length +
+                  imageFiles.filter(Boolean).length >=
+                  5 && (
+                  <div
+                    className="max-images-message-bedroom-admin"
+                    role="alert"
+                  >
+                    <p>Límite máximo de 5 imágenes alcanzado.</p>
+                  </div>
+                )}
               </fieldset>
             </div>
           </div>

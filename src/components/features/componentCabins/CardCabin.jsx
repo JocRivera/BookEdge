@@ -183,8 +183,9 @@ function CardCabin() {
           </div>
         ) : (
           currentItems.map((cabin) => (
+            // Dentro de tu .map((cabin) => ( ... ))
+
             <article key={cabin.idCabin} className="cabin-card-admin">
-              {/* Sección de la Imagen y Badge de Estado */}
               <div className="card-image-container-admin">
                 {cabinImages[cabin.idCabin] ? (
                   <img
@@ -199,14 +200,18 @@ function CardCabin() {
                   <div className="image-placeholder-admin">Sin imágenes</div>
                 )}
 
-                {/* Contador de imágenes (si hay más de una) */}
+                {/* Contador de imágenes (arriba a la izquierda) */}
                 {cabin.imageCount > 1 && (
                   <span className="image-counter-badge-admin">
-                    {" "}
-                    {cabin.imageCount - 1} más
+                    {/* Si quieres un icono aquí: <Camera size={12} style={{ marginRight: '4px' }} /> */}
+                    {cabin.imageCount - 1 === 1
+                      ? `${cabin.imageCount - 1} Imagenes más`
+                      : `${cabin.imageCount - 1} Imagenes más`}{" "}
+                    {/* Adaptar texto */}
                   </span>
                 )}
 
+                {/* Badge de Estado (arriba a la derecha) */}
                 <div
                   className={`status-badge-cabin ${
                     cabin.status === "Mantenimiento"
@@ -221,22 +226,32 @@ function CardCabin() {
               </div>
 
               <div className="card-body-admin">
-                <h2 className="cabin-title-admin">{cabin.name}</h2>
-                <div className="cabin-meta-details-admin">
-                  <div className="feature-item-admin">
-                    <MdPerson className="feature-icon" />
-                    <span>Capacidad: {cabin.capacity || "N/A"} personas</span>
+                <div className="cabin-card-content-top">
+                  <h2 className="cabin-title-admin">{cabin.name}</h2>
+
+                  {/* Contenedor para la descripción */}
+                  {cabin.description && ( // Solo muestra si hay descripción
+                    <div className="cabin-description-details-admin">
+                      {cabin.description}
+                    </div>
+                  )}
+
+                  <div className="cabin-meta-details-admin">
+                    <div className="feature-item-admin">
+                      <MdPerson className="feature-icon" />
+                      <span>Capacidad: {cabin.capacity || "N/A"} personas</span>
+                    </div>
+                    {/* Otros meta-details si los tienes */}
                   </div>
                 </div>
+                <footer className="card-footer-actions-admin">
+                  <ActionButtons
+                    onEdit={() => handleEditCabin(cabin)}
+                    onDelete={() => handleDelete(cabin.idCabin)}
+                    onView={() => handleView(cabin.idCabin)}
+                  />
+                </footer>
               </div>
-
-              <footer className="card-footer-actions-admin">
-                <ActionButtons
-                  onEdit={() => handleEditCabin(cabin)}
-                  onDelete={() => handleDelete(cabin.idCabin)}
-                  onView={() => handleView(cabin.idCabin)}
-                />
-              </footer>
             </article>
           ))
         )}

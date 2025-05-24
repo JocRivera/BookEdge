@@ -185,40 +185,40 @@ function BedroomCard() {
               : "No hay habitaciones disponibles"}
           </div>
         ) : (
+          // ...
           currentItems.map((bedroom) => (
             <article key={bedroom.idRoom} className="bedroom-card-admin">
               {" "}
-              {/* Cambiado de cabin-card-admin */}
-              {/* Sección de la Imagen y Badge de Estado */}
+              {/* Usando tu clase de BedroomCard */}
               <div className="card-image-container-admin">
                 {" "}
-                {/* Podemos reusar esta clase o hacerla .bedroom-card-image-container-admin */}
+                {/* Clase genérica/reusable */}
                 {bedroomImages[bedroom.idRoom] ? (
                   <img
                     src={`http://localhost:3000/uploads/${
                       bedroomImages[bedroom.idRoom]
                     }`}
                     alt={bedroom.name}
-                    className="card-image-admin" /* Reusable o .bedroom-card-image-admin */
+                    className="card-image-admin" // Clase genérica/reusable
                     onError={handleImageError}
                   />
                 ) : (
-                  <div className="image-placeholder-admin">
-                    Sin imágenes
-                  </div> /* Reusable */
+                  <div className="image-placeholder-admin">Sin imágenes</div> // Clase genérica/reusable
                 )}
-                {/* Contador de imágenes (si hay más de una) */}
+                {/* Contador de imágenes (arriba a la izquierda) */}
                 {bedroom.imageCount > 1 && (
                   <span className="image-counter-badge-admin">
                     {" "}
-                    {/* Reusable o .bedroom-image-counter-badge-admin */}+
-                    {bedroom.imageCount - 1} más
+                    {/* Clase genérica/reusable */}
+                    {bedroom.imageCount - 1 === 1
+                      ? `${bedroom.imageCount - 1} Imagen más` // Singular
+                      : `${bedroom.imageCount - 1} Imágenes más`}{" "}
                   </span>
                 )}
-                {/* Badge de Estado */}
+                {/* Badge de Estado (arriba a la derecha) */}
                 <div
                   className={`status-badge-bedroom ${
-                    /* Nueva clase específica */
+                    // Clase específica para bedroom status
                     bedroom.status === "Mantenimiento"
                       ? "maintenance"
                       : bedroom.status === "En Servicio"
@@ -231,40 +231,46 @@ function BedroomCard() {
                     : bedroom.status}
                 </div>
               </div>
-              {/* Cuerpo Principal de la Card: Título, Descripción, Detalles */}
               <div className="card-body-admin">
                 {" "}
-                {/* Reusable o .bedroom-card-body-admin */}
-                <h2 className="bedroom-title-admin">{bedroom.name}</h2>{" "}
-                {/* Clase específica */}
-                <p className="bedroom-description-admin">
+                {/* Clase genérica/reusable */}
+                <div className="bedroom-card-content-top">
                   {" "}
-                  {/* Clase específica */}
-                  {bedroom.description && bedroom.description.length > 120
-                    ? `${bedroom.description.substring(0, 120)}...`
-                    : bedroom.description || "No hay descripción disponible."}
-                </p>
-                <div className="bedroom-meta-details-admin">
-                  {" "}
-                  {/* Clase específica */}
-                  <div className="feature-item-admin">
+                  {/* Contenedor específico para el contenido superior de bedroom */}
+                  <h2 className="bedroom-title-admin">{bedroom.name}</h2>
+                  {/* Contenedor para la descripción */}
+                  {bedroom.description && (
+                    <div className="bedroom-description-admin">
+                      {" "}
+                      {/* Clase específica para descripción de bedroom */}
+                      {bedroom.description}
+                    </div>
+                  )}
+                  <div className="bedroom-meta-details-admin">
                     {" "}
-                    {/* Reusable o .bedroom-feature-item-admin */}
-                    <MdPerson className="feature-icon" /> {/* Reusable */}
-                    <span>Capacidad: {bedroom.capacity || "N/A"} personas</span>
+                    {/* Clase específica para meta detalles de bedroom */}
+                    <div className="feature-item-admin">
+                      {" "}
+                      {/* Clase genérica/reusable */}
+                      <MdPerson className="feature-icon" />{" "}
+                      {/* Clase genérica/reusable */}
+                      <span>
+                        Capacidad: {bedroom.capacity || "N/A"} personas
+                      </span>
+                    </div>
+                    {/* Otros meta-details si los tienes */}
                   </div>
                 </div>
+                {/* Footer para los ActionButtons */}
+                <footer className="card-footer-actions-admin">
+                
+                  <ActionButtons
+                    onEdit={() => handleEditBedroom(bedroom)}
+                    onDelete={() => handleDelete(bedroom.idRoom)}
+                    onView={() => handleView(bedroom.idRoom)}
+                  />
+                </footer>
               </div>
-              {/* Pie de Card: Acciones */}
-              <footer className="card-footer-actions-admin">
-                {" "}
-                {/* Reusable o .bedroom-card-footer-actions-admin */}
-                <ActionButtons
-                  onEdit={() => handleEditBedroom(bedroom)}
-                  onDelete={() => handleDelete(bedroom.idRoom)}
-                  onView={() => handleView(bedroom.idRoom)}
-                />
-              </footer>
             </article>
           ))
         )}
