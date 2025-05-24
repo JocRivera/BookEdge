@@ -1,40 +1,57 @@
-/* --- START OF FILE Sidebar.css --- */
-
+/* --- START OF Sidebar.css (CORRECCIONES) --- */
 
 :root {
-  /* --- Paleta Principal (Negro, Blanco, Azul Acento General) --- */
-  --sidebar-bg: #040011;
-  --sidebar-bg-subtle: #1a1a1a;
-  --sidebar-text-color: #e0e0e0;
-  --sidebar-text-color-hover: #ffffff;
-  --sidebar-text-muted: #a0a0a0;
-  --sidebar-text-title-decoration: #4a4a4a;
+  /* --- Paleta Principal (Tema Claro) --- */
+  --sidebar-bg: #ffffff;
+  --sidebar-border-color: #e9ecef;
+  --sidebar-text-color: #495057;
+  --sidebar-text-color-hover: #005fa3;
+  --sidebar-text-muted: #6c757d;
+  --primary-accent-color: #0077b6;
+  --primary-accent-color-darker: #005fa3;
+  --logo-text-color-light: #0a0a0a;
+  --item-bg-hover: rgba(0, 119, 182, 0.05);
+  --item-bg-active: rgba(0, 119, 182, 0.1);
+  --search-bg: #f8f9fa;
+  --search-border-color: #dee2e6; /* Borde normal del search */
+  --search-text-color: #495057;
+  --search-placeholder-color: #adb5bd;
+  --scrollbar-thumb-color: #adb5bd;
+  --scrollbar-track-color: transparent;
 
-  --primary-accent-color: #00aeef;
-  --primary-accent-color-darker: #008fc7;
-
-  /* --- Colores Específicos para el Logo "BookEdge" --- */
-  --logo-book-blue: #0077b6;
-  --logo-edge-gold: #daa520;
-
-  /* --- Otros Colores y Variables (Hover, Active, Borders, etc.) --- */
-  --item-bg-hover: rgba(255, 255, 255, 0.05);
-  --item-bg-active: rgba(0, 174, 239, 0.1);
-
-  --border-color-soft: rgba(255, 255, 255, 0.1);
-  --border-color-strong: var(--primary-accent-color);
+  /* --- Paleta para Modo Oscuro (Totalmente Negro) --- */
+  --sidebar-bg-dark: #000000;
+  --sidebar-border-color-dark: #282828; /* Borde ligeramente visible */
+  --sidebar-text-color-dark: #e0e0e0;
+  --sidebar-text-color-hover-dark: #ffffff;
+  --sidebar-text-muted-dark: #888888; /* Muted un poco más claro para contraste */
+  --logo-text-color-dark: #ffffff;
+  --primary-accent-color-dark-theme: #ffffff; /* Items activos usarán este color de texto */
+  --item-bg-hover-dark: #1a1a1a;
+  --item-bg-active-dark: #2c2c2c;
+  --search-bg-dark: #1a1a1a; /* Fondo del buscador más oscuro */
+  --search-border-color-dark: #383838; /* Borde del search en dark */
+  --search-text-color-dark: #e0e0e0;
+  --search-placeholder-color-dark: #666666;
+  --scrollbar-thumb-color-dark: #444444;
+  --scrollbar-track-color-dark: transparent;
 
   /* --- Dimensiones --- */
   --sidebar-width-expanded: 230px;
   --sidebar-width-collapsed: 68px;
-  --logo-expanded-height: 90px;
+  --logo-expanded-height: 38px; /* Ajustado para que no sea tan grande */
   --logo-collapsed-height: 36px;
+  --header-padding-v: var(--space-l); /* Padding vertical del header */
+  --header-padding-h: var(--space-m); /* Padding horizontal del header */
+  /* --header-min-height: 70px;  Ya no se usa min-height fijo, se adapta al contenido */
+  /* --header-min-height-with-search: 120px; */
+  --search-input-height: 25px; /* Altura del buscador reducida */
 
   /* --- Radios y Sombras --- */
   --border-radius-main: 6px;
-  --border-radius-large: 10px;
-  --shadow-subtle: rgba(0, 0, 0, 0.2);
-  --shadow-medium: rgba(0, 0, 0, 0.3);
+  --border-radius-large: 8px;
+  --shadow-flyout: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  --shadow-flyout-dark: 0px 8px 16px rgba(0, 0, 0, 0.4);
 
   /* --- Espaciados --- */
   --space-xs: 4px;
@@ -47,225 +64,273 @@
   --font-size-xs: 11px;
   --font-size-sm: 13px;
   --font-size-base: 14px;
-  --font-size-md: 16px;
+  --font-size-md: 15px;
   --font-size-lg: 18px;
 
   /* --- Transiciones --- */
-  --transition-speed: 0.25s;
+  --transition-speed: 0.2s;
   --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Toggle Button Flotante --- */
+  --toggle-btn-v-offset: 15px;
+  --toggle-btn-actual-width: 36px;
 }
 
 /* --- Estructura Base del Sidebar --- */
 .sidebar {
-  /* ... otros estilos ... */
   width: var(--sidebar-width-expanded);
   height: 100vh;
-  background: var(--sidebar-bg);
+  background: var(--sidebar-bg); /* Se aplica inicialmente */
   color: var(--sidebar-text-color);
-  transition: width var(--transition-speed) var(--transition-timing);
+  border-right: 1px solid var(--sidebar-border-color);
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
-  overflow-x: hidden;
+  overflow: hidden;
   z-index: 1000;
-  box-shadow: 4px 0 12px var(--shadow-subtle);
-  border-right: 1px solid var(--sidebar-bg-subtle);
-
-  border-top-right-radius: var(--border-radius-large);
-  border-bottom-right-radius: var(--border-radius-large);
-
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  /* ===================================== */
+  transition: width var(--transition-speed) var(--transition-timing),
+    background var(--transition-speed) var(--transition-timing),
+    color var(--transition-speed) var(--transition-timing),
+    border-color var(--transition-speed) var(--transition-timing);
 }
 .sidebar.collapsed {
   width: var(--sidebar-width-collapsed);
+}
+/* Aplicación directa y con !important para asegurar que los estilos dark se apliquen */
+.sidebar.dark-mode {
+  background: var(--sidebar-bg-dark) !important;
+  color: var(--sidebar-text-color-dark) !important;
+  border-right-color: var(--sidebar-border-color-dark) !important;
 }
 
 /* --- Cabecera del Sidebar --- */
 .sidebar-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-l) var(--space-m);
-  border-bottom: 1px solid var(--sidebar-bg-subtle);
-  background: var(--sidebar-bg);
-  min-height: 85px; /* Aumenta para el logo más grande y texto debajo */
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-.logo {
-  display: block !important;
-  align-items: center;
-  gap: var(--space-s);
-}
-.logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: var(--primary-accent-color);
-  color: var(--sidebar-bg);
-  border-radius: var(--border-radius-main);
-  font-weight: bold;
-  font-size: var(--font-size-md);
-  transition: transform var(--transition-speed) ease;
-}
-.logo-logo-stacked {
-  display: flex;
   flex-direction: column;
+  align-items: flex-start; /* Alinea logo y buscador a la izquierda */
+  padding: var(--header-padding-v) var(--header-padding-h);
+  border-bottom: 1px solid var(--sidebar-border-color);
+  background: inherit; /* Hereda del .sidebar para consistencia de tema */
+  flex-shrink: 0;
+  transition: border-color var(--transition-speed) var(--transition-timing);
+}
+.sidebar.collapsed .sidebar-header {
+  align-items: center; /* Centra el logo cuando está colapsado */
+  padding-top: var(--header-padding-v);
+  padding-bottom: var(--header-padding-v);
+  padding-left: 0; /* Para centrar correctamente */
+  padding-right: 0;
+}
+.sidebar.dark-mode .sidebar-header {
+  border-bottom-color: var(--sidebar-border-color-dark) !important;
+}
+
+.logo-area {
+  display: flex;
   align-items: center;
-  transition: all var(--transition-speed) ease; /* Para transiciones suaves de tamaño */
-  margin-bottom: -25px;
+  justify-content: flex-start; /* Siempre a la izquierda */
+  gap: var(--space-s);
+  width: 100%;
+  margin-bottom: var(--space-l); /* Espacio si el buscador está visible */
+  transition: margin-bottom var(--transition-speed) ease;
+}
+.sidebar.collapsed .logo-area {
+  justify-content: center; /* Centra la imagen del logo */
+  margin-bottom: 0; /* No hay buscador debajo */
 }
 
 .logo-image-display {
   transition: height var(--transition-speed) ease,
-              width var(--transition-speed) ease, /* MODIFICADO: Añadido width a la transición */
-              opacity var(--transition-speed) ease;
-  display: block; /* Para evitar espacio extra */
-  border-radius: 50% !important; /* MODIFICADO: Cambiado a 50% para claridad, 15000px también funciona */
-  /* object-fit: cover; Se aplicará en las clases específicas .expanded-logo y .collapsed-logo */
+    width var(--transition-speed) ease;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .logo-image-display.expanded-logo {
   height: var(--logo-expanded-height);
-  width: var(--logo-expanded-height); /* MODIFICADO: Igualar al height para hacerlo círculo */
-  opacity: 1;
-  object-fit: cover; /* AÑADIDO: Para que la imagen se ajuste bien */
+  width: var(--logo-expanded-height);
 }
-
 .logo-image-display.collapsed-logo {
   height: var(--logo-collapsed-height);
-  width: var(--logo-collapsed-height); /* MODIFICADO: Igualar al height para hacerlo círculo */
-  opacity: 1; /* Asumiendo que quieres mostrarlo así cuando esté colapsado */
-  object-fit: cover; /* AÑADIDO: Para que la imagen se ajuste bien */
+  width: var(--logo-collapsed-height);
+}
+
+.logo-text-container {
+  display: flex;
+  opacity: 1;
+  transition: opacity calc(var(--transition-speed) * 0.7) ease,
+    transform var(--transition-speed) ease;
+  transform: translateX(0);
+  white-space: nowrap;
+}
+.sidebar.collapsed .logo-text-container {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transform: translateX(-10px);
+  pointer-events: none;
 }
 .logo-text-book {
   font-size: var(--font-size-lg);
   font-weight: 700;
-  color: var(--logo-book-blue);
   letter-spacing: 0.5px;
+  color: var(--logo-text-color-light);
+  transition: color var(--transition-speed) var(--transition-timing);
+}
+.sidebar.dark-mode .logo-text-book {
+  color: var(--logo-text-color-dark) !important;
 }
 
-.logo-text-edge {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-
-  color: var(--logo-edge-gold);
-  letter-spacing: 0.5px;
-}
-
-.sidebar:not(.collapsed):hover .logo-icon {
-  transform: scale(1.05);
-}
-
-/* .logo ya estaba definido arriba, esta es una segunda definición. Considera unificar. */
-.logo { 
+/* --- Buscador --- */
+.search-container {
   display: flex;
   align-items: center;
-  gap: var(--space-s);
+  position: relative;
+  width: 100%;
+  opacity: 1;
+  transition: opacity var(--transition-speed) ease,
+    height var(--transition-speed) ease, visibility var(--transition-speed) ease;
+  height: var(--search-input-height); /* Altura fija */
+  visibility: visible;
 }
-
-/* .logo-icon ya estaba definido arriba. Considera unificar. */
-.logo-icon {
-  /* Este es el icono 'B' que ya tienes */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: var(--primary-accent-color);
-  color: var(--sidebar-bg);
-  border-radius: var(--border-radius-main);
-  font-weight: bold;
-  font-size: var(--font-size-md);
-  transition: transform var(--transition-speed) ease;
-  flex-shrink: 0; /* Para que no se encoja si el logo es muy ancho */
-}
-.sidebar:not(.collapsed):hover .logo-icon {
-  transform: scale(1.05);
-}
-
-/* === NUEVOS ESTILOS PARA TU IMAGEN DE LOGO PRINCIPAL === */
-/* Esta regla parece no aplicar al logo de imagen que estás usando actualmente (`.logo-image-display`) */
-.sidebar.collapsed .logo-image-main {
+.sidebar.collapsed .search-container {
   opacity: 0;
-  width: 0; /* Para que no ocupe espacio durante la transición si la hay */
-  overflow: hidden;
-  transform: translateX(-15px); /* Similar a como se ocultaba .logo-text */
+  height: 0;
+  visibility: hidden;
   pointer-events: none;
 }
-.sidebar.collapsed .logo-text {
-  opacity: 0;
-  transform: translateX(-15px);
-  width: 0;
-  overflow: hidden;
+.search-icon {
+  position: absolute;
+  left: var(--space-m); /* Más padding para el icono */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sidebar-text-muted);
+  font-size: 16px; /* Tamaño del icono de búsqueda */
+  pointer-events: none;
+  transition: color var(--transition-speed) var(--transition-timing);
 }
+.search-input {
+  width: 100%;
+  height: 100%; /* Ocupa la altura del contenedor */
+  padding: 0 var(--space-m) 0 calc(var(--space-m) + 20px + var(--space-s)); /* Ajustar padding */
+  border: 1px solid var(--search-border-color);
+  border-radius: var(--border-radius-main);
+  background-color: var(--search-bg);
+  color: var(--search-text-color);
+  font-size: var(--font-size-sm);
+  outline: none;
+  box-shadow: none; /* Sin sombra por defecto */
+  transition: border-color var(--transition-speed) ease,
+    background-color var(--transition-speed) ease,
+    color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+.search-input::placeholder {
+  color: var(--search-placeholder-color);
+  opacity: 1;
+  transition: color var(--transition-speed) var(--transition-timing);
+}
+.search-input:focus {
+  border-color: var(--primary-accent-color);
+  /* Sin box-shadow en focus para un look más plano, o una sombra muy sutil */
+  /* box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1); */
+}
+
+/* Buscador Dark Mode */
+.sidebar.dark-mode .search-icon {
+  color: var(--sidebar-text-muted-dark) !important;
+}
+.sidebar.dark-mode .search-input {
+  background-color: var(--search-bg-dark) !important;
+  border-color: var(--search-border-color-dark) !important; /* Borde sutil */
+  color: var(--search-text-color-dark) !important;
+  box-shadow: none !important; /* Quitar sombra en dark mode */
+}
+.sidebar.dark-mode .search-input::placeholder {
+  color: var(--search-placeholder-color-dark) !important;
+}
+.sidebar.dark-mode .search-input:focus {
+  border-color: var(
+    --sidebar-text-muted-dark
+  ) !important; /* Borde gris claro al hacer focus en dark */
+  /* box-shadow: 0 0 0 2px rgba(150, 150, 150, 0.2); */
+}
+
+/* --- Toggle Button Flotante --- */
 .toggle-btn {
-  position: fixed; /* Fijado a la ventana gráfica */
+  position: fixed;
   top: var(--toggle-btn-v-offset);
-  /* 'left' se establece dinámicamente mediante el atributo style en JSX */
-  
   width: var(--toggle-btn-actual-width);
-  height: var(--toggle-btn-actual-width); /* Para un botón cuadrado/circular */
-  
-  background-color: var(--primary-accent-color); /* Azul acento */
-  color: #ffffff; /* Icono blanco para contraste */
-  
-  border: none;
-  border-radius: 50%; /* Botón completamente redondo */
-  
+  height: var(--toggle-btn-actual-width);
+  background-color: var(--sidebar-bg); /* Fondo blanco en tema claro */
+  color: var(--sidebar-text-color); /* Icono color texto normal */
+  border: 1px solid var(--sidebar-border-color); /* Borde sutil */
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  
   cursor: pointer;
-  z-index: 1005;      /* MUY IMPORTANTE: Mayor que el z-index del .sidebar */
-  
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0,0,0,0.05); /* Sombra sutil */
-  
-  font-size: 20px;    /* Tamaño del icono dentro del botón */
-  
-  /* Transición suave para la propiedad 'left' y otros efectos visuales */
-  transition: left var(--transition-speed) var(--transition-timing), 
-              background-color var(--transition-speed) var(--transition-timing),
-              transform var(--transition-speed) var(--transition-timing),
-              box-shadow var(--transition-speed) var(--transition-timing);
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Sombra más sutil */
+  font-size: 18px;
+  transition: left var(--transition-speed) var(--transition-timing),
+    background-color var(--transition-speed) var(--transition-timing),
+    color var(--transition-speed) var(--transition-timing),
+    border-color var(--transition-speed) var(--transition-timing),
+    /* Transición borde */ transform var(--transition-speed)
+      var(--transition-timing),
+    box-shadow var(--transition-speed) var(--transition-timing);
 }
-
 .toggle-btn:hover {
-  background-color: var(--primary-accent-color-darker); /* Azul un poco más oscuro */
-  transform: scale(1.08); /* Efecto de agrandar sutilmente */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.08);
+  background-color: var(--search-bg); /* Fondo gris muy claro en hover */
+  border-color: var(--search-border-color);
+  transform: scale(1.05);
 }
-
-.toggle-btn:active {
-  transform: scale(0.98); /* Efecto al presionar */
-  background-color: var(--primary-accent-color); /* Vuelve al color original o uno un poco más claro */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+/* Toggle button cuando el sidebar está en dark-mode */
+.sidebar.dark-mode ~ .toggle-btn {
+  background-color: var(--sidebar-bg-dark) !important; /* Fondo negro */
+  color: var(
+    --sidebar-text-color-dark
+  ) !important; /* Icono blanco/gris claro */
+  border-color: var(
+    --sidebar-border-color-dark
+  ) !important; /* Borde sutil oscuro */
 }
-
+.sidebar.dark-mode ~ .toggle-btn:hover {
+  background-color: var(
+    --item-bg-hover-dark
+  ) !important; /* Fondo hover oscuro */
+}
 
 /* --- Contenido y Lista Principal del Menú --- */
+/* (Estilos de .sidebar-content, .menu-list, títulos, ítems, etc. se mantienen como tu última versión, */
+/* asegurando que los !important estén en las propiedades clave del .sidebar.dark-mode ...) */
+/* ... (copia y pega aquí los estilos desde ".sidebar-content" hasta antes de ".sidebar-footer" de tu último CSS bueno) ... */
+/* Asegúrate de revisar que los !important estén donde deben para el dark mode */
+
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-s) 0;
+  overflow-x: hidden;
+  padding: var(--space-s) var(--space-s); /* Padding para los items */
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-accent-color-darker) transparent;
+  scrollbar-color: var(--scrollbar-thumb-color) var(--scrollbar-track-color);
 }
 .sidebar-content::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 .sidebar-content::-webkit-scrollbar-thumb {
-  background-color: var(--primary-accent-color-darker);
-  border-radius: 8px;
+  background-color: var(--scrollbar-thumb-color);
+  border-radius: 10px;
 }
-.sidebar-content::-webkit-scrollbar-track {
-  background: var(--sidebar-bg-subtle);
+.sidebar.dark-mode .sidebar-content {
+  scrollbar-color: var(--scrollbar-thumb-color-dark)
+    var(--scrollbar-track-color-dark) !important;
+}
+.sidebar.dark-mode .sidebar-content::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color-dark) !important;
 }
 
 .menu-list {
@@ -276,9 +341,7 @@
 
 /* --- Títulos de Sección --- */
 .menu-section-title-container {
-  display: flex;
-  align-items: center;
-  padding: var(--space-l) var(--space-m) var(--space-xs) var(--space-m);
+  padding: var(--space-l) var(--space-s) var(--space-xs) var(--space-s);
   opacity: 1;
   transition: opacity var(--transition-speed) ease,
     height var(--transition-speed) ease, padding var(--transition-speed) ease;
@@ -287,20 +350,12 @@
 }
 .menu-section-title-text {
   font-size: var(--font-size-xs);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--sidebar-text-muted);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   white-space: nowrap;
-  text-align: center;
-  padding: 0 var(--space-s);
-  flex-shrink: 0;
-}
-.sidebar:not(.collapsed) .menu-section-title-line {
-  flex-grow: 1;
-  height: 1px;
-  background-color: var(--sidebar-text-title-decoration);
-  opacity: 0.7;
+  transition: color var(--transition-speed) ease;
 }
 .sidebar.collapsed .menu-section-title-container {
   opacity: 0;
@@ -309,57 +364,105 @@
   padding-bottom: 0;
   overflow: hidden;
 }
+.sidebar.dark-mode .menu-section-title-text {
+  color: var(--sidebar-text-muted-dark) !important;
+}
 
-/* --- Ítems del Menú Principal (Sidebar Expandido y Dropdown) --- */
+/* --- Ítems del Menú Principal --- */
 .menu-item {
-  margin-bottom: 2px;
+  margin-bottom: var(--space-xs);
   position: relative;
-  padding-left: var(--space-m);
-  padding-right: var(--space-m);
 }
 .menu-item > a,
 .menu-item > .menu-header {
   display: flex;
   align-items: center;
-  padding: 10px var(--space-m);
+  padding: 10px var(--space-s);
   text-decoration: none;
   color: var(--sidebar-text-color);
   cursor: pointer;
+  border-radius: var(--border-radius-main);
+  font-weight: 500;
+  font-size: var(--font-size-base);
   transition: background-color var(--transition-speed) ease,
     color var(--transition-speed) ease;
-  border-radius: var(--border-radius-main);
-  position: relative;
-  overflow: hidden;
-  /* Eliminamos los márgenes negativos que compensaban, ya que el padding está en .menu-item */
+}
+.sidebar.collapsed .menu-item > a,
+.sidebar.collapsed .menu-item > .menu-header {
+  justify-content: center;
+  padding: var(--space-m) 0;
 }
 .menu-item > .menu-header {
   justify-content: space-between;
 }
 
+/* Claro: Hover y Active */
 .menu-item:hover > a,
 .menu-item:hover > .menu-header {
   color: var(--sidebar-text-color-hover);
-  background: #023047;
+  background: var(--item-bg-hover);
+}
+.menu-item.active > a,
+.menu-item.active > .menu-header {
+  color: var(--primary-accent-color);
+  background: var(--item-bg-active);
+  font-weight: 600;
+}
+.menu-item.active > a .menu-icon,
+.menu-item.active > .menu-header .menu-icon {
+  color: var(--primary-accent-color);
+}
+
+/* Oscuro: Base, Hover y Active */
+.sidebar.dark-mode .menu-item > a,
+.sidebar.dark-mode .menu-item > .menu-header {
+  color: var(--sidebar-text-color-dark) !important;
+}
+.sidebar.dark-mode .menu-item:hover > a,
+.sidebar.dark-mode .menu-item:hover > .menu-header {
+  color: var(--sidebar-text-color-hover-dark) !important;
+  background: var(--item-bg-hover-dark) !important;
+}
+.sidebar.dark-mode .menu-item.active > a,
+.sidebar.dark-mode .menu-item.active > .menu-header {
+  color: var(--primary-accent-color-dark-theme) !important; /* Texto blanco */
+  background: var(--item-bg-active-dark) !important; /* Fondo gris más claro */
+  font-weight: 600;
+}
+.sidebar.dark-mode .menu-item.active > a .menu-icon,
+.sidebar.dark-mode .menu-item.active > .menu-header .menu-icon {
+  color: var(--primary-accent-color-dark-theme) !important;
+}
+
+/* Iconos */
+.menu-icon {
+  margin-right: var(--space-m);
+  font-size: 18px;
+  width: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--sidebar-text-muted);
+  flex-shrink: 0;
+  transition: color var(--transition-speed) ease;
 }
 .menu-item:hover > a .menu-icon,
 .menu-item:hover > .menu-header .menu-icon {
   color: var(--primary-accent-color);
 }
-
-.menu-icon {
-  margin-right: var(--space-m);
-  font-size: 18px;
-  width: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: color var(--transition-speed) ease,
-    transform var(--transition-speed) ease;
-  color: var(--sidebar-text-muted);
-  flex-shrink: 0;
-  
+.sidebar.dark-mode .menu-icon {
+  color: var(--sidebar-text-muted-dark) !important;
 }
-/* Texto del menú principal (NO flyout) */
+.sidebar.dark-mode .menu-item:hover > a .menu-icon,
+.sidebar.dark-mode .menu-item:hover > .menu-header .menu-icon {
+  color: var(--sidebar-text-color-hover-dark) !important;
+}
+.sidebar.collapsed .menu-icon {
+  margin-right: 0;
+  font-size: 20px;
+}
+
+/* Texto y Flecha del Menú */
 .menu-item > a > .menu-text,
 .menu-item > .menu-header > .menu-text {
   flex-grow: 1;
@@ -367,51 +470,41 @@
   transition: opacity var(--transition-speed) ease,
     transform var(--transition-speed) ease;
   white-space: nowrap;
-  font-weight: 500;
-  font-size: 15px;
   letter-spacing: 0.1px;
   transform: translateX(0);
-  color: var(--sidebar-text-color); /* Asegurar color base */
+}
+.sidebar.collapsed .menu-text {
+  display: none !important;
 }
 .menu-arrow {
-  font-size: 15px;
-  transition: transform var(--transition-speed) ease,
-    opacity var(--transition-speed) ease;
-  opacity: 0.6;
+  font-size: 14px;
+  opacity: 0.7;
+  color: var(--sidebar-text-muted);
   margin-left: var(--space-xs);
   flex-shrink: 0;
+  transition: transform var(--transition-speed) ease,
+    opacity var(--transition-speed) ease, color var(--transition-speed) ease;
 }
 .menu-item:hover .menu-arrow {
   opacity: 1;
+  color: var(--primary-accent-color);
 }
-
-/* Ocultar texto y flecha en sidebar principal COLAPSADO */
-/* Este selector es MUY específico para el texto del menú principal */
-.sidebar.collapsed .menu-list > .menu-item > .menu-header > .menu-text,
-.sidebar.collapsed .menu-list > .menu-item > a > .menu-text,
-.sidebar.collapsed .menu-list > .menu-item .menu-arrow {
+.sidebar.dark-mode .menu-arrow {
+  color: var(--sidebar-text-muted-dark) !important;
+}
+.sidebar.dark-mode .menu-item:hover .menu-arrow {
+  color: var(--sidebar-text-color-hover-dark) !important;
+}
+.sidebar.collapsed .menu-arrow {
   display: none !important;
-  opacity: 0 !important;
-  width: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
 }
 
-.sidebar.collapsed .menu-item > a,
-.sidebar.collapsed .menu-item > .menu-header {
-  justify-content: center;
-  padding: var(--space-m) 0;
-}
-.sidebar.collapsed .menu-item .menu-icon {
-  margin-right: 0;
-  font-size: 20px;
-}
-
-/* --- Submenú Estilo Dropdown (Sidebar Expandido) --- */
+/* --- Submenú Dropdown --- */
 .submenu-dropdown {
   list-style: none;
-  padding: var(--space-xs) 0 var(--space-xs) calc(var(--space-s) * 1.5);
-  margin: 0 0 0 var(--space-m);
+  padding: var(--space-xs) 0 var(--space-xs)
+    calc(var(--space-s) + 22px + var(--space-xs));
+  margin: 0 var(--space-s) 0 0;
   max-height: 0;
   overflow: hidden;
   position: relative;
@@ -421,12 +514,17 @@
 .submenu-dropdown::before {
   content: "";
   position: absolute;
-  left: -6px;
-  top: 0;
-  bottom: 0;
+  left: calc(8px + var(--space-xs));
+  top: var(--space-xs);
+  bottom: var(--space-xs);
   width: 1px;
-  background-color: var(--border-color-soft);
-  opacity: 0.5;
+  background-color: var(--sidebar-border-color);
+  opacity: 0.8;
+  transition: background-color var(--transition-speed) ease;
+}
+.sidebar.dark-mode .submenu-dropdown::before {
+  background-color: var(--sidebar-border-color-dark) !important;
+  color: #f2f3f4;
 }
 .submenu-dropdown.open {
   max-height: 400px;
@@ -442,51 +540,76 @@
   display: flex;
   align-items: center;
   transition: all var(--transition-speed) ease;
+  font-weight: 400;
 }
 .submenu-dropdown li a .menu-icon {
   font-size: 16px;
   color: var(--sidebar-text-muted);
+  margin-right: var(--space-s);
+  width: 18px;
 }
-/* Texto en dropdown (no flyout) */
 .submenu-dropdown li a .menu-text {
-  font-size: 15px;
-  color: var(--sidebar-text-muted);
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  color: var(--sidebar-text-color);
 }
-.submenu-dropdown li a:hover,
-.submenu-dropdown li.active a {
+.submenu-dropdown li a:hover {
   color: var(--primary-accent-color);
   background: var(--item-bg-hover);
 }
+.submenu-dropdown li.active a {
+  color: var(--primary-accent-color);
+  background: var(--item-bg-active);
+  font-weight: 500;
+}
 .submenu-dropdown li a:hover .menu-icon,
-.submenu-dropdown li a:hover .menu-text,
 .submenu-dropdown li.active a .menu-icon,
+.submenu-dropdown li a:hover .menu-text,
 .submenu-dropdown li.active a .menu-text {
   color: var(--primary-accent-color);
 }
-.submenu-dropdown li.active a {
-  font-weight: 500;
+/* Dark Mode Dropdown */
+.sidebar.dark-mode .submenu-dropdown li a {
+  color: var(--sidebar-text-muted-dark) !important;
+}
+.sidebar.dark-mode .submenu-dropdown li a .menu-icon {
+  color: var(--sidebar-text-muted-dark) !important;
+}
+.sidebar.dark-mode .submenu-dropdown li a .menu-text {
+  color: var(--sidebar-text-color-dark) !important;
+}
+.sidebar.dark-mode .submenu-dropdown li a:hover {
+  color: var(--primary-accent-color-dark-theme) !important;
+  background: var(--item-bg-hover-dark) !important;
+}
+.sidebar.dark-mode .submenu-dropdown li.active a {
+  color: var(--primary-accent-color-dark-theme) !important;
+  background: var(--item-bg-active-dark) !important;
+}
+.sidebar.dark-mode .submenu-dropdown li a:hover .menu-icon,
+.sidebar.dark-mode .submenu-dropdown li.active a .menu-icon,
+.sidebar.dark-mode .submenu-dropdown li a:hover .menu-text,
+.sidebar.dark-mode .submenu-dropdown li.active a .menu-text {
+  color: var(--primary-accent-color-dark-theme) !important;
 }
 
-/* --- Submenú Estilo Flyout (Sidebar Colapsado) --- */
+/* --- Submenú Flyout --- */
 .submenu-flyout-panel {
   position: fixed;
-  top: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
   z-index: 1005;
   pointer-events: none;
   opacity: 0;
-  transform: translateX(-5px) scale(0.99);
-  transition: opacity calc(var(--transition-speed) * 0.9)
+  transform: translateX(-5px) scale(0.98);
+  transition: opacity calc(var(--transition-speed) * 0.8)
       var(--transition-timing),
-    transform calc(var(--transition-speed) * 0.9) var(--transition-timing);
+    transform calc(var(--transition-speed) * 0.8) var(--transition-timing);
   padding: var(--space-s);
-  background: var(--sidebar-bg-subtle);
+  background: var(--sidebar-bg);
   border-radius: var(--border-radius-large);
-  box-shadow: 0 4px 15px var(--shadow-medium);
-  border: 1px solid var(--border-color-soft);
+  box-shadow: var(--shadow-flyout);
+  border: 1px solid var(--sidebar-border-color);
   min-width: 200px;
   list-style: none;
   margin: 0;
@@ -496,12 +619,16 @@
   transform: translateX(0) scale(1);
   pointer-events: auto;
 }
-
+.sidebar.dark-mode .submenu-flyout-panel {
+  background: var(--sidebar-bg-dark) !important;
+  border-color: var(--sidebar-border-color-dark) !important;
+  box-shadow: var(--shadow-flyout-dark) !important;
+}
 .submenu-flyout-panel li {
   opacity: 0;
   transform: translateY(3px);
   animation: flyoutItemFadeInCompact var(--transition-speed) ease forwards;
-  animation-delay: calc(var(--item-index) * 0.04s + 0.04s);
+  animation-delay: calc(var(--item-index) * 0.03s + 0.03s);
 }
 @keyframes flyoutItemFadeInCompact {
   to {
@@ -509,127 +636,247 @@
     transform: translateY(0);
   }
 }
-
 .submenu-flyout-panel li a {
-  /* Contenedor <a> del ítem en flyout */
   display: flex;
   align-items: center;
   padding: 9px var(--space-m);
   background: transparent;
   border-radius: var(--border-radius-main);
-  /* color: var(--sidebar-text-color); Ya no es necesario aquí, se controla en hijos */
-  transition: background-color var(--transition-speed) ease;
+  transition: background-color var(--transition-speed) ease,
+    color var(--transition-speed) ease;
 }
-
 .submenu-flyout-panel li a .menu-icon {
-  /* Icono dentro del flyout */
   margin-right: var(--space-s);
   font-size: 16px;
-  color: var(--sidebar-text-muted); /* Color base del icono */
+  color: var(--sidebar-text-muted);
   flex-shrink: 0;
   transition: color var(--transition-speed) ease;
 }
-
-/* --- BLOQUE FUNCIONAL PARA TEXTO DEL FLYOUT (REMASTERIZADO) --- */
 .submenu-flyout-panel li a span.menu-text {
   display: inline-block !important;
   opacity: 1 !important;
   visibility: visible !important;
-  width: auto !important; /* Ajustar al contenido */
-  min-width: 10px !important; /* Evitar colapso total */
+  width: auto !important;
+  min-width: 10px !important;
   height: auto !important;
-  overflow: visible !important; /* Mostrar todo el texto */
-  transform: none !important; /* Sin transformaciones raras */
-  position: relative !important; /* O static, para flujo normal */
-  pointer-events: auto !important; /* Que el texto sea clickeable si forma parte del link */
-  z-index: 1 !important; /* Por si acaso, pero debería ser suficiente con position */
-
-  /* Propiedades de Estilo (Aplicando paleta profesional) */
-  font-size: var(--font-size-sm) !important; /* Tamaño definido */
-  font-weight: 500 !important; /* Peso legible, no bold por defecto */
-  color: var(--sidebar-text-color) !important; /* Texto base claro (#E0E0E0) */
-  white-space: nowrap !important; /* Evita saltos de línea no deseados */
-  flex-grow: 1; /* Si 'a' es flex, permite crecer */
-  margin-left: var(--space-s); /* Espacio del icono */
-  padding: 0 !important; /* Sin padding extra en el span mismo */
-  border: none !important; /* Sin borde en el span mismo */
-  background-color: transparent !important; /* Sin fondo en el span mismo */
+  overflow: visible !important;
+  transform: none !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  z-index: 1 !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: 500 !important;
+  color: var(--sidebar-text-color) !important;
+  white-space: nowrap !important;
+  flex-grow: 1;
+  padding: 0 !important;
+  border: none !important;
+  background-color: transparent !important;
   letter-spacing: 0.2px;
   transition: color var(--transition-speed) ease,
     font-weight var(--transition-speed) ease;
 }
 
-/* Hover para ítems del flyout */
+/* --- MODIFIED SECTION --- */
+.sidebar.collapsed .submenu-flyout-panel li a span.menu-text {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  width: auto !important;
+  min-width: 10px !important;
+  height: auto !important;
+  overflow: visible !important;
+  transform: none !important;
+  position: relative !important;
+  pointer-events: auto !important;
+  z-index: 1 !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: 500 !important;
+  color: var(--sidebar-text-color) !important; /* Base color (light mode) */
+  white-space: nowrap !important;
+  flex-grow: 1;
+  padding: 0 !important;
+  border: none !important;
+  background-color: transparent !important;
+  letter-spacing: 0.2px;
+  transition: color var(--transition-speed) ease,
+    font-weight var(--transition-speed) ease;
+}
+/* --- END OF MODIFIED SECTION --- */
 .submenu-flyout-panel li a:hover {
   background: var(--item-bg-hover);
+  color: var(--sidebar-text-color-hover);
 }
 .submenu-flyout-panel li a:hover span.menu-text {
-  /* Texto en hover */
-  color: var(--sidebar-text-color-hover) !important; /* Blanco */
+  color: var(--sidebar-text-color-hover) !important;
 }
 .submenu-flyout-panel li a:hover .menu-icon {
-  /* Icono en hover */
-  color: var(--primary-accent-color) !important; /* Azul */
+  color: var(--primary-accent-color) !important;
 }
-
-/* Estado Activo para ítems del flyout */
 .submenu-flyout-panel li.active a {
-  background: var(--item-bg-active); /* Fondo azulado sutil */
-}
-.submenu-flyout-panel li.active a span.menu-text {
-  /* Texto en activo */
-  color: var(--sidebar-text-color-hover) !important; /* BLANCO para contraste */
-  font-weight: 600 !important; /* Más destacado */
-}
-.submenu-flyout-panel li.active a .menu-icon {
-  /* Icono en activo */
-  color: var(--sidebar-text-color-hover) !important; /* BLANCO para contraste */
-}
-
-/* --- Estados Activos del Menú Principal (Sidebar) --- */
-.sidebar .menu-list > .menu-item.active > a,
-.sidebar .menu-list > .menu-item.active > .menu-header {
-  color: var(--sidebar-text-color-hover);
   background: var(--item-bg-active);
-}
-.sidebar .menu-list > .menu-item.active > a .menu-icon,
-.sidebar .menu-list > .menu-item.active > .menu-header .menu-icon {
   color: var(--primary-accent-color);
 }
-.sidebar:not(.collapsed) .menu-list > .menu-item.active > a::before,
-.sidebar:not(.collapsed) .menu-list > .menu-item.active > .menu-header::before {
+.submenu-flyout-panel li.active a span.menu-text {
+  color: var(--primary-accent-color) !important;
+  font-weight: 600 !important;
+}
+.submenu-flyout-panel li.active a .menu-icon {
+  color: var(--primary-accent-color) !important;
+}
+
+/* Flyout Dark Mode */
+.sidebar.dark-mode .submenu-flyout-panel li a {
+  color: var(--sidebar-text-color-dark) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li a .menu-icon {
+  color: var(--sidebar-text-muted-dark) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li a span.menu-text {
+  color: var(--sidebar-text-color-dark) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li a:hover {
+  background: var(--item-bg-hover-dark) !important;
+  color: var(--sidebar-text-color-hover-dark) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li a:hover span.menu-text {
+  color: var(--sidebar-text-color-hover-dark) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li a:hover .menu-icon {
+  color: var(--primary-accent-color-dark-theme) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li.active a {
+  background: var(--item-bg-active-dark) !important;
+  color: var(--primary-accent-color-dark-theme) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li.active a span.menu-text {
+  color: var(--primary-accent-color-dark-theme) !important;
+}
+.sidebar.dark-mode .submenu-flyout-panel li.active a .menu-icon {
+  color: var(--primary-accent-color-dark-theme) !important;
+}
+
+/* Ítem activo colapsado */
+.sidebar.collapsed .menu-list > .menu-item.active > a,
+.sidebar.collapsed .menu-list > .menu-item.active > .menu-header {
+  background: var(--primary-accent-color) !important;
+}
+.sidebar.collapsed .menu-list > .menu-item.active > a .menu-icon,
+.sidebar.collapsed .menu-list > .menu-item.active > .menu-header .menu-icon {
+  color: var(--sidebar-bg) !important;
+}
+.sidebar.dark-mode.collapsed .menu-list > .menu-item.active > a,
+.sidebar.dark-mode.collapsed .menu-list > .menu-item.active > .menu-header {
+  background: var(
+    --primary-accent-color-dark-theme
+  ) !important; /* Blanco o gris claro en dark */
+}
+.sidebar.dark-mode.collapsed .menu-list > .menu-item.active > a .menu-icon,
+.sidebar.dark-mode.collapsed
+  .menu-list
+  > .menu-item.active
+  > .menu-header
+  .menu-icon {
+  color: var(--sidebar-bg-dark) !important; /* Icono negro */
+}
+
+/* --- Línea Decorativa para Ítems Activos (IZQUIERDA) --- */
+
+/* 1. Para Ítems Principales (sean enlaces directos o headers de submenú) ACTIVOS */
+.sidebar:not(.collapsed) .menu-item.active > a::before {
   content: "";
   position: absolute;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
-  height: 60%;
-  background-color: var(--primary-accent-color);
-  border-radius: 0 2px 2px 0;
+  height: 22px; /* Altura para ítems principales y headers */
+  background-color: var(--primary-accent-color); /* Color CLARO por defecto */
+  border-radius: 0 3px 3px 0;
+  transition: background-color var(--transition-speed) ease;
 }
-.sidebar.collapsed .menu-list > .menu-item.active > a,
-.sidebar.collapsed .menu-list > .menu-item.active > .menu-header {
-  background: var(--primary-accent-color);
-}
-.sidebar.collapsed .menu-list > .menu-item.active > a .menu-icon,
-.sidebar.collapsed .menu-list > .menu-item.active > .menu-header .menu-icon {
-  color: var(--sidebar-bg);
+.sidebar.dark-mode:not(.collapsed) .menu-item.active > a::before,
+.sidebar.dark-mode:not(.collapsed) .menu-item.active > .menu-header::before {
+  background-color: var(--primary-accent-color-dark-theme); /* Color OSCURO */
 }
 
-/* --- Diseño Responsivo --- */
+/* 3. Para Subítems de flyout (sidebar colapsado) que ESTÁN ACTIVOS */
+/* Nota: El flyout solo se muestra cuando el sidebar está colapsado. */
+/* No tiene sentido aplicar esta línea a un padre en modo flyout */
+.sidebar.collapsed .submenu-flyout-panel li.active a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px; /* Altura para subítems */
+  background-color: var(--primary-accent-color); /* Color CLARO por defecto */
+  border-radius: 0 3px 3px 0;
+  transition: background-color var(--transition-speed) ease;
+}
+.sidebar.dark-mode.collapsed .submenu-flyout-panel li.active a::before {
+  background-color: var(--primary-accent-color-dark-theme); /* Color OSCURO */
+}
+
+/* --- Sidebar Footer (Theme Toggle) --- */
+.sidebar-footer {
+  padding: var(--space-l) var(--space-s);
+  border-top: 1px solid var(--sidebar-border-color);
+  margin-top: auto;
+  background: inherit;
+  transition: border-color var(--transition-speed) var(--transition-timing);
+}
+.sidebar.dark-mode .sidebar-footer {
+  border-top-color: var(--sidebar-border-color-dark) !important;
+}
+.theme-toggle-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-s);
+  background-color: transparent;
+  border: none;
+  color: var(--sidebar-text-muted);
+  border-radius: var(--border-radius-main);
+  cursor: pointer;
+  font-size: 18px;
+  transition: color var(--transition-speed) ease,
+    background-color var(--transition-speed) ease;
+}
+.sidebar.collapsed .theme-toggle-button {
+  justify-content: center;
+}
+.theme-toggle-button:hover {
+  color: var(--sidebar-text-color-hover);
+  background-color: var(--item-bg-hover);
+}
+.theme-toggle-text {
+  margin-left: var(--space-m);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sidebar.collapsed .theme-toggle-text {
+  display: none;
+}
+.sidebar.dark-mode .theme-toggle-button {
+  color: var(--sidebar-text-muted-dark) !important;
+}
+.sidebar.dark-mode .theme-toggle-button:hover {
+  color: var(--sidebar-text-color-hover-dark) !important;
+  background-color: var(--item-bg-hover-dark) !important;
+}
+
+/* --- Responsive --- */
 @media (max-width: 768px) {
-  .sidebar {
-    width: var(--sidebar-width-collapsed);
-    border-right: none;
+  .sidebar:not(.collapsed) .sidebar-header {
+    /* Mantener altura con buscador si está expandido en móvil */
+    min-height: var(--header-min-height-with-search);
   }
-  .sidebar.collapsed .logo-text,
-  .sidebar.collapsed .menu-list > .menu-item .menu-text, /* Texto principal oculto */
-  .sidebar.collapsed .menu-list > .menu-item .menu-arrow,
-  .sidebar.collapsed .menu-section-title-container {
-    display: none !important;
-  }
-  .sidebar-header {
-    padding: var(--space-m) var(--space-s);
+  .sidebar.collapsed .sidebar-header {
+    /* Ajuste para centrar logo en móvil colapsado */
+    min-height: var(--header-min-height);
+    padding: var(--header-padding-v) 0; /* Solo padding vertical para centrar bien */
   }
 }

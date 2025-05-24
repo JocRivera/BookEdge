@@ -150,27 +150,21 @@ const Profile = ({ onClose, isOpen }) => {
     }
 
     try {
-      const dataToSubmit = { ...formData }; // Solo los datos del formulario
-      // El ID ya está en formData si se cargó del user. La API lo manejará.
+      const dataToSubmit = { ...formData };
+      const updatedUserResponse = await updateProfile(dataToSubmit); // Esta es tu función de AuthService.jsx
 
-      const updatedUserResponse = await updateProfile(dataToSubmit);
-
-      if (setUser) {
-        // La API debe devolver el usuario completo y actualizado
-        // o al menos los campos actualizados.
-        // Fusionamos lo que se envió con lo que vino del backend (que es la fuente de verdad)
-        // y con el estado previo del usuario para no perder campos que no se editan aquí.
-        setUser((prevUser) => ({
-          ...prevUser,
-          ...dataToSubmit,
-          ...updatedUserResponse,
-        }));
+      // ---- CAMBIO CRUCIAL AQUÍ ----
+      if (setUser && updatedUserResponse) { // Asegúrate que updatedUserResponse no sea undefined o null
+        // Asumimos que updatedUserResponse ES el objeto usuario COMPLETO y ACTUALIZADO
+        // devuelto por tu backend, incluyendo 'idUser', 'name', 'email', 'role' (con 'permissionRoles' DENTRO de 'role').
+        console.log("Actualizando usuario en AuthContext con:", updatedUserResponse);
+        setUser(updatedUserResponse); // <--- Usa directamente la respuesta del backend
       }
+      // ---- FIN DEL CAMBIO ----
 
       setSuccess("Perfil actualizado con éxito.");
       setIsEditing(false);
       toast.success("¡Perfil actualizado!");
-      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error("Error al actualizar:", error);
       if (error.response && error.response.data && error.response.data.errors) {
