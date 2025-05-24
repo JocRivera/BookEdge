@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { FaCreditCard, FaMoneyBillWave, FaCalendarAlt, FaCheckCircle, FaExchangeAlt, FaEye } from 'react-icons/fa';
 import './componentPayments.css';
 
-const PaymentForm = ({ 
-  totalAmount, 
-  onPaymentSubmit, 
-  initialData = {}, 
-  isViewMode = false, 
-  onCloseView = null 
+const PaymentForm = ({
+  totalAmount,
+  onPaymentSubmit,
+  initialData = {},
+  isViewMode = false,
+  onCloseView = null
 }) => {
   const [paymentData, setPaymentData] = useState({
     paymentMethod: initialData.paymentMethod || '',
@@ -23,7 +23,7 @@ const PaymentForm = ({
 
   const handleChange = (e) => {
     if (isViewMode) return; // No permitir cambios en modo visualización
-    
+
     const { name, value } = e.target;
     setPaymentData(prev => ({
       ...prev,
@@ -40,8 +40,8 @@ const PaymentForm = ({
   };
 
   const handleFileChange = (e) => {
-    if (isViewMode) return; 
-    
+    if (isViewMode) return;
+
     const file = e.target.files[0];
     if (file) {
       setPaymentData(prev => ({ ...prev, voucher: file }));
@@ -53,7 +53,7 @@ const PaymentForm = ({
       onCloseView?.();
       return;
     }
-    
+
     e.preventDefault();
     const validationErrors = validateForm();
 
@@ -82,7 +82,7 @@ const PaymentForm = ({
 
   const validateForm = () => {
     if (isViewMode) return {}; // No validar en modo visualización
-    
+
     const errors = {};
     const today = new Date().toISOString().split('T')[0];
 
@@ -97,12 +97,12 @@ const PaymentForm = ({
     }
 
     if (!paymentData.amount || isNaN(parseFloat(paymentData.amount))) {
-      errors.amount = 'Monto es requerido';
-    } else if (parseFloat(paymentData.amount) <= 0) {
-      errors.amount = 'El monto debe ser mayor a 0';
-    } else if (parseFloat(paymentData.amount) > parseFloat(totalAmount || 0)) {
-      errors.amount = 'El monto no puede ser mayor al total a pagar';
-    }
+  errors.amount = 'Monto es requerido';
+} else if (parseFloat(paymentData.amount) < 1000) { // Mínimo $1,000 COP
+  errors.amount = 'El monto mínimo es $1,000 COP';
+} else if (parseFloat(paymentData.amount) > parseFloat(totalAmount || 0)) {
+  errors.amount = 'El monto no puede ser mayor al total a pagar';
+}
 
     return errors;
   };
@@ -120,6 +120,14 @@ const PaymentForm = ({
         return <FaCreditCard className="input-icon" />;
     }
   };
+  const formatCOP = (value) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value || 0);
+  };
 
   return (
     <div className={`payment-form-container ${isViewMode ? 'view-mode' : ''}`}>
@@ -131,7 +139,7 @@ const PaymentForm = ({
         <div className="payment-summary">
           <div className="payment-total">
             <span>Total a Pagar:</span>
-            <strong>${(totalAmount || 0).toFixed(2)}</strong>
+            <strong>{formatCOP(totalAmount)}</strong>
           </div>
         </div>
 
@@ -190,8 +198,7 @@ const PaymentForm = ({
           </label>
           {isViewMode ? (
             <div className="view-mode-value">
-              ${parseFloat(paymentData.amount || 0).toFixed(2)}
-            </div>
+              {formatCOP(parseFloat(paymentData.amount || 0))}            </div>
           ) : (
             <input
               type="number"
@@ -199,8 +206,8 @@ const PaymentForm = ({
               name="amount"
               value={paymentData.amount}
               onChange={handleChange}
-              min="0.01"
-              step="0.01"
+              min="1000" // Mínimo $1,000 COP
+              step="1000" // Incrementos de $1,000 COP
               disabled={isViewMode}
             />
           )}
@@ -251,7 +258,7 @@ const PaymentForm = ({
           </label>
           {isViewMode ? (
             paymentData.voucher ? (
-              <a 
+              <a
                 href={typeof paymentData.voucher === 'string' ? paymentData.voucher : URL.createObjectURL(paymentData.voucher)}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -299,8 +306,8 @@ PaymentForm.propTypes = {
   totalAmount: PropTypes.number.isRequired,
   onPaymentSubmit: PropTypes.func.isRequired,
   initialData: PropTypes.object,
-  isViewMode: PropTypes.bool, 
-  onCloseView: PropTypes.func 
+  isViewMode: PropTypes.bool,
+  onCloseView: PropTypes.func
 };
 
 export default PaymentForm;

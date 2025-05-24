@@ -1,508 +1,412 @@
+"use client"
+
 import { useState, useEffect } from "react"
+import Switch from "../../common/Switch/Switch"
 import PropTypes from "prop-types"
 import "./componentsReservations.css"
-import CompanionsForm from "../componentCompanions/formCompanions"
-import PaymentForm from "../componentPayments/formPayments"
-import TableCompanions from "../componentCompanions/tableCompanions"
 
-import {
-  createReservation,
-  getAllPlanes,
-  getUsers,
-  updateReservation,
-  getReservationById,
-  addCompanionReservation,
-  getCabins
-} from "../../../services/reservationsService"
+// Hooks y utilidades
+import useReservationForm from "./reservationHooks"
+import { calculateTotal, updateAvailability, createSelectionHandlers, sanitizeDataForServer } from "./reservationUtils"
+
+// Componentes de pasos
+import { BasicInfoStep, CompanionsStep, AvailabilityStep, PaymentStep } from "./reservationSteps"
+
+// Servicios
+import { createReservation, updateReservation, addCompanionReservation } from "../../../services/reservationsService"
 import { createCompanion, deleteCompanion } from "../../../services/companionsService"
-import {
-  addPaymentToReservation,
-  getReservationPayments,
-} from "../../../services/paymentsService";
+import { addPaymentToReservation } from "../../../services/paymentsService"
 
 function FormReservation({ reservationData = null, onClose, onSave, isOpen, isReadOnly = false }) {
   const [step, setStep] = useState(1)
-  const [formData, setFormData] = useState({
-    idUser: "",
-    idPlan: "",
-    startDate: "",
-    endDate: "",
-    hasCompanions: false,
-    companionCount: 0,
-    companions: [],
-    status: "Reservado",
-    total: 0,
-    paymentMethod: "Efectivo",
-    idcabins: "",
-    availableCabins: [],
-    idCabin: null
-  })
-  const [errors, setErrors] = useState({})
-  const [planes, setPlanes] = useState([])
-  const [users, setUsers] = useState([])
-  const [cabins, setCabins] = useState([])
-
+  const [tempPayments, setTempPayments] = useState([])
   const [loading, setLoading] = useState(false)
-  const [tempPayments, setTempPayments] = useState([]);
-  const [reservationPayments, setReservationPayments] = useState([]);
+  const [reservationPayments, setReservationPayments] = useState([])
 
+  // ✅ CORREGIDO - Usar el hook correctamente
+  const { formData, updateFormData, errors, validateStep } = useReservationForm()
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchInitialData = async () => {
-      if (!isOpen || !isMounted) return;
-
-      try {
-        setLoading(true);
-        console.log("Iniciando carga de datos iniciales...");
-
-        // 1. Cargar todos los datos necesarios
-        const [planesData, usersData, cabinsData] = await Promise.all([
-          getAllPlanes(),
-          getUsers(),
-          getCabins()
-        ]);
-        setPlanes(planesData);
-        setUsers(usersData);
-        setCabins(cabinsData);
-
-        if (!isMounted) return;
-
-        // 2. Calcular disponibilidad
-        const companionCount = reservationData?.companions?.length || 0;
-        const requiredCapacity = companionCount + 1;
-
-        const availableCabins = cabinsData.filter(cabin =>
-          String(cabin.status).toLowerCase() === 'en servicio' &&
-          Number(cabin.capacity) >= requiredCapacity
-        );
-
-        console.log("Datos de cabañas:", {
-          todas: cabinsData,
-          disponibles: availableCabins,
-          capacidadRequerida: requiredCapacity,
-          estadoRequerido: "en servicio"
-        });
-
-        // 3. Manejo de reserva existente
-        let freshData = reservationData;
-        let reservationPaymentsData = [];
-
-        if (reservationData?.idReservation) {
-          try {
-            // Obtener datos actualizados de la reserva
-            freshData = await getReservationById(reservationData.idReservation) || reservationData;
-            console.log("Datos actualizados de la reserva:", freshData);
-
-            // Cargar pagos existentes
-            const payments = await getReservationPayments(reservationData.idReservation);
-            reservationPaymentsData = Array.isArray(payments?.data) ? payments.data :
-              (Array.isArray(payments)) ? payments : [];
-            reservationPaymentsData = reservationPaymentsData.filter(p => p?.id && p?.amount);
-          } catch (error) {
-            console.error("Error cargando datos de reserva:", error);
-          }
-        }
-
-        // 4. Preparar el estado final
-        if (!isMounted) return;
-
-        const baseFormData = {
-          // Datos principales
-          idUser: "",
-          idPlan: "",
-          idCabin: "",
-          startDate: "",
-          endDate: "",
-          hasCompanions: false,
-          companionCount: 0,
-          companions: [],
-          status: "Reservado",
-          total: 0,
-          paymentMethod: "Efectivo",
-
-          // Datos cargados
-          planes: planesData,
-          users: usersData,
-          cabins: cabinsData,
-          availableCabins: availableCabins, // Siempre definido
-        };
-
-        if (freshData) {
-          const companions = Array.isArray(freshData.companions) ? freshData.companions : [];
-          setFormData({
-            ...baseFormData,
-            idUser: freshData.idUser ? Number(freshData.idUser) : "",
-            idPlan: freshData.idPlan ? Number(freshData.idPlan) : "",
-            idCabin: freshData.idCabin ? Number(freshData.idCabin) : "",
-            startDate: freshData.startDate || "",
-            endDate: freshData.endDate || "",
-            hasCompanions: companions.length > 0,
-            companionCount: companions.length,
-            companions: companions,
-            status: freshData.status || "Reservado",
-            total: freshData.total || 0,
-            paymentMethod: freshData.paymentMethod || "Efectivo",
-          });
-        } else {
-          // Nueva reserva
-          setFormData(baseFormData);
-        }
-
-        setReservationPayments(reservationPaymentsData);
-        setTempPayments([]);
-
-      } catch (error) {
-        console.error("Error crítico en fetchInitialData:", error);
-        if (isMounted) {
-          setFormData(prev => ({
-            ...prev,
-            availableCabins: [] // Asegurar array vacío en caso de error
-          }));
-          alert(`Error al cargar datos: ${error.message}`);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-          console.log("Finalizada carga de datos iniciales");
-        }
-      }
-    };
-
-    fetchInitialData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isOpen, reservationData]);
-
-
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-
-    if (name === "hasCompanions") {
-      setFormData((prev) => ({
-        ...prev,
-        hasCompanions: checked,
-        companionCount: checked ? prev.companionCount || 1 : 0,
-        companions: checked ? prev.companions : [],
-      }))
-    } else if (name === "companionCount" && formData.hasCompanions) {
-      const count = Math.max(0, parseInt(value) || 0)
-      setFormData((prev) => ({
-        ...prev,
-        [name]: count,
-        // No recortamos los companions aquí para evitar pérdida de datos
-      }))
+  // ✅ Crear setFormData como wrapper de updateFormData
+  const setFormData = (newData) => {
+    if (typeof newData === "function") {
+      // Si es una función, obtener el estado actual y aplicar la función
+      updateFormData(newData(formData))
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      }))
+      // Si es un objeto, actualizar directamente
+      updateFormData(newData)
     }
+  }
 
-    if (errors[name]) {
-      setErrors((prev) => {
-        const updatedErrors = { ...prev }
-        delete updatedErrors[name]
-        return updatedErrors
+  // Función para limpiar errores
+  const clearError = (fieldName) => {
+    // Implementar lógica para limpiar errores específicos si es necesario
+    console.log(`Clearing error for field: ${fieldName}`)
+  }
+
+  // Handlers
+  const handleChange = async (e) => {
+    const { name, value } = e.target
+
+    console.log("📝 HandleChange ejecutado:", { name, value })
+
+    // Actualización inmediata del estado
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value }
+      console.log("📝 Nuevo estado después del cambio:", {
+        field: name,
+        oldValue: prev[name],
+        newValue: value,
+        selectedServices: newData.selectedServices,
+        idRoom: newData.idRoom,
+        idCabin: newData.idCabin,
       })
+      return newData
+    })
+    clearError(name)
+
+    // Validación especial para el campo de acompañantes
+    if (name === "companionCount") {
+      const companionCount = Number.parseInt(value) || 0
+      console.log("👥 Procesando cambio en companionCount:", companionCount)
+
+      if (formData.hasCompanions && companionCount > 0 && formData.cabins && formData.bedrooms) {
+        // Pequeño delay para permitir que el estado se actualice
+        setTimeout(() => {
+          console.log("⏰ Ejecutando actualización de disponibilidad después del delay")
+          const updatedData = updateAvailability({
+            ...formData,
+            companionCount: companionCount,
+          })
+
+          // Determinar el mensaje de disponibilidad
+          let message = ""
+          if (companionCount > 1) {
+            const availableCabins = updatedData.availableCabins.length
+            message =
+              availableCabins > 0
+                ? `✅ Hay ${availableCabins} cabañas disponibles para ${companionCount + 1} personas`
+                : `❌ No hay cabañas disponibles para ${companionCount + 1} personas`
+          } else {
+            const availableRooms = updatedData.availableBedrooms.length
+            message =
+              availableRooms > 0
+                ? `✅ Hay ${availableRooms} habitaciones disponibles`
+                : `❌ No hay habitaciones disponibles`
+          }
+
+          console.log("💬 Mensaje de disponibilidad:", message)
+
+          // Mostrar notificación (puedes usar tu sistema de notificaciones preferido)
+          Switch({
+            show: true,
+            message: message,
+            type: message.includes("✅") ? "success" : "error",
+          })
+        }, 100)
+      }
     }
   }
 
-  const validateStep = (step) => {
-    const newErrors = {}
-    const today = new Date().toISOString().split("T")[0]
-
-    if (step === 1) {
-      if (!formData.idUser) newErrors.idUser = "Cliente es requerido"
-      if (!formData.idPlan) newErrors.idPlan = "Plan es requerido"
-      if (!formData.startDate) newErrors.startDate = "Fecha de entrada es requerida"
-      if (!formData.endDate) newErrors.endDate = "Fecha de salida es requerida"
-      if (formData.startDate && formData.startDate < today) {
-        newErrors.startDate = "La fecha de inicio no puede ser en el pasado"
-      }
-
-      if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
-        newErrors.endDate = "La fecha de salida debe ser posterior a la de entrada"
-      }
-      const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"]
-      if (formData.status && !validStatuses.includes(formData.status)) {
-        newErrors.status = `Estado no válido. Use uno de: ${validStatuses.join(", ")}`
-      }
-
-      if (formData.hasCompanions && (!formData.companionCount || formData.companionCount <= 0)) {
-        newErrors.companionCount = "Debe especificar al menos 1 acompañante"
-      }
-    } else if (step === 2 && formData.hasCompanions) {
-      if (formData.companions.length === 0) {
-        newErrors.companions = "Debe agregar al menos un acompañante"
-      } else if (formData.companions.length !== formData.companionCount) {
-        newErrors.companions = `Debe agregar ${formData.companionCount} acompañantes (actualmente: ${formData.companions.length})`
-      }
-      if (step === (formData.hasCompanions ? 3 : 2)) {
-        if (!formData.idCabin) {
-          newErrors.idCabin = "Debe seleccionar una cabaña";
-        }
-      }
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  const { handleCabinSelect, handleRoomSelect, handleServiceToggle } = createSelectionHandlers(setFormData)
 
   const nextStep = () => {
-    console.log("Intentando avanzar al paso:", step + 1);
-    const isValid = validateStep(step);
-    console.log("Validación del paso actual:", isValid);
+    console.log("➡️ Intentando avanzar al siguiente paso. Paso actual:", step)
+    const isValid = validateStep(step, formData)
+    console.log("✅ Validación del paso:", isValid)
 
     if (isValid) {
       if (step === 1 && !formData.hasCompanions) {
-        console.log("Saltando directamente al paso 3 (pagos)");
-        setStep(3);
+        console.log("⏭️ Saltando paso de acompañantes (no hay acompañantes)")
+        setStep(3) // Saltar al paso de disponibilidad
       } else {
-        console.log("Avanzando al siguiente paso normal");
-        setStep(step + 1);
+        console.log("➡️ Avanzando al paso:", step + 1)
+        setStep(step + 1)
       }
     } else {
-      console.log("Validación fallida, errores:", errors);
+      console.log("❌ Validación falló, no se puede avanzar")
     }
-  };
+  }
 
   const prevStep = () => {
+    console.log("⬅️ Retrocediendo desde el paso:", step)
     if (step === 4 && !formData.hasCompanions) {
-      // Si estamos en pagos (paso 4) y no hay acompañantes, volver al paso 1
       setStep(1)
     } else if (step === 3 && !formData.hasCompanions) {
-      // Si estamos en disponibilidad (paso 3) y no hay acompañantes, volver al paso 1
       setStep(1)
     } else {
       setStep(step - 1)
     }
   }
 
-  const calculateTotal = () => {
-    const selectedPlan = planes.find((p) => p.idPlan === Number(formData.idPlan))
-    if (!selectedPlan) return 0
+  const handleSaveCompanion = (newCompanion) => {
+    console.log("👤 Guardando nuevo acompañante:", newCompanion)
 
-    // Usar precio de venta si está disponible, si no usar precio regular
-    const basePrice = selectedPlan.price || selectedPlan.salePrice || selectedPlan.precio || 0
-    const companionFee = 150  // Tarifa por acompañante
-    return basePrice + formData.companions.length * companionFee
+    // forma funcional para garantizar la actualización correcta
+    setFormData((prev) => {
+      const updatedCompanions = [...(prev.companions || []), newCompanion]
+      console.log("👥 Acompañantes actualizados:", {
+        antes: prev.companions?.length || 0,
+        después: updatedCompanions.length,
+        nuevo: newCompanion,
+      })
+
+      return {
+        ...prev,
+        companions: updatedCompanions,
+        companionCount: updatedCompanions.length, // Mantener sincronizado
+      }
+    })
+
+    // Verificación después de actualizar el estado
+    setTimeout(() => {
+      console.log("✅ Verificación post-guardado de acompañante completada")
+    }, 0)
+  }
+
+  const handleDeleteCompanion = (idOrDocNumber) => {
+    if (isReadOnly || loading) return
+
+    console.log("🗑️ Eliminando acompañante:", idOrDocNumber)
+
+    setFormData((prev) => {
+      const filteredCompanions = (prev.companions || []).filter(
+        (c) => c.idCompanions !== idOrDocNumber && c.documentNumber !== idOrDocNumber,
+      )
+
+      console.log("👥 Acompañantes después de eliminar:", {
+        antes: prev.companions?.length || 0,
+        después: filteredCompanions.length,
+        eliminado: idOrDocNumber,
+      })
+
+      return {
+        ...prev,
+        companions: filteredCompanions,
+      }
+    })
+  }
+
+  const handleAddPayment = async (paymentData) => {
+    try {
+      setLoading(true)
+      console.log("💳 Agregando pago:", paymentData)
+
+      if (!paymentData.amount || isNaN(Number.parseFloat(paymentData.amount))) {
+        throw new Error("El monto del pago no es válido")
+      }
+
+      const amount = Number.parseFloat(paymentData.amount)
+      if (amount <= 0) {
+        throw new Error("El monto debe ser mayor que cero")
+      }
+
+      const newPayment = {
+        ...paymentData,
+        amount: amount,
+        status: paymentData.status || "Pendiente",
+        paymentDate: paymentData.paymentDate || new Date().toISOString().split("T")[0],
+        paymentMethod: paymentData.paymentMethod || "Efectivo",
+      }
+
+      console.log("💳 Pago preparado:", newPayment)
+
+      if (reservationData?.idReservation) {
+        console.log("💾 Guardando pago en reserva existente:", reservationData.idReservation)
+        const savedPayment = await addPaymentToReservation({
+          ...newPayment,
+          idReservation: reservationData.idReservation,
+        })
+        console.log("✅ Pago guardado:", savedPayment)
+        setReservationPayments((prev) => [...prev, savedPayment])
+        return savedPayment
+      } else {
+        console.log("📝 Agregando pago temporal (reserva nueva)")
+        const tempPayment = {
+          ...newPayment,
+          tempId: `temp-${Date.now()}`,
+          isTemp: true,
+        }
+        console.log("📝 Pago temporal creado:", tempPayment)
+        setTempPayments((prev) => [...prev, tempPayment])
+        return tempPayment
+      }
+    } catch (error) {
+      console.error("❌ Error al agregar pago:", error)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSaveCompanionInReservation = async (companionData, reservationId) => {
+    try {
+      console.log("👤 Guardando acompañante en reserva:", { companionData, reservationId })
+
+      if (!reservationId) {
+        throw new Error("No se puede agregar acompañante sin ID de reserva")
+      }
+
+      const companionResponse = await createCompanion(companionData)
+      console.log("👤 Respuesta de creación de acompañante:", companionResponse)
+
+      if (!companionResponse?.idCompanions) {
+        throw new Error("El servidor no devolvió un ID válido para el acompañante")
+      }
+
+      try {
+        console.log("🔗 Asociando acompañante a reserva...")
+        await addCompanionReservation(reservationId, { idCompanions: companionResponse.idCompanions })
+        console.log("✅ Acompañante asociado exitosamente")
+      } catch (Error) {
+        console.error("❌ Error al asociar, eliminando acompañante creado...")
+        await deleteCompanion(companionResponse.idCompanions).catch(() => {})
+        throw new Error("Error al asociar acompañante a la reserva")
+      }
+
+      const savedCompanion = {
+        ...companionData,
+        idCompanions: companionResponse.idCompanions,
+      }
+
+      console.log("✅ Acompañante guardado completamente:", savedCompanion)
+
+      setFormData((prev) => ({
+        ...prev,
+        companions: (prev.companions || []).map((c) =>
+          c.documentNumber === companionData.documentNumber ? savedCompanion : c,
+        ),
+      }))
+
+      return savedCompanion
+    } catch (error) {
+      console.error("❌ Error completo en handleSaveCompanionInReservation:", error)
+      throw error
+    }
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("ugyuguygugu")
+    e.preventDefault()
 
-    if (!validateStep(3)) {
-      return;
+    console.log("🚀 Iniciando proceso de guardado de reserva")
+    console.log("📋 Estado actual del formulario:", {
+      step,
+      formData: {
+        idUser: formData.idUser,
+        idPlan: formData.idPlan,
+        idCabin: formData.idCabin,
+        idRoom: formData.idRoom,
+        selectedServices: formData.selectedServices,
+        companions: formData.companions?.length,
+        hasCompanions: formData.hasCompanions,
+      },
+    })
+
+    if (!validateStep(3, formData)) {
+      console.log("❌ Validación del paso 3 falló")
+      return
     }
 
     try {
-      setLoading(true);
+      setLoading(true)
 
-      // Preparar payload
-      const payload = {
-        idUser: Number(formData.idUser),
-        idPlan: Number(formData.idPlan),
-        idCabin: Number(formData.idCabin),
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        status: formData.status || "Reservado",
-        total: calculateTotal(),
-        paymentMethod: formData.paymentMethod || "Efectivo",
-      };
+      // Usar la función de sanitización mejorada
+      const payload = sanitizeDataForServer(formData)
 
-      // Guardar la reserva
-      let resultado;
+      console.log("📦 Payload final para enviar:", payload)
+
+      let resultado
       if (reservationData?.idReservation) {
-        resultado = await updateReservation(reservationData.idReservation, payload);
+        console.log("✏️ Actualizando reserva existente:", reservationData.idReservation)
+        resultado = await updateReservation(reservationData.idReservation, payload)
       } else {
-        resultado = await createReservation(payload);
+        console.log("➕ Creando nueva reserva")
+        resultado = await createReservation(payload)
       }
 
+      console.log("✅ Resultado de la operación de reserva:", resultado)
+
       if (!resultado?.idReservation) {
-        throw new Error("No se recibió un ID de reserva válido del servidor");
+        throw new Error("No se recibió un ID de reserva válido del servidor")
       }
 
       // Guardar acompañantes si existen
-      if (formData.hasCompanions && formData.companions.length > 0) {
+      if (formData.hasCompanions && formData.companions && formData.companions.length > 0) {
+        console.log("👥 Procesando acompañantes...")
         for (const companion of formData.companions) {
           if (!companion.idCompanions) {
-            await handleSaveCompanionInReservation(companion, resultado.idReservation);
+            console.log("👤 Guardando acompañante sin ID:", companion)
+            await handleSaveCompanionInReservation(companion, resultado.idReservation)
+          } else {
+            console.log("👤 Acompañante ya tiene ID, saltando:", companion.idCompanions)
           }
         }
+        console.log("✅ Todos los acompañantes procesados")
       }
 
       // Guardar pagos temporales si existen
       if (tempPayments.length > 0) {
+        console.log("💳 Procesando pagos temporales:", tempPayments.length)
         const paymentResults = await Promise.allSettled(
-          tempPayments.map(payment =>
-            addPaymentToReservation({
+          tempPayments.map((payment) => {
+            console.log("💳 Guardando pago temporal:", payment)
+            return addPaymentToReservation({
               ...payment,
-              idReservation: resultado.idReservation
+              idReservation: resultado.idReservation,
             })
-          )
-        );
-
-        // Manejar resultados de los pagos
-        paymentResults.forEach((result, index) => {
-          if (result.status === 'rejected') {
-            console.error(`Error al guardar pago ${tempPayments[index].tempId}:`, result.reason);
-          }
-        });
-
-        setTempPayments([]);
-      }
-
-      onClose();
-      onSave(resultado);
-    } catch (error) {
-      console.error("Error al guardar:", error);
-      alert(`Error al guardar: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // const handleCabinChange = (e) => {
-  //   const { value } = e.target;
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     idCabin: value,
-  //     idCabin: value, // Actualiza el idCabin en el formulario
-  //   }));
-  // };
-
-  const handleSaveCompanionInReservation = async (companionData, reservationId) => {
-    try {
-      console.log("Iniciando guardado de acompañante:", { companionData, reservationId });
-
-      if (!reservationId) {
-        throw new Error("No se puede agregar acompañante sin ID de reserva");
-      }
-
-      // 1. Crear el acompañante
-      const companionResponse = await createCompanion(companionData);
-      if (!companionResponse?.idCompanions) {
-        throw new Error("El servidor no devolvió un ID válido para el acompañante");
-      }
-
-      // 2. Asociar a la reserva
-      try {
-        await addCompanionReservation(reservationId, { idCompanions: companionResponse.idCompanions });
-      } catch (error) {
-        // Intentar eliminar el acompañante si falla la asociación
-        await deleteCompanion(companionResponse.idCompanions).catch(error);
-        throw new Error("Error al asociar acompañante a la reserva");
-      }
-
-      // 3. Actualizar estado local
-      const savedCompanion = {
-        ...companionData,
-        idCompanions: companionResponse.idCompanions
-      };
-
-      setFormData(prev => ({
-        ...prev,
-        companions: prev.companions.map(c =>
-          c.documentNumber === companionData.documentNumber ? savedCompanion : c
+          }),
         )
-      }));
 
-      return savedCompanion;
+        console.log("💳 Resultados de pagos:", paymentResults)
+        setTempPayments([])
+      }
+
+      console.log("🎉 Reserva guardada exitosamente")
+      onClose()
+      onSave(resultado)
     } catch (error) {
-      console.error("Error completo en handleSaveCompanionInReservation:", error);
-      throw error;
-    }
-  };
-
-  const handleAddPayment = async (paymentData) => {
-    try {
-      setLoading(true);
-
-      // Validaciones básicas
-      if (!paymentData.amount || isNaN(parseFloat(paymentData.amount))) {
-        throw new Error("El monto del pago no es válido");
-      }
-
-      const amount = parseFloat(paymentData.amount);
-      if (amount <= 0) {
-        throw new Error("El monto debe ser mayor que cero");
-      }
-
-      // Crear objeto de pago
-      const newPayment = {
-        ...paymentData,
-        amount: amount,
-        status: paymentData.status || 'Pendiente',
-        paymentDate: paymentData.paymentDate || new Date().toISOString().split('T')[0],
-        paymentMethod: paymentData.paymentMethod || 'Efectivo'
-      };
-
-      // Si ya tenemos ID de reserva, guardar en el backend
-      if (reservationData?.idReservation) {
-        const savedPayment = await addPaymentToReservation({
-          ...newPayment,
-          idReservation: reservationData.idReservation
-        });
-
-        // Actualizar estado con el pago confirmado
-        setReservationPayments(prev => [...prev, savedPayment]);
-        return savedPayment;
-      } else {
-        // Si no hay ID de reserva, guardar como temporal
-        const tempPayment = {
-          ...newPayment,
-          tempId: `temp-${Date.now()}`,
-          isTemp: true
-        };
-        setTempPayments(prev => [...prev, tempPayment]);
-        return tempPayment;
-      }
-    } catch (error) {
-      console.error("Error al agregar pago:", error);
-      throw error;
+      console.error("❌ Error al guardar reserva:", error)
+      alert(`Error al guardar: ${error.message}`)
     } finally {
-      setLoading(false);
-
+      setLoading(false)
     }
-  };
+  }
 
-
+  // Cerrar modal al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const modal = document.querySelector('.reservations-modal-container');
+      const modal = document.querySelector(".reservations-modal-container")
       if (modal && !modal.contains(event.target)) {
-        onClose();
+        onClose()
       }
-    };
+    }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isOpen, onClose])
 
+  if (!isOpen) return null
 
-  if (!isOpen) return null;
-  console.log("Render final - Estado completo:", {
-    availableCabins: formData.availableCabins,
-    cabins: formData.cabins,
-    loading
-  });
+  const totalAmount = calculateTotal(formData, formData.planes || [])
+  console.log("💰 Total calculado para mostrar:", totalAmount)
+  console.log("📊 Estado completo de formData:", {
+    step: step,
+    companionCount: formData.companionCount,
+    companions: formData.companions,
+    hasCompanions: formData.hasCompanions,
+    selectedServices: formData.selectedServices,
+    idRoom: formData.idRoom,
+    idCabin: formData.idCabin,
+    errors: errors,
+  })
+
   return (
     <div className="reservations-modal-overlay" onClick={(e) => e.stopPropagation()}>
-      <div className="reservations-modal-container"
-       onClick={(e) => e.stopPropagation()}
-      >
+      <div className="reservations-modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="reservations-modal-header">
           <h2>{reservationData?.idReservation ? "Editar Reserva" : "Nueva Reserva"}</h2>
           <button
@@ -530,359 +434,70 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         <div className="reservations-modal-body">
           <form onSubmit={handleSubmit} noValidate>
             {step === 1 && (
-              <div className="reservations-form-step">
-                <div className="reservations-form-grid">
-                  <div className={`reservations-form-group ${errors.idUser ? "has-error" : ""}`}>
-                    <label htmlFor="idUser">Cliente</label>
-                    <select
-                      id="idUser"
-                      name="idUser"
-                      value={formData.idUser || ""}
-                      onChange={handleChange}
-                      disabled={isReadOnly || loading}
-                      aria-invalid={!!errors.idUser}
-                      aria-describedby={errors.idUser ? "idUser-error" : undefined}
-                      required
-                    >
-                      <option value="">Seleccione un cliente</option>
-                      {users.map((user) => (
-                        <option key={user.idUser} value={user.idUser}>
-                          {user.name} - ({user.identification})
-                        </option>
-                      ))}
-                    </select>
-                    {errors.idUser && (
-                      <span className="error-message" id="idUser-error">
-                        {errors.idUser}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className={`reservations-form-group ${errors.idPlan ? "has-error" : ""}`}>
-                    <label htmlFor="idPlan">Plan</label>
-                    <select
-                      id="idPlan"
-                      name="idPlan"
-                      value={formData.idPlan || ""}
-                      onChange={handleChange}
-                      disabled={isReadOnly || loading}
-                      required
-                    >
-                      <option value="">Seleccione un plan</option>
-                      {planes.map((plan) => (
-                        <option key={plan.idPlan} value={plan.idPlan}>
-                          {plan.name || plan.nombre} - ${plan.price || plan.precio || plan.salePrice || plan.total}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.idPlan && (
-                      <span className="error-message" id="idPlan-error">
-                        {errors.idPlan}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="reservations-date-group">
-                    <div className={`reservations-form-group ${errors.startDate ? "has-error" : ""}`}>
-                      <label htmlFor="startDate">Fecha Inicio</label>
-                      <input
-                        type="date"
-                        id="startDate"
-                        name="startDate"
-                        value={formData.startDate || ""}
-                        onChange={handleChange}
-                        min={new Date().toISOString().split("T")[0]}
-                        disabled={isReadOnly || loading}
-                        aria-invalid={!!errors.startDate}
-                        aria-describedby={errors.startDate ? "startDate-error" : undefined}
-                        required
-                      />
-                      {errors.startDate && (
-                        <span className="error-message" id="startDate-error">
-                          {errors.startDate}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className={`reservations-form-group ${errors.endDate ? "has-error" : ""}`}>
-                      <label htmlFor="endDate">Fecha Fin</label>
-                      <input
-                        type="date"
-                        id="endDate"
-                        name="endDate"
-                        value={formData.endDate || ""}
-                        onChange={handleChange}
-                        min={formData.startDate || new Date().toISOString().split("T")[0]}
-                        disabled={isReadOnly || loading}
-                        aria-invalid={!!errors.endDate}
-                        aria-describedby={errors.endDate ? "endDate-error" : undefined}
-                        required
-                      />
-                      {errors.endDate && (
-                        <span className="error-message" id="endDate-error">
-                          {errors.endDate}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="companion-controls">
-                    <div className="checkbox-group">
-                      <label htmlFor="hasCompanions">
-                        <input
-                          type="checkbox"
-                          id="hasCompanions"
-                          name="hasCompanions"
-                          checked={formData.hasCompanions}
-                          onChange={handleChange}
-                          disabled={isReadOnly || loading}
-                        />
-                        ¿Incluye acompañantes?
-                      </label>
-                    </div>
-                    {formData.hasCompanions && (
-                      <div className={`form-group ${errors.companionCount ? "has-error" : ""}`}>
-                        <label htmlFor="companionCount">Cantidad de acompañantes</label>
-                        <input
-                          type="number"
-                          id="companionCount"
-                          name="companionCount"
-                          value={formData.companionCount}
-                          onChange={handleChange}
-                          min="1"
-                          max="10"
-                          placeholder="Número de acompañantes"
-                          disabled={isReadOnly || loading}
-                          aria-invalid={!!errors.companionCount}
-                          aria-describedby={errors.companionCount ? "companionCount-error" : undefined}
-                          required={formData.hasCompanions}
-                        />
-                        {errors.companionCount && (
-                          <span className="error-message" id="companionCount-error">
-                            {errors.companionCount}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <BasicInfoStep
+                formData={formData}
+                errors={errors}
+                users={formData.users || []}
+                planes={formData.planes || []}
+                loading={loading}
+                isReadOnly={isReadOnly}
+                onChange={handleChange}
+              />
             )}
 
             {step === 2 && formData.hasCompanions && (
-              <div className="form-step">
-                {errors.companions && (
-                  <div className="error-banner">
-                    <p>{errors.companions}</p>
-                  </div>
-                )}
-
-                <CompanionsForm
-                  onSaveCompanion={(newCompanion) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      companions: [...prev.companions, newCompanion]
-                    }));
-                  }}
-                  maxCompanions={formData.companionCount}
-                  currentCompanionsCount={formData.companions.length}
-                  disabled={formData.companions.length >= formData.companionCount || isReadOnly || loading}
-                />
-
-                <div className="companions-section">
-                  <TableCompanions
-                    companions={formData.companions}
-                    onDeleteCompanion={(id) => {
-                      if (isReadOnly || loading) return;
-
-                      setFormData(prev => ({
-                        ...prev,
-                        companions: prev.companions.filter(c => c.idCompanions !== id)
-                      }));
-                    }}
-                    isReadOnly={isReadOnly || loading}
-                  />
-                </div>
-              </div>
+              <CompanionsStep
+                formData={formData}
+                errors={errors}
+                loading={loading}
+                isReadOnly={isReadOnly}
+                onSaveCompanion={handleSaveCompanion}
+                onDeleteCompanion={handleDeleteCompanion}
+              />
             )}
 
             {step === (formData.hasCompanions ? 3 : 2) && (
-              <div className="form-step">
-                <h3>Selecciona tu cabaña</h3>
-                <p className="availability-subtitle">
-                  Disponibles para {formData.companionCount + 1} personas
-                </p>
-
-                {/* Contenedor simplificado de cabañas */}
-                <div className="cabins-grid">
-                  {((formData.availableCabins || []).length > 0) ? (
-                    formData.availableCabins.map((cabin) => (
-                      <div
-                        key={`cabin-${cabin.idCabin}`}
-                        className={`cabin-card ${formData.idCabin === cabin.idCabin ? "selected" : ""}`}
-                        onClick={() => {
-                          console.log("Cabaña clickeada:", cabin.idCabin);
-                          if (!loading) {
-                            setFormData(prev => ({
-                              ...prev,
-                              idCabin: cabin.idCabin,
-                            }));
-                          }
-                        }}
-                      >
-                        <div className="cabin-header">
-                          <h4>{cabin.name}</h4>
-                          <div className="cabin-meta">
-                            <span className="cabin-capacity">👥 {cabin.capacity} personas</span>
-                            <span className="cabin-status">{cabin.status}</span>
-                          </div>
-                        </div>
-
-                        <div className="cabin-description">
-                          {cabin.description || "Cabaña con todas las comodidades"}
-                        </div>
-
-                        <div className="cabin-footer">
-                          <button
-                            className="select-button"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Esto evita que el evento se propague al div padre
-                              e.preventDefault();
-                              if (!loading) {
-                                setFormData(prev => {
-                                  if (prev.idCabin === cabin.idCabin) {
-                                    return prev;
-                                  }
-                                  return {
-                                    ...prev,
-                                    idCabin: cabin.idCabin,
-                                  }
-                                  
-                                });
-                              }
-                            }}
-                          >
-                            {formData.idCabin === cabin.idCabin
-                              ? "✓ Seleccionada"
-                              : "Seleccionar"}
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="no-cabins-message">
-                      {loading ? (
-                        <p>Cargando cabañas disponibles...</p>
-                      ) : (
-                        <>
-                          <p>No hay cabañas disponibles que cumplan con los criterios actuales.</p>
-                          <div className="debug-info">
-                            <p>Información para diagnóstico:</p>
-                            <ul>
-                              <li>Cabañas totales: {cabins.length}</li>
-                              <li>Cabañas disponibles: {formData.availableCabins?.length || 0}</li>
-                              <li>{`Estado requerido: 'En Servicio'`}</li>
-                              <li>Capacidad requerida: {formData.companionCount + 1} personas</li>
-                            </ul>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Mensaje de error y detalles de selección */}
-                {errors.idCabin && (
-                  <div className="error-message" style={{ marginTop: "10px" }}>
-                    {errors.idCabin}
-                  </div>
-                )}
-
-                {formData.idCabin && (
-                  <div className="selected-cabin-details">
-                    <h4>Detalles de tu selección:</h4>
-                    <p>
-                      {formData.availableCabins?.find(c => c.idCabin === Number(formData.idCabin))?.description ||
-                        "Descripción no disponible"}
-                    </p>
-                  </div>
-                )}
-              </div>
+              <AvailabilityStep
+                formData={formData}
+                errors={errors}
+                loading={loading}
+                onCabinSelect={handleCabinSelect}
+                onRoomSelect={handleRoomSelect}
+                onServiceToggle={handleServiceToggle}
+              />
             )}
 
             {step === (formData.hasCompanions ? 4 : 3) && (
-              <div className="form-step">
-                {/* Sección de Formulario de Pago */}
-                <div className="payment-form-section">
-                  <PaymentForm
-                    totalAmount={calculateTotal()}
-                    onPaymentSubmit={async (paymentData) => {
-                      try {
-                        await handleAddPayment(paymentData);
-                      } catch (error) {
-                        console.error("Error al agregar pago:", error);
-                      }
-                    }}
-                    disabled={!reservationData?.idReservation || isReadOnly || loading}
-                  />
-                </div>
-
-                {/* Sección de Lista de Pagos */}
-                <div className="payment-list-section">
-                  <div className="payment-summary">
-                    <div className="summary-item">
-                      <span>Total Reserva:</span>
-                      <strong>${calculateTotal().toFixed(2)}</strong>
-                    </div>
-                    <div className="summary-item">
-                      <span>Total Pagado:</span>
-                      <strong>${[...reservationPayments, ...tempPayments]
-                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
-                        .toFixed(2)}</strong>
-                    </div>
-                    <div className="summary-item">
-                      <span>Saldo Pendiente:</span>
-                      <strong>${(calculateTotal() -
-                        [...reservationPayments, ...tempPayments]
-                          .reduce((sum, p) => sum + (Number(p.amount) || 0), 0))
-                        .toFixed(2)}</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PaymentStep
+                totalAmount={totalAmount}
+                reservationPayments={reservationPayments}
+                tempPayments={tempPayments}
+                reservationData={reservationData}
+                isReadOnly={isReadOnly}
+                loading={loading}
+                onPaymentSubmit={handleAddPayment}
+              />
             )}
 
             <div className="modal-footer">
               {step > 1 && (
-                <button
-                  type="button"
-                  className="reservations-cancel-btn"
-                  onClick={prevStep}
-                  disabled={loading}
-                >
+                <button type="button" className="reservations-cancel-btn" onClick={prevStep} disabled={loading}>
                   Anterior
                 </button>
               )}
 
               {step < (formData.hasCompanions ? 4 : 3) && (
-                <button
-                  type="button"
-                  className="submit-btn"
-                  onClick={nextStep}
-                  disabled={loading}
-                >
-                  {step === (formData.hasCompanions ? 3 : 2) ? "Ir a Pagos" :
-                    step === 2 ? "Verificar Disponibilidad" : "Siguiente"}
+                <button type="button" className="submit-btn" onClick={nextStep} disabled={loading}>
+                  {step === (formData.hasCompanions ? 3 : 2)
+                    ? "Ir a Pagos"
+                    : step === 2
+                      ? "Verificar Disponibilidad"
+                      : "Siguiente"}
                 </button>
               )}
 
               {!isReadOnly && step === (formData.hasCompanions ? 4 : 3) && (
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={loading}
-                  onClick={handleSubmit}
-                >
+                <button type="button" className="btn btn-primary" disabled={loading} onClick={handleSubmit}>
                   {loading ? "Guardando..." : "Guardar Reserva"}
                 </button>
               )}

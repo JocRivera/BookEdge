@@ -6,15 +6,17 @@ const TablePayments = ({ payments, onDetailPayment, onStatusChange, isLoading })
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
+    return new Date(dateString).toLocaleDateString('es-CO', options);
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount || 0);
-  };
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount || 0);
+};
 
   const handleStatusChange = (paymentId, e) => {
     if (onStatusChange) {
