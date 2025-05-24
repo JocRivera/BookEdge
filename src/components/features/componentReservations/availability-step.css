@@ -1,4 +1,4 @@
-/* availability-step.css - Versión Mejorada */
+/* availability-step.css - Versión Mejorada
 .availability-step {
   background: var(--reservations-card-bg);
   border-radius: 16px;
@@ -162,7 +162,7 @@
 }
 
 /* Botones de acción */
-.action-buttons {
+/* .action-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -205,7 +205,7 @@
 }
 
 /* Capacidad Total */
-.total-capacity {
+/* .total-capacity {
   background: rgba(143, 148, 251, 0.05);
   padding: 1rem;
   border-radius: 8px;
@@ -216,7 +216,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .options-grid, .services-grid {
     grid-template-columns: 1fr;
   }
@@ -236,4 +236,4 @@
   .btn {
     width: 100%;
   }
-}
+} */ 
