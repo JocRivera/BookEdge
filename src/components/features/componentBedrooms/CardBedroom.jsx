@@ -12,6 +12,8 @@ import {
   getBedroomImages,
 } from "../../../services/BedroomService";
 import "./BedroomCard.css";
+import { toast } from "react-toastify"; // <--- IMPORTAR TOAST
+import { useAlert } from "../../../context/AlertContext"; // <--- IMPORTAR useAlert
 
 function BedroomCard() {
   // Estados
@@ -28,7 +30,7 @@ function BedroomCard() {
   // Paginación
   const itemsPerPage = 3;
   const [currentPage, setCurrentPage] = useState(0);
-
+  const { showAlert } = useAlert();
   // Cargar datos de habitaciones e imágenes
   const loadBedroomData = useCallback(async () => {
     setLoading(true);
@@ -101,22 +103,49 @@ function BedroomCard() {
 
   // Editar habitación
   const handleEditBedroom = (bedroom) => {
-    setSelectedBedroom(bedroom);
-    setModalOpen(true);
+    // Recibe el objeto bedroom completo
+    showAlert({
+      type: "confirm-edit",
+      title: "Confirmar Modificación",
+      message: `¿Desea modificar la habitación "${bedroom.name}"?`,
+      confirmText: "Sí, Modificar",
+      onConfirm: () => {
+        setSelectedBedroom(bedroom);
+        setModalOpen(true); // Abre FormBedrooms
+      },
+      
+    });
+   
   };
-
   // Eliminar habitación
-  const handleDelete = async (idRoom) => {
-    if (!window.confirm("¿Estás seguro de eliminar esta habitación?")) return;
-
-    try {
-      await deleteBedroom(idRoom);
-      setBedrooms((prevBedrooms) =>
-        prevBedrooms.filter((bedroom) => bedroom.idRoom !== idRoom)
-      );
-    } catch (error) {
-      console.error("Error al eliminar la habitación", error);
-    }
+  const handleDelete = async (bedroomToDelete) => {
+    // Recibe el objeto bedroom completo
+    showAlert({
+      type: "confirm-delete",
+      title: "Confirmar Eliminación",
+      message: `¿Está seguro de eliminar la habitación "${bedroomToDelete.name}"? Esta acción no se puede deshacer.`,
+      confirmText: "Sí, Eliminar",
+      onConfirm: async () => {
+        try {
+          await deleteBedroom(bedroomToDelete.idRoom);
+          setBedrooms((prevBedrooms) =>
+            prevBedrooms.filter(
+              (bedroom) => bedroom.idRoom !== bedroomToDelete.idRoom
+            )
+          );
+          toast.success(
+            `Habitación "${bedroomToDelete.name}" eliminada correctamente.`
+          );
+        } catch (error) {
+          console.error("Error al eliminar la habitación", error);
+          const errorMessage =
+            error.response?.data?.message ||
+            error.message ||
+            "Error al eliminar la habitación";
+          toast.error(errorMessage);
+        }
+      },
+    });
   };
 
   // Ver detalles de habitación
@@ -142,6 +171,10 @@ function BedroomCard() {
     setModalOpen(true);
   };
 
+  const handleSaveBedroomSuccess = () => {
+    loadBedroomData(); // Recarga los datos
+    setModalOpen(false); // Cierra el modal del formulario
+  };
   return (
     <section className="bedroom-container">
       <header className="bedroom-header">
@@ -263,10 +296,9 @@ function BedroomCard() {
                 </div>
                 {/* Footer para los ActionButtons */}
                 <footer className="card-footer-actions-admin">
-                
                   <ActionButtons
                     onEdit={() => handleEditBedroom(bedroom)}
-                    onDelete={() => handleDelete(bedroom.idRoom)}
+                    onDelete={() => handleDelete(bedroom)}
                     onView={() => handleView(bedroom.idRoom)}
                   />
                 </footer>
@@ -290,6 +322,7 @@ function BedroomCard() {
         isOpen={isOpenModal}
         onClose={() => setModalOpen(false)}
         onSave={loadBedroomData}
+        onSaveSuccess={handleSaveBedroomSuccess}
         bedroomToEdit={selectedBedroom}
       />
 

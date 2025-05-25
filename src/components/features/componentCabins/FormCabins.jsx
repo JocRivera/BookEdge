@@ -1,5 +1,6 @@
 // --- START OF FILE FormCabins.jsx ---
 import React, { useState, useRef, useEffect } from "react";
+import { toast } from "react-toastify";
 import {
   MdClose,
   MdImage,
@@ -16,6 +17,7 @@ import {
   setPrimaryImage,
 } from "../../../services/CabinService";
 import { getComforts } from "../../../services/ComfortService";
+
 
 const initialFormData = {
   name: "",
@@ -111,6 +113,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
       case "capacity":
         if (!value) error = "La capacidad es obligatoria";
         else if (isNaN(value)) error = "Debe ser un número válido";
+        else if (value < 1 && value > 3) error= "La Capcidad debe ser Minimo 3 Maximo 8 Personas ";
         else {
           const numValue = parseInt(value);
           if (numValue < 1) error = "La capacidad mínima es 1";
@@ -148,12 +151,12 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
         : [...prevSelected, comfortId]
     );
   };
-
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     let formIsValid = true;
     const newErrors = {};
 
+    // Validación del frontend (como la tenías)
     Object.keys(formData).forEach((field) => {
       const error = validateField(field, formData[field]);
       if (error) {
@@ -162,57 +165,91 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
       }
     });
 
-    if (existingImages.length === 0 && !imageFiles.some(Boolean)) {
-      newErrors.images = "Debes subir al menos una imagen";
-      formIsValid = false;
+    const totalEffectiveImages = (existingImages || []).length + imageFiles.filter(Boolean).length;
+    if (totalEffectiveImages === 0) {
+        newErrors.images = "Debes subir o mantener al menos una imagen";
+        formIsValid = false;
     }
-
-    // Opcional: Validar si se requiere al menos una comodidad
-    // if (selectedComforts.length === 0) {
-    //   newErrors.comforts = "Debe seleccionar al menos una comodidad";
-    //   formIsValid = false;
-    // }
 
     setErrors(newErrors);
 
-    if (!formIsValid) return;
+    if (!formIsValid) {
+      toast.error("Por favor, corrija los errores en el formulario."); // Toast genérico si la validación del frontend falla
+      return;
+    }
 
     const dataToSubmit = {
       ...formData,
-      capacity: Number(formData.capacity), // Asegurar que capacidad sea número
+      capacity: Number(formData.capacity),
       comforts: selectedComforts,
     };
 
     try {
       let cabinId;
+      let cabinResponse; // Para obtener el nombre de la cabaña si es posible
+      let successMessage = "";
+
       if (cabinToEdit) {
-        await updateCabin(cabinToEdit.idCabin, dataToSubmit);
+        cabinResponse = await updateCabin(cabinToEdit.idCabin, dataToSubmit);
         cabinId = cabinToEdit.idCabin;
+        // Usa el nombre de la respuesta del backend si está disponible, sino el del formulario
+        successMessage = `Cabaña "${cabinResponse?.name || formData.name}" actualizada exitosamente.`;
       } else {
-        const newCabin = await createCabin(dataToSubmit);
-        cabinId = newCabin.idCabin;
+        cabinResponse = await createCabin(dataToSubmit);
+        cabinId = cabinResponse.idCabin; // Asume que la respuesta de crear tiene el ID
+        // Usa el nombre de la respuesta del backend si está disponible, sino el del formulario
+        successMessage = `Cabaña "${cabinResponse?.name || formData.name}" creada exitosamente.`;
       }
 
-      await uploadNewImages(cabinId);
-      onSuccess();
+      // Asegurarse de que cabinId tiene un valor antes de subir imágenes
+      if (!cabinId) {
+        // Este error es más grave y debería ser manejado, podría indicar un problema con la respuesta del backend
+        toast.error("Error crítico: No se pudo obtener el ID de la cabaña.");
+        setErrors((prev) => ({ ...prev, general: "No se pudo obtener el ID de la cabaña." }));
+        return; // Detener la ejecución
+      }
+
+      await uploadNewImages(cabinId); // uploadNewImages maneja sus propios toasts de error para la subida de imágenes
+
+      toast.success(successMessage); // <--- TOAST DE ÉXITO PARA LA OPERACIÓN PRINCIPAL
+
+      onSuccess(); // Llama a resetForm, onSave (que es loadCabinData en CardCabin), y onClose
     } catch (error) {
       console.error("Error al guardar la cabaña:", error);
-      if (error && error.errors && Array.isArray(error.errors)) {
-        const backendErrors = {};
-        error.errors.forEach((err) => {
-          backendErrors[err.path || "general"] = err.msg;
-        });
-        setErrors((prev) => ({ ...prev, ...backendErrors }));
-      } else if (error && error.message) {
-        setErrors((prev) => ({ ...prev, general: error.message }));
+      let errorMessage = "Ocurrió un error inesperado al guardar la cabaña."; // Mensaje por defecto
+      const backendFieldErrors = {};
+
+      // Intenta extraer mensajes de error más específicos del backend
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          // Si hay un array de errores (común con express-validator)
+          errorData.errors.forEach(err => {
+            if (err.path) backendFieldErrors[err.path] = err.msg; // Errores específicos de campo
+          });
+          // Usa el primer mensaje de error del array para el toast general, si existe
+          if (errorData.errors[0]?.msg) {
+            errorMessage = errorData.errors[0].msg;
+          }
+        } else if (errorData.message) { // Si el backend devuelve un solo campo 'message'
+          errorMessage = errorData.message;
+        }
+      } else if (error.message) { // Errores de red u otros errores del lado del cliente
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage); // <--- TOAST DE ERROR PARA LA OPERACIÓN PRINCIPAL
+
+      // Asigna errores a los campos o un error general para mostrar en el formulario
+      if (Object.keys(backendFieldErrors).length > 0) {
+        setErrors(prev => ({ ...prev, ...backendFieldErrors }));
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          general: "Ocurrió un error inesperado.",
-        }));
+        // Si no hay errores de campo específicos, muestra el error general en el formulario
+        setErrors(prev => ({ ...prev, general: errorMessage }));
       }
     }
   };
+
 
   const uploadNewImages = async (cabinId) => {
     const filesToUpload = imageFiles.filter(Boolean);

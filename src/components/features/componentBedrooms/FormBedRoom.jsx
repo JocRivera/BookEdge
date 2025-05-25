@@ -14,6 +14,7 @@ import {
   deleteBedroomImage,
   setPrimaryBedroomImage,
 } from "../../../services/BedroomService";
+import { toast } from "react-toastify";
 import { getComforts } from "../../../services/ComfortService";
 
 const initialFormData = {
@@ -181,8 +182,14 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
       if (bedroomToEdit) {
         await updateBedroom(bedroomToEdit.idRoom, dataToSubmit);
         bedroomId = bedroomToEdit.idRoom;
+        toast.success(
+          `Habitación "${bedroomToEdit.name}" Editada correctamente.`
+        );
       } else {
         const newBedroom = await createBedroom(dataToSubmit);
+         toast.success(
+          `Habitación  creada correctamente.`
+        );
         bedroomId = newBedroom.idRoom;
       }
 
