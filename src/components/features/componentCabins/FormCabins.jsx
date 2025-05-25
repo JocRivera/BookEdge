@@ -273,8 +273,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
   };
 
   const handleRemoveExistingImage = async (imageId) => {
-    if (!window.confirm("¿Estás seguro de querer eliminar esta imagen?"))
-      return;
+  
     try {
       await deleteCabinImage(imageId);
       setExistingImages((prev) =>
@@ -520,7 +519,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    handleRemoveExistingImageAndPrepareUpload(
+                                    handleRemoveExistingImage(
                                       existingImageForThisSlot.idCabinImage,
                                       slotIndex
                                     )

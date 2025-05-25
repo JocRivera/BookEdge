@@ -1,4 +1,4 @@
-// --- Sidebar.jsx (CORREGIDO PARA EVITAR BUCLE DE UPDATES) ---
+// --- Sidebar.jsx (CORREGIDO PARA EVITAR BUCLE DE UPDATES Y MEJORAR FILTRADO DE PERMISOS) ---
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -16,18 +16,16 @@ import {
   LuSearch,
   LuSun,
   LuMoon,
-  LuPanelRight, // Para el botón flotante cuando está colapsado
-  LuPanelLeft, // Para el botón flotante cuando está expandido
+  LuPanelRight,
+  LuPanelLeft,
 } from "react-icons/lu";
 import { RiMenuFoldFill, RiMenuFold2Fill } from "react-icons/ri";
 
 import "./sidebar.css";
 import miLogoCompleto from "../../../assets/bookedge4.jpg";
 import { useAuth } from "../../../context/AuthContext";
-import { MODULES, PRIVILEGES } from "../../../constants/permissions"; // Asegúrate que esta ruta sea correcta
+import { MODULES, PRIVILEGES } from "../../../constants/permissions";
 
-// Define menuItemsStructure FUERA del componente Sidebar
-// Esto es crucial para evitar que se recree en cada render y cause bucles en useEffect.
 const staticMenuItemsStructure = [
   { type: "title", text: "Principal" },
   { path: "/admin", icon: <LuLayoutDashboard />, text: "Dashboard" },
@@ -151,12 +149,10 @@ const Sidebar = () => {
   const location = useLocation();
   const { user, hasPermission } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredMenuItems, setFilteredMenuItems] = useState(
-    staticMenuItemsStructure
-  ); // Inicializar con la estructura estática
+  const [filteredMenuItems, setFilteredMenuItems] = useState([]); // Inicializar vacío, useEffect lo poblará
   const [toggleButtonLeft, setToggleButtonLeft] = useState("0px");
 
-  // EFECTO 1: Dark Mode - Aplicar clase a <html> y guardar en localStorage
+  // EFECTO 1: Dark Mode
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark-mode-html");
@@ -164,60 +160,162 @@ const Sidebar = () => {
       document.documentElement.classList.remove("dark-mode-html");
     }
     localStorage.setItem("sidebarTheme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]); // Solo se ejecuta cuando isDarkMode cambia
+  }, [isDarkMode]);
 
-  // EFECTO 2: Colapso - Notificar a AdminLayout y calcular posición del botón flotante
+  // EFECTO 2: Colapso
   useEffect(() => {
     const event = new CustomEvent("sidebarToggle", {
       detail: { collapsed: isCollapsed },
     });
     document.dispatchEvent(event);
-
     const rootStyle = getComputedStyle(document.documentElement);
     const sidebarWidthExpandedPx =
-      parseInt(
-        rootStyle.getPropertyValue("--sidebar-width-expanded").replace("px", "")
-      ) || 230;
+      parseInt(rootStyle.getPropertyValue("--sidebar-width-expanded").replace("px", "")) || 230;
     const sidebarWidthCollapsedPx =
-      parseInt(
-        rootStyle
-          .getPropertyValue("--sidebar-width-collapsed")
-          .replace("px", "")
-      ) || 68;
+      parseInt(rootStyle.getPropertyValue("--sidebar-width-collapsed").replace("px", "")) || 68;
     const toggleBtnWidthPx =
-      parseInt(
-        rootStyle
-          .getPropertyValue("--toggle-btn-actual-width")
-          .replace("px", "")
-      ) || 36;
-
+      parseInt(rootStyle.getPropertyValue("--toggle-btn-actual-width").replace("px", "")) || 36;
     setToggleButtonLeft(
       isCollapsed
         ? `${sidebarWidthCollapsedPx - toggleBtnWidthPx / 2}px`
         : `${sidebarWidthExpandedPx - toggleBtnWidthPx / 2}px`
     );
-  }, [isCollapsed]); // Solo se ejecuta cuando isCollapsed cambia
+  }, [isCollapsed]);
 
-  // EFECTO 3: Resize - Ajustar colapso automáticamente si no hay preferencia manual
+  // EFECTO 3: Resize
   useEffect(() => {
     const handleResize = () => {
       if (localStorage.getItem("sidebarManuallyCollapsed") === null) {
-        // Solo si el usuario no lo ha fijado
         setIsCollapsed(window.innerWidth < 768);
       }
     };
     window.addEventListener("resize", handleResize);
-    // Llamada inicial para establecer estado si no hay preferencia manual
     if (localStorage.getItem("sidebarManuallyCollapsed") === null) {
       setIsCollapsed(window.innerWidth < 768);
     }
     return () => window.removeEventListener("resize", handleResize);
-  }, []); // Se ejecuta solo al montar/desmontar para configurar/limpiar listener
+  }, []);
+
+  // EFECTO 4: Filtrado de menú (Revisado)
+  useEffect(() => {
+    if (!user || !hasPermission) {
+      setFilteredMenuItems([]);
+      return;
+    }
+
+    // 1. Obtener ítems base permitidos por rol/permisos
+    const getPermittedBaseItems = (menuItems) => {
+      const permitted = [];
+      for (const item of menuItems) {
+        if (item.type === "title") {
+          permitted.push(item); // Los títulos se mantienen por ahora
+          continue;
+        }
+
+        if (item.subItems) {
+          const visiblePermittedSubItems = item.subItems.filter(sub =>
+            sub.module ? hasPermission(sub.module, sub.privilege || null) : true
+          );
+          if (visiblePermittedSubItems.length > 0) {
+            permitted.push({ ...item, subItems: visiblePermittedSubItems });
+          }
+          // Si no hay subítems visibles, el padre del submenú no se añade.
+        } else {
+          if (item.module && !hasPermission(item.module, item.privilege || null)) {
+            // Sin permiso para ítem directo
+          } else {
+            permitted.push(item); // Permitido o no requiere permiso
+          }
+        }
+      }
+      return permitted;
+    };
+
+    let basePermittedItems = getPermittedBaseItems(staticMenuItemsStructure);
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    let searchAndPermissionFilteredItems;
+
+    if (!lowerSearchTerm) {
+      searchAndPermissionFilteredItems = basePermittedItems;
+    } else {
+      // 2. Aplicar filtro de búsqueda sobre los ítems permitidos
+      const searchFilteredReduced = basePermittedItems.reduce(
+        (acc, item) => {
+          if (item.type === "title") {
+            acc.potentialTitle = item; // Guardar para añadir si hay contenido después
+            return acc;
+          }
+
+          let itemMatchesSearch = item.text.toLowerCase().includes(lowerSearchTerm);
+          let subItemsResultForSearch = null; // Para los subítems que coinciden con la búsqueda
+
+          if (item.subItems) { // item.subItems ya son los permitidos
+            const matchingSubItems = item.subItems.filter(sub =>
+              sub.text.toLowerCase().includes(lowerSearchTerm)
+            );
+            if (matchingSubItems.length > 0) {
+              subItemsResultForSearch = matchingSubItems;
+              itemMatchesSearch = true; // Padre coincide si algún hijo (permitido+buscado) coincide
+            }
+            // Si no, itemMatchesSearch depende solo del texto del padre
+          }
+
+          if (itemMatchesSearch) {
+            if (acc.potentialTitle) {
+              acc.items.push(acc.potentialTitle);
+              acc.potentialTitle = null;
+            }
+            if (subItemsResultForSearch) { // Hay subítems que coinciden con la búsqueda
+              acc.items.push({ ...item, subItems: subItemsResultForSearch });
+            } else if (item.subItems && itemMatchesSearch) { // Padre coincide, tenía subítems permitidos, pero ninguno coincidió con búsqueda
+              acc.items.push({ ...item, subItems: [] }); // Mostrar padre, desplegable vacío
+            } else { // Ítem simple que coincide, o padre que coincide sin subítems originalmente
+              acc.items.push(item);
+            }
+          }
+          return acc;
+        },
+        { items: [], potentialTitle: null }
+      );
+      searchAndPermissionFilteredItems = searchFilteredReduced.items;
+    }
+    
+    // 3. Filtrar títulos que quedaron sin contenido visible debajo
+    const filterOutEmptyTitlesFinal = (itemsToFilter) => {
+      const result = [];
+      for (let i = 0; i < itemsToFilter.length; i++) {
+        const currentItem = itemsToFilter[i];
+        if (currentItem.type === "title") {
+          let hasVisibleContentBelow = false;
+          for (let j = i + 1; j < itemsToFilter.length; j++) {
+            const nextItem = itemsToFilter[j];
+            if (nextItem.type !== "title") {
+              hasVisibleContentBelow = true; // Cualquier ítem no-título cuenta como contenido
+              break;
+            }
+            if (nextItem.type === "title") { // Siguiente título encontrado
+              break;
+            }
+          }
+          if (hasVisibleContentBelow) {
+            result.push(currentItem);
+          }
+        } else {
+          result.push(currentItem); // Ítem de contenido, se añade
+        }
+      }
+      return result;
+    };
+
+    setFilteredMenuItems(filterOutEmptyTitlesFinal(searchAndPermissionFilteredItems));
+
+  }, [searchTerm, user, hasPermission]); // staticMenuItemsStructure es constante, no necesita ser dependencia
+
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => {
       const newState = !prev;
-      localStorage.setItem("sidebarManuallyCollapsed", newState.toString()); // Guardar preferencia manual
+      localStorage.setItem("sidebarManuallyCollapsed", newState.toString());
       return newState;
     });
     setActiveSubMenu("");
@@ -225,52 +323,6 @@ const Sidebar = () => {
 
   const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
-
-  // EFECTO 4: Filtrado de menú
-  useEffect(() => {
-    const lowerSearchTerm = searchTerm.toLowerCase();
-    if (!lowerSearchTerm) {
-      setFilteredMenuItems(staticMenuItemsStructure); // Usa la constante
-      return;
-    }
-    // Lógica de filtrado (puede ser mejorada para títulos de sección)
-    const filtered = staticMenuItemsStructure.reduce(
-      (acc, item) => {
-        if (item.type === "title") {
-          acc.lastTitle = item;
-          return acc;
-        }
-        let itemMatches = item.text.toLowerCase().includes(lowerSearchTerm);
-        let subItemsResult = null;
-        if (item.subItems) {
-          const matchingSubItems = item.subItems.filter((sub) =>
-            sub.text.toLowerCase().includes(lowerSearchTerm)
-          );
-          if (matchingSubItems.length > 0) subItemsResult = matchingSubItems;
-          itemMatches = itemMatches || matchingSubItems.length > 0;
-        }
-        if (itemMatches) {
-          if (acc.lastTitle) {
-            acc.items.push(acc.lastTitle);
-            acc.lastTitle = null;
-          }
-          acc.items.push(
-            subItemsResult ? { ...item, subItems: subItemsResult } : item
-          );
-        }
-        return acc;
-      },
-      { items: [], lastTitle: null }
-    );
-
-    setFilteredMenuItems(
-      filtered.items.length > 0
-        ? filtered.items
-        : searchTerm
-        ? []
-        : staticMenuItemsStructure
-    );
-  }, [searchTerm]); // Solo depende de searchTerm porque staticMenuItemsStructure es constante
 
   const handleMenuHeaderClick = useCallback(
     (menuName, e) => {
@@ -287,13 +339,8 @@ const Sidebar = () => {
           const windowHeight = window.innerHeight;
           const rootStyle = getComputedStyle(document.documentElement);
           const sidebarCollapsedWidth =
-            parseInt(
-              rootStyle
-                .getPropertyValue("--sidebar-width-collapsed")
-                .replace("px", "")
-            ) || 72;
+            parseInt(rootStyle.getPropertyValue("--sidebar-width-collapsed").replace("px", "")) || 72;
           const spaceFlyout = 8;
-
           if (topPosition + flyoutHeightEstimate > windowHeight - 20) {
             topPosition = windowHeight - flyoutHeightEstimate - 20;
           }
@@ -329,41 +376,35 @@ const Sidebar = () => {
     path &&
     (location.pathname === path ||
       (path !== "/admin" && location.pathname.startsWith(path + "/")));
-  const isSubmenuParentActive = (visibleSubItems) => {
-    if (!Array.isArray(visibleSubItems) || visibleSubItems.length === 0)
-      return false;
-    return visibleSubItems.some((item) => isActiveRoute(item.path));
+
+  const isSubmenuParentActive = (subItems) => {
+    if (!Array.isArray(subItems) || subItems.length === 0) return false;
+    return subItems.some((item) => isActiveRoute(item.path));
   };
+
   const renderProtectedSubmenuItems = (subItems, isFlyout = false) => {
+    // El filtrado de permisos ya se hizo al construir filteredMenuItems.
+    // Este filtro interno es ahora una redundancia segura.
     if (!user || !hasPermission) return null;
     if (!Array.isArray(subItems)) return null;
+
     return subItems
-      .filter((item) =>
+      .filter((item) => // Esta línea podría quitarse si confiamos 100% en el pre-filtrado
         item.module ? hasPermission(item.module, item.privilege || null) : true
       )
       .map((item, index) => {
         if (typeof item !== "object" || item === null || !item.path) {
-          return (
-            <li
-              key={`${isFlyout ? "flyout" : "dropdown"}-invalid-item-${index}`}
-            >
-              <span>Ítem Inválido</span>
-            </li>
-          );
+          return <li key={`${isFlyout ? "flyout" : "dropdown"}-invalid-item-${index}`}><span>Ítem Inválido</span></li>;
         }
         return (
           <li
-            key={`${isFlyout ? "flyout" : "dropdown"}-item-${index}-${
-              item.path
-            }`}
+            key={`${isFlyout ? "flyout" : "dropdown"}-item-${index}-${item.path}`}
             style={isFlyout ? { "--item-index": index } : {}}
             className={isActiveRoute(item.path) ? "active" : ""}
           >
             <Link
               to={item.path}
-              onClick={() => {
-                if (isFlyout || !isCollapsed) setActiveSubMenu("");
-              }}
+              onClick={() => { if (isFlyout || !isCollapsed) setActiveSubMenu(""); }}
             >
               {item.icon && <span className="menu-icon">{item.icon}</span>}
               {item.text && <span className="menu-text">{item.text}</span>}
@@ -373,28 +414,20 @@ const Sidebar = () => {
       });
   };
 
-  // Construir clases del sidebar dinámicamente
-  const sidebarFinalClasses = `sidebar ${isCollapsed ? "collapsed" : ""} ${
-    isDarkMode ? "dark-mode" : ""
-  }`;
+  const sidebarFinalClasses = `sidebar ${isCollapsed ? "collapsed" : ""} ${isDarkMode ? "dark-mode" : ""}`;
 
   return (
     <>
       <div className={sidebarFinalClasses}>
-        {" "}
-        {/* Aplicar clases directamente */}
         <div className="sidebar-header">
           <div className="logo-area">
             <img
               src={miLogoCompleto}
               alt="BookEdge Logo"
-              className={`logo-image-display ${
-                isCollapsed ? "collapsed-logo" : "expanded-logo"
-              }`}
+              className={`logo-image-display ${isCollapsed ? "collapsed-logo" : "expanded-logo"}`}
             />
             {!isCollapsed && <span className="logo-text-title">BookEdge</span>}
           </div>
-          {/* El botón de toggle del header se ha quitado. Usaremos el flotante. */}
           {!isCollapsed && (
             <div className="search-container">
               <LuSearch className="search-icon" />
@@ -411,56 +444,25 @@ const Sidebar = () => {
         <nav className="sidebar-content">
           <ul className="menu-list">
             {filteredMenuItems.map((item, index) => {
-              if (
-                item.type !== "title" &&
-                item.module &&
-                (!user ||
-                  !hasPermission ||
-                  !hasPermission(item.module, item.privilege || null))
-              )
-                return null;
+              // La comprobación de permisos para ítems directos ya se hizo al construir filteredMenuItems
+              // No es necesario repetirla aquí.
+              // if (item.type !== "title" && item.module && (!user || !hasPermission || !hasPermission(item.module, item.privilege || null))) return null;
 
-              if (item.subItems) {
-                const subItemsToRender = item.subItems;
-                const visibleSubItems = subItemsToRender.filter((sub) =>
-                  sub.module
-                    ? user &&
-                      hasPermission &&
-                      hasPermission(sub.module, sub.privilege || null)
-                    : true
-                );
+              if (item.subItems) { // El ítem tiene una propiedad subItems (puede ser array vacío)
+                const subItemsToRender = item.subItems; // Estos ya están filtrados por permiso y búsqueda
+                const isParentActive = isSubmenuParentActive(subItemsToRender);
+                
+                // No necesitamos más la lógica compleja de 'if (visibleSubItems.length === 0 && ... ) return null;' aquí
+                // porque getPermittedBaseItems ya maneja la no inclusión de padres sin subítems permitidos.
 
-                if (
-                  visibleSubItems.length === 0 &&
-                  !item.text.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                  !item.module
-                )
-                  return null;
-                if (
-                  visibleSubItems.length === 0 &&
-                  item.module &&
-                  (!user ||
-                    !hasPermission ||
-                    !hasPermission(item.module, item.privilege || null))
-                )
-                  return null;
-
-                const isParentActive = isSubmenuParentActive(visibleSubItems);
                 return (
                   <li
                     key={item.submenuName || `subparent-${index}-${item.text}`}
-                    className={`menu-item ${
-                      activeSubMenu === item.submenuName ||
-                      (!activeSubMenu && isParentActive)
-                        ? "active"
-                        : ""
-                    }`}
+                    className={`menu-item ${ activeSubMenu === item.submenuName || (!activeSubMenu && isParentActive) ? "active" : "" }`}
                   >
                     <div
                       className="menu-header"
-                      onClick={(e) =>
-                        handleMenuHeaderClick(item.submenuName, e)
-                      }
+                      onClick={(e) => handleMenuHeaderClick(item.submenuName, e)}
                       aria-expanded={activeSubMenu === item.submenuName}
                       role="button"
                       tabIndex={0}
@@ -469,30 +471,23 @@ const Sidebar = () => {
                       <span className="menu-text">{item.text}</span>
                       {!isCollapsed && (
                         <span className="menu-arrow">
-                          {activeSubMenu === item.submenuName ? (
-                            <LuChevronDown />
-                          ) : (
-                            <LuChevronRight />
-                          )}
+                          {activeSubMenu === item.submenuName ? <LuChevronDown /> : <LuChevronRight />}
                         </span>
                       )}
                     </div>
-                    {visibleSubItems.length > 0 &&
-                      !isCollapsed &&
-                      activeSubMenu === item.submenuName && (
+                    {/* Solo renderizar el UL si hay elementos en subItemsToRender */}
+                    {subItemsToRender.length > 0 && !isCollapsed && activeSubMenu === item.submenuName && (
                         <ul className="submenu-dropdown open">
-                          {renderProtectedSubmenuItems(visibleSubItems, false)}
+                          {renderProtectedSubmenuItems(subItemsToRender, false)}
                         </ul>
                       )}
-                    {visibleSubItems.length > 0 &&
-                      isCollapsed &&
-                      activeSubMenu === item.submenuName && (
+                    {subItemsToRender.length > 0 && isCollapsed && activeSubMenu === item.submenuName && (
                         <ul
                           className="submenu-flyout-panel open"
                           style={flyoutPanelStyle}
                           ref={flyoutPanelRef}
                         >
-                          {renderProtectedSubmenuItems(visibleSubItems, true)}
+                          {renderProtectedSubmenuItems(subItemsToRender, true)}
                         </ul>
                       )}
                   </li>
@@ -500,20 +495,16 @@ const Sidebar = () => {
               }
               if (item.type === "title") {
                 return (
-                  <li
-                    key={`title-${index}-${item.text}`}
-                    className="menu-section-title-container"
-                  >
+                  <li key={`title-${index}-${item.text}`} className="menu-section-title-container" >
                     <span className="menu-section-title-text">{item.text}</span>
                   </li>
                 );
               }
+              // Ítem simple (enlace directo)
               return (
                 <li
                   key={item.path || `menuitem-${index}-${item.text}`}
-                  className={`menu-item ${
-                    isActiveRoute(item.path) ? "active" : ""
-                  }`}
+                  className={`menu-item ${isActiveRoute(item.path) ? "active" : ""}`}
                 >
                   <Link to={item.path} onClick={() => setActiveSubMenu("")}>
                     <span className="menu-icon">{item.icon}</span>
@@ -528,9 +519,7 @@ const Sidebar = () => {
           <button
             onClick={toggleDarkMode}
             className="theme-toggle-button"
-            aria-label={
-              isDarkMode ? "Activar tema claro" : "Activar tema oscuro"
-            }
+            aria-label={isDarkMode ? "Activar tema claro" : "Activar tema oscuro"}
           >
             {isDarkMode ? <LuSun /> : <LuMoon />}
             {!isCollapsed && (
@@ -542,7 +531,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Botón Flotante para colapsar/expandir */}
       <button
         className="toggle-btn"
         onClick={toggleSidebar}

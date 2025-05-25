@@ -1,3 +1,5 @@
+// src/features/componentConfort/ComponentConfort.jsx
+
 import React, { useState, useEffect } from "react";
 import {
   getComforts,
@@ -11,8 +13,9 @@ import "./componentConfort.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { CiSearch } from "react-icons/ci";
-import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import FormConfort from "./formConfort";
+import { useAlert } from "../../../context/AlertContext";
 
 function ComponentConfort() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,32 +23,34 @@ function ComponentConfort() {
   const [currentComfort, setCurrentComfort] = useState(null);
   const [comforts, setComforts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [fetchInitialError, setFetchInitialError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
 
+  const { showAlert } = useAlert();
+
   useEffect(() => {
-    const fetchComforts = async () => {
+    const fetchComfortsAsync = async () => {
       setLoading(true);
       try {
         const data = await getComforts();
         setComforts(data);
-        setError(null);
+        setFetchInitialError(null);
       } catch (error) {
         console.error("Error al obtener las comodidades:", error);
-        setError(error.message || "Error al cargar comodidades");
-        toast.error("Error al cargar comodidades");
+        const errorMessage = error.message || "Error al cargar comodidades";
+        setFetchInitialError(errorMessage);
+        toast.error(`Error al cargar datos: ${errorMessage}`);
       } finally {
         setLoading(false);
       }
     };
-    fetchComforts();
+    fetchComfortsAsync();
   }, []);
 
   const filtrarDatos = comforts.filter((comfort) =>
-    comfort.name.toLowerCase().includes(searchTerm.toLowerCase())
+    comfort?.name?.toLowerCase()?.includes(searchTerm.toLowerCase())
   );
 
-  // Resetear página al buscar
   useEffect(() => {
     setCurrentPage(0);
   }, [searchTerm]);
@@ -61,60 +66,120 @@ function ComponentConfort() {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (idComfort) => {
-    const comfortToEdit = comforts.find(
-      (comfort) => comfort.idComfort === idComfort
-    );
-    setCurrentComfort(comfortToEdit);
-    setIsModalOpen(true);
+  const handleEdit = (comfortToEdit) => {
+    showAlert({
+      type: "confirm-edit",
+      title: "Confirmar Modificación",
+      message: `¿Está seguro de que desea modificar la comodidad "${comfortToEdit.name}"?`,
+      confirmText: "Sí, Modificar",
+      onConfirm: () => {
+        setCurrentComfort(comfortToEdit);
+        setIsModalOpen(true);
+      },
+    });
   };
 
-  const handleDelete = async (idComfort) => {
-    if (window.confirm("¿Está seguro de que desea eliminar esta comodidad?")) {
-      try {
-        await deleteComfort(idComfort);
-        setComforts(
-          comforts.filter((comfort) => comfort.idComfort !== idComfort)
-        );
-        toast.success("Comodidad eliminada correctamente");
-      } catch (error) {
-        console.error("Error al eliminar la comodidad:", error);
-        toast.error("Error al eliminar la comodidad");
-      }
-    }
+  const handleDelete = async (comfortToDelete) => {
+    showAlert({
+      type: "confirm-delete",
+      title: "Confirmar Eliminación",
+      message: `¿Está seguro de que desea eliminar la comodidad "${comfortToDelete.name}"? Esta acción no se puede deshacer.`,
+      confirmText: "Sí, Eliminar",
+      onConfirm: async () => {
+        try {
+          await deleteComfort(comfortToDelete.idComfort);
+          setComforts((prevComforts) =>
+            prevComforts.filter(
+              (comfort) => comfort.idComfort !== comfortToDelete.idComfort
+            )
+          );
+          toast.success(
+            `Comodidad "${comfortToDelete.name}" eliminada correctamente.`
+          );
+        } catch (error) {
+          console.error("Error al eliminar la comodidad:", error);
+          const errorMessage =
+            error.response?.data?.message ||
+            error.message ||
+            "Error al eliminar la comodidad";
+          toast.error(errorMessage);
+        }
+      },
+    });
   };
 
-  const handleSave = async (data) => {
+  const handleSave = async (formData) => {
     try {
-      if (data.idComfort) {
-        await updateComfort(data.idComfort, data);
-        setComforts((prev) =>
-          prev.map((item) => (item.idComfort === data.idComfort ? data : item))
+      if (formData.idComfort) {
+        // Editando
+        const updatedComfort = await updateComfort(
+          formData.idComfort,
+          formData
         );
-        toast.success("Comodidad actualizada correctamente");
+
+        // Asegurar que updatedComfort sea un objeto válido
+        const comfortToUpdate =
+          updatedComfort &&
+          typeof updatedComfort === "object" &&
+          !Array.isArray(updatedComfort)
+            ? updatedComfort
+            : formData;
+
+        setComforts((prev) =>
+          prev.map((item) =>
+            item.idComfort === formData.idComfort ? comfortToUpdate : item
+          )
+        );
+
+        toast.success(
+          `Comodidad "${
+            comfortToUpdate.name || formData.name
+          }" actualizada correctamente.`
+        );
       } else {
-        const newComfort = await createComfort(data);
-        setComforts((prev) => [...prev, newComfort]);
-        toast.success("Comodidad creada correctamente");
+        // Creando
+        const newComfort = await createComfort(formData);
+
+        // Asegurar que newComfort sea un objeto válido
+        const comfortToAdd =
+          newComfort &&
+          typeof newComfort === "object" &&
+          !Array.isArray(newComfort)
+            ? newComfort
+            : formData;
+
+        setComforts((prev) => [comfortToAdd, ...prev]);
+        toast.success(
+          `Comodidad "${
+            comfortToAdd.name || formData.name
+          }" creada correctamente.`
+        );
       }
       setIsModalOpen(false);
       return null;
     } catch (error) {
-      console.log("Error completo recibido:", JSON.stringify(error, null, 2));
+      console.error("Error al guardar la comodidad:", error);
 
-      if (error.errors && Array.isArray(error.errors)) {
-        const formattedErrors = {};
-        error.errors.forEach((err) => {
-          if (err.path && err.msg) {
-            formattedErrors[err.path] = err.msg;
-          }
-        });
-        if (Object.keys(formattedErrors).length > 0) {
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          const formattedErrors = {};
+          let firstUserMessage = "Por favor, corrija los errores indicados.";
+          errorData.errors.forEach((errItem, index) => {
+            if (errItem.path) formattedErrors[errItem.path] = errItem.msg;
+            if (index === 0 && errItem.msg) firstUserMessage = errItem.msg;
+          });
+          toast.error(firstUserMessage);
           return formattedErrors;
+        } else if (errorData.message) {
+          toast.error(errorData.message);
+          return { general: errorData.message };
         }
       }
-      toast.error("Error al guardar la comodidad");
-      return { general: "Error al procesar la solicitud" };
+      const fallbackErrorMessage =
+        error.message || "Error al guardar la comodidad";
+      toast.error(fallbackErrorMessage);
+      return { general: fallbackErrorMessage };
     }
   };
 
@@ -159,11 +224,15 @@ function ComponentConfort() {
             <div className="loading-spinner"></div>
             <p>Cargando comodidades...</p>
           </div>
-        ) : error ? (
+        ) : fetchInitialError && comforts.length === 0 ? (
           <div className="error-message">
-            {error}
-            <button onClick={() => setError(null)}>
-              <FaTimes />
+            <p>{fetchInitialError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="comfort-cancel-btn"
+              style={{ marginTop: "10px" }}
+            >
+              Recargar Página
             </button>
           </div>
         ) : (
@@ -180,7 +249,9 @@ function ComponentConfort() {
                 {currentItems.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="no-data-row">
-                      No se encontraron comodidades
+                      {searchTerm
+                        ? "No se encontraron comodidades con ese nombre."
+                        : "No hay comodidades registradas."}
                     </td>
                   </tr>
                 ) : (
@@ -190,8 +261,8 @@ function ComponentConfort() {
                       <td>{comfort.name}</td>
                       <td className="actions-cell">
                         <ActionButtons
-                          onEdit={() => handleEdit(comfort.idComfort)}
-                          onDelete={() => handleDelete(comfort.idComfort)}
+                          onEdit={() => handleEdit(comfort)}
+                          onDelete={() => handleDelete(comfort)}
                         />
                       </td>
                     </tr>

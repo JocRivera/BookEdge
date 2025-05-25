@@ -1,0 +1,241 @@
+/* src/components/common/CustomAlert/CustomAlert.css */
+
+:root {
+  --alert-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif; /* Inter es una excelente opción moderna */
+  --alert-bg-light: #ffffff;
+  --alert-text-title: #111827;  /* Negro/Gris muy oscuro para títulos */
+  --alert-text-body: #4b5563;   /* Gris oscuro para cuerpo del mensaje */
+  --alert-text-button-primary-hover: #ffffff;
+  --alert-overlay-color: rgba(17, 24, 39, 0.6); /* Overlay gris oscuro con opacidad */
+  --alert-border-radius-main: 12px; /* Bordes redondeados más suaves */
+  --alert-border-radius-button: 8px;
+
+  /* Colores de Acento (ajusta según tu paleta) */
+  --alert-accent-error-icon: #ef4444;      /* Rojo para icono de error/delete */
+  --alert-accent-error-button-bg: #ef4444; /* Rojo para botón primario de error/delete */
+  --alert-accent-error-button-hover-bg: #dc2626;
+
+  --alert-accent-warning-icon: #f59e0b;    /* Naranja/Amarillo para icono de advertencia/edit */
+  --alert-accent-warning-button-bg: #f59e0b; /* Naranja/Amarillo para botón primario de advertencia/edit */
+  --alert-accent-warning-button-hover-bg: #d97706;
+  
+  --alert-accent-info-icon: #3b82f6;       /* Azul para icono de info */
+  --alert-accent-info-button-bg: #3b82f6;  /* Azul para botón primario de info */
+  --alert-accent-info-button-hover-bg: #2563eb;
+
+  --alert-button-secondary-bg: #ffffff;
+  --alert-button-secondary-text: #374151;
+  --alert-button-secondary-border: #d1d5db;
+  --alert-button-secondary-hover-bg: #f9fafb;
+}
+
+/* --- Overlay y Contenedor Principal --- */
+.custom-alert-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--alert-overlay-color); /* Ej: rgba(17, 24, 39, 0.6) */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+
+  opacity: 0;
+  /* Transición para el fade-in del overlay */
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* visibility: hidden; y transition-delay para visibility se manejan mejor con JS o estados de renderizado */
+}
+
+.custom-alert-overlay.open {
+  opacity: 1;
+  /* visibility: visible; */
+  /* transition-delay: 0s; */
+}
+
+
+
+.custom-alert-content {
+  background-color: var(--alert-bg-light); /* Ej: #ffffff */
+  font-family: var(--alert-font-family); /* Ej: "Inter", sans-serif */
+  border-radius: var(--alert-border-radius-main); /* Ej: 12px */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 460px;
+  padding: 24px;
+  text-align: left;
+  
+  /* ESTADO INICIAL (antes de abrir) */
+  opacity: 0;
+  transform: translateY(20px) scale(0.97); /* Ligeramente deslizado hacia abajo y más pequeño */
+  
+  /* TRANSICIÓN (cuando se añade .open al overlay) */
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.05s, /* Pequeño retraso para la opacidad */
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.05s; /* Pequeño retraso para la transformación */
+}
+
+.custom-alert-overlay.open .custom-alert-content {
+  /* ESTADO FINAL (cuando está abierto) */
+  opacity: 1;
+  transform: translateY(0) scale(1); /* Vuelve a su posición y tamaño original */
+}
+/* --- Cabecera del Modal (Icono y Título) --- */
+.custom-alert-header {
+  display: flex;
+  align-items: flex-start; /* Alinear icono y título en la parte superior */
+  gap: 16px; /* Espacio entre icono y texto */
+  margin-bottom: 12px;
+}
+
+.custom-alert-icon-wrapper { /* Contenedor para el círculo del icono */
+  flex-shrink: 0; /* Evita que el icono se encoja */
+  width: 40px;    /* Tamaño del círculo */
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-alert-icon-area { /* El SVG del icono en sí */
+  font-size: 1.25rem; /* Tamaño del icono SVG */
+  line-height: 1;
+}
+.custom-alert-icon-area svg { /* Si react-icons renderiza un SVG */
+    width: 20px; /* Ajusta según el icono */
+    height: 20px;
+}
+
+/* Colores para el círculo e icono */
+.custom-alert-content.confirm-delete .custom-alert-icon-wrapper { background-color: #fee2e2; /* Rojo muy claro */ }
+.custom-alert-content.confirm-delete .custom-alert-icon-area { color: var(--alert-accent-error-icon); }
+
+.custom-alert-content.confirm-edit .custom-alert-icon-wrapper { background-color: #fffbeb; /* Amarillo/Naranja muy claro */ }
+.custom-alert-content.confirm-edit .custom-alert-icon-area { color: var(--alert-accent-warning-icon); }
+
+.custom-alert-content.error-modal .custom-alert-icon-wrapper { background-color: #fee2e2; }
+.custom-alert-content.error-modal .custom-alert-icon-area { color: var(--alert-accent-error-icon); }
+
+.custom-alert-content.info-modal .custom-alert-icon-wrapper { background-color: #dbeafe; /* Azul muy claro */ }
+.custom-alert-content.info-modal .custom-alert-icon-area { color: var(--alert-accent-info-icon); }
+
+
+.custom-alert-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600; /* Semibold */
+  line-height: 1.5; /* 28px */
+  color: var(--alert-text-title);
+  margin: 0; /* Quitar márgenes por defecto del h3 */
+  padding-top: 6px; /* Para alinear mejor con el icono */
+}
+
+/* --- Cuerpo del Mensaje --- */
+.custom-alert-message {
+  font-size: 0.875rem; /* 14px */
+  color: var(--alert-text-body);
+  line-height: 1.5; /* 24px */
+  margin-bottom: 24px; /* Espacio antes de los botones */
+  padding-left: 56px; /* (ancho del icono + gap) para indentar el mensaje si el título es corto */
+}
+/* Si el título es largo y el mensaje debe empezar debajo, ajustar el padding-left o quitarlo */
+
+
+/* --- Acciones y Botones --- */
+.custom-alert-actions {
+  display: flex;
+  flex-direction: column-reverse; /* Para que el botón primario esté a la derecha en pantallas grandes si cambias a row */
+  gap: 12px; /* Espacio entre botones si son varios */
+  /* Para alinear a la derecha en diseño horizontal (row) */
+  /* justify-content: flex-end; */ 
+}
+
+/* En pantallas más grandes, podrías querer los botones en línea */
+@media (min-width: 640px) { /* sm de Tailwind */
+  .custom-alert-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+
+.custom-alert-button {
+  width: 100%; /* Botones apilados ocupan todo el ancho */
+  padding: 10px 16px;
+  border: 1px solid transparent; /* Borde base */
+  border-radius: var(--alert-border-radius-button);
+  font-family: var(--alert-font-family);
+  font-weight: 500; /* Medium */
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Sombra sutil */
+}
+@media (min-width: 640px) {
+  .custom-alert-button {
+    width: auto; /* En línea, ancho automático */
+  }
+}
+
+
+.custom-alert-button:focus-visible { /* Mejor outline para accesibilidad */
+  outline: 2px solid var(--alert-accent-info);
+  outline-offset: 2px;
+}
+.custom-alert-button:active {
+  transform: scale(0.98);
+}
+
+/* Botón Principal (clase .confirm) */
+.custom-alert-button.confirm {
+  color: var(--alert-bg-light); /* Texto blanco para botones con fondo de color */
+}
+.custom-alert-content.confirm-delete .custom-alert-button.confirm {
+  background-color: var(--alert-accent-error-button-bg);
+  border-color: var(--alert-accent-error-button-bg);
+}
+.custom-alert-content.confirm-delete .custom-alert-button.confirm:hover {
+  background-color: var(--alert-accent-error-button-hover-bg);
+  border-color: var(--alert-accent-error-button-hover-bg);
+}
+
+.custom-alert-content.confirm-edit .custom-alert-button.confirm {
+  background-color: var(--alert-accent-warning-button-bg);
+  border-color: var(--alert-accent-warning-button-bg);
+}
+.custom-alert-content.confirm-edit .custom-alert-button.confirm:hover {
+  background-color: var(--alert-accent-warning-button-hover-bg);
+  border-color: var(--alert-accent-warning-button-hover-bg);
+}
+
+.custom-alert-content.error-modal .custom-alert-button.confirm { /* Botón Aceptar de error */
+  background-color: var(--alert-accent-error-button-bg);
+  border-color: var(--alert-accent-error-button-bg);
+}
+.custom-alert-content.error-modal .custom-alert-button.confirm:hover {
+  background-color: var(--alert-accent-error-button-hover-bg);
+  border-color: var(--alert-accent-error-button-hover-bg);
+}
+
+.custom-alert-content.info-modal .custom-alert-button.confirm { /* Botón Aceptar de info */
+  background-color: var(--alert-accent-info-button-bg);
+  border-color: var(--alert-accent-info-button-bg);
+}
+.custom-alert-content.info-modal .custom-alert-button.confirm:hover {
+  background-color: var(--alert-accent-info-button-hover-bg);
+  border-color: var(--alert-accent-info-button-hover-bg);
+}
+
+
+/* Botón Secundario (Cancelar) */
+.custom-alert-button.cancel {
+  background-color: var(--alert-button-secondary-bg);
+  color: var(--alert-button-secondary-text);
+  border-color: var(--alert-button-secondary-border);
+}
+.custom-alert-button.cancel:hover {
+  background-color: var(--alert-button-secondary-hover-bg);
+}
+
+
