@@ -1,22 +1,62 @@
 import { useState } from "react"
 
-const useReservationForm = () => {
+const useReservationForm = (initialData = null) => {
   const [formData, setFormData] = useState({
-    idUser: "",
-    idPlan: "",
-    startDate: "",
-    endDate: "",
-    status: "Pendiente",
-    hasCompanions: false,
-    companionCount: 0,
+    // Datos básicos
+    idUser: initialData?.idUser || initialData?.user?.idUser || "",
+    idPlan: initialData?.idPlan || initialData?.plan?.idPlan || "",
+    startDate: initialData?.startDate || "",
+    endDate: initialData?.endDate || "",
+    status: initialData?.status || "Pendiente",
+
+    // Acompañantes
+    hasCompanions: initialData?.companions ? initialData.companions.length > 0 : false,
+    companionCount: initialData?.companions ? initialData.companions.length : 0,
+    companions: initialData?.companions || [],
+
+    // Alojamiento
+    idCabin:
+      initialData?.idCabin ||
+      (initialData?.cabins && initialData.cabins.length > 0 ? initialData.cabins[0].idCabin : ""),
+    idRoom:
+      initialData?.idRoom ||
+      (initialData?.bedrooms && initialData.bedrooms.length > 0 ? initialData.bedrooms[0].idRoom : ""),
+
+    // ✅ SERVICIOS CON CANTIDADES
+    selectedServices: initialData?.services 
+      ? initialData.services.map((s) => ({
+          serviceId: s.Id_Service,
+          quantity: s.quantity || 1
+        }))
+      : [],
+
+    // Datos cargados del servidor (se llenarán después)
+    users: [],
+    planes: [],
+    cabins: [],
+    bedrooms: [],
+    availableServices: [],
+    availableCabins: [],
+    availableBedrooms: [],
   })
+
   const [errors, setErrors] = useState({})
   const [currentStep, setCurrentStep] = useState(0)
 
   const updateFormData = (data) => {
-    setFormData({ ...formData, ...data })
+    if (typeof data === "function") {
+      setFormData((prevData) => {
+        const newData = data(prevData)
+        console.log("🔄 Hook updateFormData (función):", { prevData, newData })
+        return newData
+      })
+    } else {
+      console.log("🔄 Hook updateFormData (objeto):", { currentData: formData, newData: data })
+      setFormData((prevData) => ({ ...prevData, ...data }))
+    }
   }
 
+  // Resto del código del hook permanece igual...
   const nextStep = () => {
     const newErrors = validateStep(currentStep)
     if (Object.keys(newErrors).length === 0) {
@@ -32,21 +72,21 @@ const useReservationForm = () => {
     setErrors({})
   }
 
-  const validateStep = (step) => {
+  const validateStep = (step, dataToValidate = formData) => {
     const newErrors = {}
 
-    if (step === 0) {
-      if (!formData.idUser) newErrors.idUser = "Cliente es requerido"
-      if (!formData.idPlan) newErrors.idPlan = "Plan es requerido"
-      if (!formData.startDate) newErrors.startDate = "Fecha de entrada es requerida"
-      if (!formData.endDate) newErrors.endDate = "Fecha de salida es requerida"
+    if (step === 1 || step === 0) {
+      if (!dataToValidate.idUser) newErrors.idUser = "Cliente es requerido"
+      if (!dataToValidate.idPlan) newErrors.idPlan = "Plan es requerido"
+      if (!dataToValidate.startDate) newErrors.startDate = "Fecha de entrada es requerida"
+      if (!dataToValidate.endDate) newErrors.endDate = "Fecha de salida es requerida"
 
       // Validación mejorada de fechas
       const today = new Date()
-      today.setHours(0, 0, 0, 0) // Resetear horas para comparación exacta
+      today.setHours(0, 0, 0, 0)
 
-      if (formData.startDate) {
-        const startDate = new Date(formData.startDate)
+      if (dataToValidate.startDate) {
+        const startDate = new Date(dataToValidate.startDate)
         startDate.setHours(0, 0, 0, 0)
 
         if (startDate < today) {
@@ -54,9 +94,9 @@ const useReservationForm = () => {
         }
       }
 
-      if (formData.startDate && formData.endDate) {
-        const startDate = new Date(formData.startDate)
-        const endDate = new Date(formData.endDate)
+      if (dataToValidate.startDate && dataToValidate.endDate) {
+        const startDate = new Date(dataToValidate.startDate)
+        const endDate = new Date(dataToValidate.endDate)
 
         if (endDate <= startDate) {
           newErrors.endDate = "La fecha de salida debe ser posterior a la fecha de inicio"
@@ -64,16 +104,23 @@ const useReservationForm = () => {
       }
 
       const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"]
-      if (formData.status && !validStatuses.includes(formData.status)) {
+      if (dataToValidate.status && !validStatuses.includes(dataToValidate.status)) {
         newErrors.status = `Estado no válido. Use uno de: ${validStatuses.join(", ")}`
       }
 
-      if (formData.hasCompanions && (!formData.companionCount || formData.companionCount <= 0)) {
+      if (dataToValidate.hasCompanions && (!dataToValidate.companionCount || dataToValidate.companionCount <= 0)) {
         newErrors.companionCount = "Debe especificar al menos 1 acompañante"
       }
 
-      if (formData.hasCompanions && formData.companionCount > 10) {
+      if (dataToValidate.hasCompanions && dataToValidate.companionCount > 10) {
         newErrors.companionCount = "Máximo 10 acompañantes permitidos"
+      }
+    }
+
+    // Validación del paso 3 (disponibilidad)
+    if (step === 3) {
+      if (!dataToValidate.idCabin && !dataToValidate.idRoom) {
+        newErrors.accommodation = "Debe seleccionar una cabaña o habitación"
       }
     }
 
@@ -81,10 +128,9 @@ const useReservationForm = () => {
   }
 
   const handleSubmit = () => {
-    const newErrors = validateStep(2) // Assuming step 2 is the final step
+    const newErrors = validateStep(2)
     if (Object.keys(newErrors).length === 0) {
       setErrors({})
-      // Here you would typically submit the form data
       console.log("Form submitted:", formData)
       alert("Form submitted successfully!")
     } else {
@@ -100,6 +146,7 @@ const useReservationForm = () => {
     nextStep,
     prevStep,
     handleSubmit,
+    validateStep,
   }
 }
 

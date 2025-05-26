@@ -415,7 +415,7 @@ export const changeReservationStatus = async (idReservation, status) => {
     console.log("📦 Payload completo para cambio de estado:", payload)
 
     // Usar PUT en lugar de PATCH
-    const response = await axios.put(`${API_URL_RESERVATIONS}/${id}`, payload, {
+    const response = await axios.patch(`${API_URL_RESERVATIONS}/${id}/status`, payload, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
