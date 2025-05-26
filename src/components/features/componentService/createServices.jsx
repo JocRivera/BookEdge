@@ -9,10 +9,6 @@ import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAlert } from "../../../context/AlertContext";
 
-
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
-
 export default function CreateServices() {
     const [currentService, setCurrentService] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
