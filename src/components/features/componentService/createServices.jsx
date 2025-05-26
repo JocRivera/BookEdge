@@ -78,45 +78,24 @@ export default function CreateServices() {
     };
 
     const handleDelete = (Id_Service) => {
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de eliminar el servicio ${Id_Service}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Eliminar</b></button>', function (instance, toast) {
-                    serviceService.deleteService(Id_Service).then(() => {
-                        setServices(services.filter((service) => service.Id_Service !== Id_Service));
-                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Servicio eliminado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }).catch((error) => {
-                        console.error("Error deleting service:", error);
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo eliminar el servicio',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    });
-                }, true],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                }],
-            ],
+        showAlert({
+            type: "confirm-delete",
+            title: "Confirmar Eliminación",
+            message: "¿Está seguro de eliminar este servicio?",
+            confirmText: "Sí, Eliminar",
+            onConfirm: () => {
+                serviceService.deleteService(Id_Service).then(() => {
+                    setServices(services.filter((service) => service.Id_Service !== Id_Service));
+                    toast.success(
+                        `Servicio eliminado correctamente.`
+                    );
+                }).catch((error) => {
+                    console.error("Error deleting service:", error);
+                    toast.error(
+                        `Error al eliminar el servicio: ${error.message || error}`
+                    );
+                });
+            },
         });
     };
 
