@@ -68,54 +68,34 @@ export default function CreateConfig() {
         setIsView(true);
     }
     const handleEdit = (idRol) => {
-        const config = settings.find((config) => config.idRol === idRol);
-        setCurrentConfig(config);
-        setIsModalOpen(true);
-        console.log(config)
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Modificación",
+            message: "¿Está seguro de modificar este servicio?",
+            confirmText: "Sí, Modificar",
+            onConfirm: () => {
+                const config = settings.find((config) => config.idRol === idRol);
+                setCurrentConfig(config);
+                setIsModalOpen(true);
+            }
+        })
     }
     const handleDelete = (idRol) => {
-        //usar iziToast para mostrar el mensaje de confirmación
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de actualizar al rol ${idRol}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Eliminar</b></button>', function (instance, toast) {
-                    // Aquí va la lógica para eliminar el rol
-                    rolesService.deleteRole(idRol).then((res) => {
-                        setSettings(settings.filter((config) => config.idRol !== idRol))
-                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Rol eliminado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }).catch((error) => {
-                        console.log(error)
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo eliminar el Rol',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    })
-                }, true],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                }],
-            ],
-        });
+        showAlert({
+            type: "confirm-delete",
+            title: "Confirmar Eliminación",
+            message: "¿Está seguro de eliminar este rol?",
+            confirmText: "Sí, Eliminar",
+            onConfirm: () => {
+                rolesService.deleteRole(idRol).then((res) => {
+                    setSettings(settings.filter((config) => config.idRol !== idRol));
+                    toast.success('Rol eliminado correctamente')
+                }).catch((error) => {
+                    console.log(error)
+                    toast.error(`Error al eliminar el rol: ${error.message || 'Error desconocido'}`);
+                })
+            }
+        })
     }
     const handleSave = (setting) => {
 
