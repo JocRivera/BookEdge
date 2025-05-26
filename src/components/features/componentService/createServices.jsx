@@ -5,9 +5,9 @@ import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormService from "./formServices";
 import serviceService from "../../../services/serviceService"
-import { FaEdit, FaTrash, FaTimes, FaEye } from "react-icons/fa";
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
+import { FaTimes } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { useAlert } from "../../../context/AlertContext";
 
 export default function CreateServices() {
     const [currentService, setCurrentService] = useState(null);
@@ -16,6 +16,8 @@ export default function CreateServices() {
     const [isView, setIsView] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const { showAlert } = useAlert();
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -57,51 +59,38 @@ export default function CreateServices() {
     };
 
     const handleEdit = (Id_Service) => {
-        const service = services.find((service) => service.Id_Service === Id_Service);
-        setCurrentService(service);
-        setIsModalOpen(true);
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Modificación",
+            message: "¿Está seguro de modificar este servicio?",
+            confirmText: "Sí, Modificar",
+            onConfirm: () => {
+                const serviceToEdit = services.find((service) => service.Id_Service === Id_Service);
+                setCurrentService(serviceToEdit);
+                setIsModalOpen(true);
+            },
+        });
     };
 
     const handleDelete = (Id_Service) => {
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de eliminar el servicio ${Id_Service}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Eliminar</b></button>', function (instance, toast) {
-                    serviceService.deleteService(Id_Service).then(() => {
-                        setServices(services.filter((service) => service.Id_Service !== Id_Service));
-                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Servicio eliminado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }).catch((error) => {
-                        console.error("Error deleting service:", error);
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo eliminar el servicio',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    });
-                }, true],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                }],
-            ],
+        showAlert({
+            type: "confirm-delete",
+            title: "Confirmar Eliminación",
+            message: "¿Está seguro de eliminar este servicio?",
+            confirmText: "Sí, Eliminar",
+            onConfirm: () => {
+                serviceService.deleteService(Id_Service).then(() => {
+                    setServices(services.filter((service) => service.Id_Service !== Id_Service));
+                    toast.success(
+                        `Servicio eliminado correctamente.`
+                    );
+                }).catch((error) => {
+                    console.error("Error deleting service:", error);
+                    toast.error(
+                        `Error al eliminar el servicio: ${error.message || error}`
+                    );
+                });
+            },
         });
     };
 
@@ -109,44 +98,20 @@ export default function CreateServices() {
         if (currentService) {
             serviceService.updateService(currentService.Id_Service, service).then(() => {
                 setServices(services.map((srvc) => srvc.Id_Service === currentService.Id_Service ? { ...srvc, ...service } : srvc));
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Servicio actualizado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Servicio actualizado correctamente');
             }).catch((error) => {
                 console.error("Error updating service:", error);
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: `No se pudo actualizar el servicio: ${error}`,
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.error(`Error al actualizar el servicio: ${error.message || error}`);
             });
         } else {
             serviceService.createService(service).then((newService) => {
                 setServices([...services, newService]);
                 setCurrentService(null);
                 setIsModalOpen(false);
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Servicio creado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Servicio creado correctamente');
             }).catch((error) => {
                 console.error("Error creating service:", error);
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: `No se pudo crear el servicio: ${error}`,
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.error(`Error al crear el servicio: ${error.message || error}`);
             });
         }
         console.log(service);
@@ -156,51 +121,21 @@ export default function CreateServices() {
         const service = services.find((service) => service.Id_Service === Id_Service);
         const updatedService = { ...service, StatusServices: !service.StatusServices };
 
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de actualizar el estado del servicio ${Id_Service}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Actualizar</b></button>', function (instance, toast) {
-                    serviceService.changeStatus(Id_Service, updatedService.StatusServices).then(() => {
-                        setServices(
-                            services.map((service) =>
-                                service.Id_Service === Id_Service
-                                    ? { ...service, StatusServices: !service.StatusServices }
-                                    : service
-                            )
-                        );
-                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Estado actualizado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }).catch((error) => {
-                        console.error("Error changing service status:", error);
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo actualizar el estado del servicio',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    });
-                }, true],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                }],
-            ],
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Cambio de Estado",
+            message: `¿Está seguro de que desea ${updatedService.StatusServices ? "activar" : "desactivar"} este servicio?`,
+            confirmText: "Sí, Cambiar Estado",
+            onConfirm: async () => {
+                try {
+                    await serviceService.updateService(Id_Service, updatedService);
+                    setServices(services.map((srvc) => srvc.Id_Service === Id_Service ? updatedService : srvc));
+                    toast.success(`Servicio ${updatedService.StatusServices ? "activado" : "desactivado"} correctamente.`);
+                } catch (error) {
+                    console.error("Error updating service status:", error);
+                    toast.error(`Error al actualizar el estado del servicio: ${error.message || error}`);
+                }
+            },
         });
     };
 

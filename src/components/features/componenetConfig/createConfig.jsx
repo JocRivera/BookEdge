@@ -6,8 +6,11 @@ import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
-import { FaEdit, FaTrash, FaTimes, FaEye } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import DetailsConfig from "./detailsConfig";
+import { toast } from "react-toastify";
+import { useAlert } from "../../../context/AlertContext";
+
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 export default function CreateConfig() {
@@ -17,6 +20,9 @@ export default function CreateConfig() {
     const [isView, setIsView] = useState(false)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const { showAlert } = useAlert();
+
     useEffect(() => {
         const fetchConfig = async () => {
             setLoading(true)
@@ -33,11 +39,14 @@ export default function CreateConfig() {
         fetchConfig()
     }, [])
     const [searchTerm, setSearchTerm] = useState("");
-    const filtrarDatos = settings.filter((config) =>
-        Object.values(config).some((value) =>
-            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
+    const filtrarDatos = settings
+        .filter((config) => config.name.toLowerCase() !== "admin")
+        .filter((config) =>
+            Object.values(config).some((value) =>
+                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        );
+
 
     const itemsPerPage = 6;
     const [currentPage, setCurrentPage] = useState(0);
@@ -59,54 +68,34 @@ export default function CreateConfig() {
         setIsView(true);
     }
     const handleEdit = (idRol) => {
-        const config = settings.find((config) => config.idRol === idRol);
-        setCurrentConfig(config);
-        setIsModalOpen(true);
-        console.log(config)
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Modificación",
+            message: "¿Está seguro de modificar este servicio?",
+            confirmText: "Sí, Modificar",
+            onConfirm: () => {
+                const config = settings.find((config) => config.idRol === idRol);
+                setCurrentConfig(config);
+                setIsModalOpen(true);
+            }
+        })
     }
     const handleDelete = (idRol) => {
-        //usar iziToast para mostrar el mensaje de confirmación
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de actualizar al rol ${idRol}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Eliminar</b></button>', function (instance, toast) {
-                    // Aquí va la lógica para eliminar el rol
-                    rolesService.deleteRole(idRol).then((res) => {
-                        setSettings(settings.filter((config) => config.idRol !== idRol))
-                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Rol eliminado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }).catch((error) => {
-                        console.log(error)
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo eliminar el Rol',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    })
-                }, true],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                }],
-            ],
-        });
+        showAlert({
+            type: "confirm-delete",
+            title: "Confirmar Eliminación",
+            message: "¿Está seguro de eliminar este rol?",
+            confirmText: "Sí, Eliminar",
+            onConfirm: () => {
+                rolesService.deleteRole(idRol).then((res) => {
+                    setSettings(settings.filter((config) => config.idRol !== idRol));
+                    toast.success('Rol eliminado correctamente')
+                }).catch((error) => {
+                    console.log(error)
+                    toast.error(`Error al eliminar el rol: ${error.message || 'Error desconocido'}`);
+                })
+            }
+        })
     }
     const handleSave = (setting) => {
 
@@ -114,24 +103,10 @@ export default function CreateConfig() {
             console.log(currentConfig)
             rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
                 setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
-                // setCurrentConfig(null)
-                // setIsModalOpen(false)
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Rol actualizado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Rol actualizado correctamente')
             }).catch((error) => {
                 console.log(error)
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: 'No se pudo actualizar el Rol',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.error(`Error al actualizar el rol: ${error.message || 'Error desconocido'}`);
             }
             )
         }
@@ -140,23 +115,10 @@ export default function CreateConfig() {
                 setSettings([...settings, res])
                 setCurrentConfig(null)
                 setIsModalOpen(false)
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Rol creado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Rol creado correctamente')
             }).catch((error) => {
                 console.log(error)
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: 'No se pudo crear el Rol',
-                    position: 'topRight',
-                    timeout: 5000
-                });
-
+                toast.error(`Error al crear el rol: ${error.message || 'Error desconocido'}`);
             })
         }
         console.log(setting);
@@ -164,45 +126,20 @@ export default function CreateConfig() {
     const handleToggle = async (idRol) => {
         const config = settings.find((config) => config.idRol === idRol);
         const updatedConfig = { ...config, status: !config.status };
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de actualizar el rol ${idRol}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Actualizar</b></button>', function (instance, toast) {
-                    rolesService.updateRole(idRol, updatedConfig).then((res) => {
-                        setSettings(settings.map((config) => config.idRol === idRol ? { ...config, status: !config.status } : config))
-                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Rol actualizado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }).catch((error) => {
-                        console.log(error)
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo actualizar el Rol',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    })
-                }, true],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                }],
-            ],
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Cambio de Estado",
+            message: `¿Está seguro de cambiar el estado del rol "${config.name}"?`,
+            confirmText: "Sí, Cambiar Estado",
+            onConfirm: () => {
+                rolesService.updateRole(idRol, updatedConfig).then((res) => {
+                    setSettings(settings.map((c) => c.idRol === idRol ? { ...c, status: !c.status } : c));
+                    toast.success(`Rol ${updatedConfig.status ? "activado" : "desactivado"} correctamente.`);
+                }).catch((error) => {
+                    console.log(error)
+                    toast.error(`Error al actualizar el estado del rol: ${error.message || 'Error desconocido'}`);
+                })
+            }
         });
     };
     return (
