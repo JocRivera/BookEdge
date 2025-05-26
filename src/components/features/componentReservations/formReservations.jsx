@@ -588,13 +588,22 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         <div className="steps-indicator">
           <div className={`step ${step === 1 ? "active" : ""}`}>1. Datos Reserva</div>
           {formData.hasCompanions && <div className={`step ${step === 2 ? "active" : ""}`}>2. Acompañantes</div>}
-          <div className={`step ${step === (formData.hasCompanions ? 3 : 2) ? "active" : ""}`}>
-            {formData.hasCompanions ? "3" : "2"}. Disponibilidad
-          </div>
-          <div className={`step ${step === (formData.hasCompanions ? 4 : 3) ? "active" : ""}`}>
-            {formData.hasCompanions ? "4" : "3"}. Pagos
+          {!formData.requiresAccommodation && null}
+          {formData.requiresAccommodation && (
+            <div className={`step ${step === (formData.hasCompanions ? 3 : 2) ? "active" : ""}`}>
+              {formData.hasCompanions ? "3" : "2"}. Disponibilidad
+            </div>
+          )}
+          <div className={`step ${step === (formData.hasCompanions
+            ? (formData.requiresAccommodation ? 4 : 3)
+            : (formData.requiresAccommodation ? 3 : 2))
+            ? "active" : ""}`}>
+            {formData.hasCompanions
+              ? (formData.requiresAccommodation ? "4" : "3")
+              : (formData.requiresAccommodation ? "3" : "2")}. Pagos
           </div>
         </div>
+
 
         <div className="reservations-modal-body">
           <form onSubmit={handleSubmit} noValidate>

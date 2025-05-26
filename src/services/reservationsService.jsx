@@ -108,7 +108,7 @@ export const getAllPlanes = async () => {
       return []
     }
 
-    console.log("✅ Planes obtenidos:", data.length)
+    console.log("✅ Planes obtenidos:", data)
     console.log("📋 Planes detalle:", data)
     return data
   } catch (error) {
