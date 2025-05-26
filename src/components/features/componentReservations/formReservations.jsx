@@ -14,7 +14,7 @@ import { BasicInfoStep, CompanionsStep, AvailabilityStep, PaymentStep } from "./
 import { createReservation, updateReservation, addCompanionReservation } from "../../../services/reservationsService"
 import { createCompanion, deleteCompanion } from "../../../services/companionsService"
 import { addPaymentToReservation } from "../../../services/paymentsService"
-import { getUsers, getAllPlanes, getCabins, getBedrooms, getServices } from "../../../services/reservationsService"
+import { getUsers, getAllProgrammedPlans, getAllPlanes, getCabins, getBedrooms, getServices } from "../../../services/reservationsService"
 import { getReservationPayments } from "../../../services/paymentsService"
 
 function FormReservation({ reservationData = null, onClose, onSave, isOpen, isReadOnly = false }) {
@@ -87,10 +87,38 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
       // Cuando cambia la fecha de inicio en un plan "Día de sol"
       if (name === "startDate") {
+        const selectedDate = new Date(value)
+
+        const validProgrammedIds = (formData.programmedPlans || []).filter(pp => {
+          const start = new Date(pp.startDate)
+          const end = new Date(pp.endDate)
+          return pp.statusProgramed && selectedDate >= start && selectedDate <= end
+        }).map(pp => pp.idPlan)
+
+        const visiblePlanes = (formData.planes || []).filter(plan =>
+          plan.isStatic || validProgrammedIds.includes(plan.idPlan)
+        )
+
+        newData.availablePlanes = visiblePlanes
+
+        // Si el plan actual ya no está disponible, reiniciar idPlan
+        if (!visiblePlanes.find(p => p.idPlan === Number(newData.idPlan))) {
+          newData.idPlan = ""
+          newData.requiresAccommodation = true
+          newData.endDate = ""
+        }
+
+        // Si el plan sí es visible y no requiere alojamiento
+        // const selectedPlan = visiblePlanes.find(p => p.idPlan === Number(newData.idPlan))
+        // if (selectedPlan && selectedPlan.requiresAccommodation === false) {
+        //   newData.endDate = value
+        //   newData.requiresAccommodation = false
+        // }
         const selectedPlan = formData.planes.find(p => p.idPlan === Number(newData.idPlan))
         if (selectedPlan && selectedPlan.name === "Día de sol") {
           newData.endDate = value // Sincronizar fecha fin con inicio
         }
+
       }
 
       // Aplicar lógica de disponibilidad cuando cambian campos relevantes
@@ -441,21 +469,43 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         console.log("🔄 Cargando datos iniciales...")
 
         // Cargar datos del servidor
-        const [usersData, planesData, cabinsData, bedroomsData, servicesData] = await Promise.all([
+        const [
+          usersData,
+          planesData,
+          programmedPlansData,
+          cabinsData,
+          bedroomsData,
+          servicesData
+        ] = await Promise.all([
           getUsers(),
           getAllPlanes(),
+          getAllProgrammedPlans(),
           getCabins(),
           getBedrooms(),
           getServices(),
         ])
 
-        console.log("📊 Datos cargados del servidor:", {
-          users: usersData?.length,
-          planes: planesData?.length,
-          cabins: cabinsData?.length,
-          bedrooms: bedroomsData?.length,
-          services: servicesData?.length,
-        })
+        // 🔍 Marcar planes estáticos (ejemplo: IDs 1, 3, 5)
+        const staticPlanIds = [1, 3, 5]
+        const patchedPlanes = planesData.map(plan => ({
+          ...plan,
+          isStatic: staticPlanIds.includes(plan.idPlan)
+        }))
+
+        // 📅 Filtrar planes programados activos según hoy
+        const today = new Date()
+        const activeProgrammedIds = programmedPlansData
+          .filter(pp => {
+            const start = new Date(pp.startDate)
+            const end = new Date(pp.endDate)
+            return pp.statusProgramed && today >= start && today <= end
+          })
+          .map(pp => pp.idPlan)
+
+        // 🧠 Planes visibles: estáticos o programados válidos
+        const visiblePlanes = patchedPlanes.filter(plan =>
+          plan.isStatic || activeProgrammedIds.includes(plan.idPlan)
+        )
 
         // Filtrar solo elementos en servicio
         const activeCabins = cabinsData?.filter((cabin) => cabin.status?.toLowerCase() === "en servicio") || []
@@ -466,7 +516,9 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
           const newData = {
             ...prevData,
             users: usersData || [],
-            planes: planesData || [],
+            planes: patchedPlanes || [],
+            programmedPlans: programmedPlansData || [], // <--- Agregado
+            availablePlanes: visiblePlanes || [],
             cabins: cabinsData || [],
             bedrooms: bedroomsData || [],
             availableServices: servicesData || [],
@@ -612,11 +664,12 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 formData={formData}
                 errors={errors}
                 users={formData.users || []}
-                planes={formData.planes || []}
+                planes={formData.availablePlanes || []} // <-- usar solo los visibles
                 loading={loading}
                 isReadOnly={isReadOnly}
                 onChange={handleChange}
               />
+
             )}
 
             {step === 2 && formData.hasCompanions && (

@@ -3,6 +3,8 @@ import api from "./api"
 
 const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
 const API_URL_PLANS = "http://localhost:3000/plan"
+const API_URL = "http://localhost:3000/"
+
 
 const validateId = (id, name = "ID") => {
   const numId = Number(id)
@@ -113,6 +115,29 @@ export const getAllPlanes = async () => {
     return data
   } catch (error) {
     console.error("❌ Error al obtener planes:", {
+      message: error.message,
+      response: error.response?.data,
+      config: error.config,
+    })
+    return []
+  }
+}
+
+export const getAllProgrammedPlans = async () => {
+  try {
+    console.log("📅 Obteniendo planes programados...")
+    const { data } = await axios.get(`${API_URL}planProgramed`)
+    console.log("🔍 Respuesta cruda del servidor:", data)
+
+    if (!Array.isArray(data)) {
+      console.warn("⚠️ La respuesta del servidor no es un array:", data)
+      return []
+    }
+    console.log("✅ Planes programados obtenidos:", data)
+    console.log("📅 Planes programados detalle:", data)
+    return data
+  } catch (error) {
+    console.error("❌ Error al obtener planes programados:", {
       message: error.message,
       response: error.response?.data,
       config: error.config,
