@@ -1,21 +1,40 @@
-/* availability-step.css - Versión Mejorada
+
+/* Variables CSS para consistencia */
+:root {
+  --availability-primary: #4e54c8;
+  --availability-primary-light: #8f94fb;
+  --availability-primary-dark: #3a3f9e;
+  --availability-success: #28a745;
+  --availability-warning: #ffc107;
+  --availability-danger: #dc3545;
+  --availability-info: #17a2b8;
+  --availability-light: #f8f9fa;
+  --availability-border: #e2e8f0;
+  --availability-shadow: rgba(78, 84, 200, 0.1);
+  --availability-text-dark: #2d3748;
+  --availability-text-normal: #4a5568;
+  --availability-text-light: #718096;
+}
+
+/* Contenedor principal del paso de disponibilidad */
 .availability-step {
-  background: var(--reservations-card-bg);
+  background: white;
   border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 15px 30px var(--reservations-shadow-light);
+  box-shadow: 0 15px 30px var(--availability-shadow);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   margin-bottom: 2rem;
 }
 
 .availability-step:hover {
-  box-shadow: 0 25px 50px var(--reservations-shadow-dark);
+  box-shadow: 0 25px 50px rgba(78, 84, 200, 0.15);
 }
 
+/* Título del paso */
 .step-title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: var(--reservations-primary-dark);
+  color: var(--availability-text-dark);
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
   position: relative;
@@ -28,7 +47,7 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, var(--reservations-primary), var(--reservations-primary-dark));
+  background: linear-gradient(90deg, var(--availability-primary), var(--availability-primary-dark));
   border-radius: 3px;
   transform-origin: left center;
   transform: scaleX(1);
@@ -39,15 +58,35 @@
   transform: scaleX(1.1);
 }
 
-.section-container {
+/* Información de huéspedes */
+.guest-info {
+  background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
   margin-bottom: 2rem;
+  border-left: 4px solid var(--availability-primary);
+}
+
+.guest-info p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: var(--availability-text-dark);
+}
+
+.guest-info strong {
+  color: var(--availability-primary-dark);
+}
+
+/* Contenedores de sección */
+.section-container {
+  margin-bottom: 2.5rem;
 }
 
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--reservations-primary-dark);
-  margin-bottom: 1rem;
+  color: var(--availability-primary-dark);
+  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -58,182 +97,599 @@
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: var(--reservations-primary);
+  background: var(--availability-primary);
   border-radius: 50%;
 }
 
-.options-grid, .services-grid {
+/* Grid para opciones de alojamiento */
+.options-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+  margin-top: 1rem;
 }
 
-.option-item, .service-item {
+/* Elementos de opción (cabañas/habitaciones) */
+.option-item {
   display: flex;
   align-items: flex-start;
-  background-color: var(--reservations-card-bg);
+  background-color: white;
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid var(--reservations-border);
+  border: 2px solid var(--availability-border);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   position: relative;
   overflow: hidden;
 }
 
-.option-item:hover, .service-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px var(--reservations-shadow-medium);
-  border-color: var(--reservations-primary-light);
+.option-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px var(--availability-shadow);
+  border-color: var(--availability-primary-light);
 }
 
-.option-item.selected, .service-item.selected {
-  border-color: var(--reservations-primary);
-  background-color: var(--reservations-primary-hover);
+.option-item.selected {
+  border-color: var(--availability-success);
+  background-color: rgba(40, 167, 69, 0.05);
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.2);
 }
 
-.option-item.selected::after, .service-item.selected::after {
+.option-item.selected::after {
   content: "✓";
   position: absolute;
-  top: 10px;
-  right: 10px;
-  color: var(--reservations-primary);
-  font-size: 1.2rem;
+  top: 12px;
+  right: 12px;
+  color: var(--availability-success);
+  font-size: 1.4rem;
   font-weight: bold;
+  background: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
 }
 
-.option-selector, .service-selector {
+/* Selector de opciones */
+.option-selector {
   margin-right: 1rem;
-  font-size: 1.2rem;
-  min-width: 24px;
+  font-size: 1.4rem;
+  min-width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .selected-icon {
-  color: var(--reservations-primary);
+  color: var(--availability-success);
   font-weight: bold;
 }
 
 .unselected-icon {
-  color: var(--reservations-border);
+  color: var(--availability-border);
+  font-size: 1.2rem;
 }
 
-.option-content, .service-content {
+/* Contenido de opciones */
+.option-content {
   flex: 1;
 }
 
-.option-name, .service-name {
-  font-size: 1.1rem;
+.option-name {
+  font-size: 1.2rem;
   font-weight: 600;
-  color: var(--reservations-text-dark);
+  color: var(--availability-text-dark);
   margin-bottom: 0.5rem;
+  line-height: 1.3;
 }
 
-.option-detail, .service-price {
-  color: var(--reservations-primary-dark);
+.option-detail {
+  color: var(--availability-primary-dark);
   font-size: 0.95rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
 
-.option-description, .service-description {
-  color: var(--reservations-text-normal);
+.option-description {
+  color: var(--availability-text-normal);
   font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.option-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+/* Mensaje cuando no hay opciones */
+.no-options {
+  color: var(--availability-text-light);
+  font-style: italic;
+  padding: 2rem;
+  text-align: center;
+  background-color: rgba(143, 148, 251, 0.05);
+  border-radius: 12px;
+  border: 2px dashed var(--availability-border);
+  font-size: 1rem;
+}
+
+/* ===== ESTILOS PARA SERVICIOS CON CANTIDADES ===== */
+
+/* Grid para servicios con cantidades */
+.services-grid-with-quantity {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* Elemento de servicio con cantidad */
+.service-item-with-quantity {
+  border: 2px solid var(--availability-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: white;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.service-item-with-quantity:hover {
+  border-color: var(--availability-primary);
+  box-shadow: 0 8px 25px var(--availability-shadow);
+  transform: translateY(-2px);
+}
+
+.service-item-with-quantity.selected {
+  border-color: var(--availability-success);
+  background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.2);
+}
+
+.service-item-with-quantity.selected::before {
+  content: "✓";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--availability-success);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Información del servicio */
+.service-info {
+  margin-bottom: 1.5rem;
+}
+
+.service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.service-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--availability-text-dark);
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.service-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--availability-primary);
+  background: rgba(78, 84, 200, 0.1);
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.service-description {
+  font-size: 0.9rem;
+  color: var(--availability-text-normal);
+  margin: 0;
   line-height: 1.5;
 }
 
-.no-options {
-  color: var(--reservations-text-light);
-  font-style: italic;
-  padding: 1rem;
-  text-align: center;
-  background-color: rgba(143, 148, 251, 0.05);
-  border-radius: 8px;
-  border: 1px dashed var(--reservations-border);
-}
-
-.error-message {
-  color: #ff4757;
-  background-color: rgba(255, 71, 87, 0.05);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-  border-left: 4px solid #ff4757;
-}
-
-/* Botones de acción */
-/* .action-buttons {
+/* Controles de cantidad */
+.service-quantity-controls {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--reservations-border);
+  align-items: center;
 }
 
-.btn {
-  padding: 0.8rem 1.5rem;
-  border-radius: 50px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+/* Selector de cantidad minimalista */
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--availability-light);
+  border-radius: 12px;
+  padding: 6px;
+  width: fit-content;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.btn-cancel {
-  background: var(--reservations-card-bg);
-  border: 1px solid var(--reservations-border);
-  color: var(--reservations-text-normal);
-}
-
-.btn-cancel:hover {
-  background-color: #f7fafc;
-  border-color: #cbd5e0;
-}
-
-.btn-primary {
-  background: var(--reservations-primary);
-  border: 1px solid var(--reservations-primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--reservations-primary-dark);
-  border-color: var(--reservations-primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--reservations-shadow-medium);
-}
-
-/* Capacidad Total */
-/* .total-capacity {
-  background: rgba(143, 148, 251, 0.05);
-  padding: 1rem;
+.quantity-btn {
+  background: white;
+  border: 1px solid var(--availability-border);
+  color: var(--availability-text-normal);
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
-  margin-top: 1.5rem;
-  font-weight: 500;
-  color: var(--reservations-primary-dark);
-  border-left: 4px solid var(--reservations-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  user-select: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Responsive */
-/* @media (max-width: 768px) {
-  .options-grid, .services-grid {
-    grid-template-columns: 1fr;
+.quantity-btn:hover:not(:disabled) {
+  background: var(--availability-primary);
+  color: white;
+  border-color: var(--availability-primary);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(78, 84, 200, 0.3);
+}
+
+.quantity-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.quantity-btn:disabled {
+  background: #e9ecef;
+  color: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.quantity-btn.decrease {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+
+.quantity-btn.increase {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: none;
+}
+
+.quantity-input {
+  border: 1px solid var(--availability-border);
+  border-left: none;
+  border-right: none;
+  background: white;
+  text-align: center;
+  width: 60px;
+  height: 40px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--availability-text-dark);
+  outline: none;
+  border-radius: 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.quantity-input:focus {
+  border-color: var(--availability-primary);
+  box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.1);
+}
+
+/* Subtotal del servicio */
+.service-subtotal {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--availability-success);
+  background: rgba(40, 167, 69, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+/* Resumen de servicios seleccionados */
+.services-summary {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
+  border: 1px solid var(--availability-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.services-summary h4 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
+  color: var(--availability-text-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.services-summary h4::before {
+  content: "📋";
+  font-size: 1.3rem;
+}
+
+.selected-services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.selected-service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--availability-border);
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.selected-service-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.selected-service-item .service-name {
+  font-weight: 500;
+  color: var(--availability-text-dark);
+  flex: 1;
+}
+
+.selected-service-item .service-quantity {
+  background: var(--availability-primary);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0 1rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.selected-service-item .service-total {
+  font-weight: 600;
+  color: var(--availability-success);
+  font-size: 1rem;
+}
+
+/* Animaciones */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.service-item-with-quantity.selected {
+  animation: slideInUp 0.3s ease;
+}
+
+.service-subtotal {
+  animation: slideInUp 0.2s ease;
+}
+
+.quantity-btn:hover:not(:disabled) {
+  animation: pulse 0.3s ease;
+}
+
+/* Estados de error */
+.error-message {
+  color: var(--availability-danger);
+  background-color: rgba(220, 53, 69, 0.05);
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  border-left: 4px solid var(--availability-danger);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-message::before {
+  content: "⚠️";
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .availability-step {
     padding: 1.5rem;
   }
-  
+
   .step-title {
     font-size: 1.5rem;
   }
-  
-  .action-buttons {
+
+  .services-grid-with-quantity {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .service-header {
     flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
   }
-  
-  .btn {
+
+  .service-price {
+    align-self: flex-start;
+  }
+
+  .quantity-selector {
     width: 100%;
+    justify-content: center;
   }
-} */ 
+
+  .selected-service-item {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .selected-service-item .service-quantity {
+    margin: 0;
+  }
+
+  .guest-info {
+    padding: 1rem;
+  }
+
+  .services-summary {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .availability-step {
+    padding: 1rem;
+  }
+
+  .step-title {
+    font-size: 1.3rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .option-item,
+  .service-item-with-quantity {
+    padding: 1rem;
+  }
+
+  .quantity-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .quantity-input {
+    width: 50px;
+    height: 36px;
+    font-size: 14px;
+  }
+}
+
+/* Estados de carga */
+.service-item-with-quantity.loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.service-item-with-quantity.loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+/* Indicador para servicios sin disponibilidad */
+.service-item-with-quantity.out-of-stock {
+  opacity: 0.6;
+  background: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.service-item-with-quantity.out-of-stock .quantity-selector {
+  pointer-events: none;
+}
+
+.service-item-with-quantity.out-of-stock::after {
+  content: "No disponible";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 10;
+}
+
+/* Mejoras de accesibilidad */
+.quantity-btn:focus {
+  outline: 2px solid var(--availability-primary);
+  outline-offset: 2px;
+}
+
+.option-item:focus,
+.service-item-with-quantity:focus {
+  outline: 2px solid var(--availability-primary);
+  outline-offset: 2px;
+}
+
+/* Efectos de transición suaves */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s
+    ease;
+}

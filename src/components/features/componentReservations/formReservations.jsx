@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import Switch from "../../common/Switch/Switch"
 import PropTypes from "prop-types"
@@ -16,6 +14,8 @@ import { BasicInfoStep, CompanionsStep, AvailabilityStep, PaymentStep } from "./
 import { createReservation, updateReservation, addCompanionReservation } from "../../../services/reservationsService"
 import { createCompanion, deleteCompanion } from "../../../services/companionsService"
 import { addPaymentToReservation } from "../../../services/paymentsService"
+import { getUsers, getAllPlanes, getCabins, getBedrooms, getServices } from "../../../services/reservationsService"
+import { getReservationPayments } from "../../../services/paymentsService"
 
 function FormReservation({ reservationData = null, onClose, onSave, isOpen, isReadOnly = false }) {
   const [step, setStep] = useState(1)
@@ -24,7 +24,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
   const [reservationPayments, setReservationPayments] = useState([])
 
   // ✅ CORREGIDO - Usar el hook correctamente
-  const { formData, updateFormData, errors, validateStep } = useReservationForm()
+  const { formData, updateFormData, errors, validateStep } = useReservationForm(reservationData)
 
   // ✅ Crear setFormData como wrapper de updateFormData
   const setFormData = (newData) => {
@@ -45,69 +45,90 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
   // Handlers
   const handleChange = async (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
 
-    console.log("📝 HandleChange ejecutado:", { name, value })
+    console.log("📝 HandleChange ejecutado:", { name, value, type, checked })
 
     // Actualización inmediata del estado
     setFormData((prev) => {
-      const newData = { ...prev, [name]: value }
-      console.log("📝 Nuevo estado después del cambio:", {
-        field: name,
-        oldValue: prev[name],
-        newValue: value,
-        selectedServices: newData.selectedServices,
-        idRoom: newData.idRoom,
-        idCabin: newData.idCabin,
-      })
-      return newData
-    })
-    clearError(name)
+      let newData = { ...prev }
 
-    // Validación especial para el campo de acompañantes
-    if (name === "companionCount") {
-      const companionCount = Number.parseInt(value) || 0
-      console.log("👥 Procesando cambio en companionCount:", companionCount)
+      // Manejar diferentes tipos de campos
+      if (type === "checkbox") {
+        newData[name] = checked
 
-      if (formData.hasCompanions && companionCount > 0 && formData.cabins && formData.bedrooms) {
-        // Pequeño delay para permitir que el estado se actualice
+        // Si se desmarca hasCompanions, resetear acompañantes
+        if (name === "hasCompanions" && !checked) {
+          newData.companionCount = 0
+          newData.companions = []
+        }
+        // Si se marca hasCompanions y no hay count, establecer 1
+        else if (name === "hasCompanions" && checked && !newData.companionCount) {
+          newData.companionCount = 1
+        }
+      } else {
+        newData[name] = value
+      }
+
+      // Aplicar lógica de disponibilidad cuando cambian campos relevantes
+      if (name === "companionCount" || name === "hasCompanions") {
+        console.log("👥 Actualizando disponibilidad por cambio en:", name)
+
+        // Limpiar selecciones de alojamiento al cambiar número de huéspedes
+        newData.idCabin = ""
+        newData.idRoom = ""
+
+        // Aplicar nueva disponibilidad
+        newData = updateAvailability(newData)
+
+        // Mostrar mensaje informativo
+        const companionCount = newData.companionCount || 0
+        let message = ""
+
+        if (companionCount > 1) {
+          const availableCabins = newData.availableCabins.length
+          message =
+            availableCabins > 0
+              ? `🏠 Disponibles ${availableCabins} cabañas para ${companionCount + 1} Acompañantes`
+              : `❌ No hay cabañas disponibles para ${companionCount + 1} Acompañantes`
+        } else {
+          const availableRooms = newData.availableBedrooms.length
+          message =
+            availableRooms > 0
+              ? `🛏️ Disponibles ${availableRooms} habitaciones para ${companionCount + 1} Acompañantes`
+              : `❌ No hay habitaciones disponibles`
+        }
+
+        console.log("💬 Mensaje de disponibilidad:", message)
+
+        // Mostrar notificación
         setTimeout(() => {
-          console.log("⏰ Ejecutando actualización de disponibilidad después del delay")
-          const updatedData = updateAvailability({
-            ...formData,
-            companionCount: companionCount,
-          })
-
-          // Determinar el mensaje de disponibilidad
-          let message = ""
-          if (companionCount > 1) {
-            const availableCabins = updatedData.availableCabins.length
-            message =
-              availableCabins > 0
-                ? `✅ Hay ${availableCabins} cabañas disponibles para ${companionCount + 1} personas`
-                : `❌ No hay cabañas disponibles para ${companionCount + 1} personas`
-          } else {
-            const availableRooms = updatedData.availableBedrooms.length
-            message =
-              availableRooms > 0
-                ? `✅ Hay ${availableRooms} habitaciones disponibles`
-                : `❌ No hay habitaciones disponibles`
-          }
-
-          console.log("💬 Mensaje de disponibilidad:", message)
-
-          // Mostrar notificación (puedes usar tu sistema de notificaciones preferido)
           Switch({
             show: true,
             message: message,
-            type: message.includes("✅") ? "success" : "error",
+            type: message.includes("❌") ? "error" : "success",
           })
         }, 100)
       }
-    }
+
+      console.log("📝 Nuevo estado después del cambio:", {
+        field: name,
+        oldValue: prev[name],
+        newValue: newData[name],
+        companionCount: newData.companionCount,
+        hasCompanions: newData.hasCompanions,
+        availableCabins: newData.availableCabins?.length,
+        availableBedrooms: newData.availableBedrooms?.length,
+      })
+
+      return newData
+    })
+
+    clearError(name)
   }
 
-  const { handleCabinSelect, handleRoomSelect, handleServiceToggle } = createSelectionHandlers(setFormData)
+  // ✅ ACTUALIZAR HANDLERS PARA INCLUIR CANTIDADES DE SERVICIOS
+  const { handleCabinSelect, handleRoomSelect, handleServiceToggle, handleServiceQuantityChange } = createSelectionHandlers(setFormData)
 
   const nextStep = () => {
     console.log("➡️ Intentando avanzar al siguiente paso. Paso actual:", step)
@@ -389,6 +410,127 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
     }
   }, [isOpen, onClose])
 
+  // ✅ CARGAR DATOS INICIALES Y DEL SERVIDOR
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        setLoading(true)
+        console.log("🔄 Cargando datos iniciales...")
+
+        // Cargar datos del servidor
+        const [usersData, planesData, cabinsData, bedroomsData, servicesData] = await Promise.all([
+          getUsers(),
+          getAllPlanes(),
+          getCabins(),
+          getBedrooms(),
+          getServices(),
+        ])
+
+        console.log("📊 Datos cargados del servidor:", {
+          users: usersData?.length,
+          planes: planesData?.length,
+          cabins: cabinsData?.length,
+          bedrooms: bedroomsData?.length,
+          services: servicesData?.length,
+        })
+
+        // Filtrar solo elementos en servicio
+        const activeCabins = cabinsData?.filter((cabin) => cabin.status?.toLowerCase() === "en servicio") || []
+        const activeBedrooms = bedroomsData?.filter((bedroom) => bedroom.status?.toLowerCase() === "en servicio") || []
+
+        // Actualizar formData con los datos del servidor
+        updateFormData((prevData) => {
+          const newData = {
+            ...prevData,
+            users: usersData || [],
+            planes: planesData || [],
+            cabins: cabinsData || [],
+            bedrooms: bedroomsData || [],
+            availableServices: servicesData || [],
+          }
+
+          // Aplicar lógica de disponibilidad basada en el número de acompañantes
+          const updatedWithAvailability = updateAvailability({
+            ...newData,
+            // Usar los datos filtrados para la disponibilidad
+            cabins: activeCabins,
+            bedrooms: activeBedrooms,
+          })
+
+          console.log("🏨 Disponibilidad inicial aplicada:", {
+            companionCount: updatedWithAvailability.companionCount,
+            availableCabins: updatedWithAvailability.availableCabins?.length,
+            availableBedrooms: updatedWithAvailability.availableBedrooms?.length,
+          })
+
+          return updatedWithAvailability
+        })
+
+        // Si hay datos de reserva para editar, cargar información adicional
+        if (reservationData?.idReservation) {
+          console.log("✏️ Modo edición - Cargando datos de reserva:", reservationData.idReservation)
+
+          // Cargar pagos de la reserva
+          try {
+            const payments = await getReservationPayments(reservationData.idReservation)
+            setReservationPayments(Array.isArray(payments) ? payments : [])
+            console.log("💳 Pagos cargados:", payments?.length || 0)
+          } catch (error) {
+            console.error("❌ Error cargando pagos:", error)
+            setReservationPayments([])
+          }
+
+          console.log("✅ Datos de edición cargados correctamente")
+        } else {
+          console.log("➕ Modo creación - Nueva reserva")
+        }
+      } catch (error) {
+        console.error("❌ Error cargando datos iniciales:", error)
+        alert(`Error al cargar datos: ${error.message}`)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (isOpen) {
+      loadInitialData()
+    }
+  }, [isOpen, reservationData?.idReservation])
+
+  // ✅ SINCRONIZAR DATOS CUANDO CAMBIA reservationData
+  useEffect(() => {
+    if (reservationData && isOpen) {
+      console.log("🔄 Sincronizando datos de reserva para edición:", reservationData)
+
+      // Actualizar formData con los datos de la reserva
+      updateFormData({
+        idUser: reservationData.idUser || reservationData.user?.idUser || "",
+        idPlan: reservationData.idPlan || reservationData.plan?.idPlan || "",
+        startDate: reservationData.startDate || "",
+        endDate: reservationData.endDate || "",
+        status: reservationData.status || "Pendiente",
+        hasCompanions: reservationData.companions ? reservationData.companions.length > 0 : false,
+        companionCount: reservationData.companions ? reservationData.companions.length : 0,
+        companions: reservationData.companions || [],
+        idCabin:
+          reservationData.idCabin ||
+          (reservationData.cabins && reservationData.cabins.length > 0 ? reservationData.cabins[0].idCabin : ""),
+        idRoom:
+          reservationData.idRoom ||
+          (reservationData.bedrooms && reservationData.bedrooms.length > 0 ? reservationData.bedrooms[0].idRoom : ""),
+        // ✅ CARGAR SERVICIOS CON CANTIDADES
+        selectedServices: reservationData.services 
+          ? reservationData.services.map((s) => ({
+              serviceId: s.Id_Service,
+              quantity: s.quantity || 1
+            }))
+          : [],
+      })
+
+      console.log("✅ Datos sincronizados para edición")
+    }
+  }, [reservationData, isOpen])
+
   if (!isOpen) return null
 
   const totalAmount = calculateTotal(formData, formData.planes || [])
@@ -464,6 +606,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 onCabinSelect={handleCabinSelect}
                 onRoomSelect={handleRoomSelect}
                 onServiceToggle={handleServiceToggle}
+                onServiceQuantityChange={handleServiceQuantityChange}
               />
             )}
 

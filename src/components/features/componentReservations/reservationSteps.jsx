@@ -1,4 +1,3 @@
-"use client"
 
 import PropTypes from "prop-types"
 import { useState, useEffect } from "react"
@@ -435,7 +434,7 @@ BasicInfoStep.propTypes = {
   users: PropTypes.array.isRequired,
   planes: PropTypes.array.isRequired,
   loading: PropTypes.bool.isRequired,
-  isReadOnly: PropTypes.bool.isRequired,
+  isReadOnly: PropTypes.bool.isReadOnly,
   onChange: PropTypes.func.isRequired,
 }
 
@@ -480,109 +479,229 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
   )
 }
 
-export function AvailabilityStep({ formData, errors, onCabinSelect, onRoomSelect, onServiceToggle }) {
+// ✅ COMPONENTE DE SELECTOR DE CANTIDAD MINIMALISTA
+function QuantitySelector({ value, onChange, min = 0, max = 99, disabled = false }) {
+  const handleDecrease = () => {
+    if (value > min) {
+      onChange(value - 1)
+    }
+  }
+
+  const handleIncrease = () => {
+    if (value < max) {
+      onChange(value + 1)
+    }
+  }
+
+  const handleInputChange = (e) => {
+    const newValue = parseInt(e.target.value) || 0
+    if (newValue >= min && newValue <= max) {
+      onChange(newValue)
+    }
+  }
+
+  return (
+    <div className="quantity-selector">
+      <button
+        type="button"
+        className="quantity-btn decrease"
+        onClick={handleDecrease}
+        disabled={disabled || value <= min}
+        aria-label="Disminuir cantidad"
+      >
+        −
+      </button>
+      <input
+        type="number"
+        className="quantity-input"
+        value={value}
+        onChange={handleInputChange}
+        min={min}
+        max={max}
+        disabled={disabled}
+        aria-label="Cantidad"
+      />
+      <button
+        type="button"
+        className="quantity-btn increase"
+        onClick={handleIncrease}
+        disabled={disabled || value >= max}
+        aria-label="Aumentar cantidad"
+      >
+        +
+      </button>
+    </div>
+  )
+}
+
+export function AvailabilityStep({ formData, errors, onCabinSelect, onRoomSelect, onServiceQuantityChange }) {
+  const companionCount = formData.companionCount || 0
+  const totalGuests = companionCount + 1
+  const showCabins = companionCount > 1
+  const showRooms = companionCount <= 1
+
+  // Función para obtener la cantidad actual de un servicio
+  const getServiceQuantity = (serviceId) => {
+    const service = formData.selectedServices?.find(s => s.serviceId === serviceId)
+    return service ? service.quantity : 0
+  }
+
+  // Función para manejar cambio de cantidad
+  const handleQuantityChange = (serviceId, newQuantity) => {
+    onServiceQuantityChange(serviceId, newQuantity)
+  }
+
   return (
     <div className="availability-step">
       <h2 className="step-title">Selección de Alojamiento</h2>
 
+      <div className="guest-info">
+        <p>
+          <strong>Huéspedes totales:</strong> {totalGuests} persona{totalGuests !== 1 ? "s" : ""}
+        </p>
+        <p>
+          <strong>Tipo de alojamiento requerido:</strong> {showCabins ? "Cabañas" : "Habitaciones"}
+        </p>
+      </div>
+
       {errors.accommodation && <div className="error-message">{errors.accommodation}</div>}
 
-      {/* Sección de Cabañas */}
-      <div className="section-container">
-        <h3 className="section-title">Cabañas</h3>
+      {/* Sección de Cabañas - Solo si hay más de 1 acompañante */}
+      {showCabins && (
+        <div className="section-container">
+          <h3 className="section-title">Cabañas (Para {totalGuests} personas)</h3>
 
-        {formData.availableCabins.length > 0 ? (
-          <div className="options-grid">
-            {formData.availableCabins.map((cabin) => (
-              <div
-                key={cabin.idCabin}
-                className={`option-item ${formData.idCabin === cabin.idCabin ? "selected" : ""}`}
-                onClick={() => onCabinSelect(cabin.idCabin)}
-              >
-                <div className="option-selector">
-                  {formData.idCabin === cabin.idCabin ? (
-                    <span className="selected-icon">✓</span>
-                  ) : (
-                    <span className="unselected-icon">○</span>
-                  )}
+          {formData.availableCabins.length > 0 ? (
+            <div className="options-grid">
+              {formData.availableCabins.map((cabin) => (
+                <div
+                  key={cabin.idCabin}
+                  className={`option-item ${formData.idCabin === cabin.idCabin ? "selected" : ""}`}
+                  onClick={() => onCabinSelect(cabin.idCabin)}
+                >
+                  <div className="option-selector">
+                    {formData.idCabin === cabin.idCabin ? (
+                      <span className="selected-icon">✓</span>
+                    ) : (
+                      <span className="unselected-icon">○</span>
+                    )}
+                  </div>
+                  <div className="option-content">
+                    <h4 className="option-name">{cabin.name}</h4>
+                    <p className="option-detail">Capacidad: {cabin.capacity} personas</p>
+                    <p className="option-description">{cabin.description}</p>
+                    {cabin.image && (
+                      <img src={cabin.image || "/placeholder.svg"} alt={cabin.name} className="option-image" />
+                    )}
+                  </div>
                 </div>
-                <div className="option-content">
-                  <h4 className="option-name">{cabin.name}</h4>
-                  <p className="option-detail">Capacidad: {cabin.capacity} personas</p>
-                  <p className="option-description">{cabin.description}</p>
-                  {cabin.image && (
-                    <img src={cabin.image || "/placeholder.svg"} alt={cabin.name} className="option-image" />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="no-options">No hay cabañas disponibles</p>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <p className="no-options">No hay cabañas disponibles para {totalGuests} personas</p>
+          )}
+        </div>
+      )}
 
-      {/* Sección de Habitaciones */}
-      <div className="section-container">
-        <h3 className="section-title">Habitaciones</h3>
+      {/* Sección de Habitaciones - Solo si hay 1 acompañante o menos */}
+      {showRooms && (
+        <div className="section-container">
+          <h3 className="section-title">
+            Habitaciones (Para {totalGuests} persona{totalGuests !== 1 ? "s" : ""})
+          </h3>
 
-        {formData.availableBedrooms.length > 0 ? (
-          <div className="options-grid">
-            {formData.availableBedrooms.map((bedroom) => (
-              <div
-                key={bedroom.idRoom}
-                className={`option-item ${formData.idRoom === bedroom.idRoom ? "selected" : ""}`}
-                onClick={() => onRoomSelect(bedroom.idRoom)}
-              >
-                <div className="option-selector">
-                  {formData.idRoom === bedroom.idRoom ? (
-                    <span className="selected-icon">✓</span>
-                  ) : (
-                    <span className="unselected-icon">○</span>
-                  )}
+          {formData.availableBedrooms.length > 0 ? (
+            <div className="options-grid">
+              {formData.availableBedrooms.map((bedroom) => (
+                <div
+                  key={bedroom.idRoom}
+                  className={`option-item ${formData.idRoom === bedroom.idRoom ? "selected" : ""}`}
+                  onClick={() => onRoomSelect(bedroom.idRoom)}
+                >
+                  <div className="option-selector">
+                    {formData.idRoom === bedroom.idRoom ? (
+                      <span className="selected-icon">✓</span>
+                    ) : (
+                      <span className="unselected-icon">○</span>
+                    )}
+                  </div>
+                  <div className="option-content">
+                    <h4 className="option-name">Habitación {bedroom.name || bedroom.idRoom}</h4>
+                    {bedroom.capacity && <p className="option-detail">Capacidad: {bedroom.capacity} personas</p>}
+                    <p className="option-description">{bedroom.description}</p>
+                  </div>
                 </div>
-                <div className="option-content">
-                  <h4 className="option-name">Habitación {bedroom.name || bedroom.idRoom}</h4>
-                  {bedroom.capacity && <p className="option-detail">Capacidad: {bedroom.capacity} personas</p>}
-                  <p className="option-description">{bedroom.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="no-options">No hay habitaciones disponibles</p>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <p className="no-options">No hay habitaciones disponibles</p>
+          )}
+        </div>
+      )}
 
-      {/* Sección de Servicios */}
+      {/* ✅ SECCIÓN DE SERVICIOS CON CANTIDADES */}
       <div className="section-container">
         <h3 className="section-title">Servicios Adicionales</h3>
 
         {formData.availableServices.length > 0 ? (
-          <div className="services-grid">
-            {formData.availableServices.map((service) => (
-              <div
-                key={service.Id_Service}
-                className={`service-item ${formData.selectedServices.includes(service.Id_Service) ? "selected" : ""}`}
-                onClick={() => onServiceToggle(service.Id_Service)}
-              >
-                <div className="service-selector">
-                  {formData.selectedServices.includes(service.Id_Service) ? (
-                    <span className="selected-icon">✓</span>
-                  ) : (
-                    <span className="unselected-icon">○</span>
-                  )}
+          <div className="services-grid-with-quantity">
+            {formData.availableServices.map((service) => {
+              const currentQuantity = getServiceQuantity(service.Id_Service)
+              const isSelected = currentQuantity > 0
+
+              return (
+                <div
+                  key={service.Id_Service}
+                  className={`service-item-with-quantity ${isSelected ? "selected" : ""}`}
+                >
+                  <div className="service-info">
+                    <div className="service-header">
+                      <h4 className="service-name">{service.name}</h4>
+                      <span className="service-price">{formatCOP(service.Price)}</span>
+                    </div>
+                    <p className="service-description">{service.Description}</p>
+                  </div>
+                  
+                  <div className="service-quantity-controls">
+                    <QuantitySelector
+                      value={currentQuantity}
+                      onChange={(newQuantity) => handleQuantityChange(service.Id_Service, newQuantity)}
+                      min={0}
+                      max={20}
+                    />
+                    {currentQuantity > 0 && (
+                      <div className="service-subtotal">
+                        Subtotal: {formatCOP(service.Price * currentQuantity)}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="service-content">
-                  <h4 className="service-name">{service.name}</h4>
-                  <p className="service-price">Precio: {formatCOP(service.Price)}</p>
-                  <p className="service-description">{service.Description}</p>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <p className="no-options">No hay servicios disponibles</p>
+        )}
+
+        {/* Resumen de servicios seleccionados */}
+        {formData.selectedServices && formData.selectedServices.length > 0 && (
+          <div className="services-summary">
+            <h4>Servicios seleccionados:</h4>
+            <div className="selected-services-list">
+              {formData.selectedServices.map((serviceSelection) => {
+                const service = formData.availableServices.find(s => s.Id_Service === serviceSelection.serviceId)
+                if (!service) return null
+                
+                return (
+                  <div key={serviceSelection.serviceId} className="selected-service-item">
+                    <span className="service-name">{service.name}</span>
+                    <span className="service-quantity">x{serviceSelection.quantity}</span>
+                    <span className="service-total">{formatCOP(service.Price * serviceSelection.quantity)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -595,7 +714,7 @@ AvailabilityStep.propTypes = {
   loading: PropTypes.bool.isRequired,
   onCabinSelect: PropTypes.func.isRequired,
   onRoomSelect: PropTypes.func.isRequired,
-  onServiceToggle: PropTypes.func.isRequired,
+  onServiceQuantityChange: PropTypes.func.isRequired,
 }
 
 export function PaymentStep({
@@ -648,7 +767,7 @@ export function PaymentStep({
   return (
     <div className="step-content">
       <div className="payment-summary">
-        <h3>Resumen de Pagos</h3>
+        <h3>Resumen del Pago</h3>
         <div className="summary-row">
           <span>Total Reserva:</span>
           <span>{formatCOP(safeTotalAmount)}</span>
@@ -663,36 +782,7 @@ export function PaymentStep({
         </div>
       </div>
 
-      <div className="payments-list">
-        <h4>Pagos Registrados</h4>
-        {allPayments.length === 0 ? (
-          <p>No hay pagos registrados</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Monto</th>
-                <th>Fecha</th>
-                <th>Método</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allPayments.map((payment) => {
-                const amount = payment?.amount || 0
-                return (
-                  <tr key={payment?.id || payment?.tempId || Math.random()}>
-                    <td>{formatCOP(amount)}</td>
-                    <td>{payment?.paymentDate || "N/A"}</td>
-                    <td>{payment?.paymentMethod || "N/A"}</td>
-                    <td>{payment?.status || "N/A"}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+    
 
       {!isReadOnly && remainingAmount > 0 && (
         <div className="add-payment-form">
@@ -764,7 +854,7 @@ export function PaymentStep({
 
           <button
             type="button"
-            onClick={handlePaymentSubmit} // <-- aquí va el submit manual
+            onClick={handlePaymentSubmit}
             disabled={loading}
             className="submit-btn"
           >

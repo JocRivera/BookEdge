@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useMemo, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import { ActionButtons, CustomButton } from "../../common/Button/customButton"
@@ -547,7 +545,14 @@ function TableReservations() {
 
                   {/* Sección de Acompañantes */}
                   <div className="reservation-card">
-                    <h3>Acompañantes</h3>
+                    <div className="card-header-with-actions">
+                      <h3>Acompañantes</h3>
+                      <span className="companions-count">
+                        {Array.isArray(currentReservation.companions)
+                          ? `${currentReservation.companions.length} Acompañantes`
+                          : "Sin acompañantes"}
+                      </span>
+                    </div>
                     {Array.isArray(currentReservation.companions) && currentReservation.companions.length > 0 ? (
                       <div className="companions-list">
                         <TableCompanions
