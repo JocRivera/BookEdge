@@ -133,7 +133,7 @@ export default function CreateServices() {
                     toast.success(`Servicio ${updatedService.StatusServices ? "activado" : "desactivado"} correctamente.`);
                 } catch (error) {
                     console.error("Error updating service status:", error);
-                    toast.error(`Error al cambiar el estado del servicio: ${error.message || error}`);
+                    toast.error(`Error al actualizar el estado del servicio: ${error.message || error}`);
                 }
             },
         });

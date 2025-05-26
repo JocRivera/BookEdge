@@ -126,45 +126,20 @@ export default function CreateConfig() {
     const handleToggle = async (idRol) => {
         const config = settings.find((config) => config.idRol === idRol);
         const updatedConfig = { ...config, status: !config.status };
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de actualizar el rol ${idRol}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Actualizar</b></button>', function (instance, toast) {
-                    rolesService.updateRole(idRol, updatedConfig).then((res) => {
-                        setSettings(settings.map((config) => config.idRol === idRol ? { ...config, status: !config.status } : config))
-                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Rol actualizado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }).catch((error) => {
-                        console.log(error)
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo actualizar el Rol',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    })
-                }, true],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                }],
-            ],
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Cambio de Estado",
+            message: `¿Está seguro de cambiar el estado del rol "${config.name}"?`,
+            confirmText: "Sí, Cambiar Estado",
+            onConfirm: () => {
+                rolesService.updateRole(idRol, updatedConfig).then((res) => {
+                    setSettings(settings.map((c) => c.idRol === idRol ? { ...c, status: !c.status } : c));
+                    toast.success(`Rol ${updatedConfig.status ? "activado" : "desactivado"} correctamente.`);
+                }).catch((error) => {
+                    console.log(error)
+                    toast.error(`Error al actualizar el estado del rol: ${error.message || 'Error desconocido'}`);
+                })
+            }
         });
     };
     return (
