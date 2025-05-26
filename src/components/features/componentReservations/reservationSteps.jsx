@@ -321,6 +321,7 @@ const formatCOP = (value) => {
 }
 
 export function BasicInfoStep({ formData, errors, users, planes, loading, isReadOnly, onChange }) {
+  const isDiaDeSol = planes.find(p => p.idPlan === Number(formData.idPlan))?.name === "Día de sol"
   return (
     <div className="step-content">
       <div className="form-group">
@@ -388,9 +389,10 @@ export function BasicInfoStep({ formData, errors, users, planes, loading, isRead
             value={formData.endDate}
             onChange={onChange}
             min={formData.startDate || new Date().toISOString().split("T")[0]}
-            disabled={loading || isReadOnly}
+            disabled={loading || isReadOnly || isDiaDeSol}
             className={errors.endDate ? "error" : ""}
           />
+
           {errors.endDate && <span className="error-message">{errors.endDate}</span>}
         </div>
       </div>
@@ -661,7 +663,7 @@ export function AvailabilityStep({ formData, errors, onCabinSelect, onRoomSelect
                     </div>
                     <p className="service-description">{service.Description}</p>
                   </div>
-                  
+
                   <div className="service-quantity-controls">
                     <QuantitySelector
                       value={currentQuantity}
@@ -691,7 +693,7 @@ export function AvailabilityStep({ formData, errors, onCabinSelect, onRoomSelect
               {formData.selectedServices.map((serviceSelection) => {
                 const service = formData.availableServices.find(s => s.Id_Service === serviceSelection.serviceId)
                 if (!service) return null
-                
+
                 return (
                   <div key={serviceSelection.serviceId} className="selected-service-item">
                     <span className="service-name">{service.name}</span>
@@ -782,7 +784,7 @@ export function PaymentStep({
         </div>
       </div>
 
-    
+
 
       {!isReadOnly && remainingAmount > 0 && (
         <div className="add-payment-form">

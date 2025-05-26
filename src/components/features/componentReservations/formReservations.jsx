@@ -70,6 +70,29 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         newData[name] = value
       }
 
+      if (name === "idPlan") {
+        const selectedPlan = formData.planes.find(p => p.idPlan === Number(value))
+        if (selectedPlan && selectedPlan.name === "Día de sol") {
+          // Para "Día de sol", la fecha fin es igual a la fecha inicio
+          if (newData.startDate) {
+            newData.endDate = newData.startDate
+          }
+          // Marcar el plan como sin alojamiento
+          newData.requiresAccommodation = false
+        } else {
+          // Para otros planes, habilitar alojamiento
+          newData.requiresAccommodation = true
+        }
+      }
+
+      // Cuando cambia la fecha de inicio en un plan "Día de sol"
+      if (name === "startDate") {
+        const selectedPlan = formData.planes.find(p => p.idPlan === Number(newData.idPlan))
+        if (selectedPlan && selectedPlan.name === "Día de sol") {
+          newData.endDate = value // Sincronizar fecha fin con inicio
+        }
+      }
+
       // Aplicar lógica de disponibilidad cuando cambian campos relevantes
       if (name === "companionCount" || name === "hasCompanions") {
         console.log("👥 Actualizando disponibilidad por cambio en:", name)
@@ -280,7 +303,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         console.log("✅ Acompañante asociado exitosamente")
       } catch (Error) {
         console.error("❌ Error al asociar, eliminando acompañante creado...")
-        await deleteCompanion(companionResponse.idCompanions).catch(() => {})
+        await deleteCompanion(companionResponse.idCompanions).catch(() => { })
         throw new Error("Error al asociar acompañante a la reserva")
       }
 
@@ -519,11 +542,11 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
           reservationData.idRoom ||
           (reservationData.bedrooms && reservationData.bedrooms.length > 0 ? reservationData.bedrooms[0].idRoom : ""),
         // ✅ CARGAR SERVICIOS CON CANTIDADES
-        selectedServices: reservationData.services 
+        selectedServices: reservationData.services
           ? reservationData.services.map((s) => ({
-              serviceId: s.Id_Service,
-              quantity: s.quantity || 1
-            }))
+            serviceId: s.Id_Service,
+            quantity: s.quantity || 1
+          }))
           : [],
       })
 
