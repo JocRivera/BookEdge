@@ -6,7 +6,7 @@ import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
-import { FaEdit, FaTrash, FaTimes, FaEye } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import DetailsConfig from "./detailsConfig";
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
