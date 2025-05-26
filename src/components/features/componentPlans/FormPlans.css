@@ -486,6 +486,18 @@ textarea.plan-form-input {
     border-color: #cbd5e0;
 }
 
+/* Estilos de error */
+.plan-error-message {
+    color: #d32f2f;
+    font-size: 0.95rem;
+    margin-top: 0.2rem;
+    display: block;
+}
+
+.input-error {
+    border-color: #d32f2f !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .plan-form-grid {

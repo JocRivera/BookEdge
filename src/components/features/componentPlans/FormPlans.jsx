@@ -12,6 +12,65 @@ const calculateTotalCapacity = (cabins, bedrooms) => {
     return cabinsCapacity + bedroomsCapacity
 }
 
+// Validación personalizada para los campos del formulario de planes
+const validatePlanField = (name, value) => {
+    let error = ""
+
+    switch (name) {
+        case "name":
+            if (!value.trim()) {
+                error = "El nombre del plan es obligatorio"
+            } else if (value.trim().length < 6) {
+                error = "El nombre debe tener al menos 6 caracteres"
+            } else if (/[0-9]/.test(value)) {
+                error = "El nombre no puede contener números"
+            } else if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/.test(value)) {
+                error = "El nombre no puede contener caracteres especiales"
+            } else if (value.trim().length > 30) {
+                error = "El nombre debe tener menos de 30 caracteres"
+            }
+            break
+
+        case "description":
+            if (!value.trim()) {
+                error = "La descripción es obligatoria"
+            } else if (value.trim().length < 10) {
+                error = "La descripción debe tener al menos 10 caracteres"
+            } else if (value.trim().length > 500) {
+                error = "La descripción no puede tener más de 500 caracteres"
+            }
+            break
+
+        case "salePrice":
+            if (value === "" || value === null) {
+                error = "El precio de venta es obligatorio"
+            } else if (isNaN(value) || Number(value) <= 0) {
+                error = "El precio de venta debe ser un número positivo"
+            }
+            break
+
+        case "total":
+            if (value === "" || value === null) {
+                error = "El total de servicios es obligatorio"
+            } else if (isNaN(value) || Number(value) < 0) {
+                error = "El total de servicios debe ser un número válido"
+            }
+            break
+
+        case "capacity":
+            if (value === "" || value === null) {
+                error = "La capacidad es obligatoria"
+            } else if (isNaN(value) || Number(value) < 1) {
+                error = "La capacidad debe ser un número mayor a 0"
+            }
+            break
+
+        default:
+            break
+    }
+    return error
+}
+
 const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
     const [activeTab, setActiveTab] = useState("basic")
     const [localFormData, setLocalFormData] = useState({
@@ -35,6 +94,7 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
     const [availableCabins, setAvailableCabins] = useState([])
     const [availableServices, setAvailableServices] = useState([])
     const [availableBedrooms, setAvailableBedrooms] = useState([])
+    const [errors, setErrors] = useState({});
 
     // Cargar datos iniciales
     useEffect(() => {
@@ -136,11 +196,17 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
     }, [planToEdit])
 
     const handleChange = (e) => {
-        const { name, value } = e.target
+        const { name, value } = e.target;
         setLocalFormData((prev) => ({
             ...prev,
             [name]: value,
-        }))
+        }));
+
+        // Validación en tiempo real
+        setErrors((prev) => ({
+            ...prev,
+            [name]: validatePlanField(name, value),
+        }));
     }
 
     const resetForm = () => {
@@ -162,7 +228,34 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
     }
 
     const handleSubmit = (e) => {
-        e.preventDefault()
+        e.preventDefault();
+
+        // Validar campos principales antes de enviar
+        const fieldsToValidate = [
+            { name: "name", value: localFormData.name },
+            { name: "description", value: localFormData.description },
+            { name: "salePrice", value: localFormData.salePrice },
+            { name: "total", value: localFormData.total },
+            { name: "capacity", value: calculateTotalCapacity(localFormData.cabins, localFormData.bedrooms) },
+        ];
+
+        let formErrors = {};
+        fieldsToValidate.forEach(({ name, value }) => {
+            const error = validatePlanField(name, value);
+            if (error) formErrors[name] = error;
+        });
+
+        // Validar que haya al menos un servicio
+        if (!localFormData.services || localFormData.services.length === 0) {
+            formErrors.services = "Debe agregar al menos un servicio al plan";
+        }
+
+        setErrors(formErrors);
+
+        if (Object.keys(formErrors).length > 0) {
+            // El formulario no se envía si hay errores
+            return;
+        }
 
         const totalCapacity = calculateTotalCapacity(localFormData.cabins, localFormData.bedrooms)
 
@@ -270,13 +363,13 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
     // Función para agregar habitación
     const handleAddBedroom = () => {
         if (selectedBedroom) {
-            const bedroom = availableBedrooms.find((b) => b.id === Number.parseInt(selectedBedroom));
-            const quantity = localFormData.bedroomQuantity || 1;
+            const bedroom = availableBedrooms.find((b) => b.id === Number.parseInt(selectedBedroom))
+            const quantity = localFormData.bedroomQuantity || 1
 
             setLocalFormData((prev) => {
-                const existingBedroomIndex = prev.bedrooms.findIndex((b) => b.capacity === bedroom.capacity);
+                const existingBedroomIndex = prev.bedrooms.findIndex((b) => b.capacity === bedroom.capacity)
 
-                let newBedrooms;
+                let newBedrooms
                 if (existingBedroomIndex >= 0) {
                     newBedrooms = prev.bedrooms.map((b, index) =>
                         index === existingBedroomIndex
@@ -286,7 +379,7 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                                 totalCapacity: (b.quantity + quantity) * b.capacity,
                             }
                             : b,
-                    );
+                    )
                 } else {
                     newBedrooms = [
                         ...prev.bedrooms,
@@ -296,18 +389,18 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                             name: `Habitación ${bedroom.capacity} personas`,
                             totalCapacity: quantity * bedroom.capacity,
                         },
-                    ];
+                    ]
                 }
 
                 return {
                     ...prev,
                     bedrooms: newBedrooms,
                     capacidad: calculateTotalCapacity(prev.cabins, newBedrooms),
-                };
-            });
-            setSelectedBedroom("");
+                }
+            })
+            setSelectedBedroom("")
         }
-    };
+    }
 
     // Función para agregar servicio
     const handleAddService = () => {
@@ -498,6 +591,7 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                             <div className="plan-form-basic-grid">
                                 {/* Columna izquierda: nombre y descripción */}
                                 <div className="plan-form-basic-left">
+                                    {/* Ejemplo para el campo nombre */}
                                     <div className="plan-form-group">
                                         <label htmlFor="name" className="plan-form-label">
                                             Nombre del Plan
@@ -508,10 +602,11 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                                             name="name"
                                             value={localFormData.name}
                                             onChange={handleChange}
-                                            className="plan-form-input"
+                                            className={`plan-form-input${errors.name ? " input-error" : ""}`}
                                             placeholder="Ingrese el nombre del plan"
                                             required
                                         />
+                                        {errors.name && <span className="plan-error-message">{errors.name}</span>}
                                     </div>
                                     <div className="plan-form-group">
                                         <label htmlFor="description" className="plan-form-label">

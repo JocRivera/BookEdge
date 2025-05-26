@@ -1,0 +1,204 @@
+.bugGeys-plans-client-container {
+    position: relative;
+    padding: 4rem 6rem;
+    margin: 3rem auto;
+    max-width: 1400px;
+    width: 100%;
+}
+
+.bugGeys-plans-client-swiper-nav {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2rem;
+    pointer-events: none;
+}
+
+.bugGeys-plans-client-nav-prev,
+.bugGeys-plans-client-nav-next {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    pointer-events: auto;
+}
+
+.bugGeys-plans-client-nav-prev:hover,
+.bugGeys-plans-client-nav-next:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bugGeys-plans-client-card {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 1rem 0;
+}
+
+.bugGeys-plans-client-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.bugGeys-plans-client-image-container {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    position: relative;
+}
+
+.bugGeys-plans-client-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.bugGeys-plans-client-card:hover .bugGeys-plans-client-image {
+    transform: scale(1.1);
+}
+
+.bugGeys-plans-client-no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #f3f4f6, #e5e7eb);
+    color: #9ca3af;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.bugGeys-plans-client-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2.5rem 2rem;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.85) 0%,
+        rgba(0, 0, 0, 0.6) 60%,
+        transparent 100%
+    );
+    color: white;
+}
+
+.bugGeys-plans-client-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.bugGeys-plans-client-description {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+    opacity: 0.95;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: #f0f0f0;
+}
+
+.bugGeys-plans-client-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.bugGeys-plans-client-price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #4e54c8;
+    padding: 0.4rem 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+}
+
+.bugGeys-plans-client-capacity {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+}
+
+.bugGeys-plans-client-reserve-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    background: #4e54c8;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bugGeys-plans-client-reserve-btn:hover {
+    background: #3a3f9e;
+    transform: translateY(-2px);
+}
+
+.bugGeys-plans-client-reserve-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 1024px) {
+    .bugGeys-plans-client-container {
+        padding: 3rem 4rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .bugGeys-plans-client-container {
+        padding: 2rem;
+    }
+    
+    .bugGeys-plans-client-card {
+        height: 400px;
+    }
+}
+
+@media (max-width: 640px) {
+    .bugGeys-plans-client-container {
+        padding: 1.5rem;
+    }
+    
+    .bugGeys-plans-client-nav-prev,
+    .bugGeys-plans-client-nav-next {
+        width: 36px;
+        height: 36px;
+    }
+}

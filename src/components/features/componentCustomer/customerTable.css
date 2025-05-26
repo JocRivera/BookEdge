@@ -321,3 +321,38 @@
         transform: translateY(0);
     }
 }
+
+/* Estilos para el botón de reservas */
+.CUSTOMER-action-btn.reservation-btn {
+    background: var(--reservations-primary, #4e54c8);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(78, 84, 200, 0.15);
+}
+
+.CUSTOMER-action-btn.reservation-btn:hover {
+    background: var(--reservations-primary-dark, #3a3f9e);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(78, 84, 200, 0.2);
+}
+
+.CUSTOMER-action-btn.reservation-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(78, 84, 200, 0.15);
+}
+
+/* Asegúrate que el botón se alinee bien con los otros botones de acción */
+.CUSTOMER-action-buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
