@@ -5,7 +5,11 @@ import Switch from "../../common/Switch/Switch"
 import Pagination from "../../common/Paginator/Pagination";
 import FormService from "./formServices";
 import serviceService from "../../../services/serviceService"
-import { FaEdit, FaTrash, FaTimes, FaEye } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { useAlert } from "../../../context/AlertContext";
+
+
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
@@ -16,6 +20,9 @@ export default function CreateServices() {
     const [isView, setIsView] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const { showAlert } = useAlert();
+
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -57,9 +64,17 @@ export default function CreateServices() {
     };
 
     const handleEdit = (Id_Service) => {
-        const service = services.find((service) => service.Id_Service === Id_Service);
-        setCurrentService(service);
-        setIsModalOpen(true);
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Modificación",
+            message: "¿Está seguro de modificar este servicio?",
+            confirmText: "Sí, Modificar",
+            onConfirm: () => {
+                const serviceToEdit = services.find((service) => service.Id_Service === Id_Service);
+                setCurrentService(serviceToEdit);
+                setIsModalOpen(true);
+            },
+        });
     };
 
     const handleDelete = (Id_Service) => {
