@@ -8,6 +8,9 @@ import FormConfig from "./formConfig";
 import rolesService from "../../../services/RolesService"
 import { FaTimes } from "react-icons/fa";
 import DetailsConfig from "./detailsConfig";
+import { toast } from "react-toastify";
+import { useAlert } from "../../../context/AlertContext";
+
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 export default function CreateConfig() {
@@ -17,6 +20,9 @@ export default function CreateConfig() {
     const [isView, setIsView] = useState(false)
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const { showAlert } = useAlert();
+
     useEffect(() => {
         const fetchConfig = async () => {
             setLoading(true)
@@ -33,11 +39,14 @@ export default function CreateConfig() {
         fetchConfig()
     }, [])
     const [searchTerm, setSearchTerm] = useState("");
-    const filtrarDatos = settings.filter((config) =>
-        Object.values(config).some((value) =>
-            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
+    const filtrarDatos = settings
+        .filter((config) => config.name.toLowerCase() !== "admin")
+        .filter((config) =>
+            Object.values(config).some((value) =>
+                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        );
+
 
     const itemsPerPage = 6;
     const [currentPage, setCurrentPage] = useState(0);

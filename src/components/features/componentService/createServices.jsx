@@ -19,7 +19,6 @@ export default function CreateServices() {
 
     const { showAlert } = useAlert();
 
-
     useEffect(() => {
         const fetchServices = async () => {
             setLoading(true);
