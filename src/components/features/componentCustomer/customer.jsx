@@ -1,9 +1,9 @@
 import React from 'react';
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { CustomButton} from "../../common/Button/customButton";
+import { CustomButton, ActionButtons } from "../../common/Button/customButton";
 import Switch from "../../common/Switch/Switch";
 import rolesService from "../../../services/RolesService"
 import {getReservation} from "../../../services/reservationsService"
@@ -384,21 +384,13 @@ function Customer() {
                                 </td>
                                 <td className="customer-table-cell">
                                     <div className="action-buttons-container">
-                                        <button
-                                            onClick={() => handleEdit(customer)}
-                                            className="action-btn edit-btn"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteCustomer(customer)}
-                                            className="action-btn delete-btn"
-                                        >
-                                            <FaTrash />
-                                        </button>
+                                        <ActionButtons
+                                            onEdit={() => handleEdit(customer)}
+                                            onDelete={() => handleDeleteCustomer(customer)}
+                                        />
                                         {usersWithReservations.includes(customer.idUser) && (
                                             <button
-                                                className="action-btn reservation-btn"
+                                                className="CUSTOMER-action-btn reservation-btn"
                                                 onClick={() => handleGoToReservations(customer)}
                                                 title="Ir a reserva(s)"
                                             >

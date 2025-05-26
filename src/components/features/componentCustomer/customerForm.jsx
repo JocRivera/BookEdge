@@ -73,6 +73,12 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
           error = "El nombre es obligatorio";
         } else if (value.trim().length < 3) {
           error = "El nombre debe tener al menos 3 caracteres";
+        } else if (/[0-9]/.test(value)) {
+          error = "El nombre no puede contener números";
+        } else if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/.test(value)) {
+          error = "El nombre no puede contener caracteres especiales";
+        } else if (value.trim().length > 50) {
+          error = "El nombre debe tener menos de 50 caracteres";
         }
         break;
 
@@ -87,14 +93,32 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
       case "identification":
         if (!value.trim()) {
           error = "La identificación es obligatoria";
-        } else if (value.trim().length < 5) {
-          error = "La identificación debe tener al menos 5 caracteres";
+        } else if (/^0/.test(value)) {
+          error = "La identificación no puede empezar con 0";
+        } else if (/\./.test(value)) {
+          error = "La identificación no puede ser un número decimal";
+        } else if (/[a-zA-Z]/.test(value)) {
+          error = "La identificación no puede tener letras";
+        } else if (/[^0-9]/.test(value)) {
+          error = "La identificación no puede contener caracteres especiales";
+        } else if (/^-/.test(value)) {
+          error = "La identificación no puede ser un número negativo";
+        } else if (value.trim().length < 6) {
+          error = "La identificación debe tener al menos 6 caracteres";
+        } else if (value.trim().length > 15) {
+          error = "La identificación no puede ser mayor a 15 caracteres";
         }
         break;
 
       case "cellphone":
         if (!value.trim()) {
           error = "El teléfono es obligatorio";
+        } else if (/[a-zA-Z]/.test(value)) {
+          error = "El teléfono no debe contener letras";
+        } else if (/^-/.test(value)) {
+          error = "El teléfono no debe ser un número negativo";
+        } else if (/[^0-9]/.test(value)) {
+          error = "El teléfono no debe contener caracteres especiales";
         } else if (!/^\d{10}$/.test(value)) {
           error = "El teléfono debe tener 10 dígitos";
         }
@@ -116,11 +140,11 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
           error = "La contraseña es obligatoria para nuevos clientes";
         } else if (value && value.length < 8) {
           error = "La contraseña debe tener al menos 8 caracteres";
+        } else if (value && value.length > 15) {
+          error = "La contraseña no debe contener más de 15 dígitos";
         } else if (
           value &&
-          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(
-            value
-          )
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(value)
         ) {
           error =
             "La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales";
@@ -130,6 +154,28 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
       case "identificationType":
         if (!value) {
           error = "El tipo de identificación es obligatorio";
+        }
+        break;
+
+      case "eps":
+        if (value.trim()) {
+          if (value.length < 4) {
+            error = "La EPS debe tener al menos 4 caracteres";
+          } else if (value.length > 50) {
+            error = "La EPS no puede tener más de 50 caracteres";
+          } else if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s0-9]/.test(value)) {
+            error = "La EPS no puede contener caracteres especiales";
+          }
+        }
+        break;
+
+      case "address":
+        if (value.trim()) {
+          if (value.length < 3) {
+            error = "La dirección debe tener al menos 3 caracteres";
+          } else if (value.length > 50) {
+            error = "La dirección no puede tener más de 50 caracteres";
+          }
         }
         break;
     }
@@ -246,25 +292,22 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
             <div className="customer-tabs-container">
               <ul className="customer-tabs">
                 <li
-                  className={`customer-tab ${
-                    activeTab === "personal" ? "active" : ""
-                  }`}
+                  className={`customer-tab ${activeTab === "personal" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("personal")}
                 >
                   Datos Personales
                 </li>
                 <li
-                  className={`customer-tab ${
-                    activeTab === "contact" ? "active" : ""
-                  }`}
+                  className={`customer-tab ${activeTab === "contact" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("contact")}
                 >
                   Información de Contacto
                 </li>
                 <li
-                  className={`customer-tab ${
-                    activeTab === "security" ? "active" : ""
-                  }`}
+                  className={`customer-tab ${activeTab === "security" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("security")}
                 >
                   Seguridad
@@ -274,9 +317,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
 
             {/* Pestaña de Datos Personales */}
             <div
-              className={`customer-tab-content ${
-                activeTab === "personal" ? "active" : ""
-              }`}
+              className={`customer-tab-content ${activeTab === "personal" ? "active" : ""
+                }`}
             >
               <div className="customer-form-grid">
                 <div className="form-group-customer">
@@ -288,9 +330,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.name ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.name ? "input-error-customer" : ""
+                      }`}
                     placeholder="Nombre completo"
                     required
                   />
@@ -312,9 +353,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="identificationType"
                     value={formData.identificationType}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.identificationType ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.identificationType ? "input-error-customer" : ""
+                      }`}
                   >
                     <option value="">Seleccione</option>
                     <option value="CC">Cédula de Ciudadanía</option>
@@ -340,9 +380,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="identification"
                     value={formData.identification}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.identification ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.identification ? "input-error-customer" : ""
+                      }`}
                     placeholder="Ingrese la identificación"
                   />
                   {errors.identification && (
@@ -361,9 +400,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="birthdate"
                     value={formData.birthdate}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.birthdate ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.birthdate ? "input-error-customer" : ""
+                      }`}
                   />
                   {errors.birthdate && (
                     <span className="error-message-customer">
@@ -381,9 +419,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="eps"
                     value={formData.eps}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.eps ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.eps ? "input-error-customer" : ""
+                      }`}
                     placeholder="Ingrese la EPS"
                   />
                   {errors.eps && (
@@ -395,9 +432,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
 
             {/* Pestaña de Información de Contacto */}
             <div
-              className={`customer-tab-content ${
-                activeTab === "contact" ? "active" : ""
-              }`}
+              className={`customer-tab-content ${activeTab === "contact" ? "active" : ""
+                }`}
             >
               <div className="customer-form-grid">
                 <div className="form-group-customer">
@@ -409,9 +445,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.email ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.email ? "input-error-customer" : ""
+                      }`}
                     placeholder="Ingrese el correo electrónico"
                   />
                   {errors.email && (
@@ -430,9 +465,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="cellphone"
                     value={formData.cellphone}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.cellphone ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.cellphone ? "input-error-customer" : ""
+                      }`}
                     placeholder="Ingrese el teléfono"
                   />
                   {errors.cellphone && (
@@ -451,9 +485,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.address ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.address ? "input-error-customer" : ""
+                      }`}
                     placeholder="Ingrese la dirección"
                   />
                   {errors.address && (
@@ -467,9 +500,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
 
             {/* Pestaña de Seguridad */}
             <div
-              className={`customer-tab-content ${
-                activeTab === "security" ? "active" : ""
-              }`}
+              className={`customer-tab-content ${activeTab === "security" ? "active" : ""
+                }`}
             >
               <div className="customer-form-grid">
                 <div className="form-group-customer">
@@ -483,9 +515,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      errors.password ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${errors.password ? "input-error-customer" : ""
+                      }`}
                     placeholder={
                       customerData
                         ? "Dejar vacío para mantener actual"
@@ -511,9 +542,8 @@ const FormCustomer = ({ isOpen, onClose, onSave, customerData, rolID }) => {
                     id="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`form-input-customer ${
-                      passwordError ? "input-error-customer" : ""
-                    }`}
+                    className={`form-input-customer ${passwordError ? "input-error-customer" : ""
+                      }`}
                     placeholder="Confirme la contraseña"
                   />
                   {passwordError && (
