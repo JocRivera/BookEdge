@@ -103,44 +103,20 @@ export default function CreateServices() {
         if (currentService) {
             serviceService.updateService(currentService.Id_Service, service).then(() => {
                 setServices(services.map((srvc) => srvc.Id_Service === currentService.Id_Service ? { ...srvc, ...service } : srvc));
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Servicio actualizado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Servicio actualizado correctamente');
             }).catch((error) => {
                 console.error("Error updating service:", error);
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: `No se pudo actualizar el servicio: ${error}`,
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.error(`Error al actualizar el servicio: ${error.message || error}`);
             });
         } else {
             serviceService.createService(service).then((newService) => {
                 setServices([...services, newService]);
                 setCurrentService(null);
                 setIsModalOpen(false);
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Servicio creado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Servicio creado correctamente');
             }).catch((error) => {
                 console.error("Error creating service:", error);
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: `No se pudo crear el servicio: ${error}`,
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.error(`Error al crear el servicio: ${error.message || error}`);
             });
         }
         console.log(service);
