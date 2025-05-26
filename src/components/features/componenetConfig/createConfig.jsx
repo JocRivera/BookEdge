@@ -103,24 +103,10 @@ export default function CreateConfig() {
             console.log(currentConfig)
             rolesService.updateRole(currentConfig.idRol, setting).then((res) => {
                 setSettings(settings.map((config) => config.idRol === currentConfig.idRol ? { ...config, ...setting } : config))
-                // setCurrentConfig(null)
-                // setIsModalOpen(false)
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Rol actualizado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Rol actualizado correctamente')
             }).catch((error) => {
                 console.log(error)
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: 'No se pudo actualizar el Rol',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.error(`Error al actualizar el rol: ${error.message || 'Error desconocido'}`);
             }
             )
         }
@@ -129,23 +115,10 @@ export default function CreateConfig() {
                 setSettings([...settings, res])
                 setCurrentConfig(null)
                 setIsModalOpen(false)
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Rol creado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                });
+                toast.success('Rol creado correctamente')
             }).catch((error) => {
                 console.log(error)
-                iziToast.error({
-                    class: 'custom-alert',
-                    title: 'Error',
-                    message: 'No se pudo crear el Rol',
-                    position: 'topRight',
-                    timeout: 5000
-                });
-
+                toast.error(`Error al crear el rol: ${error.message || 'Error desconocido'}`);
             })
         }
         console.log(setting);
