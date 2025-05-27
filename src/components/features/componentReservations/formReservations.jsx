@@ -571,7 +571,7 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
         ])
 
         // 🔍 Marcar planes estáticos (ejemplo: IDs 1, 3, 5)
-        const staticPlanIds = [1, 3, 5]
+        const staticPlanIds = [1, 3, 4]
         const patchedPlanes = planesData.map(plan => {
           const requiresAccommodation = (plan.totalAssignedCabins || 0) > 0 || (plan.totalAssignedBedrooms || 0) > 0
 
