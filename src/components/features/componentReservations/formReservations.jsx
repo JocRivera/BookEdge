@@ -84,15 +84,41 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
           newData.requiresAccommodation = true
         }
       }
+      if (name === "idPlan") {
+        const selectedPlan = formData.planes.find(p => p.idPlan === Number(value))
 
-      // Cuando cambia la fecha de inicio en un plan "Día de sol"
+        if (selectedPlan) {
+          // Detectar automáticamente si requiere alojamiento
+          const requiresAccommodation =
+            (selectedPlan.totalAssignedCabins || 0) > 0 ||
+            (selectedPlan.totalAssignedBedrooms || 0) > 0
+
+          newData.requiresAccommodation = requiresAccommodation
+
+          // Si no requiere alojamiento, igualar fecha de fin
+          if (!requiresAccommodation && newData.startDate) {
+            newData.endDate = newData.startDate
+          }
+        }
+      }
+
       if (name === "startDate") {
-        const selectedDate = new Date(value)
+        const selectedPlan = formData.planes.find(p => p.idPlan === Number(newData.idPlan))
 
+        // Si el plan seleccionado no requiere alojamiento, sincronizar fechas
+        const requiresAccommodation =
+          selectedPlan &&
+          ((selectedPlan.totalAssignedCabins || 0) > 0 || (selectedPlan.totalAssignedBedrooms || 0) > 0)
+
+        if (selectedPlan && !requiresAccommodation) {
+          newData.endDate = value
+        }
+
+        // También actualizamos availablePlanes según la fecha
         const validProgrammedIds = (formData.programmedPlans || []).filter(pp => {
           const start = new Date(pp.startDate)
           const end = new Date(pp.endDate)
-          return pp.statusProgramed && selectedDate >= start && selectedDate <= end
+          return pp.statusProgramed && new Date(value) >= start && new Date(value) <= end
         }).map(pp => pp.idPlan)
 
         const visiblePlanes = (formData.planes || []).filter(plan =>
@@ -101,25 +127,14 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
         newData.availablePlanes = visiblePlanes
 
-        // Si el plan actual ya no está disponible, reiniciar idPlan
+        // Resetear plan si ya no está disponible
         if (!visiblePlanes.find(p => p.idPlan === Number(newData.idPlan))) {
           newData.idPlan = ""
           newData.requiresAccommodation = true
           newData.endDate = ""
         }
-
-        // Si el plan sí es visible y no requiere alojamiento
-        // const selectedPlan = visiblePlanes.find(p => p.idPlan === Number(newData.idPlan))
-        // if (selectedPlan && selectedPlan.requiresAccommodation === false) {
-        //   newData.endDate = value
-        //   newData.requiresAccommodation = false
-        // }
-        const selectedPlan = formData.planes.find(p => p.idPlan === Number(newData.idPlan))
-        if (selectedPlan && selectedPlan.name === "Día de sol") {
-          newData.endDate = value // Sincronizar fecha fin con inicio
-        }
-
       }
+
 
       // Aplicar lógica de disponibilidad cuando cambian campos relevantes
       if (name === "companionCount" || name === "hasCompanions") {
@@ -487,10 +502,16 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
         // 🔍 Marcar planes estáticos (ejemplo: IDs 1, 3, 5)
         const staticPlanIds = [1, 3, 5]
-        const patchedPlanes = planesData.map(plan => ({
-          ...plan,
-          isStatic: staticPlanIds.includes(plan.idPlan)
-        }))
+        const patchedPlanes = planesData.map(plan => {
+          const requiresAccommodation = (plan.totalAssignedCabins || 0) > 0 || (plan.totalAssignedBedrooms || 0) > 0
+
+          return {
+            ...plan,
+            isStatic: staticPlanIds.includes(plan.idPlan),
+            requiresAccommodation // <- true si requiere alojamiento
+          }
+        })
+
 
         // 📅 Filtrar planes programados activos según hoy
         const today = new Date()
@@ -683,17 +704,19 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
               />
             )}
 
-            {step === (formData.hasCompanions ? 3 : 2) && (
-              <AvailabilityStep
-                formData={formData}
-                errors={errors}
-                loading={loading}
-                onCabinSelect={handleCabinSelect}
-                onRoomSelect={handleRoomSelect}
-                onServiceToggle={handleServiceToggle}
-                onServiceQuantityChange={handleServiceQuantityChange}
-              />
-            )}
+            {formData.requiresAccommodation &&
+              step === (formData.hasCompanions ? 3 : 2) && (
+                <AvailabilityStep
+                  formData={formData}
+                  errors={errors}
+                  loading={loading}
+                  onCabinSelect={handleCabinSelect}
+                  onRoomSelect={handleRoomSelect}
+                  onServiceToggle={handleServiceToggle}
+                  onServiceQuantityChange={handleServiceQuantityChange}
+                />
+              )}
+
 
             {step === (formData.hasCompanions ? 4 : 3) && (
               <PaymentStep

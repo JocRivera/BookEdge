@@ -321,7 +321,9 @@ const formatCOP = (value) => {
 }
 
 export function BasicInfoStep({ formData, errors, users, planes, loading, isReadOnly, onChange }) {
-  const isDiaDeSol = planes.find(p => p.idPlan === Number(formData.idPlan))?.name === "Día de sol"
+  const selectedPlan = planes.find(p => p.idPlan === Number(formData.idPlan))
+  const disableEndDate = selectedPlan && !selectedPlan.requiresAccommodation
+
   return (
     <div className="step-content">
       <div className="form-group">
@@ -389,8 +391,8 @@ export function BasicInfoStep({ formData, errors, users, planes, loading, isRead
             value={formData.endDate}
             onChange={onChange}
             min={formData.startDate || new Date().toISOString().split("T")[0]}
-            disabled={loading || isReadOnly || isDiaDeSol}
             className={errors.endDate ? "error" : ""}
+            disabled={loading || isReadOnly || disableEndDate}
           />
 
           {errors.endDate && <span className="error-message">{errors.endDate}</span>}
