@@ -196,34 +196,104 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
   // ✅ ACTUALIZAR HANDLERS PARA INCLUIR CANTIDADES DE SERVICIOS
   const { handleCabinSelect, handleRoomSelect, handleServiceToggle, handleServiceQuantityChange } = createSelectionHandlers(setFormData)
 
-  const nextStep = () => {
-    console.log("➡️ Intentando avanzar al siguiente paso. Paso actual:", step)
-    const isValid = validateStep(step, formData)
-    console.log("✅ Validación del paso:", isValid)
+  const getTotalSteps = (formData) => {
+    let steps = 1; // Paso 1: Datos básicos (siempre existe)
 
-    if (isValid) {
-      if (step === 1 && !formData.hasCompanions) {
-        console.log("⏭️ Saltando paso de acompañantes (no hay acompañantes)")
-        setStep(3) // Saltar al paso de disponibilidad
+    if (formData.hasCompanions) {
+      steps++; // Paso 2: Acompañantes
+    }
+
+    if (formData.requiresAccommodation) {
+      steps++; // Paso 3: Disponibilidad (solo si requiere alojamiento)
+    }
+
+    steps++; // Último paso: Pagos (siempre existe)
+
+    return steps;
+  };
+
+  // Función helper para obtener el siguiente paso
+  const getNextStep = (currentStep, formData) => {
+    if (currentStep === 1) {
+      if (formData.hasCompanions) {
+        return 2; // Ir a acompañantes
+      } else if (formData.requiresAccommodation) {
+        return 3; // Saltar a disponibilidad
       } else {
-        console.log("➡️ Avanzando al paso:", step + 1)
-        setStep(step + 1)
+        return getTotalSteps(formData); // Ir directo a pagos
+      }
+    } else if (currentStep === 2) {
+      // Estamos en el paso de acompañantes
+      if (formData.requiresAccommodation) {
+        return 3; // Ir a disponibilidad
+      } else {
+        return getTotalSteps(formData); // Saltar directo a pagos
       }
     } else {
-      console.log("❌ Validación falló, no se puede avanzar")
+      return currentStep + 1; // Avanzar normalmente
     }
-  }
+  };
 
-  const prevStep = () => {
-    console.log("⬅️ Retrocediendo desde el paso:", step)
-    if (step === 4 && !formData.hasCompanions) {
-      setStep(1)
-    } else if (step === 3 && !formData.hasCompanions) {
-      setStep(1)
+  // Función helper para obtener el paso anterior
+  const getPrevStep = (currentStep, formData) => {
+    const totalSteps = getTotalSteps(formData);
+
+    if (currentStep === totalSteps) {
+      // Estamos en el paso de pagos
+      if (formData.requiresAccommodation) {
+        return formData.hasCompanions ? 3 : 2; // Volver a disponibilidad
+      } else {
+        return formData.hasCompanions ? 2 : 1; // Volver a acompañantes o datos básicos
+      }
+    } else if (currentStep === 3) {
+      // Estamos en disponibilidad
+      return formData.hasCompanions ? 2 : 1; // Volver a acompañantes o datos básicos
     } else {
-      setStep(step - 1)
+      return currentStep - 1; // Retroceder normalmente
     }
-  }
+  };
+
+  // Función helper para obtener el texto del botón "Siguiente"
+  const getNextButtonText = (currentStep, formData) => {
+    const nextStep = getNextStep(currentStep, formData);
+    const totalSteps = getTotalSteps(formData);
+
+    if (nextStep === totalSteps) {
+      return "Ir a Pagos";
+    } else if (nextStep === 3 && formData.requiresAccommodation) {
+      return "Verificar Disponibilidad";
+    } else {
+      return "Siguiente";
+    }
+  };
+
+  // Función helper para verificar si estamos en el último paso
+  const isLastStep = (currentStep, formData) => {
+    return currentStep === getTotalSteps(formData);
+  };
+
+  // Reemplaza la función nextStep existente en formReservations.jsx:
+  const nextStep = () => {
+    console.log("➡️ Intentando avanzar al siguiente paso. Paso actual:", step);
+    const isValid = validateStep(step, formData);
+    console.log("✅ Validación del paso:", isValid);
+
+    if (isValid) {
+      const nextStepNumber = getNextStep(step, formData);
+      console.log("➡️ Avanzando al paso:", nextStepNumber);
+      setStep(nextStepNumber);
+    } else {
+      console.log("❌ Validación falló, no se puede avanzar");
+    }
+  };
+
+  // Reemplaza la función prevStep existente en formReservations.jsx:
+  const prevStep = () => {
+    console.log("⬅️ Retrocediendo desde el paso:", step);
+    const prevStepNumber = getPrevStep(step, formData);
+    console.log("⬅️ Retrocediendo al paso:", prevStepNumber);
+    setStep(prevStepNumber);
+  };
 
   const handleSaveCompanion = (newCompanion) => {
     console.log("👤 Guardando nuevo acompañante:", newCompanion)
@@ -660,20 +730,16 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
 
         <div className="steps-indicator">
           <div className={`step ${step === 1 ? "active" : ""}`}>1. Datos Reserva</div>
-          {formData.hasCompanions && <div className={`step ${step === 2 ? "active" : ""}`}>2. Acompañantes</div>}
-          {!formData.requiresAccommodation && null}
+          {formData.hasCompanions && (
+            <div className={`step ${step === 2 ? "active" : ""}`}>2. Acompañantes</div>
+          )}
           {formData.requiresAccommodation && (
-            <div className={`step ${step === (formData.hasCompanions ? 3 : 2) ? "active" : ""}`}>
+            <div className={`step ${step === 3 ? "active" : ""}`}>
               {formData.hasCompanions ? "3" : "2"}. Disponibilidad
             </div>
           )}
-          <div className={`step ${step === (formData.hasCompanions
-            ? (formData.requiresAccommodation ? 4 : 3)
-            : (formData.requiresAccommodation ? 3 : 2))
-            ? "active" : ""}`}>
-            {formData.hasCompanions
-              ? (formData.requiresAccommodation ? "4" : "3")
-              : (formData.requiresAccommodation ? "3" : "2")}. Pagos
+          <div className={`step ${step === getTotalSteps(formData) ? "active" : ""}`}>
+            {getTotalSteps(formData)}. Pagos
           </div>
         </div>
 
@@ -685,12 +751,11 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 formData={formData}
                 errors={errors}
                 users={formData.users || []}
-                planes={formData.availablePlanes || []} // <-- usar solo los visibles
+                planes={formData.availablePlanes || []}
                 loading={loading}
                 isReadOnly={isReadOnly}
                 onChange={handleChange}
               />
-
             )}
 
             {step === 2 && formData.hasCompanions && (
@@ -704,21 +769,19 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
               />
             )}
 
-            {formData.requiresAccommodation &&
-              step === (formData.hasCompanions ? 3 : 2) && (
-                <AvailabilityStep
-                  formData={formData}
-                  errors={errors}
-                  loading={loading}
-                  onCabinSelect={handleCabinSelect}
-                  onRoomSelect={handleRoomSelect}
-                  onServiceToggle={handleServiceToggle}
-                  onServiceQuantityChange={handleServiceQuantityChange}
-                />
-              )}
+            {step === 3 && formData.requiresAccommodation && (
+              <AvailabilityStep
+                formData={formData}
+                errors={errors}
+                loading={loading}
+                onCabinSelect={handleCabinSelect}
+                onRoomSelect={handleRoomSelect}
+                onServiceToggle={handleServiceToggle}
+                onServiceQuantityChange={handleServiceQuantityChange}
+              />
+            )}
 
-
-            {step === (formData.hasCompanions ? 4 : 3) && (
+            {isLastStep(step, formData) && (
               <PaymentStep
                 totalAmount={totalAmount}
                 reservationPayments={reservationPayments}
@@ -729,26 +792,36 @@ function FormReservation({ reservationData = null, onClose, onSave, isOpen, isRe
                 onPaymentSubmit={handleAddPayment}
               />
             )}
-
             <div className="modal-footer">
               {step > 1 && (
-                <button type="button" className="reservations-cancel-btn" onClick={prevStep} disabled={loading}>
+                <button
+                  type="button"
+                  className="reservations-cancel-btn"
+                  onClick={prevStep}
+                  disabled={loading}
+                >
                   Anterior
                 </button>
               )}
 
-              {step < (formData.hasCompanions ? 4 : 3) && (
-                <button type="button" className="submit-btn" onClick={nextStep} disabled={loading}>
-                  {step === (formData.hasCompanions ? 3 : 2)
-                    ? "Ir a Pagos"
-                    : step === 2
-                      ? "Verificar Disponibilidad"
-                      : "Siguiente"}
+              {!isLastStep(step, formData) && (
+                <button
+                  type="button"
+                  className="submit-btn"
+                  onClick={nextStep}
+                  disabled={loading}
+                >
+                  {getNextButtonText(step, formData)}
                 </button>
               )}
 
-              {!isReadOnly && step === (formData.hasCompanions ? 4 : 3) && (
-                <button type="button" className="btn btn-primary" disabled={loading} onClick={handleSubmit}>
+              {!isReadOnly && isLastStep(step, formData) && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={loading}
+                  onClick={handleSubmit}
+                >
                   {loading ? "Guardando..." : "Guardar Reserva"}
                 </button>
               )}
