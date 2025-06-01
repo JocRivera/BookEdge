@@ -18,6 +18,27 @@ const TopPlans = () => {
         labels: [],
         datasets: []
     });
+    const generateColors = (count) => {
+        const baseColors = [
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(199, 199, 199, 0.6)',
+            'rgba(83, 102, 255, 0.6)',
+            'rgba(255, 99, 255, 0.6)',
+            'rgba(99, 255, 132, 0.6)',
+        ];
+
+        const borderColors = baseColors.map(c => c.replace('0.6', '1'));
+
+        return {
+            backgroundColor: Array.from({ length: count }, (_, i) => baseColors[i % baseColors.length]),
+            borderColor: Array.from({ length: count }, (_, i) => borderColors[i % borderColors.length])
+        };
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,6 +47,7 @@ const TopPlans = () => {
 
                 const labels = plans.map(p => p.name);
                 const data = plans.map(p => p.clientCount);
+                const colors = generateColors(plans.length);
 
                 setChartData({
                     labels,
@@ -33,8 +55,8 @@ const TopPlans = () => {
                         {
                             label: 'Reservas por plan',
                             data,
-                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: colors.backgroundColor,
+                            borderColor: colors.borderColor,
                             borderWidth: 1
                         }
                     ]
@@ -60,6 +82,9 @@ const TopPlans = () => {
                                 top: 10,
                                 bottom: 30,
                             },
+                        },
+                        legend: {
+                            display: false, // Oculta la leyenda
                         },
                     },
                     maintainAspectRatio: false,

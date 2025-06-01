@@ -7,7 +7,7 @@ import DailyReservations from './DailyReservations.jsx';
 
 // Stats Card Component
 const StatsCard = ({ title, value, change, isPositive }) => (
-    <div className="bg-gray-100 rounded-lg shadow-2xl p-6 shadow-indigo-300 hover:shadow-lg transition-shadow duration-300 ">
+    <div className="bg-gray-200 rounded-lg shadow-2xl p-6 shadow-indigo-300 hover:shadow-lg transition-shadow duration-300 ">
         <div className="flex flex-col items-center">
             <h3 className="text-sm font-medium text-gray-900 ">{title}</h3>
             <p className="text-xl font-bold mt-2 text-gray-600">{value}</p>
@@ -20,11 +20,12 @@ const StatsCard = ({ title, value, change, isPositive }) => (
 export default function DashboardManagement() {
     // Stats data
     const statsData = [
-        { title: "Total Revenue", value: "$24,345", change: "12% from last month", isPositive: true },
-        { title: "New Users", value: "2,345", change: "8% from last month", isPositive: true },
-        { title: "Active Sessions", value: "1,432", change: "3% from last month", isPositive: false },
-        { title: "Conversion Rate", value: "3.2%", change: "1.2% from last month", isPositive: true }
+        { title: "Reservas hoy", value: "15", change: "5 más que ayer", isPositive: true },
+        { title: "Reservas este mes", value: "420", change: "10% más que el mes pasado", isPositive: true },
+        { title: "Cancelaciones", value: "12", change: "2 más que la semana pasada", isPositive: false },
+        { title: "Ocupación promedio", value: "78%", change: "3% menos que el mes pasado", isPositive: false }
     ];
+
 
     return (
         <div className="gap-4 mb-6">
