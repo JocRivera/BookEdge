@@ -13,7 +13,7 @@ import { getTopPlans } from '../../../services/DashboardService.jsx';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const BarsChart = () => {
+const TopPlans = () => {
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: []
@@ -74,4 +74,4 @@ const BarsChart = () => {
     );
 };
 
-export default BarsChart;
+export default TopPlans;

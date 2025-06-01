@@ -1,9 +1,9 @@
 "use client"
 
 import React from 'react';
-import BarsChart from './Bars.jsx';
+import BarsChart from './TopPlans.jsx';
 import LinesChart from './Lines.jsx';
-import DoughnutsChart from './Doughnut.jsx';
+import DoughnutsChart from './DailyReservations.jsx';
 
 // Stats Card Component
 const StatsCard = ({ title, value, change, isPositive }) => (
