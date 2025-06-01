@@ -1,9 +1,9 @@
 "use client"
 
 import React from 'react';
-import BarsChart from './TopPlans.jsx';
+import TopPlans from './TopPlans.jsx';
 import LinesChart from './Lines.jsx';
-import DoughnutsChart from './DailyReservations.jsx';
+import DailyReservations from './DailyReservations.jsx';
 
 // Stats Card Component
 const StatsCard = ({ title, value, change, isPositive }) => (
@@ -45,10 +45,10 @@ export default function DashboardManagement() {
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div className='lg:col-span-2 bg-gray-100  shadow-indigo-300 rounded-lg p-4 shadow-2xl  hover:shadow-lg transition-shadow duration-300'>
-                        <BarsChart />
+                        <TopPlans />
                     </div>
                     <div className=" bg-gray-100 rounded-lg p-4  shadow-indigo-300 shadow-2xl  hover:shadow-lg transition-shadow duration-300 ">
-                        <DoughnutsChart />
+                        <DailyReservations />
                     </div>
                 </div>
                 <div className=" bg-gray-100 rounded-lg shadow-2xl p-4  shadow-indigo-300  hover:shadow-lg transition-shadow duration-300 ">
