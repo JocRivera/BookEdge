@@ -52,92 +52,112 @@ const Profile = ({ onClose, isOpen }) => {
     setSuccess(null);
   }, [user, isOpen]); // Dependencia de isOpen para resetear al reabrir
 
-  const validateField = (name, value) => {
-    let error = "";
-    switch (name) {
-      case "name":
-        if (!value.trim()) error = "El nombre completo es obligatorio.";
-        else if (value.trim().length < 3)
-          error = "Debe tener al menos 3 caracteres.";
-        break;
-      case "identificationType":
-        if (!value) error = "El tipo de identificación es obligatorio.";
-        break;
-      case "identification":
-        if (!value.trim())
-          error = "El número de identificación es obligatorio.";
-        else if (value.trim().length < 5)
-          error = "Debe tener al menos 5 caracteres.";
-        break;
-      case "cellphone":
-        if (!value.trim()) error = "El teléfono/celular es obligatorio.";
-        else if (!/^\d{10}$/.test(value.trim()))
-          error = "Debe ser un número de 10 dígitos.";
-        break;
-      case "birthdate":
-        if (value) {
-          // Solo valida si tiene valor, asumiendo opcional o requerido de otra forma
-          const today = new Date();
-          const birthDate = new Date(value);
-          today.setHours(0, 0, 0, 0); // Normalizar hora para comparación
-          birthDate.setHours(0, 0, 0, 0); // Normalizar hora
+  // Función para validar campos (puedes llamarla igual en tu componente de Perfil)
+// Solo incluirá los cases para los campos del perfil que necesitas validar.
 
-          let age = today.getFullYear() - birthDate.getFullYear();
-          const m = today.getMonth() - birthDate.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-          }
-          if (birthDate > today) error = "La fecha no puede ser futura.";
-          else if (age < 18) error = "Debes ser mayor de 18 años."; // Si es un requisito
-        }
-        // Si 'birthdate' fuese estrictamente obligatorio y está vacío:
-        // else if (!value && isEditing) error = "La fecha de nacimiento es obligatoria";
-        break;
-      default:
-        break;
-    }
-    return error;
-  };
+const validateField = (name, value) => { // Mismo nombre de función
+  let error = "";
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  switch (name) {
+    case "name": // Nombre completo
+      if (!value.trim()) {
+        error = "El nombre completo es obligatorio.";
+      } else if (value.trim().length < 3) {
+        error = "El nombre debe tener al menos 3 caracteres.";
+      } else if (value.trim().length > 50) {
+        error = "El nombre no puede exceder los 50 caracteres.";
+      }
+      break;
 
-    // Validación al cambiar
-    const errorMsg = validateField(name, value);
-    setErrors((prev) => ({ ...prev, [name]: errorMsg }));
-  };
+    case "identificationType": // Tipo de documento
+      if (!value.trim()) {
+        error = "Debes seleccionar un tipo de documento.";
+      }
+      break;
 
-  const validateForm = () => {
-    const newErrors = {};
-    let formIsValid = true;
+    case "identification": // Número de documento/identificación
+      if (!value.trim()) {
+        error = "El número de documento es obligatorio.";
+      } else if (value.trim().length < 5) {
+        error = "La identificación debe tener mínimo 5 caracteres.";
+      }
+      // else if (value.trim().length > 10) { // Si tienes un máximo
+      //   error = "La identificación no puede tener más de 10 caracteres.";
+      // }
+      else if (!/^\d+$/.test(value.trim())) {
+        error = "El número de documento solo debe contener números."
+      }
+      break;
 
-    // Lista de campos a validar y si son requeridos
-    // El email está deshabilitado, no lo validamos en el front al editar
-    const fieldsToValidate = [
-      { name: "name", required: true },
-      { name: "identificationType", required: true },
-      { name: "identification", required: true },
-      { name: "cellphone", required: true },
-      { name: "birthdate", required: false }, // Cambiar a true si es estrictamente requerido
-      // { name: "eps", required: false }, // Opcional
-      // { name: "address", required: false }, // Opcional
-    ];
+    case "cellphone": // Número de contacto/celular
+      if (!value.trim()) {
+        error = "El número de contacto es obligatorio.";
+      } else if (value.trim().length < 10) {
+        error = "El número de contacto debe tener al menos 10 caracteres.";
+      } else if (!/^\d+$/.test(value.trim())) {
+        error = "El número de contacto solo debe contener números."
+      }
+      break;
 
-    fieldsToValidate.forEach((field) => {
-      const error = validateField(field.name, formData[field.name]);
-      if (error) {
-        newErrors[field.name] = error;
-        if (field.required || formData[field.name]) {
-          // Si es requerido, o si tiene valor aunque sea opcional pero con error
-          formIsValid = false;
+    case "birthdate": // Fecha de nacimiento
+      if (!value.trim()) {
+        error = "La fecha de nacimiento es obligatoria.";
+      } else {
+        const birthDate = new Date(value);
+        const eighteenYearsAgo = new Date();
+        eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+
+        if (birthDate > eighteenYearsAgo) {
+          error = "Debes ser mayor de 18 años.";
         }
       }
-    });
+      break;
+    
+    // NO INCLUIR cases para 'email', 'password', 'confirmPassword' aquí si no los validas en el perfil.
 
-    setErrors(newErrors);
-    return formIsValid;
-  };
+    default:
+      break;
+  }
+  return error;
+};
+
+const handleChange = (e) => { // MISMA FUNCIÓN handleChange
+  const { name, value } = e.target;
+  setFormData(prevData => ({ ...prevData, [name]: value })); // Actualiza el estado 'formData'
+
+  // Validar el campo modificado
+  const error = validateField(name, value); // Llama a TU función validateField
+  setErrors(prevErrors => ({
+    ...prevErrors,
+    [name]: error,
+    // Opcional: Limpiar el error si el campo ahora es válido
+    // [name]: error || null, // si error es "", se pondrá null y limpiará
+  }));
+};
+
+  const validateForm = () => { // MISMA FUNCIÓN validateForm
+  const newErrors = {};
+  let isValid = true;
+
+  // Lista de los CAMPOS DEL PERFIL que quieres validar
+  // Asegúrate que estos nombres coincidan con las 'keys' en tu estado 'formData' del perfil
+  const fieldsToValidateInProfile = ["name", "identificationType", "identification", "cellphone", "birthdate"];
+
+  fieldsToValidateInProfile.forEach(fieldName => {
+    // Solo valida si el campo existe en el estado formData y tiene un valor o se espera que tenga uno
+    if (formData.hasOwnProperty(fieldName)) {
+        const valueToValidate = formData[fieldName] === null || formData[fieldName] === undefined ? "" : String(formData[fieldName]);
+        const error = validateField(fieldName, valueToValidate);
+        if (error) {
+            newErrors[fieldName] = error;
+            isValid = false;
+        }
+    }
+  });
+
+  setErrors(newErrors); // Actualiza el estado 'errors'
+  return isValid;
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

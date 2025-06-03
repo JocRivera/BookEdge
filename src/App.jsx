@@ -30,6 +30,7 @@ import Error401 from "./components/common/401&404/401";
 import Error404 from "./components/common/401&404/404";
 import "../src/components/features/componentPlans/componentPlan.css";
 import { AlertProvider } from "./context/AlertContext";
+import ResetPassword from "./components/features/componentAuth/Emailcode";
 export default function App() {
   return (
     <BrowserRouter>
@@ -198,6 +199,7 @@ export default function App() {
             </Route>
 
             <Route path="*" element={<Error404 />} />
+            <Route path="/restablecer" element={<ResetPassword/>}/>
           </Routes>
           <ToastContainer position="top-right" autoClose={3000} />
         </AlertProvider>

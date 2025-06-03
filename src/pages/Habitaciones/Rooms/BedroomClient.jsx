@@ -1,13 +1,12 @@
-// --- START OF FILE BedroomsClient.jsx (Revisado para usar clases de BedroomClient.css) ---
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { FaBed } from "react-icons/fa";
+import { FaBed } from "react-icons/fa"; 
 import React, { useEffect, useState, useCallback } from "react";
 import {
   getBedrooms,
   getBedroomImages,
 } from "../../../services/BedroomService";
-import BedroomDetailClient from "./BedroomDetails";
-import "./BedroomClient.css"; // IMPORTA EL BedroomClient.css
+import BedroomDetailClient from "./BedroomDetails"; 
+import "../Cabins/CabinClient.css"; 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -23,10 +22,11 @@ function BedroomsClient() {
 
   const loadRoomImages = useCallback(async (roomList) => {
     const imagesMap = {};
+    // Usamos Promise.all para ejecutar las cargas de imágenes en paralelo
     await Promise.all(
       roomList.map(async (room) => {
         try {
-          const images = await getBedroomImages(room.idRoom);
+          const images = await getBedroomImages(room.idRoom); // Servicio específico de habitación
           const primaryImage =
             images.find((img) => img.isPrimary) ||
             (images.length > 0 ? images[0] : null);
@@ -36,7 +36,7 @@ function BedroomsClient() {
             `Error cargando imágenes para habitación ${room.idRoom}:`,
             err
           );
-          imagesMap[room.idRoom] = null;
+          imagesMap[room.idRoom] = null; // Asegurar que haya una entrada incluso si falla
         }
       })
     );
@@ -48,7 +48,7 @@ function BedroomsClient() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getBedrooms();
+        const data = await getBedrooms(); // Servicio específico de habitación
         const activatedRooms = data.filter(
           (room) => room.status === "En Servicio"
         );
@@ -57,7 +57,7 @@ function BedroomsClient() {
           const imageMap = await loadRoomImages(activatedRooms);
           setRoomImagesMap(imageMap);
         } else {
-          setRoomImagesMap({});
+          setRoomImagesMap({}); // Limpiar si no hay habitaciones activas
         }
       } catch (err) {
         setError(err.message || "Error al conectar con la API");
@@ -71,133 +71,112 @@ function BedroomsClient() {
   const openModal = (room) => {
     setSelectedRoom(room);
     setIsModalOpen(true);
-    document.body.style.overflow = "hidden";
+    // Opcional: document.body.style.overflow = "hidden"; (si BedroomDetailClient no lo maneja)
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedRoom(null);
-    document.body.style.overflow = "auto";
+    // Opcional: document.body.style.overflow = "auto";
   };
 
-  if (loading)
-    return (
-      <div
-        className="loading-indicator-client"
-        style={{ textAlign: "center", padding: "50px", fontSize: "1.2rem" }}
-      >
-        Cargando habitaciones...
-      </div>
-    );
-  if (error)
-    return (
-      <div
-        className="error-indicator-client"
-        style={{ textAlign: "center", padding: "50px", color: "red" }}
-      >
-        Error: {error}
-      </div>
-    );
+  if (loading) {
+    return <div className="loading-indicator-client">Cargando habitaciones...</div>;
+  }
+
+  if (error) {
+    return <div className="error-indicator-client">Error: {error}</div>;
+  }
 
   return (
     <>
-      <section className="swiper-room-container">
-        {" "}
-        {/* Clase del contenedor Swiper */}
-        <div className="swiper-custom-nav-room">
-          {" "}
-          {/* Clases para la navegación, asegúrate que Swiper las use */}
+      {/* Usaremos las clases de swiper-cabin-container y swiper-custom-nav */}
+      <section className="swiper-cabin-container"> {/* Era swiper-room-container */}
+        {/* Título opcional, como en CabinsClient si lo tienes */}
+        {/* <h2 className="title-cabin-home">Nuestras <span>Habitaciones</span></h2> */}
+
+        {/* Contenedor de navegación con la clase de CabinClient */}
+        <div className="swiper-custom-nav"> {/* Era swiper-custom-nav-room */}
           <div className="swiper-button-prev-custom">
-            <ChevronLeft size={28} />
+            <ChevronLeft size={24} /> {/* Ajusta tamaño si es diferente */}
           </div>
           <div className="swiper-button-next-custom">
-            <ChevronRight size={28} />
+            <ChevronRight size={24} /> {/* Ajusta tamaño si es diferente */}
           </div>
         </div>
+
         <Swiper
           modules={[Navigation]}
           navigation={{
-            nextEl: ".swiper-button-next-custom", // Estas clases deben coincidir con los botones de nav
+            nextEl: ".swiper-button-next-custom", // Clases estándar de tus botones
             prevEl: ".swiper-button-prev-custom",
           }}
           spaceBetween={30}
           slidesPerView={1}
-          breakpoints={{
+          breakpoints={{ // Mismos breakpoints que CabinsClient
             640: { slidesPerView: 1, spaceBetween: 20 },
             768: { slidesPerView: 2, spaceBetween: 25 },
             1024: { slidesPerView: 3, spaceBetween: 30 },
           }}
-          className="room-swiper" // Clase opcional para el Swiper
+          className="cabin-swiper" // Usar la misma clase para el Swiper si es genérica
         >
           {rooms.map((room) => (
-            <SwiperSlide key={room.idRoom} className="swiper-slide-room">
-              {" "}
-              {/* Clase para el slide */}
+            // Usar la misma clase para el slide si los estilos son compartidos
+            <SwiperSlide key={room.idRoom} className="swiper-slide-cabin"> {/* O una clase genérica si la tienes */}
+              {/* Usar la misma estructura y clases para la tarjeta */}
               <article
-                className="room-card-client"
+                className="cabin-card-home" // Clase de tarjeta de CabinClient
                 onClick={() => openModal(room)}
               >
-                {" "}
-                {/* Card */}
-                <figure className="room-image-container-client">
-                  {" "}
-                  {/* Contenedor Imagen */}
+                <figure className="cabin-image-container-home"> {/* Clase de CabinClient */}
                   {roomImagesMap[room.idRoom] ? (
                     <img
                       src={`http://localhost:3000/uploads/${
                         roomImagesMap[room.idRoom]
                       }`}
-                      alt={room.name}
-                      className="room-image-client"
+                      alt={room.name || 'Habitación'}
+                      className="cabin-image-home" // Clase de CabinClient
                     />
                   ) : (
-                    <div className="no-image-placeholder-room-client">
-                      Sin Imagen
-                    </div> 
+                    // Placeholder consistente con CabinClient
+                    <div className="no-image-placeholder">Sin Imagen</div>
                   )}
                 </figure>
-                <div className="room-content-overlay-client">
-                  {" "}
-                  {/* Overlay */}
-                  {/* No necesitas el div .room-text-content aquí si el overlay maneja el flex-end */}
-                  <h2 className="room-title-client">{room.name}</h2>
+
+                <div className="cabin-content-overlay-home"> {/* Clase de CabinClient */}
+                  {/* Quité cabin-text-content si no es necesario y el overlay ya posiciona */}
+                  <h2 className="cabin-title-home">{room.name || 'Habitación sin nombre'}</h2>
                   {room.description && (
-                    <p className="room-description-client">
+                    <p className="cabin-description-home">
                       {room.description}
                     </p>
                   )}
-                  <div className="room-meta-tags-client">
-                    <span className="room-meta-tag-client">
+                  <div className="cabin-meta-tags-home">
+                    <span className="meta-tag-home"> {/* Clase genérica de CabinClient */}
                       <FaBed /> {room.capacity} Persona
                       {room.capacity > 1 ? "s" : ""}
                     </span>
-                    {/* Otros meta-tags */}
+                    {/* Otros meta-tags si aplican a habitaciones */}
                   </div>
-                  <button className="room-details-button-client">
+                  <button className="cabin-details-button-home"> {/* Clase de CabinClient */}
                     Ver Detalles
                   </button>
                 </div>
               </article>
             </SwiperSlide>
           ))}
-          {rooms.length === 0 && !loading && (
-            <div
-              style={{
-                width: "100%",
-                textAlign: "center",
-                padding: "40px",
-                color: "#777",
-                gridColumn: "1 / -1",
-              }}
-            >
+        </Swiper>
+        
+        {/* Mensaje si no hay habitaciones */}
+        {rooms.length === 0 && !loading && (
+            <div style={{ width: "100%", textAlign: "center", padding: "40px", color: "#777" }}>
               No hay habitaciones disponibles en este momento.
             </div>
-          )}
-        </Swiper>
+        )}
       </section>
 
       {selectedRoom && (
-        <BedroomDetailClient
+        <BedroomDetailClient // Este es tu modal de detalle específico para habitaciones
           room={selectedRoom}
           isOpen={isModalOpen}
           onClose={closeModal}
@@ -208,4 +187,3 @@ function BedroomsClient() {
 }
 
 export default BedroomsClient;
-// --- END OF FILE BedroomsClient.jsx ---

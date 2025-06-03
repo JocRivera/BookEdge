@@ -8,68 +8,58 @@
 
 :root {
   --primary-color: #2b9ad6;
-  --primary-gradient: linear-gradient(135deg, #2b9ad6, #1e6ca0);
-  --secondary-color: #f9f9f9;
-  --text-color: #333;
   --error-color: #e74c3c;
   --border-color: #e1e1e1;
-  --shadow-color: rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
 }
 
 body {
   font-family: "Poppins", sans-serif;
   background-color: #f5f9fc;
-  color: var(--text-color);
+  color: #333;
 }
 
-/* Navbar simplificado */
-.simple-navbar {
+/* Navbar */
+.login-navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   z-index: 1000;
   padding: 10px 20px;
 }
-
-.navbar-content {
+.login-navbar__content {
   max-width: 1500px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
-.brand {
+.login-navbar__brand {
   display: flex;
   align-items: center;
   cursor: pointer;
   transition: var(--transition);
 }
-
-.brand:hover {
+.login-navbar__brand:hover {
   transform: scale(1.02);
 }
-
-.navbar-logo {
+.login-navbar__logo {
   height: 40px;
   margin-right: 10px;
 }
-
-.navbar-title {
+.login-navbar__title {
   font-family: "Henny Penny", sans-serif;
   font-size: 1.6rem;
   color: var(--primary-color);
   margin: 0;
 }
 
-/* Login page */
-.login-page {
+/* Página de Login */
+.login-page-wrapper {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -77,182 +67,160 @@ body {
   padding: 20px;
   background: linear-gradient(45deg, #f5f9fc, #e7f0f8);
 }
-
-.login-container {
+.login-main-container {
   width: 100%;
   max-width: 1000px;
-  margin-top: 60px;
-  perspective: 1000px;
+  margin-top: 60px; /* Espacio para el navbar fijo */
 }
-
-.login-card {
+.login-card-container {
   display: flex;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transform-style: preserve-3d;
   transition: var(--transition);
 }
-
-.login-card:hover {
+.login-card-container:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
 }
-
-.form-side {
+.login-card__form-section {
   flex: 1;
   padding: 40px;
   background: white;
 }
-
-.brand-side {
+.login-card__brand-section {
   flex: 1;
-  display: flex;
+  display: flex; /* Oculto en mobile por media query más abajo */
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2b9ad6, #1e6ca0);
-  color: white;
-  padding: 0;
   position: relative;
   overflow: hidden;
 }
-.image-carousel {
+.login-card__image-carousel {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
 }
-
-.carousel-image {
+.login-card__carousel-image {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Para que la imagen cubra todo el espacio */
+  object-fit: cover;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
 }
-
-.carousel-image.active {
+.login-card__carousel-image--active { /* Clase de estado */
   opacity: 1;
 }
-
-.brand-overlay {
+.login-card__brand-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  background-color: rgba(0, 0, 0, 0.1); /* Overlay sutil */
 }
 
-.brand-decoration {
-  position: absolute;
-  width: 240px;
-  height: 240px;
-  opacity: 0.9; /* Hacer el logo más visible */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-}
-
-.brand-decoration:before {
-  display: none;
-}
-
-.logo-carousel {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
-}
-
-.logo-carousel img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0;
-  transition: opacity 0.8s ease-in-out;
-}
-
-.logo-carousel img.active {
-  opacity: 1;
-}
-
-/* Form Styles */
-.login-form {
+/* Formulario de Login */
+.login-form-main {
   width: 100%;
 }
-
-.form-title {
+.login-form__title {
   font-size: 2em;
-  color: var(--text-color);
+  color: #333;
   margin-bottom: 10px;
   font-weight: 600;
 }
-
-.form-subtitle {
+.login-form__subtitle {
   color: #777;
   margin-bottom: 30px;
   font-size: 0.95em;
 }
-
-.input-group {
+.login-form__input-group {
   margin-bottom: 20px;
 }
 
-.form-input {
+/* Contenedor de campo (etiqueta + input/error) */
+.login-form__field {
   position: relative;
-  border: none !important;
+  margin-bottom: 20px;
+}
+/* Etiqueta flotante */
+.login-form__label {
+  position: absolute;
+  left: 15px;
+  top: 14px; /* Ajustar para que coincida con el padding del input */
+  font-size: 16px;
+  color: #777;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background-color: white;
+  padding: 0 5px;
+  z-index: 1;
+}
+.login-form__label--active {
+  top: -10px; /* Sube la etiqueta */
+  font-size: 12px;
+  color: var(--primary-color);
 }
 
-.form-input input {
-  width: 100%;
+/* Wrapper para input y error */
+.login-form__input-error-wrapper {
+
+  position: relative; 
+}
+/* Campo de entrada */
+.login-form__input {
+  width: 100%; 
   padding: 12px 15px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 16px;
   transition: var(--transition);
-  background: transparent; 
+  background: transparent;
+  outline: none;
+  display: block; 
 
-  margin-top: 5px;
+}
+.login-form__field--focused .login-form__input {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 1px var(--primary-color);
 }
 
 
-.form-input.focused input { 
-  border-color: var(--primary-color) !important; 
-  border: none;
-  
-}
+.login-form__error-message {
+  display: block;
+  color: var(--error-color);
+  font-size: 0.85em;
+  margin-top: 6px;  
 
-.form-input.focused label { 
-  color: var(--primary-color) !important; 
-
-}
-
-
-.label-active {
-  color: var(--primary-color) !important; 
+  text-align: left; 
+  padding-left: 2px; 
 }
 
 
+/* Errores del Backend */
+.login-form__backend-error-container {
+  background-color: rgba(231, 76, 60, 0.1);
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+.login-form__backend-error-text {
+  color: var(--error-color);
+  font-size: 0.9em;
+}
 
-
-.login-button {
+/* Botón de Submit */
+.login-form__submit-button {
   width: 100%;
   padding: 14px;
-  background: #00a6ff !important;
+  background: #00a6ff !important; /* Usar variable --primary-color si es el mismo */
   color: white;
   border: none;
   border-radius: 8px;
@@ -264,56 +232,52 @@ body {
   justify-content: center;
   align-items: center;
 }
-
-.login-button:hover {
+.login-form__submit-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(10, 15, 70, 0.3) !important;
 }
-
-.login-button:disabled {
+.login-form__submit-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
-
-.loading-spinner {
+.login-form__submit-button-loading {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-.spinner {
+.login-form__submit-button-spinner {
   width: 20px;
   height: 20px;
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
+  animation: login-form-spin 1s ease-in-out infinite; /* Nombre de animación único */
   margin-right: 10px;
 }
-
-@keyframes spin {
+@keyframes login-form-spin { /* Nombre de animación único */
   to {
     transform: rotate(360deg);
   }
 }
 
-.forgot-password {
+/* Enlace "Olvidaste tu contraseña" */
+.login-form__forgot-password {
   text-align: right;
   margin-bottom: 20px;
+  margin-top: 10px;
 }
-
-.forgot-password a {
+.login-form__forgot-password a {
   color: var(--primary-color);
   text-decoration: none;
   font-size: 0.9em;
   transition: var(--transition);
 }
-
-.forgot-password a:hover {
+.login-form__forgot-password a:hover {
   text-decoration: underline;
 }
 
-.signup-section {
+/* Sección de Registro */
+.login-card__signup-section {
   margin-top: 30px;
   text-align: center;
   padding-top: 25px;
@@ -323,76 +287,64 @@ body {
   justify-content: center;
   gap: 10px;
 }
-
-.signup-button {
+.login-card__signup-link {
   color: var(--primary-color);
   text-decoration: none;
   font-weight: 600;
   transition: var(--transition);
 }
-
-.signup-button:hover {
+.login-card__signup-link:hover {
   text-decoration: underline;
 }
 
-.terms-section {
+/* Sección de Términos */
+.login-card__terms-section {
   margin-top: 20px;
   text-align: center;
   font-size: 0.8em;
   color: #888;
 }
-
-.terms-section a {
+.login-card__terms-section a {
   color: var(--primary-color);
   text-decoration: none;
 }
-
-.terms-section a:hover {
+.login-card__terms-section a:hover {
   text-decoration: underline;
-}
-
-.error-container- {
-  background-color: rgba(231, 76, 60, 0.1);
-  padding: 12px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-}
-
-.error-text-ss {
-  color: red;
-  font-size: 0.9em;
 }
 
 /* Responsive Design */
 @media (max-width: 900px) {
-  .brand-side {
+  .login-card__brand-section {
     display: none;
   }
-
-  .login-card {
+  .login-card-container { /* Ajustado el selector */
     max-width: 500px;
     margin: 0 auto;
   }
 }
-
 @media (max-width: 600px) {
-  .form-side {
+  .login-card__form-section { /* Ajustado el selector */
     padding: 30px 20px;
   }
-
-  .form-title {
+  .login-form__title { /* Ajustado el selector */
     font-size: 1.8em;
   }
-
-  .form-subtitle {
+  .login-form__subtitle { /* Ajustado el selector */
     font-size: 0.9em;
   }
-
-  .navbar-logo {
+  .login-navbar__logo { /* Ajustado el selector */
     height: 30px;
   }
-
-  .navbar-title {
+  .login-navbar__title { /* Ajustado el selector */
     font-size: 1.3rem;
+  }
+  .login-form__input-error-wrapper { /* Ajustado el selector */
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .login-form__error-message--beside { /* Ajustado el selector */
+    margin-left: 0;
+    margin-top: 5px;
+    white-space: normal;
   }
 }
