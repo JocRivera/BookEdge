@@ -228,6 +228,8 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
             cabinQuantity: 1,
             bedroomQuantity: 1,
         })
+        setImageError("")
+        setErrors({})
     }
 
     const handleSubmit = (e) => {

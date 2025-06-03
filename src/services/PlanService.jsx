@@ -6,6 +6,11 @@ export const getAllPlans = async () => {
     return data
 }
 
+export const getPlanById = async (id) => {
+    const {data} = await axios.get(`${API_URL_PLANES}/${id}`)
+    return data
+}
+
 export const createPlan = async (plan) => {
     const response = await axios.post(API_URL_PLANES, plan);
     const newPlans = await getAllPlans(); // Obtener datos actualizados
