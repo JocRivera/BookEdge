@@ -11,3 +11,13 @@ export const getTopPlans = async () => {
         throw new Error('Error al obtener los datos del dashboard');
     }
 }
+
+export const getDailyReservations = async () => {
+    try {
+        const response = await axios.get(`${API_URL_DASHBOARD}/dailyReservations`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching daily reservations:', error);
+        throw new Error('Error al obtener las reservas diarias');
+    }
+}

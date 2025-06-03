@@ -4,95 +4,141 @@ export const calculateTotal = (formData, planes) => {
   if (!selectedPlan) return 0
 
   const basePrice = selectedPlan.price || selectedPlan.salePrice || selectedPlan.precio || 0
-  const companionFee = 150000 // Cambiado a 150,000 COP (ajusta este valor según tu necesidad)
+  const companionFee = 150000
 
-  // ✅ NUEVO CÁLCULO DE SERVICIOS CON CANTIDADES
-  const servicesCost = formData.selectedServices?.reduce((total, serviceSelection) => {
-    const service = formData.availableServices?.find((s) => s.Id_Service === serviceSelection.serviceId)
-    const quantity = serviceSelection.quantity || 1
-    const servicePrice = service?.Price || 0
-    return total + (servicePrice * quantity)
-  }, 0) || 0
+  // ✅ CÁLCULO DE SERVICIOS CON CANTIDADES
+  const servicesCost =
+    formData.selectedServices?.reduce((total, serviceSelection) => {
+      const service = formData.availableServices?.find((s) => s.Id_Service === serviceSelection.serviceId)
+      const quantity = serviceSelection.quantity || 1
+      const servicePrice = service?.Price || 0
+      return total + servicePrice * quantity
+    }, 0) || 0
 
   return basePrice + formData.companions.length * companionFee + servicesCost
 }
 
-export const updateAvailability = (formData) => {
-  if (!formData.cabins || !formData.bedrooms) return formData
+// ✅ FUNCIÓN AUXILIAR PARA DEBUGGING DE CAPACIDADES
+const debugAccommodationCapacity = (accommodation, type, totalGuests) => {
+  const id = accommodation.idCabin || accommodation.idRoom
+  const name = accommodation.name || `${type} ${id}`
+  const status = accommodation.status
+  const capacity = accommodation.capacity || accommodation.maxCapacity || accommodation.maxOccupancy
+  const isActive = status?.toLowerCase() === "en servicio"
 
-  const companionCount = formData.companionCount || 0
-  const totalGuests = companionCount + 1 // +1 para el huésped principal
-
-  console.log("🏨 Actualizando disponibilidad:", {
-    companionCount,
-    totalGuests,
-    hasCompanions: formData.hasCompanions,
-  })
-
-  let newAvailableCabins = []
-  let newAvailableBedrooms = []
-
-  // REGLA: Si hay MÁS de 1 acompañante (2+ personas total), solo mostrar cabañas
-  if (companionCount > 1) {
-    console.log("🏠 Más de 1 acompañante - Mostrando solo cabañas")
-    newAvailableCabins = formData.cabins.filter(
-      (cabin) => cabin.status?.toLowerCase() === "en servicio" && cabin.capacity >= totalGuests,
-    )
-    newAvailableBedrooms = [] // No mostrar habitaciones
-  }
-  // REGLA: Si hay 1 acompañante o menos (1-2 personas total), solo mostrar habitaciones
-  else {
-    console.log("🛏️ 1 acompañante o menos - Mostrando solo habitaciones")
-    newAvailableBedrooms = formData.bedrooms.filter((bedroom) => bedroom.status?.toLowerCase() === "en servicio")
-    newAvailableCabins = [] // No mostrar cabañas
-  }
-
-  // Verificar si las selecciones actuales siguen siendo válidas
-  const isSelectedCabinAvailable = newAvailableCabins.some((c) => c.idCabin === formData.idCabin)
-
-  const isSelectedRoomAvailable = newAvailableBedrooms.some((b) => b.idRoom === formData.idRoom)
-
-  console.log("✅ Disponibilidad actualizada:", {
-    availableCabins: newAvailableCabins.length,
-    availableBedrooms: newAvailableBedrooms.length,
-    selectedCabinValid: isSelectedCabinAvailable,
-    selectedRoomValid: isSelectedRoomAvailable,
-  })
+ 
 
   return {
+    id,
+    name,
+    status,
+    capacity,
+    isActive,
+    hasCapacity: capacity >= totalGuests,
+  }
+}
+
+export const updateAvailability = (formData) => {
+
+
+  if (!formData.cabins || !formData.bedrooms) {
+    return formData
+  }
+
+  const companionCount = formData.companionCount || 0
+  const totalGuests = companionCount + 1
+
+  
+
+  // ✅ FUNCIÓN AUXILIAR MEJORADA PARA OBTENER CAPACIDAD
+  const getAccommodationCapacity = (accommodation, type) => {
+    // Lista de posibles campos de capacidad en orden de prioridad
+    const capacityFields = [
+      accommodation.capacity,
+      accommodation.maxCapacity,
+      accommodation.maxOccupancy,
+      accommodation.maxGuests,
+      accommodation.occupancy,
+    ]
+
+    // Buscar el primer valor válido (no undefined, no null, mayor que 0)
+    const capacity = capacityFields.find((field) => field !== undefined && field !== null && field > 0)
+
+    // Valores por defecto según el tipo
+    const defaultCapacity = type === "cabin" ? 7 : 2
+    const finalCapacity = capacity || defaultCapacity
+
+
+    return finalCapacity
+  }
+
+  // ✅ FILTRAR CABAÑAS CON DEBUGGING MEJORADO
+  const newAvailableCabins = formData.cabins.filter((cabin) => {
+    const capacity = getAccommodationCapacity(cabin, "cabin")
+    const isActive = cabin.status?.toLowerCase() === "en servicio"
+    const hasCapacity = capacity >= totalGuests
+    const isValid = isActive && hasCapacity
+
+  
+
+    return isValid
+  })
+
+  // ✅ FILTRAR HABITACIONES CON DEBUGGING MEJORADO
+  const newAvailableBedrooms = formData.bedrooms.filter((bedroom) => {
+    const capacity = getAccommodationCapacity(bedroom, "bedroom")
+    const isActive = bedroom.status?.toLowerCase() === "en servicio"
+    const hasCapacity = capacity >= totalGuests
+    const isValid = isActive && hasCapacity
+
+   
+
+    return isValid
+  })
+
+
+
+  // ✅ VERIFICAR SELECCIONES ACTUALES
+  const isSelectedCabinAvailable = newAvailableCabins.some((c) => c.idCabin === formData.idCabin)
+  const isSelectedRoomAvailable = newAvailableBedrooms.some((b) => b.idRoom === formData.idRoom)
+
+  const result = {
     ...formData,
     availableCabins: newAvailableCabins,
     availableBedrooms: newAvailableBedrooms,
-    // Limpiar selecciones inválidas
     idCabin: !isSelectedCabinAvailable ? "" : formData.idCabin,
     idRoom: !isSelectedRoomAvailable ? "" : formData.idRoom,
     availabilityStatus: {
       hasCabinAvailability: newAvailableCabins.length > 0,
       hasRoomAvailability: newAvailableBedrooms.length > 0,
       requiredCapacity: totalGuests,
-      accommodationType: companionCount > 1 ? "cabin" : "bedroom",
+      accommodationType: totalGuests > 4 ? "cabin-only" : totalGuests > 2 ? "cabin-preferred" : "room-preferred",
     },
   }
+
+  return result
 }
 
-// Validador de capacidad de alojamiento
 export const validateAccommodationCapacity = (formData) => {
   const totalGuests = formData.companionCount + 1
 
   if (formData.idCabin) {
-    const selectedCabin = formData.availableCabins.find(c => c.idCabin === formData.idCabin)
-    return selectedCabin ? selectedCabin.capacity >= totalGuests : false
+    const selectedCabin = formData.availableCabins.find((c) => c.idCabin === formData.idCabin)
+    const capacity = selectedCabin?.capacity || selectedCabin?.maxCapacity || selectedCabin?.maxOccupancy
+  
+    return selectedCabin ? capacity >= totalGuests : false
   }
 
   if (formData.idRoom) {
-    const selectedRoom = formData.availableBedrooms.find(r => r.idRoom === formData.idRoom)
-    return selectedRoom ? (selectedRoom.capacity || 2) >= totalGuests : false
+    const selectedRoom = formData.availableBedrooms.find((r) => r.idRoom === formData.idRoom)
+    const capacity = selectedRoom?.capacity || selectedRoom?.maxCapacity || selectedRoom?.maxOccupancy || 2
+ 
+    return selectedRoom ? capacity >= totalGuests : false
   }
 
   return false
 }
 
-// Funciones auxiliares para manejo de eventos
 export const createFormChangeHandler = (formData, setFormData, clearError) => {
   return (e) => {
     const { name, value, type, checked } = e.target
@@ -103,7 +149,6 @@ export const createFormChangeHandler = (formData, setFormData, clearError) => {
         hasCompanions: checked,
         companionCount: checked ? Math.max(prev.companionCount || 1, 1) : 0,
         companions: checked ? prev.companions : [],
-        // Limpiar selección de alojamiento si cambia el número de huéspedes
         idCabin: "",
         idRoom: "",
       }))
@@ -115,7 +160,6 @@ export const createFormChangeHandler = (formData, setFormData, clearError) => {
           ...prev,
           companionCount: count,
           companions: newCompanions,
-          // Limpiar selección de alojamiento si cambia el número
           idCabin: "",
           idRoom: "",
         }
@@ -124,7 +168,6 @@ export const createFormChangeHandler = (formData, setFormData, clearError) => {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
-        // Recalcular disponibilidad cuando cambien las fechas
         idCabin: "",
         idRoom: "",
       }))
@@ -143,70 +186,62 @@ export const createSelectionHandlers = (setFormData) => {
   const handleCabinSelect = (cabinId) => {
     setFormData((prev) => ({
       ...prev,
-      idCabin: prev.idCabin === cabinId ? "" : cabinId, // Toggle selection
-      idRoom: "", // Deseleccionar habitación
+      idCabin: prev.idCabin === cabinId ? "" : cabinId,
+      idRoom: "",
     }))
   }
 
   const handleRoomSelect = (roomId) => {
     setFormData((prev) => ({
       ...prev,
-      idRoom: prev.idRoom === roomId ? "" : roomId, // Toggle selection
-      idCabin: "", // Deseleccionar cabaña
+      idRoom: prev.idRoom === roomId ? "" : roomId,
+      idCabin: "",
     }))
   }
 
-  // ✅ NUEVA FUNCIÓN PARA MANEJAR SERVICIOS CON CANTIDADES
   const handleServiceQuantityChange = (serviceId, quantity) => {
     setFormData((prev) => {
       const currentServices = prev.selectedServices || []
-      
+
       if (quantity <= 0) {
-        // Remover el servicio si la cantidad es 0 o menor
         return {
           ...prev,
-          selectedServices: currentServices.filter(s => s.serviceId !== serviceId)
+          selectedServices: currentServices.filter((s) => s.serviceId !== serviceId),
         }
       } else {
-        // Buscar si el servicio ya existe
-        const existingServiceIndex = currentServices.findIndex(s => s.serviceId === serviceId)
-        
+        const existingServiceIndex = currentServices.findIndex((s) => s.serviceId === serviceId)
+
         if (existingServiceIndex >= 0) {
-          // Actualizar cantidad existente
           const updatedServices = [...currentServices]
           updatedServices[existingServiceIndex] = { serviceId, quantity }
           return {
             ...prev,
-            selectedServices: updatedServices
+            selectedServices: updatedServices,
           }
         } else {
-          // Agregar nuevo servicio
           return {
             ...prev,
-            selectedServices: [...currentServices, { serviceId, quantity }]
+            selectedServices: [...currentServices, { serviceId, quantity }],
           }
         }
       }
     })
   }
 
-  // Función legacy para compatibilidad (ahora usa cantidad 1)
   const handleServiceToggle = (serviceId) => {
     setFormData((prev) => {
       const currentServices = prev.selectedServices || []
-      const existingService = currentServices.find(s => s.serviceId === serviceId)
-      
+      const existingService = currentServices.find((s) => s.serviceId !== serviceId)
+
       if (existingService) {
-        // Remover el servicio
         return {
           ...prev,
-          selectedServices: currentServices.filter(s => s.serviceId !== serviceId)
+          selectedServices: currentServices.filter((s) => s.serviceId !== serviceId),
         }
       } else {
-        // Agregar el servicio con cantidad 1
         return {
           ...prev,
-          selectedServices: [...currentServices, { serviceId, quantity: 1 }]
+          selectedServices: [...currentServices, { serviceId, quantity: 1 }],
         }
       }
     })
@@ -216,40 +251,37 @@ export const createSelectionHandlers = (setFormData) => {
     handleCabinSelect,
     handleRoomSelect,
     handleServiceToggle,
-    handleServiceQuantityChange, // Nueva función
+    handleServiceQuantityChange,
   }
 }
 
-// Función para validar datos de acompañante
 export const validateCompanionData = (companion) => {
   const errors = {}
-  
+
   if (!companion.documentNumber?.trim()) {
     errors.documentNumber = "Número de documento es requerido"
   }
-  
+
   if (!companion.name?.trim()) {
     errors.name = "Nombre es requerido"
   }
-  
+
   return {
     isValid: Object.keys(errors).length === 0,
-    errors
+    errors,
   }
 }
 
-// Función para formatear fechas
 export const formatDate = (dateString) => {
   if (!dateString) return ""
   const date = new Date(dateString)
-  return date.toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  return date.toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   })
 }
 
-// Función para calcular días entre fechas
 export const calculateDaysBetween = (startDate, endDate) => {
   if (!startDate || !endDate) return 0
   const start = new Date(startDate)
@@ -258,32 +290,69 @@ export const calculateDaysBetween = (startDate, endDate) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 }
 
-// Función para generar ID temporal
 export const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-// Función para limpiar datos antes de enviar al servidor
+// ✅ FUNCIÓN CORREGIDA: Formato exacto que espera tu backend
 export const sanitizeDataForServer = (formData) => {
-  return {
+  const payload = {
     idUser: Number(formData.idUser),
     idPlan: Number(formData.idPlan),
-    idCabin: formData.idCabin ? Number(formData.idCabin) : null,
-    idRoom: formData.idRoom ? Number(formData.idRoom) : null,
     startDate: formData.startDate,
     endDate: formData.endDate,
-    status: formData.status || "Reservado",
-    total: calculateTotal(formData, formData.planes),
-    paymentMethod: formData.paymentMethod || "Efectivo",
-    // ✅ NUEVO FORMATO DE SERVICIOS CON CANTIDADES
-    services: (formData.selectedServices || []).map(serviceSelection => ({
-      serviceId: serviceSelection.serviceId,
-      quantity: serviceSelection.quantity || 1
-    })),
-    companions: formData.companions.map(companion => ({
-      documentNumber: companion.documentNumber,
-      name: companion.name,
-      lastName: companion.lastName,
-      email: companion.email || null,
-      phone: companion.phone || null,
+    status: formData.status || "Pendiente",
+  }
+
+  // Agregar alojamiento
+  if (formData.idCabin) {
+    payload.idCabin = Number(formData.idCabin)
+  } else if (formData.idRoom) {
+    payload.idRoom = Number(formData.idRoom)
+  }
+
+  // ✅ SERVICIOS: Formato exacto que espera tu backend
+  if (formData.selectedServices && formData.selectedServices.length > 0) {
+    payload.services = formData.selectedServices.map((service) => ({
+      serviceId: Number(service.serviceId),
+      quantity: Number(service.quantity) || 1,
     }))
   }
+
+  return payload
+}
+
+// ✅ FUNCIÓN PARA PROCESAR SERVICIOS DEL BACKEND AL FRONTEND
+export const processServicesFromBackend = (backendServices) => {
+  if (!Array.isArray(backendServices) || backendServices.length === 0) {
+    return []
+  }
+
+  // Contar ocurrencias de cada servicio para obtener las cantidades
+  const serviceCount = {}
+  const serviceDetails = {}
+
+  backendServices.forEach((service) => {
+    const serviceId = service.Id_Service
+
+    // Contar cantidad
+    serviceCount[serviceId] = (serviceCount[serviceId] || 0) + 1
+
+    // Guardar detalles del servicio (solo una vez)
+    if (!serviceDetails[serviceId]) {
+      serviceDetails[serviceId] = {
+        id: service.Id_Service,
+        name: service.name || "Servicio sin nombre",
+        price: service.Price || 0,
+        description: service.Description || "Sin descripción",
+      }
+    }
+  })
+
+  // Convertir a formato frontend
+  const frontendServices = Object.keys(serviceCount).map((serviceId) => ({
+    serviceId: Number(serviceId),
+    quantity: serviceCount[serviceId],
+    ...serviceDetails[serviceId],
+  }))
+
+  return frontendServices
 }
