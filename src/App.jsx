@@ -25,6 +25,7 @@ import CompanionsView from "./components/features/componentCompanions/companions
 import ViewPayments from "./components/features/componentPayments/viewPayments";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
+import ReseservationClient from "./pages/Reservations/ReservationsClient"
 import Error401 from "./components/common/401&404/401";
 import Error404 from "./components/common/401&404/404";
 import "../src/components/features/componentPlans/componentPlan.css";
@@ -37,6 +38,7 @@ export default function App() {
           <Routes>
             {/* --- RUTAS PÚBLICAS --- */}
             <Route path="/" element={<MainLayout />}>
+            <Route path="/my-reservations" element={<ReseservationClient />} />
               <Route index element={<Homepage />} />
               <Route path="/reservationsCustomer" element={<FormReservation />} />
             </Route>
@@ -45,6 +47,9 @@ export default function App() {
             <Route path="/recoveryPassword" element={<RecoveryPassword />} />
             <Route path="/Emailcode" element={<Emailcode />} />
             <Route path="/unauthorized" element={<Error401 />} />
+
+            {/* --- RUTAS PÚBLICAS DEL CLIENTE --- */}
+            
 
             {/* --- RUTAS PROTEGIDAS DEL PANEL DE ADMINISTRADOR --- */}
             <Route
