@@ -6,13 +6,14 @@ import { CiSearch } from "react-icons/ci";
 import { CustomButton, ActionButtons } from "../../common/Button/customButton";
 import Switch from "../../common/Switch/Switch";
 import rolesService from "../../../services/RolesService"
-import {getReservation} from "../../../services/reservationsService"
+import { getReservation } from "../../../services/reservationsService"
 import { getCustomers, postCustomers, updateCustomers, deleteCustomer, changeSatus } from '../../../services/usersService';
 import FormCustomer from './customerForm'
 import Pagination from "../../common/Paginator/Pagination"; // Asegúrate de importar tu paginador
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
+import { toast } from "react-toastify";
+import { useAlert } from "../../../context/AlertContext";
 import './customerTable.css'
+import { ca } from 'date-fns/locale';
 
 function Customer() {
     const [customers, setCustomers] = useState([]);
@@ -59,6 +60,8 @@ function Customer() {
         }
     }
 
+    const {showAlert} = useAlert();
+
     const fecthRoles = async () => {
         try {
             const roles = await rolesService.getRoles()
@@ -99,8 +102,16 @@ function Customer() {
     }, []);
 
     const handleEdit = (customer) => {
-        setFormData(customer)
-        setIsModalOpen(true)
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Modificación",
+            message: `¿Desea modificar los datos del cliente "${customer.name}"?`,
+            confirmText: "Sí, Modificar",
+            onConfirm: () => {
+                setFormData(customer);
+                setIsModalOpen(true);
+            },
+        });
     }
 
     const handleCloseModal = () => {
@@ -108,198 +119,73 @@ function Customer() {
         setFormData(null);
     }
 
-    const handleSubmit = async (data) => {
-        try {
-            if (data.idUser) {
-                // Si password está vacío, lo eliminas
-                if (data.password === "") {
-                    delete data.password;
-                }
-                iziToast.question({
-                    timeout: 20000,
-                    close: false,
-                    overlay: true,
-                    displayMode: 'once',
-                    id: 'question',
-                    class: 'custom-alert',
-                    backgroundColor: '#ffffff',
-                    zindex: 999,
-                    title: 'Confirmación',
-                    message: `¿Está seguro de actualizar al cliente ${data.name}?`,
-                    position: 'topRight',
-                    buttons: [
-                        ['<button><b>Confirmar</b></button>', async function (instance, toast) {
-                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-
-                            await updateCustomers(data);
-                            await fecthCustomers();
-                            // Alerta de éxito
-                            iziToast.success({
-                                class: 'custom-alert',
-                                title: 'Éxito',
-                                message: 'Cliente actualizado correctamente',
-                                position: 'topRight',
-                                timeout: 5000
-                            });
-                        }],
-                        ['<button>Cancelar</button>', function (instance, toast) {
-                            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                            // Notificación de cancelación (opcional)
-                            iziToast.info({
-                                class: 'custom-alert',
-                                title: 'Cancelado',
-                                message: 'No se realizaron cambios',
-                                position: 'topRight',
-                                timeout: 3000
-                            });
-                            handleEdit(data)
-                        }]
-                    ]
-                });
-            } else {
-                await postCustomers(data);
-                await fecthCustomers();
-                // Alerta de éxito
-                iziToast.success({
-                    class: 'custom-alert',
-                    title: 'Éxito',
-                    message: 'Cliente creado correctamente',
-                    position: 'topRight',
-                    timeout: 5000
-                })
-            }
-            setIsModalOpen(false);
-        }
-        catch (error) {
-            // Alerta de error
-            iziToast.error({
-                class: 'custom-alert',
-                title: 'Error',
-                message: `${error.message}`,
-                position: 'topRight',
-                timeout: 5000
-            });
-        }
-    }
-
     const handleDeleteCustomer = async (customer) => {
-        // Alerta de confirmación
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de eliminar al cliente ${customer.name}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Confirmar</b></button>', async function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-
-                    try {
-                        await deleteCustomer(customer.idUser);
-                        await fecthCustomers();
-
-                        // Alerta de éxito
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Cliente eliminado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    } catch (error) {
-                        console.log(error);
-
-                        // Alerta de error
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo eliminar el cliente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }
-                }],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-
-                    // Notificación de cancelación (opcional)
-                    iziToast.info({
-                        class: 'custom-alert',
-                        title: 'Cancelado',
-                        message: 'No se realizaron cambios',
-                        position: 'topRight',
-                        timeout: 3000
-                    });
-                }]
-            ]
+        showAlert({
+            type: "confirm-delete",
+            title: "Confirmar Eliminación",
+            message: `¿Está seguro que deseas eliminar al cliente "${customer.name}"? Esta acción no se puede deshacer.`,
+            confirmText: "Sí, Eliminar",
+            onConfirm: async () => {
+                try {
+                    await deleteCustomer(customer.idUser);
+                    await fecthCustomers();
+                    toast.success(`Cliente "${customer.name}" eliminado correctamente.`);
+                } catch (error) {
+                    console.error("Error al eliminar cliente:", error);
+                    const errorMessage = error.response?.data?.message || error.message || "Error al eliminar el cliente.";
+                    toast.error(errorMessage);
+                }
+            },
         });
     }
 
     const handleChangeStatus = async (customer) => {
-        // Alerta de confirmación
-        iziToast.question({
-            timeout: 20000,
-            close: false,
-            overlay: true,
-            displayMode: 'once',
-            id: 'question',
-            class: 'custom-alert',
-            backgroundColor: '#ffffff',
-            zindex: 999,
-            title: 'Confirmación',
-            message: `¿Está seguro de cambiar el estado del cliente ${customer.name}?`,
-            position: 'topRight',
-            buttons: [
-                ['<button><b>Confirmar</b></button>', async function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        const newStatus = !customer.status;
+        const actionText = newStatus ? "activar" : "desactivar";
+        const newStatusText = newStatus ? "Activo" : "Inactivo";
 
-                    try {
-                        await changeSatus(customer.idUser, { status: !customer.status });
-                        await fecthCustomers();
-
-                        // Alerta de éxito
-                        iziToast.success({
-                            class: 'custom-alert',
-                            title: 'Éxito',
-                            message: 'Estado del cliente actualizado correctamente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }
-                    catch (error) {
-                        console.log(error);
-
-                        // Alerta de error
-                        iziToast.error({
-                            class: 'custom-alert',
-                            title: 'Error',
-                            message: 'No se pudo actualizar el estado del cliente',
-                            position: 'topRight',
-                            timeout: 5000
-                        });
-                    }
-                }],
-                ['<button>Cancelar</button>', function (instance, toast) {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-
-                    // Notificación de cancelación (opcional)
-                    iziToast.info({
-                        class: 'custom-alert',
-                        title: 'Cancelado',
-                        message: 'No se realizaron cambios',
-                        position: 'topRight',
-                        timeout: 3000
-                    });
-                }]
-            ]
+        showAlert({
+            type: "confirm-edit",
+            title: `Confirmar Cambio de Estado`,
+            message: `¿Está seguro de que desea ${actionText} al cliente "${customer.name}"? Su nuevo estado será "${newStatusText}".`,
+            confirmText: `Sí, ${actionText.charAt(0).toUpperCase() + actionText.slice(1)}`,
+            onConfirm: async () => {
+                try {
+                    await changeSatus(customer.idUser, { status: newStatus });
+                    toast.success(`Estado del cliente "${customer.name}" cambiado a "${newStatusText}" correctamente.`);
+                    await fecthCustomers();
+                } catch (error) {
+                    console.error("Error al cambiar estado:", error);
+                    const errorMessage = error.response?.data?.message || error.message || "No se pudo cambiar el estado.";
+                    toast.error(errorMessage);
+                }
+            },
         });
     };
+
+    const handleSubmit = async (data) => {
+        try {
+            if (data.idUser) {
+                if (data.password === "") {
+                    delete data.password;
+                }
+                await updateCustomers(data);
+                await fecthCustomers();
+                toast.success(`Cliente "${data.name}" actualizado correctamente.`);
+            } else {
+                await postCustomers(data);
+                await fecthCustomers();
+                toast.success(`Cliente "${data.name}" creado correctamente.`);
+            }
+            setIsModalOpen(false);
+        }
+        catch (error) {
+            console.error("Error al guardar cliente:", error);
+            const errorMessage = error.response?.data?.message || error.message || "Error al guardar el cliente.";
+            toast.error(errorMessage);
+            throw error;
+        }
+    }
 
     const handleGoToReservations = (customer) => {
         // Redirige a la ruta de reservas con el parámetro del cliente

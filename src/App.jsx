@@ -7,6 +7,7 @@ import AdminLayout from "./components/layout/sidebarAdmin/adminLayout";
 import ProtectedRoute from "./ProtectedRutes";
 import { MODULES, PRIVILEGES } from "./constants/permissions";
 import Homepage from "./pages/Landingpage";
+import FormReservation from "./pages/Reservations/ReservationFormClient";
 import Loginform from "./components/features/componentAuth/Loginform";
 import RegisterForm from "./components/features/componentAuth/register";
 import RecoveryPassword from "./components/features/componentAuth/recoveryPassword";
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/" element={<MainLayout />}>
             <Route path="/my-reservations" element={<ReseservationClient />} />
               <Route index element={<Homepage />} />
+              <Route path="/reservationsCustomer" element={<FormReservation />} />
             </Route>
             <Route path="/login" element={<Loginform />} />
             <Route path="/register" element={<RegisterForm />} />

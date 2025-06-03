@@ -16,6 +16,7 @@ import {
   IoReturnUpBackOutline,
 } from "react-icons/io5";
 import { FiStar, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { RiCalendarScheduleLine } from "react-icons/ri";
 
 const Navbar = () => {
   // ----- ESTADOS DEL COMPONENTE -----
@@ -258,7 +259,10 @@ const Navbar = () => {
               <IoBedOutline /> Habitaciones
             </div>
             <div className="navbar-public-link" onClick={() => scrollToSection("services")}>
-              <FiStar /> Planes
+              <FiStar /> Servicios
+            </div>
+            <div className="navbar-public-link" onClick={() => scrollToSection("plans")}>
+              <RiCalendarScheduleLine /> Planes
             </div>
             <div className="navbar-public-link" onClick={() => handleNavigation("/contact")}>
               <IoMailOutline /> Contacto
