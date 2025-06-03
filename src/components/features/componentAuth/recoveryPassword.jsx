@@ -1,133 +1,132 @@
+// --- START OF FILE recoveryPassword.jsx ---
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { recoverPassword } from "../../../services/AuthService";
-import { useAuth } from "../../../context/AuthContext"; 
-import "./recoveryPassword.css"
+import { useAuth } from "../../../context/AuthContext";
+import "./recoveryPassword.css"; // CSS original
 import logo from "../../../assets/logo.png";
 
-
 const RecoveryPassword = () => {
-  const { loading, setLoading } = useAuth(); 
-  const [formulario, setFormulario] = useState({
-    email: "",
-  });
-  const [errores, setErrores] = useState({});
+  const { loading, setLoading } = useAuth();
+  const [email, setEmail] = useState(""); // Cambiado de 'formulario.email' a solo 'email'
+  const [emailError, setEmailError] = useState(""); // Estado para el mensaje de error del email
+
   const navigate = useNavigate();
 
-  const validarFormulario = (nombre, valor) => {
-    switch (nombre) {
-      case "email": {
-        const expresion = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-        if (!expresion.test(valor)) {
-          return "El correo no es válido";
-        }
-        break;
-      }
-      default:
-        break;
+  const validarEmail = (valorEmail) => { // Renombrado para claridad
+    if (!valorEmail.trim()) { // Validar que no esté vacío primero
+        return "El correo electrónico es obligatorio.";
     }
-    return "";
+    const expresion = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    if (!expresion.test(valorEmail)) {
+      return "El formato del correo electrónico no es válido.";
+    }
+    return ""; // No hay error
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { value } = e.target; // Solo necesitamos el valor del input de email
+    setEmail(value);
 
-    setFormulario((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    const error = validarFormulario(name, value);
-    setErrores((prev) => ({
-      ...prev,
-      [name]: error,
-    }));
+    // Validar al escribir para dar feedback inmediato (opcional, pero buena UX)
+    const error = validarEmail(value);
+    setEmailError(error);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setEmailError(""); // Limpiar errores previos
 
-    const emailError = validarFormulario("email", formulario.email);
-    setErrores({ email: emailError });
+    const currentEmailError = validarEmail(email);
+    if (currentEmailError) {
+      setEmailError(currentEmailError);
+      return; // Detener si hay error de validación
+    }
 
-    if (!emailError) {
-      try {
-        setLoading(true); 
-        await recoverPassword(formulario.email); 
-        toast.success(
-          `Se ha enviado un correo electrónico a ${formulario.email} 📧`,
-          { autoClose: 2000 }
-        );
-        setTimeout(() => {
-          navigate("/Login");
-        }, 5000);
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Error al enviar el correo",
-          { autoClose: 3000 }
-        );
-      } finally {
-        setLoading(false); // Desactivar el loading
-      }
+    // Si no hay error, proceder
+    try {
+      setLoading(true);
+      await recoverPassword(email); // Enviar solo el string del email
+      toast.success(
+        `Se ha enviado un correo electrónico a ${email} con las instrucciones. 📧`,
+        { autoClose: 4000 }
+      );
+      setTimeout(() => {
+        navigate("/login"); // Asegúrate que la ruta sea correcta
+      }, 5000);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Error al enviar el correo. Inténtalo de nuevo.",
+        { autoClose: 3000 }
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    navigate("/login");
+    navigate("/login"); // Asegúrate que la ruta sea correcta
   };
 
   return (
-      
-    <div className="page-container">
-              <div className="simple-navbar">
-            <div className="navbar-content">
-              <div className="brand" onClick={() => navigate("/")}>
-                <img src={logo} alt="Logo" className="navbar-logo" />
-                <h1 className="navbar-title">Los Lagos</h1>
-              </div>
-            </div>
+    <div className="page-container"> {/* CLASE ORIGINAL */}
+      {/* Navbar (manteniendo tus clases originales de login si son las mismas) */}
+      <div className="login-navbar">
+        <div className="login-navbar__content">
+          <div className="login-navbar__brand" onClick={() => navigate("/")}>
+            <img src={logo} alt="Logo" className="login-navbar__logo" />
+            <h1 className="login-navbar__title">Los Lagos</h1>
           </div>
-      <div className="recovery-container">
-        <div className="recovery-card">
-          <div className="recovery-header">
-            <h1 className="recovery-title">Recuperar contraseña</h1>
-            <p className="recovery-subtitle">
+        </div>
+      </div>
+      <div className="recovery-container"> {/* CLASE ORIGINAL */}
+        <div className="recovery-card"> {/* CLASE ORIGINAL */}
+          <div className="recovery-header"> {/* CLASE ORIGINAL */}
+            <h1 className="recovery-title">Recuperar contraseña</h1> {/* CLASE ORIGINAL */}
+            <p className="recovery-subtitle"> {/* CLASE ORIGINAL */}
               Para recuperar tu contraseña, ingresa tu correo electrónico.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="recovery-form">
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">
+          <form onSubmit={handleSubmit} className="recovery-form"> {/* CLASE ORIGINAL */}
+            <div className="form-group"> {/* CLASE ORIGINAL */}
+              <label htmlFor="email" className="form-label"> {/* CLASE ORIGINAL */}
                 Correo electrónico
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                value={formulario.email}
+                value={email} // Usar el estado 'email'
                 onChange={handleChange}
-                className="form-input"
+                className={`form-input ${emailError ? "form-input--error" : ""}`} /* CLASE ORIGINAL + modificador para error */
                 placeholder="ejemplo@correo.com"
                 required
+                disabled={loading}
               />
-              {errores.email && <p className="error-message">{errores.email}</p>}
+              {/* Mensaje de error con clase renombrada y condicional */}
+              {emailError && (
+                <p className="login-form__error-message">{emailError}</p> 
+                /* ^^^ USAREMOS ESTA CLASE (o la que uses en login para el error DEBAJO del input) */
+              )}
             </div>
 
-            <div className="buttons-recovery-password">
+            <div className="buttons-recovery-password"> {/* CLASE ORIGINAL */}
               <button
                 type="submit"
-                className="recovery-button"
-                disabled={loading} // Desactivar el botón mientras se está enviando
+                className="recovery-button" /* CLASE ORIGINAL */
+                disabled={loading}
               >
                 {loading ? "Enviando..." : "Enviar"}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="cancel-button"
+                className="cancel-button" /* CLASE ORIGINAL */
+                disabled={loading} // También deshabilitar cancelar si está cargando
               >
                 Cancelar
               </button>
@@ -136,9 +135,10 @@ const RecoveryPassword = () => {
         </div>
       </div>
 
-      <ToastContainer />
+      <ToastContainer position="top-right" />
     </div>
   );
 };
 
 export default RecoveryPassword;
+// --- END OF FILE recoveryPassword.jsx ---

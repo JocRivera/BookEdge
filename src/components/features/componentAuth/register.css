@@ -72,12 +72,12 @@
   font-weight: 500;
 }
 
+
 .form-group-register input,
 .form-group-register select {
   width: 100%;
-  height: 44px; /* Altura fija para todos los inputs */
-
-  padding: 0.75rem 1rem; /* Debe ser igual en todos */
+  height: 44px;
+  padding: 0.75rem 1rem;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -88,39 +88,64 @@
 .form-group-register input:focus,
 .form-group-register select:focus {
   outline: none;
-  border-color: #4f46e5;
+  border-color: #4f46e5; /* Tu color primario de foco */
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   background-color: #fff;
+}
+.form-group-register input.form-input--error, /* Aplicar a input con la clase */
+.form-group-register select.form-input--error { /* También para select si tiene error */
+  border-color: #ef4444 !important; /* Rojo de error de tu .error-text */
+  box-shadow: 0 0 0 1px #ef4444 !important; /* Sombra roja sutil */
+}
+.form-group-register input.form-input--error:focus,
+.form-group-register select.form-input--error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important; /* Sombra de foco más intensa para error */
 }
 
 .password-input-container {
   position: relative;
-  display: flex;
+  display: flex; /* Para alinear el input y el botón del ojo */
   align-items: center;
+  width: 100%; /* Asegura que ocupe el ancho del form-group */
 }
 
 .password-input-container input {
-  padding-right: 30px;
+  /* width: 100%; ya lo hereda de .form-group-register input si no se especifica aquí */
+  /* padding-right debe ser suficiente para el botón del ojo */
+  padding-right: 40px !important; /* Ajusta este valor si el ojo es más grande o más pequeño */
+  flex-grow: 1; /* Para que el input llene el espacio si es necesario */
 }
 
 .toggle-password {
   position: absolute;
-  right: 12px;
-  background: none;
+  right: 1px; /* Ajusta para que quede bien dentro del borde del input */
+  top: 1px;   /* Ajusta para que quede bien dentro del borde del input */
+  bottom: 1px;/* Ajusta para que quede bien dentro del borde del input */
+  width: 38px; /* Ancho del botón */
+  background: transparent;
   border: none;
+  border-left: 1px solid var(--reset-border-color); /* Línea separadora sutil */
+  padding: 0 8px;
   cursor: pointer;
-  color: #6b7280;
-  font-size: 1.1rem;
-  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  transition: color 0.2s;
+  color: #777;
+  border-top-right-radius: 7px; /* Para que coincida con el input */
+  border-bottom-right-radius: 7px; /* Para que coincida con el input */
 }
 
+.form-group-register input.form-input--error + .toggle-password {
+    /* border-left-color: #ef4444; */ /* Solo si tenías el border-left */
+    color: #ef4444; /* Ojo rojo también */
+}
+.toggle-password svg { /* Estilo para el ícono SVG */
+  width: 20px; /* Ajusta el tamaño del icono */
+  height: 20px; /* Ajusta el tamaño del icono */
+}
 .toggle-password:hover {
-  color: #4f46e5;
+  color: #4f46e5; /* Tu color hover original */
 }
 
 .terms-checkbox {
@@ -226,12 +251,16 @@
 }
 
 .error-text {
-  color: #ef4444;
-  font-size: 0.8rem;
-  position: absolute;
-  left: 0;
-  margin-top: -0.2rem;
-  font-weight: 500;
+  color: #ef4444; /* Rojo para errores */
+  font-size: 0.8rem; /* Mantén tu tamaño */
+  /* position: absolute; */ /* Quitar si quieres que empuje el contenido */
+  /* left: 0; */
+  /* margin-top: -0.2rem; */ /* Quitar si quieres que empuje el contenido */
+  margin-top: 0.25rem; /* Pequeño espacio arriba del error */
+  display: block; /* Asegura que ocupe su propia línea */
+  font-weight: 500; /* Mantén tu peso */
+  width: 100%; /* Para que ocupe el ancho y no se desborde raro */
+  text-align: left; /* Por si acaso */
 }
 
 /* Modern animations */

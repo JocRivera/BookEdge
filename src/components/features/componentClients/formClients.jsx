@@ -159,65 +159,117 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
         if (!value.trim()) {
           error = "El nombre es obligatorio";
         } else if (value.trim().length < 3) {
-          error = "El nombre debe ser mayor a 3 caracteres";
+          error = "El nombre debe tener al menos 3 caracteres";
+        } else if (/[0-9]/.test(value)) {
+          error = "El nombre no puede contener números";
+        } else if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/.test(value)) {
+          error = "El nombre no puede contener caracteres especiales";
+        } else if (value.trim().length > 50) {
+          error = "El nombre debe tener menos de 50 caracteres";
         }
         break;
 
       case "email":
         if (!value.trim()) {
-          error = "El email es obligatorio";
+          error = "El correo electrónico es obligatorio";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = "El email no es válido";
+          error = "El correo electrónico no es válido";
         }
         break;
 
-      case "password":
-        if (!value.trim()) {
-          error = "La contraseña no puede estar vacía";
-        } else if (value.length < 8) {
-          error = "La contraseña debe tener al menos 8 caracteres";
-        } else if (
-          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(
-            value
-          )
-        ) {
-          error =
-            "Debe contener al menos una mayúscula, una minúscula, un número y un carácter especial";
-        }
-        break;
-      case "cellphone":
-        if (!value.trim()) {
-          error = "El Número es obligatorio";
-        } else if (value.trim().length < 10) {
-          error = "El número debe tener al menos 10 caracteres";
-        }
-        break;
       case "identification":
         if (!value.trim()) {
-          error = "La identificación no puede estar vacía";
-        } else if (value.trim().length < 5) {
-          error = "La identificación debe tener mínimo 5 caracteres";
+          error = "La identificación es obligatoria";
+        } else if (/^0/.test(value)) {
+          error = "La identificación no puede empezar con 0";
+        } else if (/\./.test(value)) {
+          error = "La identificación no puede ser un número decimal";
+        } else if (/[a-zA-Z]/.test(value)) {
+          error = "La identificación no puede tener letras";
+        } else if (/[^0-9]/.test(value)) {
+          error = "La identificación no puede contener caracteres especiales";
+        } else if (/^-/.test(value)) {
+          error = "La identificación no puede ser un número negativo";
+        } else if (value.trim().length < 6) {
+          error = "La identificación debe tener al menos 6 caracteres";
+        } else if (value.trim().length > 15) {
+          error = "La identificación no puede ser mayor a 15 caracteres";
         }
         break;
+
+      case "cellphone":
+        if (!value.trim()) {
+          error = "El teléfono es obligatorio";
+        } else if (/[a-zA-Z]/.test(value)) {
+          error = "El teléfono no debe contener letras";
+        } else if (/^-/.test(value)) {
+          error = "El teléfono no debe ser un número negativo";
+        } else if (/[^0-9]/.test(value)) {
+          error = "El teléfono no debe contener caracteres especiales";
+        } else if (!/^\d{10}$/.test(value)) {
+          error = "El teléfono debe tener 10 dígitos";
+        }
+        break;
+
       case "birthdate":
         if (!value) {
           error = "La fecha de nacimiento es obligatoria";
         } else {
           const age = calculateAge(value);
           if (age < 18) {
-            error = "Debes ser mayor o igual a 18 años";
-          } else if (new Date(value) > new Date()) {
-            error = "La fecha no puede ser futura";
+            error = "Debe ser mayor de 18 años";
           }
         }
         break;
-      default:
+
+      case "password":
+        if (!customerData && !value) {
+          error = "La contraseña es obligatoria para nuevos clientes";
+        } else if (value && value.length < 8) {
+          error = "La contraseña debe tener al menos 8 caracteres";
+        } else if (value && value.length > 15) {
+          error = "La contraseña no debe contener más de 15 dígitos";
+        } else if (
+          value &&
+          !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/.test(value)
+        ) {
+          error =
+            "La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales";
+        }
+        break;
+
+      case "identificationType":
+        if (!value) {
+          error = "El tipo de identificación es obligatorio";
+        }
+        break;
+
+      case "eps":
+        if (value.trim()) {
+          if (value.length < 4) {
+            error = "La EPS debe tener al menos 4 caracteres";
+          } else if (value.length > 50) {
+            error = "La EPS no puede tener más de 50 caracteres";
+          } else if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s0-9]/.test(value)) {
+            error = "La EPS no puede contener caracteres especiales";
+          }
+        }
+        break;
+
+      case "address":
+        if (value.trim()) {
+          if (value.length < 3) {
+            error = "La dirección debe tener al menos 3 caracteres";
+          } else if (value.length > 50) {
+            error = "La dirección no puede tener más de 50 caracteres";
+          }
+        }
         break;
     }
 
     return error;
   };
-
+  
   const calculateAge = (birthdate) => {
     const birthDate = new Date(birthdate);
     const today = new Date();
