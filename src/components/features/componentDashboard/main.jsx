@@ -7,7 +7,8 @@ import DailyReservations from './DailyReservations.jsx';
 
 // Stats Card Component
 const StatsCard = ({ title, value, change, isPositive }) => (
-    <div className="bg-gray-200 rounded-lg shadow-2xl p-6 shadow-indigo-300 hover:shadow-lg transition-shadow duration-300 ">
+    <div className="border border-gray-200
+    bg-gray-100 rounded-lg shadow-2xl p-6 shadow-indigo-300 hover:shadow-lg transition-shadow duration-300">
         <div className="flex flex-col items-center">
             <h3 className="text-sm font-medium text-gray-900 ">{title}</h3>
             <p className="text-xl font-bold mt-2 text-gray-600">{value}</p>
