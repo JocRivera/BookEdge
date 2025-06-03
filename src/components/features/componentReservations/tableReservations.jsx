@@ -1,9 +1,12 @@
+
 import { useState, useMemo, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
+import { toast } from "react-toastify"
+import { useAlert } from "../../../context/AlertContext"
 import { ActionButtons, CustomButton } from "../../common/Button/customButton"
 import Pagination from "../../common/Paginator/Pagination"
 import { CiSearch } from "react-icons/ci"
-import { FaBed, FaHome, FaMapMarkerAlt } from "react-icons/fa"
+import { FaBed, FaHome, FaMapMarkerAlt, FaTimes } from "react-icons/fa"
 import "./componentsReservations.css"
 import TableCompanions from "../componentCompanions/tableCompanions"
 import FormReservation from "./formReservations"
@@ -19,6 +22,7 @@ import { getReservationPayments } from "../../../services/paymentsService"
 function TableReservations() {
   const [searchParams] = useSearchParams()
   const clienteId = searchParams.get("cliente")
+  const { showAlert } = useAlert()
 
   // Estados principales
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
@@ -70,15 +74,24 @@ function TableReservations() {
       })
 
       setReservations(enrichedReservations)
+
+      // Toast de éxito al cargar datos
+      toast.success(`${enrichedReservations.length} reservas cargadas correctamente`, {
+        position: "top-right",
+        autoClose: 5000,
+      })
     } catch (error) {
       console.error("Error al cargar datos:", error)
-      alert(`Error al cargar datos: ${error.message}`)
+      toast.error(`Error al cargar datos: ${error.message}`, {
+        position: "top-right",
+        autoClose: 6000,
+      })
     } finally {
       setIsLoading(false)
     }
   }
 
-  // 🆕 FUNCIÓN PARA OBTENER INFORMACIÓN DE ALOJAMIENTO
+  // Función para obtener información de alojamiento
   const getAccommodationInfo = (reservation) => {
     console.log("🏨 Analizando alojamiento para reserva:", reservation.idReservation)
     console.log("🏠 Cabañas:", reservation.cabins)
@@ -129,18 +142,35 @@ function TableReservations() {
     }
   }
 
-  // 🆕 FUNCIÓN PARA OBTENER SERVICIOS ADICIONALES
+  // Función para obtener servicios adicionales
   const getServicesInfo = (reservation) => {
     console.log("🛎️ Analizando servicios para reserva:", reservation.idReservation)
-    console.log("🛎️ Servicios:", reservation.services)
+    console.log("🛎️ Servicios raw:", reservation.services)
 
     if (reservation.services && Array.isArray(reservation.services) && reservation.services.length > 0) {
-      return reservation.services.map((service) => ({
-        id: service.Id_Service,
-        name: service.name || "Servicio sin nombre",
-        price: service.Price || 0,
-        description: service.Description || "Sin descripción",
-      }))
+      const processedServices = reservation.services.map((service) => {
+        // Acceder correctamente al quantity de la tabla intermedia
+        const quantity = service.ReservationsService?.quantity || 1
+        const price = service.Price || service.price || 0
+
+        console.log(`🔍 Procesando servicio ${service.Id_Service}:`, {
+          name: service.name,
+          price: price,
+          quantity: quantity,
+          rawService: service,
+        })
+
+        return {
+          id: service.Id_Service,
+          name: service.name || "Servicio sin nombre",
+          price: price,
+          description: service.Description || service.description || "Sin descripción",
+          quantity: quantity,
+        }
+      })
+
+      console.log("🛎️ Servicios procesados:", processedServices)
+      return processedServices
     }
 
     return []
@@ -202,14 +232,22 @@ function TableReservations() {
 
     const reservationToEdit = reservations.find((r) => r.idReservation === id)
     if (reservationToEdit) {
-      setCurrentReservation(reservationToEdit)
-      setIsModalOpen(true)
+      showAlert({
+        type: "confirm-edit",
+        title: "Editar Reserva",
+        message: `¿Desea editar la reserva #${id} de ${reservationToEdit.user?.name || "Cliente"}?`,
+        confirmText: "Sí, Editar",
+        onConfirm: () => {
+          setCurrentReservation(reservationToEdit)
+          setIsModalOpen(true)
+        },
+      })
     }
   }
 
+  // Función para guardar reserva
   const handleSaveReservation = async (updatedReservation) => {
     console.log("[TABLE] Recibida reserva para actualizar:", updatedReservation)
-    console.log("Recibido en onSave:", updatedReservation)
 
     if (!updatedReservation) {
       console.error("[TABLE] No se recibieron datos de reserva")
@@ -218,16 +256,35 @@ function TableReservations() {
 
     try {
       setIsLoading(true)
-      await loadReservationData() // Recargar datos del servidor
+      await loadReservationData()
+
+      // Cerrar modal después de guardar exitosamente
+      setIsModalOpen(false)
+      setCurrentReservation(null)
+
+      console.log("✅ Reserva guardada y datos actualizados")
+
+      toast.success(
+        updatedReservation.idReservation
+          ? `Reserva #${updatedReservation.idReservation} actualizada correctamente`
+          : "Nueva reserva creada correctamente",
+        {
+          position: "top-right",
+          autoClose: 5000,
+        },
+      )
     } catch (error) {
-      console.error("Error al guardar reserva:", error)
-      alert(`Error al guardar reserva: ${error.message}`)
+      console.error("Error al actualizar datos después de guardar:", error)
+      toast.error(`Error al actualizar datos: ${error.message}`, {
+        position: "top-right",
+        autoClose: 6000,
+      })
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Manejo de estado de reservas
+  // Manejo de estado con confirmación
   const handleStatusChange = async (idReservation, newStatus) => {
     const id = Number(idReservation)
     if (isNaN(id)) return
@@ -235,13 +292,52 @@ function TableReservations() {
     const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"]
     if (!validStatuses.includes(newStatus)) return
 
+    const reservation = reservations.find((r) => r.idReservation === id)
+    const clientName = reservation?.user?.name || `Reserva #${id}`
+
+    // Confirmación para cambios críticos
+    if (newStatus === "Anulado") {
+      showAlert({
+        type: "confirm-delete",
+        title: "Anular Reserva",
+        message: `¿Está seguro de anular la reserva de "${clientName}"? Esta acción no se puede deshacer.`,
+        confirmText: "Sí, Anular",
+        onConfirm: async () => {
+          await executeStatusChange(id, newStatus, clientName)
+        },
+      })
+    } else if (newStatus === "Confirmado") {
+      showAlert({
+        type: "confirm-edit",
+        title: "Confirmar Reserva",
+        message: `¿Desea confirmar la reserva de "${clientName}"?`,
+        confirmText: "Sí, Confirmar",
+        onConfirm: async () => {
+          await executeStatusChange(id, newStatus, clientName)
+        },
+      })
+    } else {
+      await executeStatusChange(id, newStatus, clientName)
+    }
+  }
+
+  // Función auxiliar para ejecutar cambio de estado
+  const executeStatusChange = async (id, newStatus, clientName) => {
     try {
       setIsLoading(true)
       await changeReservationStatus(id, newStatus)
-      await loadReservationData() // Recargar datos actualizados
+      await loadReservationData()
+
+      toast.success(`Estado de "${clientName}" cambiado a "${newStatus}"`, {
+        position: "top-right",
+        autoClose: 5000,
+      })
     } catch (error) {
       console.error("Error al cambiar estado:", error)
-      alert(`Error al cambiar estado: ${error.message}`)
+      toast.error(`Error al cambiar estado: ${error.message}`, {
+        position: "top-right",
+        autoClose: 6000,
+      })
     } finally {
       setIsLoading(false)
     }
@@ -255,32 +351,69 @@ function TableReservations() {
     if (reservationToView) {
       try {
         const payments = await getReservationPayments(id)
-        setCurrentPayments(Array.isArray(payments) ? payments : []) // Asegurar que sea array
+        setCurrentPayments(Array.isArray(payments) ? payments : [])
         setCurrentReservation(reservationToView)
         setIsDetailModalOpen(true)
       } catch (error) {
-        console.error("Error cargando pagos:", error)
-        setCurrentPayments([]) // En caso de error, establecer array vacío
+        console.error("Error al cargar pagos de la reserva:", error)
+
+        setCurrentPayments([])
         setCurrentReservation(reservationToView)
         setIsDetailModalOpen(true)
+
+        toast.warning("No se pudieron cargar los pagos de la reserva", {
+          position: "top-right",
+          autoClose: 5000,
+        })
       }
     }
   }
 
-  // Manejo de acompañantes
+  // Manejo de acompañantes con confirmación
   const handleDeleteCompanion = async (reservationId, companionId) => {
-    try {
-      await deleteCompanionReservation(Number(reservationId), Number(companionId))
-      await loadReservationData() // Recargar datos actualizados
-    } catch (error) {
-      console.error("Error al eliminar acompañante:", error)
-      alert(`Error al eliminar acompañante: ${error.message}`)
-    }
+    const reservation = reservations.find((r) => r.idReservation === reservationId)
+    const companion = reservation?.companions?.find((c) => c.idCompanions === companionId)
+    const companionName = companion ? `${companion.name} ${companion.lastName}` : "este acompañante"
+
+    showAlert({
+      type: "confirm-delete",
+      title: "Eliminar Acompañante",
+      message: `¿Está seguro de eliminar a "${companionName}" de la reserva #${reservationId}?`,
+      confirmText: "Sí, Eliminar",
+      onConfirm: async () => {
+        try {
+          await deleteCompanionReservation(Number(reservationId), Number(companionId))
+          await loadReservationData()
+
+          toast.success(`Acompañante "${companionName}" eliminado correctamente`, {
+            position: "top-right",
+            autoClose: 5000,
+          })
+        } catch (error) {
+          toast.error(`Error al eliminar acompañante: ${error.message}`, {
+            position: "top-right",
+            autoClose: 6000,
+          })
+        }
+      },
+    })
   }
 
   const formatCurrency = (amount) => {
     const value = Number(amount) || 0
     return `$${value.toFixed(2)}`
+  }
+
+  // Función para limpiar búsqueda
+  const handleClearSearch = () => {
+    setSearchTerm("")
+  }
+
+  // Función para cerrar modal de detalles
+  const handleCloseDetailsModal = () => {
+    setIsDetailModalOpen(false)
+    setCurrentReservation(null)
+    setCurrentPayments([])
   }
 
   // Cargar datos iniciales
@@ -306,8 +439,8 @@ function TableReservations() {
             value={searchTerm}
           />
           {searchTerm && (
-            <button className="clear-search-btn" onClick={() => setSearchTerm("")} aria-label="Limpiar búsqueda">
-              ×
+            <button className="clear-search-btn" onClick={handleClearSearch} aria-label="Limpiar búsqueda">
+              <FaTimes />
             </button>
           )}
         </div>
@@ -317,7 +450,9 @@ function TableReservations() {
         </CustomButton>
 
         <button
-          onClick={() => setShowAnuladas(!showAnuladas)}
+          onClick={() => {
+            setShowAnuladas(!showAnuladas)
+          }}
           className={`reservation-filter-btn ${showAnuladas ? "active" : ""}`}
           disabled={isLoading}
         >
@@ -384,7 +519,9 @@ function TableReservations() {
                           {
                             icon: "receipt",
                             tooltip: "Generar factura",
-                            action: () => console.log("Generar factura", reservation.idReservation),
+                            action: () => {
+                              console.log("Generar factura", reservation.idReservation)
+                            },
                           },
                         ]}
                         disabled={isLoading}
@@ -416,11 +553,14 @@ function TableReservations() {
       <FormReservation
         isOpen={isModalOpen}
         reservationData={currentReservation}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false)
+          setCurrentReservation(null)
+        }}
         onSave={handleSaveReservation}
       />
 
-      {/* 🆕 MODAL DE DETALLES  */}
+      {/* Modal de detalles */}
       {isDetailModalOpen && currentReservation && (
         <div className="reservations-modal-overlay">
           <div className="reservations-modal-container reservation-details-modal">
@@ -430,7 +570,7 @@ function TableReservations() {
               </div>
               <button
                 className="close-button"
-                onClick={() => setIsDetailModalOpen(false)}
+                onClick={handleCloseDetailsModal}
                 disabled={isLoading}
                 aria-label="Cerrar"
               >
@@ -465,7 +605,7 @@ function TableReservations() {
                     </div>
                   </div>
 
-                  {/*SECCIÓN DE ALOJAMIENTO */}
+                  {/* Sección de alojamiento */}
                   <div className="reservation-card">
                     <h3>Alojamiento</h3>
                     {(() => {
@@ -502,7 +642,7 @@ function TableReservations() {
                     })()}
                   </div>
 
-                  {/*  SECCIÓN DE SERVICIOS ADICIONALES */}
+                  {/* Sección de servicios adicionales */}
                   <div className="reservation-card">
                     <h3>Servicios Adicionales</h3>
                     {(() => {
@@ -513,11 +653,28 @@ function TableReservations() {
                             <div key={service.id} className="service-item">
                               <div className="service-header">
                                 <h4 className="service-name">{service.name}</h4>
-                                <span className="service-price">{formatCurrency(service.price)}</span>
+                                <div className="service-pricing">
+                                  <span className="service-quantity">x{service.quantity}</span>
+                                  <span className="service-price">
+                                    {formatCurrency(service.price * service.quantity)}
+                                  </span>
+                                </div>
                               </div>
                               {service.description && <p className="service-description">{service.description}</p>}
                             </div>
                           ))}
+
+                          {/* Total de servicios */}
+                          <div className="services-total">
+                            <div className="total-line">
+                              <span className="total-label">Total servicios:</span>
+                              <span className="total-amount">
+                                {formatCurrency(
+                                  services.reduce((total, service) => total + service.price * service.quantity, 0),
+                                )}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <p className="no-services">No se han agregado servicios adicionales</p>
