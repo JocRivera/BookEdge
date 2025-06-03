@@ -20,8 +20,17 @@ import {
 import { getReservationPayments } from "../../../services/paymentsService"
 
 function TableReservations() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const clienteId = searchParams.get("cliente")
+  const [CustomerSend, setCustomerSend] = useState(clienteId || "")
+
+  useEffect(() => {
+    // Si ya obtuvimos el clienteId, limpiamos el query string
+    if (clienteId) {
+      // Esto reemplaza los params por un objeto vacío → quita todo ?cliente=...
+      setSearchParams({})
+    }
+  }, [clienteId, setSearchParams])
   const { showAlert } = useAlert()
 
   // Estados principales
@@ -31,7 +40,7 @@ function TableReservations() {
   const [reservations, setReservations] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [currentPayments, setCurrentPayments] = useState([])
-  const [searchTerm, setSearchTerm] = useState(clienteId ? clienteId : "")
+  const [searchTerm, setSearchTerm] = useState(CustomerSend !== "" ? CustomerSend : "")
   const [showAnuladas, setShowAnuladas] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const itemsPerPage = 6

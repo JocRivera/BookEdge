@@ -1,0 +1,359 @@
+.bookGEYS-plan-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.bookGEYS-plan-modal-container {
+    width: 95%;
+    max-width: 1200px;
+    max-height: 90vh;
+    background: var(--enhanced-plans-background);
+    border-radius: var(--enhanced-plans-radius);
+    box-shadow: var(--enhanced-plans-shadow-soft);
+    position: relative;
+    overflow: hidden;
+    animation: modalFadeIn 0.4s ease forwards;
+}
+
+.bookGEYS-plan-details-close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: var(--enhanced-plans-transition);
+    color: white;
+}
+
+.bookGEYS-plan-details-close-button:hover {
+    background: var(--enhanced-plans-accent);
+    transform: rotate(90deg);
+}
+
+.bookGEYS-plan-details-content {
+    display: flex;
+    height: 90vh;
+}
+
+.bookGEYS-plan-details-gallery {
+    flex: 1.2;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+}
+
+.bookGEYS-plan-details-main-image-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.bookGEYS-plan-details-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.bookGEYS-plan-details-no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--enhanced-plans-text-light);
+    background: #222;
+    font-size: 1rem;
+    text-align: center;
+    padding: 20px;
+}
+
+.bookGEYS-plan-details-info {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    background: var(--enhanced-plans-background);
+}
+
+.bookGEYS-plan-details-header {
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--enhanced-plans-border);
+}
+
+.bookGEYS-plan-details-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--enhanced-plans-text-dark);
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.bookGEYS-plan-details-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.bookGEYS-plan-details-spec {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--enhanced-plans-text-dark);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.bookGEYS-plan-details-spec-icon {
+    color: var(--enhanced-plans-accent);
+}
+
+.bookGEYS-plan-details-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.bookGEYS-plan-details-description,
+.bookGEYS-plan-details-services {
+    border: 1px solid var(--enhanced-plans-border);
+    border-radius: var(--enhanced-plans-radius-small);
+    padding: 20px;
+    background-color: var(--enhanced-plans-background-soft);
+    box-shadow: var(--enhanced-plans-shadow-soft);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--enhanced-plans-text-dark);
+    margin-bottom: 15px;
+    position: relative;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--enhanced-plans-border);
+}
+
+.section-title::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: var(--enhanced-plans-accent);
+}
+
+.bookGEYS-plan-details-text {
+    color: var(--enhanced-plans-text-muted);
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.bookGEYS-plan-details-service-tags {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.bookGEYS-plan-details-service-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: var(--enhanced-plans-transition);
+    color: var(--enhanced-plans-text-dark);
+    box-shadow: var(--enhanced-plans-shadow-soft);
+    border: 1px solid var(--enhanced-plans-border);
+}
+
+.bookGEYS-plan-details-service-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--enhanced-plans-shadow-hover);
+    border-color: var(--enhanced-plans-accent);
+}
+
+.bookGEYS-plan-details-service-icon {
+    color: var(--enhanced-plans-accent);
+}
+
+.bookGEYS-plan-details-footer {
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.bookGEYS-plan-details-reserve-button {
+    width: 100%;
+    padding: 1rem;
+    background: var(--enhanced-plans-accent);
+    color: white;
+    border: none;
+    border-radius: var(--enhanced-plans-radius-small);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--enhanced-plans-transition);
+}
+
+.bookGEYS-plan-details-reserve-button:hover {
+    background: var(--enhanced-plans-accent-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--enhanced-plans-shadow-button);
+}
+
+/* Estilos para cabañas y habitaciones */
+.bookGEYS-plan-details-cabins,
+.bookGEYS-plan-details-rooms {
+    background: var(--enhanced-plans-background-soft);
+    border-radius: var(--enhanced-plans-radius-small);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    box-shadow: var(--enhanced-plans-shadow-soft);
+    border: 1px solid var(--enhanced-plans-border);
+}
+
+.bookGEYS-plan-details-cabin-list,
+.bookGEYS-plan-details-room-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.bookGEYS-plan-details-cabin-item,
+.bookGEYS-plan-details-room-item {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--enhanced-plans-radius-small);
+    border: 1px solid var(--enhanced-plans-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: var(--enhanced-plans-transition);
+}
+
+.bookGEYS-plan-details-cabin-item:hover,
+.bookGEYS-plan-details-room-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--enhanced-plans-shadow-hover);
+    border-color: var(--enhanced-plans-accent);
+}
+
+.bookGEYS-plan-details-cabin-capacity,
+.bookGEYS-plan-details-room-capacity {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--enhanced-plans-text-dark);
+}
+
+.bookGEYS-plan-details-cabin-name,
+.bookGEYS-plan-details-room-name {
+    font-size: 0.95rem;
+    color: var(--enhanced-plans-text-muted);
+}
+
+.bookGEYS-plan-details-no-cabins,
+.bookGEYS-plan-details-no-rooms {
+    text-align: center;
+    color: var(--enhanced-plans-text-muted);
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--enhanced-plans-radius-small);
+    border: 1px dashed var(--enhanced-plans-border);
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .bookGEYS-plan-details-cabin-list,
+    .bookGEYS-plan-details-room-list {
+        grid-template-columns: 1fr;
+    }
+
+    .bookGEYS-plan-details-cabins,
+    .bookGEYS-plan-details-rooms {
+        padding: 1rem;
+    }
+
+    .bookGEYS-plan-details-cabin-item,
+    .bookGEYS-plan-details-room-item {
+        padding: 0.875rem;
+    }
+}
+
+/* Animaciones */
+.bookGEYS-plan-details-cabin-item,
+.bookGEYS-plan-details-room-item {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 1100px) {
+    .bookGEYS-plan-details-content {
+        flex-direction: column;
+        height: auto;
+        max-height: 90vh;
+    }
+
+    .bookGEYS-plan-details-gallery {
+        height: 50vh;
+    }
+
+    .bookGEYS-plan-details-info {
+        max-height: 40vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .bookGEYS-plan-modal-container {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .bookGEYS-plan-details-title {
+        font-size: 1.8rem;
+    }
+
+    .bookGEYS-plan-details-gallery {
+        height: 40vh;
+    }
+
+    .bookGEYS-plan-details-specs {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

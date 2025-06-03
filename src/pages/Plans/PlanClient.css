@@ -1,12 +1,80 @@
-.bugGeys-plans-client-container {
-    position: relative;
-    padding: 4rem 6rem;
-    margin: 3rem auto;
-    max-width: 1400px;
-    width: 100%;
+/* Enhanced Plan Client Styles - Siguiendo estándares de diseño de referencia */
+
+:root {
+    --enhanced-plans-primary: #1e96fc;
+    --enhanced-plans-primary-dark: #0d8ecf;
+    --enhanced-plans-accent: #4e54c8;
+    --enhanced-plans-accent-dark: #3a3f9e;
+    --enhanced-plans-text-dark: #333333;
+    --enhanced-plans-text-light: #ffffff;
+    --enhanced-plans-text-muted: #6b7280;
+    --enhanced-plans-background: #ffffff;
+    --enhanced-plans-background-soft: #f8f9fa;
+    --enhanced-plans-border: #e9ecef;
+    --enhanced-plans-shadow-soft: 0 3px 10px rgba(0, 0, 0, 0.08), 0 6px 15px rgba(0, 0, 0, 0.05);
+    --enhanced-plans-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.15);
+    --enhanced-plans-shadow-button: 0 4px 15px rgba(78, 84, 200, 0.3);
+    --enhanced-plans-radius: 20px;
+    --enhanced-plans-radius-small: 12px;
+    --enhanced-plans-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --enhanced-plans-transition-fast: all 0.3s ease;
 }
 
-.bugGeys-plans-client-swiper-nav {
+.enhanced-plans-main-container {
+    position: relative;
+    margin: 1rem auto;
+    padding: 2rem 1.5rem;
+    /* Remove max-width to match alojamientos container */
+    width: 100%;
+    background: var(--enhanced-plans-background);
+    border-radius: var(--enhanced-plans-radius);
+    box-shadow: var(--enhanced-plans-shadow-soft);
+    overflow: hidden;
+}
+
+.enhanced-plans-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.enhanced-plans-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    color: var(--enhanced-plans-text-dark);
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 1rem;
+}
+
+.enhanced-plans-title::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--enhanced-plans-primary), var(--enhanced-plans-accent));
+    border-radius: 2px;
+}
+
+.enhanced-plans-subtitle {
+    font-size: 1.2rem;
+    color: var(--enhanced-plans-text-muted);
+    font-weight: 400;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.enhanced-plans-swiper-container {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.enhanced-plans-navigation {
     position: absolute;
     top: 50%;
     left: 0;
@@ -15,190 +83,332 @@
     z-index: 10;
     display: flex;
     justify-content: space-between;
-    padding: 0 2rem;
+    padding: 0 1rem;
     pointer-events: none;
 }
 
-.bugGeys-plans-client-nav-prev,
-.bugGeys-plans-client-nav-next {
-    width: 44px;
-    height: 44px;
+.enhanced-plans-nav-button {
+    width: 50px;
+    height: 50px;
     background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--enhanced-plans-border);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
+    box-shadow: var(--enhanced-plans-shadow-soft);
+    transition: var(--enhanced-plans-transition-fast);
     pointer-events: auto;
+    color: var(--enhanced-plans-text-dark);
 }
 
-.bugGeys-plans-client-nav-prev:hover,
-.bugGeys-plans-client-nav-next:hover {
-    background: white;
+.enhanced-plans-nav-button:hover {
+    background: var(--enhanced-plans-primary);
+    color: var(--enhanced-plans-text-light);
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--enhanced-plans-shadow-hover);
 }
 
-.bugGeys-plans-client-card {
+.enhanced-plans-nav-button:active {
+    transform: scale(0.95);
+}
+
+.enhanced-plans-card {
     position: relative;
     width: 100%;
-    height: 450px;
-    border-radius: 18px;
+    height: 480px;
+    border-radius: var(--enhanced-plans-radius);
     overflow: hidden;
     cursor: pointer;
-    background: #fff;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: var(--enhanced-plans-background);
+    box-shadow: var(--enhanced-plans-shadow-soft);
+    transition: var(--enhanced-plans-transition);
     margin: 1rem 0;
+    border: 1px solid var(--enhanced-plans-border);
 }
 
-.bugGeys-plans-client-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+.enhanced-plans-card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--enhanced-plans-shadow-hover);
 }
 
-.bugGeys-plans-client-image-container {
+.enhanced-plans-image-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    margin: 0;
-    position: relative;
+    overflow: hidden;
 }
 
-.bugGeys-plans-client-image {
+.enhanced-plans-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.bugGeys-plans-client-card:hover .bugGeys-plans-client-image {
-    transform: scale(1.1);
+.enhanced-plans-card:hover .enhanced-plans-image {
+    transform: scale(1.08);
 }
 
-.bugGeys-plans-client-no-image {
+.enhanced-plans-no-image {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(45deg, #f3f4f6, #e5e7eb);
-    color: #9ca3af;
+    background: linear-gradient(135deg, var(--enhanced-plans-background-soft), #e5e7eb);
+    color: var(--enhanced-plans-text-muted);
     font-size: 1.1rem;
     font-weight: 500;
+    text-align: center;
+    padding: 2rem;
 }
 
-.bugGeys-plans-client-content {
+.enhanced-plans-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 75%;
+    background: linear-gradient(to top,
+            rgba(0, 0, 0, 0.9) 0%,
+            rgba(0, 0, 0, 0.7) 40%,
+            rgba(0, 0, 0, 0.3) 70%,
+            transparent 100%);
+    z-index: 2;
+}
+
+.enhanced-plans-content {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 2.5rem 2rem;
-    background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, 0.85) 0%,
-        rgba(0, 0, 0, 0.6) 60%,
-        transparent 100%
-    );
-    color: white;
+    color: var(--enhanced-plans-text-light);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.bugGeys-plans-client-title {
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.enhanced-plans-card-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--enhanced-plans-text-light);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    line-height: 1.2;
 }
 
-.bugGeys-plans-client-description {
+.enhanced-plans-description {
     font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 1.25rem;
+    line-height: 1.6;
+    margin: 0;
     opacity: 0.95;
+    color: #f0f0f0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    color: #f0f0f0;
+    text-overflow: ellipsis;
 }
 
-.bugGeys-plans-client-meta {
+.enhanced-plans-meta-info {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    gap: 1rem;
+    margin: 0.5rem 0;
+    flex-wrap: wrap;
 }
 
-.bugGeys-plans-client-price {
+.enhanced-plans-price-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 1.4rem;
     font-weight: 700;
-    color: #4e54c8;
-    padding: 0.4rem 1rem;
+    color: var(--enhanced-plans-accent);
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--enhanced-plans-radius-small);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.bugGeys-plans-client-capacity {
-    display: flex;
+.enhanced-plans-capacity-tag {
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 1rem;
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
+    font-weight: 500;
+    color: var(--enhanced-plans-text-light);
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: var(--enhanced-plans-radius-small);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.bugGeys-plans-client-reserve-btn {
+.enhanced-plans-reserve-button {
     width: 100%;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     border: none;
-    border-radius: 10px;
-    background: #4e54c8;
-    color: white;
+    border-radius: var(--enhanced-plans-radius-small);
+    background: linear-gradient(135deg, var(--enhanced-plans-accent), var(--enhanced-plans-accent-dark));
+    color: var(--enhanced-plans-text-light);
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--enhanced-plans-transition-fast);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-shadow: var(--enhanced-plans-shadow-button);
+    position: relative;
+    overflow: hidden;
 }
 
-.bugGeys-plans-client-reserve-btn:hover {
-    background: #3a3f9e;
+.enhanced-plans-reserve-button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.enhanced-plans-reserve-button:hover {
+    background: linear-gradient(135deg, var(--enhanced-plans-accent-dark), #2d3277);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(78, 84, 200, 0.4);
 }
 
-.bugGeys-plans-client-reserve-btn:active {
+.enhanced-plans-reserve-button:hover::before {
+    left: 100%;
+}
+
+.enhanced-plans-reserve-button:active {
     transform: translateY(0);
 }
 
-@media (max-width: 1024px) {
-    .bugGeys-plans-client-container {
-        padding: 3rem 4rem;
+.enhanced-plans-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    font-size: 1.2rem;
+    color: var(--enhanced-plans-text-muted);
+    background: var(--enhanced-plans-background-soft);
+    border-radius: var(--enhanced-plans-radius);
+    margin: 2rem 0;
+}
+
+.enhanced-plans-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    font-size: 1.1rem;
+    color: #dc3545;
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    border-radius: var(--enhanced-plans-radius);
+    margin: 2rem 0;
+    text-align: center;
+}
+
+/* Animaciones */
+@keyframes enhanced-plans-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.enhanced-plans-card {
+    animation: enhanced-plans-fade-in 0.6s ease forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .enhanced-plans-main-container {
+        padding: 1.5rem 1rem;
     }
 }
 
 @media (max-width: 768px) {
-    .bugGeys-plans-client-container {
-        padding: 2rem;
+    .enhanced-plans-main-container {
+        padding: 1.5rem 1rem;
+        margin: 1rem auto;
     }
-    
-    .bugGeys-plans-client-card {
-        height: 400px;
+
+    .enhanced-plans-title {
+        font-size: 2rem;
+    }
+
+    .enhanced-plans-subtitle {
+        font-size: 1rem;
+    }
+
+    .enhanced-plans-card {
+        height: 420px;
+    }
+
+    .enhanced-plans-nav-button {
+        width: 44px;
+        height: 44px;
+    }
+
+    .enhanced-plans-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .enhanced-plans-card-title {
+        font-size: 1.5rem;
+    }
+
+    .enhanced-plans-meta-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
     }
 }
 
-@media (max-width: 640px) {
-    .bugGeys-plans-client-container {
-        padding: 1.5rem;
+@media (max-width: 480px) {
+    .enhanced-plans-main-container {
+        padding: 1rem 0.75rem;
     }
-    
-    .bugGeys-plans-client-nav-prev,
-    .bugGeys-plans-client-nav-next {
-        width: 36px;
-        height: 36px;
+
+    .enhanced-plans-card {
+        height: 380px;
+    }
+
+    .enhanced-plans-nav-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    .enhanced-plans-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .enhanced-plans-price-tag {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .enhanced-plans-reserve-button {
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
     }
 }

@@ -4,6 +4,8 @@ import { CustomButton, ActionButtons } from "../../common/Button/customButton";
 import { getAllPlans, deletePlan, updatePlan, createPlan } from "../../../services/PlanService";
 import FormPlans from "./FormPlans";
 import ViewDetail from './ViewDetail';
+import { useAlert } from "../../../context/AlertContext";
+import { toast } from "react-toastify";
 import "./Plancss.css";
 
 function Plan() {
@@ -12,6 +14,7 @@ function Plan() {
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [data, setData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const { showAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -33,21 +36,53 @@ function Plan() {
                     planData.delete("image");
                 }
                 updatedPlan = await updatePlan(selectedPlan.idPlan, planData);
-                fetchData();
+                toast.success(`Plan "${planData.get("name")}" actualizado correctamente.`);
             } else {
                 updatedPlan = await createPlan(planData);
-                fetchData();
+                toast.success(`Plan "${planData.get("name")}" creado correctamente.`);
             }
+            fetchData();
             setIsModalOpen(false);
             setSelectedPlan(null);
         } catch (error) {
             console.error("Error al guardar el plan:", error);
+            const errorMessage = error.response?.data?.message || error.message || "Error al guardar el plan.";
+            toast.error(errorMessage);
+            throw error;
         }
     };
 
-    const handleDeletePlan = async (planId) => {
-        await deletePlan(planId);
-        fetchData();
+    const handleDeletePlan = async (plan) => {
+        showAlert({
+            type: "confirm-delete",
+            title: "Confirmar Eliminación",
+            message: `¿Está seguro que desea eliminar el plan "${plan.name}"? Esta acción no se puede deshacer.`,
+            confirmText: "Sí, Eliminar",
+            onConfirm: async () => {
+                try {
+                    await deletePlan(plan.idPlan);
+                    await fetchData();
+                    toast.success(`Plan "${plan.name}" eliminado correctamente.`);
+                } catch (error) {
+                    console.error("Error al eliminar plan:", error);
+                    const errorMessage = error.response?.data?.message || error.message || "Error al eliminar el plan.";
+                    toast.error(errorMessage);
+                }
+            }
+        });
+    };
+
+    const handleEdit = (plan) => {
+        showAlert({
+            type: "confirm-edit",
+            title: "Confirmar Modificación",
+            message: `¿Desea modificar los datos del plan "${plan.name}"?`,
+            confirmText: "Sí, Modificar",
+            onConfirm: () => {
+                setSelectedPlan(plan);
+                setIsModalOpen(true);
+            }
+        });
     };
 
     const handleSearch = (e) => {
@@ -134,11 +169,8 @@ function Plan() {
                                                 setSelectedPlan(plan);
                                                 setIsDetailModalOpen(true);
                                             }}
-                                            onEdit={() => {
-                                                setSelectedPlan(plan);
-                                                setIsModalOpen(true);
-                                            }}
-                                            onDelete={() => handleDeletePlan(plan.idPlan)}
+                                            onEdit={() => handleEdit(plan)}
+                                            onDelete={() => handleDeletePlan(plan)}
                                         />
                                     </div>
                                 </div>
