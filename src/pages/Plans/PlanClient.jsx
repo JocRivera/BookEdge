@@ -77,6 +77,7 @@ function EnhancedPlanClient() {
         // TODO: Implementar navegación a formulario de reserva
         // navigate(`/plans/${plan.Plan.idPlanProgramed}/reserve`)
         // Navegar al formulario de reserva pasando los datos del plan
+        console.log("Reservar plan:", plan)
         navigate("/reservationsCustomer")
     }
 
