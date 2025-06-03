@@ -1,0 +1,84 @@
+/* ✅ ESTILOS ESPECÍFICOS PARA MODO CLIENTE */
+
+/* Información del cliente en modo cliente */
+.client-info-display {
+  margin-bottom: 1rem;
+}
+
+.client-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
+  border: 2px solid #4e54c8;
+  border-radius: 12px;
+  position: relative;
+}
+
+.client-avatar {
+  width: 50px;
+  height: 50px;
+  background: #4e54c8;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.client-details {
+  flex: 1;
+}
+
+.client-details h4 {
+  margin: 0 0 0.25rem 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.client-details p {
+  margin: 0 0 0.25rem 0;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.client-id {
+  font-size: 0.8rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.client-mode-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Responsive para modo cliente */
+@media (max-width: 768px) {
+  .client-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .client-mode-badge {
+    position: static;
+    align-self: center;
+    margin-top: 0.5rem;
+  }
+}

@@ -14,15 +14,12 @@ const validateId = (id, name = "ID") => {
 
 export const getReservation = async () => {
   try {
-    console.log("📋 Obteniendo todas las reservas...")
+
     const { data } = await axios.get(API_URL_RESERVATIONS)
 
-    if (!Array.isArray(data)) {
-      console.warn("⚠️ La respuesta del servidor no es un array:", data)
-      return []
-    }
 
-    console.log("✅ Reservas obtenidas:", data.length)
+
+
     return data
   } catch (error) {
     console.error("❌ Error al obtener reservas:", {
@@ -35,12 +32,12 @@ export const getReservation = async () => {
 
 export const getReservationById = async (idReservation) => {
   try {
-    console.log("🔍 Obteniendo reserva por ID:", idReservation)
+
     // Validar ID
     const id = validateId(idReservation, "ID de reserva")
 
     const { data } = await axios.get(`${API_URL_RESERVATIONS}/${id}`)
-    console.log("✅ Reserva obtenida:", data)
+
     return data
   } catch (error) {
     console.error(`❌ Error al obtener reserva con ID ${idReservation}:`, {
@@ -51,23 +48,20 @@ export const getReservationById = async (idReservation) => {
   }
 }
 
-export const getReservationsByUser = async (userId) => {
+export const getReservationsByUser = async (idUser) => {
   try {
-    console.log("👤 Obteniendo reservas por usuario:", userId)
+
     // Validar ID
-    const id = validateId(userId, "ID de usuario")
+    const id = validateId(idUser, "ID de usuario")
 
     const { data } = await axios.get(`${API_URL_RESERVATIONS}/user/${id}`)
 
-    if (!Array.isArray(data)) {
-      console.warn("⚠️ La respuesta del servidor no es un array:", data)
-      return []
-    }
 
-    console.log("✅ Reservas de usuario obtenidas:", data.length)
+
+
     return data
   } catch (error) {
-    console.error(`❌ Error al obtener reservas para el usuario con ID ${userId}:`, {
+    console.error(`❌ Error al obtener reservas para el usuario con ID ${idUser}:`, {
       message: error.message,
       response: error.response?.data,
     })
@@ -76,40 +70,32 @@ export const getReservationsByUser = async (userId) => {
 }
 
 export const getUsers = async () => {
-  console.log("👥 Obteniendo usuarios...")
   const response = await api.get("/user")
-  console.log("✅ Usuarios obtenidos:", response.data?.length || 0)
   return response.data
 }
 
 export const getServices = async () => {
-  console.log("🛎️ Obteniendo servicios...")
+
   const response = await api.get("/services")
-  console.log("✅ Servicios obtenidos:", response.data?.length || 0)
-  console.log("🛎️ Servicios detalle:", response.data)
+
   return response.data
 }
 
 export const getBedrooms = async () => {
-  console.log("🛏️ Obteniendo habitaciones...")
+
   const response = await api.get("/bedroom")
-  console.log("✅ Habitaciones obtenidas:", response.data?.length || 0)
-  console.log("🛏️ Habitaciones detalle:", response.data)
+
   return response.data
 }
 
 export const getAllPlanes = async () => {
   try {
-    console.log("📋 Obteniendo planes...")
+
     const { data } = await axios.get(API_URL_PLANS)
 
-    if (!Array.isArray(data)) {
-      console.warn("⚠️ La respuesta del servidor no es un array:", data)
-      return []
-    }
 
-    console.log("✅ Planes obtenidos:", data.length)
-    console.log("📋 Planes detalle:", data)
+
+
     return data
   } catch (error) {
     console.error("❌ Error al obtener planes:", {
@@ -123,10 +109,8 @@ export const getAllPlanes = async () => {
 
 export const getCabins = async () => {
   try {
-    console.log("🏠 Obteniendo cabañas...")
     const { data } = await axios.get(`${API_URL_RESERVATIONS}/cabins`)
 
-    console.log("🏠 Cabañas raw del servidor:", data)
 
     // Normalizar datos
     const normalizedCabins = data.map((cabin) => ({
@@ -138,7 +122,6 @@ export const getCabins = async () => {
       price: Number(cabin.price) || 0,
     }))
 
-    console.log("✅ Cabañas normalizadas:", normalizedCabins)
     return normalizedCabins
   } catch (error) {
     console.error("❌ Error al obtener cabañas:", {
@@ -151,7 +134,6 @@ export const getCabins = async () => {
 }
 
 const validateReservationData = (reservationData) => {
-  console.log("🔍 Validando datos de reserva:", reservationData)
 
   if (!reservationData) {
     throw new Error("No se proporcionaron datos de reserva")
@@ -204,12 +186,10 @@ const validateReservationData = (reservationData) => {
     errors.businessErrors.push(`Estado no válido. Use uno de: ${validStatuses.join(", ")}`)
   }
 
-  console.log("🔍 Resultado de validación:", errors)
   return errors
 }
 
 const prepareReservationPayload = (reservationData) => {
-  console.log("📦 Preparando payload de reserva:", reservationData)
 
   const payload = {
     idUser: Number(reservationData.idUser),
@@ -226,14 +206,12 @@ const prepareReservationPayload = (reservationData) => {
     services: Array.isArray(reservationData.services) ? reservationData.services : [], // ✅ Agregado
   }
 
-  console.log("📦 Payload preparado:", payload)
   return payload
 }
 
 export const createReservation = async (reservationData) => {
   try {
-    console.log("➕ Iniciando creación de reserva...")
-    console.log("📋 Datos recibidos:", reservationData)
+
 
     // Validar datos
     const errors = validateReservationData(reservationData)
@@ -254,7 +232,6 @@ export const createReservation = async (reservationData) => {
     // Preparar payload
     const payload = prepareReservationPayload(reservationData)
 
-    console.log("📤 Enviando payload al servidor:", payload)
 
     // Enviar solicitud
     const response = await axios.post(API_URL_RESERVATIONS, payload, {
@@ -265,7 +242,6 @@ export const createReservation = async (reservationData) => {
       timeout: 5000,
     })
 
-    console.log("✅ Respuesta del servidor:", response.data)
     return response.data
   } catch (error) {
     console.error("❌ Error en createReservation:", {
@@ -287,7 +263,6 @@ export const createReservation = async (reservationData) => {
 
 export const updateReservation = async (idReservation, reservationData) => {
   try {
-    console.log("✏️ Iniciando actualización de reserva con ID:", idReservation, "y datos:", reservationData)
 
     // Validar ID - asegurar que sea un número entero positivo
     const reservationId = Number(idReservation)
@@ -313,18 +288,15 @@ export const updateReservation = async (idReservation, reservationData) => {
     }
 
     // Verificar primero si la reserva existe
-    console.log(`🔍 Verificando si existe la reserva con ID ${reservationId}...`)
     try {
       const { data } = await axios.get(`${API_URL_RESERVATIONS}/${reservationId}`)
       if (!data || !data.idReservation) {
         throw new Error(`La reserva con ID ${reservationId} no existe`)
       }
-      console.log("✅ Reserva encontrada:", data)
     } catch (error) {
       if (error.response && error.response.status === 404) {
         throw new Error(`La reserva con ID ${reservationId} no existe`)
       }
-      console.error("❌ Error al verificar existencia de reserva:", error.message)
       throw error
     }
 
@@ -335,8 +307,7 @@ export const updateReservation = async (idReservation, reservationData) => {
       idReservation: reservationId,
     }
 
-    console.log(`📤 Enviando PUT a ${API_URL_RESERVATIONS}/${reservationId}`)
-    console.log("📦 Payload:", payload)
+
 
     // Enviar solicitud
     const response = await axios.put(`${API_URL_RESERVATIONS}/${reservationId}`, payload, {
@@ -347,7 +318,6 @@ export const updateReservation = async (idReservation, reservationData) => {
       timeout: 10000,
     })
 
-    console.log("✅ Respuesta del servidor:", response.data)
     return response.data
   } catch (error) {
     console.error("❌ Error detallado en updateReservation:", {
@@ -371,11 +341,7 @@ export const updateReservation = async (idReservation, reservationData) => {
 
 export const changeReservationStatus = async (idReservation, status) => {
   try {
-    console.log("🔄 Intentando cambiar estado:", {
-      idReservation,
-      status,
-      typeOfStatus: typeof status,
-    })
+
 
     // Validar ID
     const id = validateId(idReservation, "ID de reserva")
@@ -412,7 +378,6 @@ export const changeReservationStatus = async (idReservation, status) => {
       idReservation: id,
     }
 
-    console.log("📦 Payload completo para cambio de estado:", payload)
 
     // Usar PUT en lugar de PATCH
     const response = await axios.patch(`${API_URL_RESERVATIONS}/${id}/status`, payload, {
@@ -423,7 +388,6 @@ export const changeReservationStatus = async (idReservation, status) => {
       timeout: 10000,
     })
 
-    console.log("✅ Respuesta del servidor:", response.data)
     return response.data
   } catch (error) {
     console.error(`❌ Error cambiando estado de reserva ${idReservation}:`, {
@@ -432,10 +396,7 @@ export const changeReservationStatus = async (idReservation, status) => {
       config: error.config,
     })
 
-    // Mostrar detalles específicos del error si están disponibles
-    if (error.response?.data?.errors) {
-      console.error("❌ Errores de validación:", error.response.data.errors)
-    }
+
 
     throw new Error(`Error al cambiar estado: ${error.message}`)
   }
@@ -443,18 +404,13 @@ export const changeReservationStatus = async (idReservation, status) => {
 
 export const getReservationCompanions = async (reservationId) => {
   try {
-    console.log("👥 Obteniendo acompañantes de reserva:", reservationId)
     // Validar ID
     const id = validateId(reservationId, "ID de reserva")
 
     const { data } = await axios.get(`${API_URL_RESERVATIONS}/${id}/companions`)
 
-    if (!Array.isArray(data)) {
-      console.warn("⚠️ La respuesta del servidor no es un array:", data)
-      return []
-    }
 
-    console.log("✅ Acompañantes obtenidos:", data.length)
+
     return data
   } catch (error) {
     console.error(`❌ Error al obtener acompañantes de reserva con ID ${reservationId}:`, {
@@ -467,7 +423,6 @@ export const getReservationCompanions = async (reservationId) => {
 
 export const addCompanionReservation = async (reservationId, companionData) => {
   try {
-    console.log("🔗 Intentando asociar acompañante:", { reservationId, companionData })
 
     const id = validateId(reservationId, "ID de reserva")
 
@@ -479,7 +434,6 @@ export const addCompanionReservation = async (reservationId, companionData) => {
       idCompanions: Number(companionData.idCompanions),
     }
 
-    console.log("📤 Enviando payload de asociación:", payload)
 
     const response = await axios.post(`${API_URL_RESERVATIONS}/${id}/companions`, payload, {
       headers: {
@@ -487,7 +441,6 @@ export const addCompanionReservation = async (reservationId, companionData) => {
       },
     })
 
-    console.log("✅ Respuesta del servidor:", response.data)
     return response.data
   } catch (error) {
     console.error("❌ Error detallado en asociación:", {
@@ -504,7 +457,6 @@ export const addCompanionReservation = async (reservationId, companionData) => {
 
 export const associateCompanionToReservation = async (reservationId, companionId) => {
   try {
-    console.log("🔗 Asociando acompañante a reserva:", { reservationId, companionId })
     const response = await axios.post(
       `/reservations/${reservationId}/companions`,
       { idCompanions: companionId },
@@ -514,7 +466,6 @@ export const associateCompanionToReservation = async (reservationId, companionId
         },
       },
     )
-    console.log("✅ Asociación exitosa:", response.data)
     return response.data
   } catch (error) {
     console.error("❌ Error en associateCompanionToReservation:", {
@@ -528,13 +479,11 @@ export const associateCompanionToReservation = async (reservationId, companionId
 
 export const deleteCompanionReservation = async (reservationId, companionId) => {
   try {
-    console.log("🗑️ Eliminando acompañante de reserva:", { reservationId, companionId })
     // Validar IDs
     const resId = validateId(reservationId, "ID de reserva")
     const compId = validateId(companionId, "ID de acompañante")
 
     const { data } = await axios.delete(`${API_URL_RESERVATIONS}/${resId}/companions/${compId}`)
-    console.log("✅ Acompañante eliminado:", data)
     return data
   } catch (error) {
     console.error(`❌ Error al eliminar acompañante ${companionId} de reserva ${reservationId}:`, {
@@ -547,18 +496,15 @@ export const deleteCompanionReservation = async (reservationId, companionId) => 
 
 export const getReservationPayments = async (reservationId) => {
   try {
-    console.log("💳 Obteniendo pagos de reserva:", reservationId)
     // Validar ID
     const id = validateId(reservationId, "ID de reserva")
 
     const { data } = await axios.get(`${API_URL_RESERVATIONS}/${id}/payments`)
 
     if (!Array.isArray(data)) {
-      console.warn("⚠️ La respuesta del servidor no es un array:", data)
       return []
     }
 
-    console.log("✅ Pagos obtenidos:", data.length)
     return data
   } catch (error) {
     console.error(`❌ Error al obtener pagos de reserva con ID ${reservationId}:`, {
