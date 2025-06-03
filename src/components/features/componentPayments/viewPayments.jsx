@@ -1,11 +1,14 @@
-"use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import PropTypes from "prop-types"
 import { getReservationPayments, changePaymentStatus, getAllPayments } from "../../../services/paymentsService"
 import { getReservationById } from "../../../services/reservationsService"
 import TablePayments from "./tablePayments"
+import { FaSync, FaClock, FaExclamationTriangle, FaSearch, FaTimes } from "react-icons/fa"
+import { toast } from "react-toastify"
+import { useAlert } from "../../../context/AlertContext"
 import "./componentPayments.css"
+import Pagination from "../../common/Paginator/Pagination"
 
 const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
   // Estados principales
@@ -15,7 +18,7 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(0)
   const [showAnulados, setShowAnulados] = useState(false)
-  const itemsPerPage = 5
+  const itemsPerPage = 6 // Igual que en servicios
 
   // Estados para el modal de detalles
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
@@ -27,26 +30,121 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
   // Cache para reservas ya buscadas
   const [reservationCache, setReservationCache] = useState(new Map())
 
-  // Cargar pagos
+  // Estados para auto-refresh
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [lastRefresh, setLastRefresh] = useState(null)
+  const [refreshError, setRefreshError] = useState(null)
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true)
+  const intervalRef = useRef(null)
+  const refreshInterval = 30000 // 30 segundos
+
+  // Usar el contexto de alertas
+  const { showAlert } = useAlert()
+
+  // Función para cargar pagos
+  const fetchPayments = useCallback(async () => {
+    try {
+      setError(null)
+      const paymentsData = idReservation ? await getReservationPayments(idReservation) : await getAllPayments()
+      setPayments(Array.isArray(paymentsData) ? paymentsData : [])
+      return true
+    } catch (error) {
+      console.error("Error al cargar pagos:", error)
+      setError(`Error al cargar pagos: ${error.message}`)
+      setRefreshError(`Error al cargar pagos: ${error.message}`)
+      throw error
+    }
+  }, [idReservation])
+
+  // Función para ejecutar el refresh
+  const executeRefresh = useCallback(
+    async (isManual = false) => {
+      if (isRefreshing && !isManual) return
+
+      try {
+        setIsRefreshing(true)
+        setRefreshError(null)
+
+        await fetchPayments()
+        setLastRefresh(new Date())
+
+        if (isManual) {
+          toast.success("Datos actualizados correctamente")
+        }
+      } catch (error) {
+        console.error("Error en auto-refresh:", error)
+        setRefreshError(error.message)
+
+        if (isManual) {
+          toast.error(`Error al actualizar: ${error.message}`)
+        }
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [fetchPayments, isRefreshing],
+  )
+
+  // Función para refresh manual
+  const manualRefresh = useCallback(() => {
+    executeRefresh(true)
+  }, [executeRefresh])
+
+  // Toggle del auto-refresh
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefreshEnabled((prev) => {
+      const newState = !prev
+      toast.info(newState ? "Auto-actualización activada" : "Auto-actualización desactivada")
+      return newState
+    })
+  }, [])
+
+  // Configurar el intervalo automático
   useEffect(() => {
-    const fetchPayments = async () => {
+    if (autoRefreshEnabled && refreshInterval > 0) {
+      intervalRef.current = setInterval(() => {
+        executeRefresh(false)
+      }, refreshInterval)
+
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current)
+        }
+      }
+    }
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [autoRefreshEnabled, refreshInterval, executeRefresh])
+
+  // Limpiar intervalo al desmontar
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [])
+
+  // Cargar pagos inicial
+  useEffect(() => {
+    const loadInitialData = async () => {
       try {
         setIsLoading(true)
-        setError(null)
-
-        const paymentsData = idReservation ? await getReservationPayments(idReservation) : await getAllPayments()
-
-        setPayments(Array.isArray(paymentsData) ? paymentsData : [])
-      } catch (err) {
-        console.error("Error al cargar pagos:", err)
-        setError(`Error al cargar pagos: ${err.message}`)
+        await fetchPayments()
+        setLastRefresh(new Date())
+      } catch (error) {
+        console.error("Error al cargar pagos iniciales:", error)
+        // Error ya manejado en fetchPayments
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchPayments()
-  }, [idReservation])
+    loadInitialData()
+  }, [fetchPayments])
 
   // Filtrado y paginación
   const { currentItems, pageCount } = useMemo(() => {
@@ -69,55 +167,39 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
     }
   }, [payments, searchTerm, currentPage, itemsPerPage, showAnulados])
 
-  // Total pagado general (para cuando no hay reserva específica)
-  
   // Función para buscar reserva por ID de pago
   const findReservationByPaymentId = async (paymentId) => {
     try {
-      console.log("🔍 Buscando reserva para el pago ID:", paymentId)
-
       // Verificar cache primero
       if (reservationCache.has(paymentId)) {
-        console.log("✅ Reserva encontrada en cache")
         return reservationCache.get(paymentId)
       }
 
       // Estrategia: Intentar IDs de reserva secuencialmente
-      // Esto es una solución temporal hasta que el backend incluya idReservation
       let foundReservation = null
       let attempts = 0
-      const maxAttempts = 50 // Limitar intentos para evitar bucles infinitos
+      const maxAttempts = 50
 
       for (let reservationId = 1; reservationId <= maxAttempts; reservationId++) {
         attempts++
         try {
-          console.log(`🔍 Intentando reserva ID: ${reservationId} (intento ${attempts}/${maxAttempts})`)
-
           const reservation = await getReservationById(reservationId)
 
           if (reservation && reservation.payments) {
             const hasPayment = reservation.payments.some((p) => p.idPayments === paymentId || p.id === paymentId)
 
             if (hasPayment) {
-              console.log(`✅ ¡Reserva encontrada! ID: ${reservationId}`)
               foundReservation = reservation
-
               // Guardar en cache
               setReservationCache((prev) => new Map(prev.set(paymentId, reservation)))
               break
             }
           }
         } catch (err) {
-          // Si la reserva no existe, continuar con la siguiente
           if (err.response?.status === 404) {
             continue
           }
-          console.warn(`⚠️ Error al buscar reserva ${reservationId}:`, err.message)
         }
-      }
-
-      if (!foundReservation) {
-        console.log("❌ No se encontró reserva para el pago después de", attempts, "intentos")
       }
 
       return foundReservation
@@ -127,33 +209,83 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
     }
   }
 
-  // Cambiar estado
+  // Cambiar estado con auto-refresh y confirmación
   const handleStatusChange = async (paymentId, newStatus) => {
     if (!paymentId || !newStatus) return
 
-    try {
-      setIsLoading(true)
-      const updatedPayment = await changePaymentStatus(paymentId, newStatus)
+    // Obtener el pago actual para mostrar información en la alerta
+    const currentPayment = payments.find((p) => p.idPayments === paymentId || p.id === paymentId)
+    if (!currentPayment) return
 
-      setPayments((prev) => prev.map((p) => (p.idPayments === updatedPayment.idPayments ? updatedPayment : p)))
+    // Determinar el mensaje según el nuevo estado
+    let statusMessage = ""
+    let statusType = ""
 
-      // Si el pago actualizado es el seleccionado, actualizar también los datos de la reserva
-      if (selectedPayment && selectedPayment.idPayments === updatedPayment.idPayments) {
-        setSelectedPayment(updatedPayment)
-        // Recargar los pagos de la reserva específica
-        if (updatedPayment.idReservation) {
-          const reservationPayments = await getReservationPayments(updatedPayment.idReservation)
-          setSelectedReservationPayments(Array.isArray(reservationPayments) ? reservationPayments : [])
-        }
-      }
-
-      setError(null)
-    } catch (err) {
-      console.error("Error al cambiar estado:", err)
-      setError(`Error al cambiar estado: ${err.response?.data?.message || err.message}`)
-    } finally {
-      setIsLoading(false)
+    switch (newStatus) {
+      case "Confirmado":
+        statusMessage = "confirmar"
+        statusType = "confirm-edit"
+        break
+      case "Pendiente":
+        statusMessage = "marcar como pendiente"
+        statusType = "confirm-edit"
+        break
+      case "Anulado":
+        statusMessage = "anular"
+        statusType = "confirm-delete"
+        break
+      default:
+        statusMessage = "cambiar el estado de"
+        statusType = "confirm-edit"
     }
+
+    // Mostrar alerta de confirmación
+    showAlert({
+      type: statusType,
+      title: `Confirmar Cambio de Estado`,
+      message: `¿Está seguro de ${statusMessage} este pago por ${formatCurrency(currentPayment.amount)}?`,
+      confirmText: `Sí, ${statusMessage}`,
+      onConfirm: async () => {
+        try {
+          setIsLoading(true)
+
+          // Cambiar estado del pago
+          const updatedPayment = await changePaymentStatus(paymentId, newStatus)
+
+          // Actualizar el estado local
+          setPayments((prev) => prev.map((p) => (p.idPayments === updatedPayment.idPayments ? updatedPayment : p)))
+
+          // Mostrar mensaje de éxito
+          toast.success(`Pago ${newStatus.toLowerCase()} correctamente`)
+
+          // Si el pago actualizado es el seleccionado, actualizar también los datos de la reserva
+          if (selectedPayment && selectedPayment.idPayments === updatedPayment.idPayments) {
+            setSelectedPayment(updatedPayment)
+
+            if (updatedPayment.idReservation) {
+              try {
+                // Recargar los datos de la reserva para mostrar el estado actualizado
+                const updatedReservation = await getReservationById(updatedPayment.idReservation)
+                setSelectedReservationData(updatedReservation)
+
+                // Recargar los pagos de la reserva
+                const reservationPayments = await getReservationPayments(updatedPayment.idReservation)
+                setSelectedReservationPayments(Array.isArray(reservationPayments) ? reservationPayments : [])
+              } catch (reservationError) {
+                console.error("Error al actualizar datos de la reserva:", reservationError)
+                toast.error(`Error al actualizar datos de la reserva: ${reservationError.message}`)
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Error al cambiar estado:", err)
+          toast.error(`Error al cambiar estado: ${err.response?.data?.message || err.message}`)
+          setError(`Error al cambiar estado: ${err.response?.data?.message || err.message}`)
+        } finally {
+          setIsLoading(false)
+        }
+      },
+    })
   }
 
   // Ver detalles - Cargar datos específicos de la reserva
@@ -163,40 +295,31 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
       setSelectedPayment(payment)
       setIsDetailModalOpen(true)
 
-      console.log("🔍 Pago seleccionado:", payment)
-      console.log("🔍 ID del pago:", paymentId)
-
       let reservationData = null
       let reservationPayments = []
 
-      // Si el pago tiene idReservation directamente (poco probable en vista global)
       if (payment.idReservation) {
-        console.log("✅ El pago tiene idReservation:", payment.idReservation)
-
         try {
           reservationData = await getReservationById(payment.idReservation)
           reservationPayments = await getReservationPayments(payment.idReservation)
         } catch (reservationError) {
           console.error("❌ Error al cargar reserva por ID:", reservationError)
+          toast.error(`Error al cargar datos de la reserva: ${reservationError.message}`)
         }
       } else {
-        // Buscar la reserva que contiene este pago
-        console.log("🔍 Buscando reserva que contiene el pago...")
-
         reservationData = await findReservationByPaymentId(payment.idPayments || paymentId)
-
         if (reservationData) {
           reservationPayments = reservationData.payments || []
-          console.log("✅ Reserva encontrada:", reservationData.idReservation)
         } else {
-          console.log("❌ No se encontró reserva para este pago")
+          toast.info("No se encontró una reserva asociada a este pago")
         }
       }
 
       setSelectedReservationData(reservationData)
       setSelectedReservationPayments(Array.isArray(reservationPayments) ? reservationPayments : [])
     } catch (err) {
-      console.error("❌ Error general al cargar datos de la reserva:", err)
+      console.error("Error al cargar datos:", err)
+      toast.error(`Error al cargar datos: ${err.message}`)
       setError(`Error al cargar datos de la reserva: ${err.message}`)
       setSelectedReservationData(null)
       setSelectedReservationPayments([])
@@ -215,7 +338,6 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
       }
     }
 
-    // Calcular total de la reserva basado en el plan
     const planPrice = selectedReservationData.plan?.salePrice || selectedReservationData.plan?.price || 0
     const servicesTotal = (selectedReservationData.services || []).reduce(
       (sum, service) => sum + (service.Price || 0),
@@ -223,7 +345,6 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
     )
     const totalReservation = planPrice + servicesTotal
 
-    // Calcular total pagado
     const totalPaidReservation = selectedReservationPayments.reduce((sum, payment) => {
       return payment.status !== "Anulado" ? sum + (Number(payment.amount) || 0) : sum
     }, 0)
@@ -250,76 +371,165 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
     return new Date(dateString).toLocaleDateString("es-CO", options)
   }
 
+  // Formatear última actualización
+  const formatLastRefresh = (date) => {
+    if (!date) return "Nunca"
+
+    const now = new Date()
+    const diff = Math.floor((now - date) / 1000)
+
+    if (diff < 60) return `Hace ${diff}s`
+    if (diff < 3600) return `Hace ${Math.floor(diff / 60)}m`
+    return date.toLocaleTimeString("es-CO", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  // Manejar cambio de página
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected)
+  }
+
+  // Limpiar búsqueda
+  const handleClearSearch = () => {
+    setSearchTerm("")
+    setCurrentPage(0) // Resetear a la primera página
+  }
+
   const reservationSummary = getReservationSummary()
 
   return (
-    <div className="view-payments-container">
-      {/* Encabezado */}
-      <div className="payments-header">
-        <h2>Gestión de Pagos</h2>
+    <div className="table-container">
+      {/* Encabezado igual que servicios */}
+      <div className="title-container">
+        <h2 className="table-title">Gestión de Pagos</h2>
       </div>
 
-      {/* Controles */}
-      <div className="payments-controls">
-        <div className="search-container">
+      {/* Controles de búsqueda y acciones - Estilo servicios */}
+      <div className="container-search">
+        <div className="search-wrapper-comfort">
+          <FaSearch className="config-search-icon" />
           <input
             type="text"
-            placeholder="Buscar pagos..."
+            className="comfort-search"
+            placeholder="Buscar pago..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             disabled={isLoading}
           />
           {searchTerm && (
-            <button onClick={() => setSearchTerm("")} disabled={isLoading} className="clear-search">
-              ×
+            <button className="clear-search" onClick={handleClearSearch} aria-label="Limpiar búsqueda">
+              <FaTimes />
             </button>
           )}
         </div>
 
-        <button
-          onClick={() => setShowAnulados(!showAnulados)}
-          className={`toggle-anulados ${showAnulados ? "active" : ""}`}
-        >
-          {showAnulados ? "Ocultar Anulados" : "Mostrar Anulados"}
-        </button>
+        <div className="payments-action-buttons">
+          <button
+            onClick={() => setShowAnulados(!showAnulados)}
+            className={`toggle-anulados ${showAnulados ? "active" : ""}`}
+          >
+            {showAnulados ? "Ocultar Anulados" : "Mostrar Anulados"}
+          </button>
+
+          <button
+            className="manual-refresh-btn"
+            onClick={manualRefresh}
+            disabled={isRefreshing || isLoading}
+            title="Actualizar manualmente"
+          >
+            <FaSync className={isRefreshing || isLoading ? "animate-spin" : ""} />
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      {/* Indicador de estado compacto */}
+      <div className="refresh-status-compact">
+        <div className="auto-refresh-indicator">
+          {refreshError ? (
+            <FaExclamationTriangle style={{ color: "#dc3545" }} />
+          ) : isRefreshing || isLoading ? (
+            <div className="refresh-spinner" />
+          ) : (
+            <FaClock style={{ color: autoRefreshEnabled ? "#28a745" : "#6c757d" }} />
+          )}
+          <span>
+            {refreshError
+              ? "Error al actualizar"
+              : isRefreshing || isLoading
+                ? "Actualizando..."
+                : autoRefreshEnabled
+                  ? "Auto-actualización activa"
+                  : "Auto-actualización pausada"}
+          </span>
+          {lastRefresh && !refreshError && (
+            <span className="last-refresh">• Última: {formatLastRefresh(lastRefresh)}</span>
+          )}
+        </div>
+
+        <label className={`auto-refresh-toggle ${autoRefreshEnabled ? "active" : ""}`}>
+          <input
+            type="checkbox"
+            checked={autoRefreshEnabled}
+            onChange={toggleAutoRefresh}
+            style={{ display: "none" }}
+          />
+          <span>Auto-actualizar cada 30s</span>
+        </label>
       </div>
 
       {/* Mensaje de error */}
-      {error && (
+      {(error || refreshError) && (
         <div className="error-message">
-          {error}
-          <button onClick={() => setError(null)}>×</button>
+          {error || refreshError}
+          <button
+            onClick={() => {
+              setError(null)
+              setRefreshError(null)
+              manualRefresh()
+            }}
+          >
+            <FaTimes />
+          </button>
         </div>
       )}
 
-      {/* Tabla */}
-      <div className="payments-table-wrapper">
-        <TablePayments
-          payments={currentItems}
-          onDetailPayment={handleViewDetails}
-          onStatusChange={!isReadOnly ? handleStatusChange : null}
-          isLoading={isLoading}
-        />
-
-        {pageCount > 1 && (
-          <div className="pagination-container">
-            <button onClick={() => setCurrentPage((p) => Math.max(0, p - 1))} disabled={currentPage === 0 || isLoading}>
-              Anterior
-            </button>
-            <span>
-              Página {currentPage + 1} de {pageCount}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(pageCount - 1, p + 1))}
-              disabled={currentPage >= pageCount - 1 || isLoading}
-            >
-              Siguiente
+      {/* Wrapper de tabla igual que servicios */}
+      <div className="comfort-table-wrapper">
+        {isLoading && !isRefreshing ? (
+          <div className="loading-indicator">
+            <div className="loading-spinner"></div>
+            <p>Cargando pagos...</p>
+          </div>
+        ) : error && !refreshError ? (
+          <div className="error-message">
+            {error}
+            <button onClick={() => setError(null)}>
+              <FaTimes />
             </button>
           </div>
+        ) : (
+          <>
+            <TablePayments
+              payments={currentItems}
+              onDetailPayment={handleViewDetails}
+              onStatusChange={!isReadOnly ? handleStatusChange : null}
+              isLoading={isRefreshing}
+            />
+
+            {/* Paginación igual que servicios */}
+            {pageCount > 1 && (
+              <div className="pagination-container">
+                <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Modal de detalles */}
+      {/* Modal de detalles - mantener igual */}
       {isDetailModalOpen && selectedPayment && (
         <div className="payments-modal-overlay">
           <div className="payments-modal-container">

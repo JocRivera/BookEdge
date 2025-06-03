@@ -47,11 +47,9 @@ const useReservationForm = (initialData = null) => {
     if (typeof data === "function") {
       setFormData((prevData) => {
         const newData = data(prevData)
-        console.log("🔄 Hook updateFormData (función):", { prevData, newData })
         return newData
       })
     } else {
-      console.log("🔄 Hook updateFormData (objeto):", { currentData: formData, newData: data })
       setFormData((prevData) => ({ ...prevData, ...data }))
     }
   }
@@ -112,8 +110,8 @@ const useReservationForm = (initialData = null) => {
         newErrors.companionCount = "Debe especificar al menos 1 acompañante"
       }
 
-      if (dataToValidate.hasCompanions && dataToValidate.companionCount > 10) {
-        newErrors.companionCount = "Máximo 10 acompañantes permitidos"
+      if (dataToValidate.hasCompanions && dataToValidate.companionCount > 6) {
+        newErrors.companionCount = "Máximo 6 acompañantes permitidos"
       }
     }
 
@@ -131,7 +129,6 @@ const useReservationForm = (initialData = null) => {
     const newErrors = validateStep(2)
     if (Object.keys(newErrors).length === 0) {
       setErrors({})
-      console.log("Form submitted:", formData)
       alert("Form submitted successfully!")
     } else {
       setErrors(newErrors)
