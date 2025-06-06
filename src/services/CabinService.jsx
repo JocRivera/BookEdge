@@ -13,38 +13,27 @@ export const getCabinById = async (id) => {
   const { data } = await axios.get(`${API_URL}/${id}`);
   return data;
 };
+
+// <<< CORRECCIÓN: Eliminamos el try/catch para que el error de Axios se propague completo.
 export const createCabin = async (cabinData) => {
-  try {
-    // Convertimos capacity a número si existe
-    const dataToSend = {
-      ...cabinData,
-      capacity: cabinData.capacity ? Number(cabinData.capacity) : undefined
-    };
-    
-    const response = await axios.post(API_URL, dataToSend);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { 
-      message: error.message || "Error al crear la cabaña",
-      errors: error.response?.data?.errors // Asegúrate de pasar los errores
-    };
-  }
+  const dataToSend = {
+    ...cabinData,
+    capacity: cabinData.capacity ? Number(cabinData.capacity) : undefined
+  };
+  
+  const response = await axios.post(API_URL, dataToSend);
+  return response.data;
 };
+
+// <<< CORRECCIÓN: Mismo cambio aquí.
 export const updateCabin = async (id, cabinData) => {
-  try {
-    const dataToSend = {
-      ...cabinData,
-      capacity: cabinData.capacity ? Number(cabinData.capacity) : undefined
-    };
-    
-    const response = await axios.put(`${API_URL}/${id}`, dataToSend);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { 
-      message: error.message || "Error al crear la habitación",
-      errors: error.response?.data?.errors // Asegúrate de pasar los errores
-    };
-  }
+  const dataToSend = {
+    ...cabinData,
+    capacity: cabinData.capacity ? Number(cabinData.capacity) : undefined
+  };
+  
+  const response = await axios.put(`${API_URL}/${id}`, dataToSend);
+  return response.data;
 };
 
 export const deleteCabin = async (id) => {
@@ -61,7 +50,6 @@ export const getCabinImages = async (cabinId) => {
 export const uploadCabinImages = async (cabinId, imageFiles) => {
   const formData = new FormData();
   
-  // Permitir subir múltiples imágenes
   imageFiles.forEach(file => {
     formData.append("images", file);
   });

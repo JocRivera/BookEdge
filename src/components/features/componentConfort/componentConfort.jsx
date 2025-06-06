@@ -112,18 +112,17 @@ function ComponentConfort() {
     try {
       if (formData.idComfort) {
         // Editando
-        const updatedComfort = await updateComfort(
+        const updatedComfortData = await updateComfort(
           formData.idComfort,
           formData
         );
+        
+        // El servicio updateComfort ahora devuelve el objeto comodidad actualizado o un objeto similar a la creación.
+        // O si la API no devuelve el objeto completo, usamos formData como fallback para actualizar la UI.
+        const comfortToUpdate = (updatedComfortData && typeof updatedComfortData === 'object' && !Array.isArray(updatedComfortData) && updatedComfortData.idComfort) 
+                                ? updatedComfortData 
+                                : { ...comforts.find(c => c.idComfort === formData.idComfort), ...formData };
 
-        // Asegurar que updatedComfort sea un objeto válido
-        const comfortToUpdate =
-          updatedComfort &&
-          typeof updatedComfort === "object" &&
-          !Array.isArray(updatedComfort)
-            ? updatedComfort
-            : formData;
 
         setComforts((prev) =>
           prev.map((item) =>
@@ -138,15 +137,14 @@ function ComponentConfort() {
         );
       } else {
         // Creando
-        const newComfort = await createComfort(formData);
-
-        // Asegurar que newComfort sea un objeto válido
-        const comfortToAdd =
-          newComfort &&
-          typeof newComfort === "object" &&
-          !Array.isArray(newComfort)
-            ? newComfort
-            : formData;
+        const newComfortData = await createComfort(formData);
+        
+        // Asumimos que createComfort devuelve la nueva comodidad con su ID.
+        // Si no, formData no tendrá el idComfort asignado por el backend.
+        // Es importante que newComfortData sea el objeto retornado por el backend.
+        const comfortToAdd = (newComfortData && typeof newComfortData === 'object' && !Array.isArray(newComfortData) && newComfortData.idComfort) 
+                              ? newComfortData 
+                              : { ...formData, idComfort: Date.now() }; // Fallback si la API no devuelve el objeto completo
 
         setComforts((prev) => [comfortToAdd, ...prev]);
         toast.success(
@@ -156,30 +154,48 @@ function ComponentConfort() {
         );
       }
       setIsModalOpen(false);
-      return null;
-    } catch (error) {
-      console.error("Error al guardar la comodidad:", error);
+      return null; // Indica éxito al formulario, para que cierre y resetee.
+    } catch (caughtError) {
+      console.error("Error al guardar la comodidad:", caughtError);
 
-      if (error.response && error.response.data) {
-        const errorData = error.response.data;
-        if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
-          const formattedErrors = {};
-          let firstUserMessage = "Por favor, corrija los errores indicados.";
-          errorData.errors.forEach((errItem, index) => {
-            if (errItem.path) formattedErrors[errItem.path] = errItem.msg;
-            if (index === 0 && errItem.msg) firstUserMessage = errItem.msg;
-          });
-          toast.error(firstUserMessage);
-          return formattedErrors;
-        } else if (errorData.message) {
-          toast.error(errorData.message);
-          return { general: errorData.message };
+      // caughtError es lo que ComfortService arrojó.
+      // Puede ser:
+      // 1. El objeto de error del backend: { errors: [{ path: 'name', msg: '...' }] }
+      // 2. Un objeto de error de Axios (si ComfortService lanzó `error` directamente)
+      // 3. Un objeto { message: "..." } (si ComfortService lo construyó así)
+
+      const formattedErrors = {};
+      let generalErrorMessage = "Error al guardar la comodidad. Intente de nuevo.";
+
+      if (caughtError && Array.isArray(caughtError.errors) && caughtError.errors.length > 0) {
+        // Caso 1: Estructura { errors: [...] } del backend
+        let firstUserMessage = null;
+        caughtError.errors.forEach((errItem, index) => {
+          if (errItem.path) {
+            formattedErrors[errItem.path] = errItem.msg;
+          }
+          if (index === 0 && errItem.msg) {
+            firstUserMessage = errItem.msg;
+          }
+        });
+        generalErrorMessage = firstUserMessage || "Por favor, corrija los errores indicados.";
+       
+        return formattedErrors; // Ejemplo: { name: "Ya existe esta comodidad" }
+      } else if (caughtError && caughtError.message) {
+        // Caso 2 o 3: Error con una propiedad `message` (puede ser de Axios o construido)
+        // O si el backend devuelve un error como { message: "...", detalle: "..." }
+        generalErrorMessage = caughtError.message;
+        if (caughtError.response && caughtError.response.data && caughtError.response.data.message) {
+          // Si es un error de Axios y hay un mensaje específico en response.data.message
+          generalErrorMessage = caughtError.response.data.message;
         }
+  
+        // Si el mensaje indica un error de campo específico (aunque no venga en `errors` array)
+        // podrías intentar mapearlo si conoces el formato. Por ahora, lo tratamos como general.
+        return { general: generalErrorMessage };
       }
-      const fallbackErrorMessage =
-        error.message || "Error al guardar la comodidad";
-      toast.error(fallbackErrorMessage);
-      return { general: fallbackErrorMessage };
+      
+ 
     }
   };
 

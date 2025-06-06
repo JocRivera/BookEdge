@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   MdClose,
@@ -31,6 +32,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
   const [imageFiles, setImageFiles] = useState(Array(5).fill(null));
   const [imagePreviews, setImagePreviews] = useState(Array(5).fill(null));
   const [errors, setErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({}); // Para validación interactiva
   const fileInputRefs = useRef([]);
 
   // Estados para Comodidades
@@ -40,10 +42,8 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
   // Efectos
   useEffect(() => {
     if (!isOpen) return;
-
     resetForm();
     fetchComforts();
-
     if (bedroomToEdit) {
       loadBedroomData(bedroomToEdit);
     }
@@ -92,6 +92,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
     setExistingImages([]);
     setSelectedComforts([]);
     setErrors({});
+    setTouchedFields({}); // Limpiar campos tocados
     fileInputRefs.current.forEach((input) => {
       if (input) input.value = "";
     });
@@ -124,19 +125,19 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
     return error;
   };
 
-  // Manejadores de Formulario
+  // Manejadores de Formulario Mejorados
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Limpiar el error cuando el usuario empieza a escribir
     if (errors[name]) {
-      const newErrors = { ...errors };
-      delete newErrors[name];
-      setErrors(newErrors);
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
+    setTouchedFields((prev) => ({ ...prev, [name]: true }));
     const error = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
@@ -151,6 +152,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     let formIsValid = true;
     const newErrors = {};
 
@@ -169,7 +171,10 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
 
     setErrors(newErrors);
 
-    if (!formIsValid) return;
+    if (!formIsValid) {
+      toast.error("Por favor, corrija los errores del formulario.");
+      return;
+    }
 
     const dataToSubmit = {
       ...formData,
@@ -182,34 +187,33 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
       if (bedroomToEdit) {
         await updateBedroom(bedroomToEdit.idRoom, dataToSubmit);
         bedroomId = bedroomToEdit.idRoom;
-        toast.success(
-          `Habitación "${bedroomToEdit.name}" Editada correctamente.`
-        );
+        toast.success(`Habitación "${formData.name}" editada correctamente.`);
       } else {
         const newBedroom = await createBedroom(dataToSubmit);
-         toast.success(
-          `Habitación  creada correctamente.`
-        );
         bedroomId = newBedroom.idRoom;
+        toast.success(`Habitación "${formData.name}" creada correctamente.`);
       }
 
       await uploadNewImages(bedroomId);
       onSuccess();
     } catch (error) {
       console.error("Error al guardar la habitación:", error);
-      if (error && error.errors && Array.isArray(error.errors)) {
-        const backendErrors = {};
-        error.errors.forEach((err) => {
-          backendErrors[err.path || "general"] = err.msg;
-        });
-        setErrors((prev) => ({ ...prev, ...backendErrors }));
-      } else if (error && error.message) {
-        setErrors((prev) => ({ ...prev, general: error.message }));
+      if (error.response && error.response.data && Array.isArray(error.response.data.errors)) {
+        // Maneja errores de validación estructurados del backend
+        const backendErrors = error.response.data.errors.reduce((acc, err) => {
+          if (err.path) { // 'path' es el nombre del campo (ej: 'description')
+            acc[err.path] = err.msg; // 'msg' es el mensaje de error
+          }
+          return acc;
+        }, {});
+        setErrors(backendErrors);
+        toast.error("Por favor, revise los errores en el formulario.");
       } else {
-        setErrors((prev) => ({
-          ...prev,
-          general: "Ocurrió un error inesperado.",
-        }));
+        // Fallback para errores generales o inesperados
+        const errorMessage =
+          error.response?.data?.message || "Ocurrió un error inesperado.";
+        toast.error(errorMessage);
+        setErrors((prev) => ({ ...prev, general: errorMessage }));
       }
     }
   };
@@ -221,11 +225,9 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
         await uploadBedroomImages(bedroomId, filesToUpload);
       } catch (uploadError) {
         console.error("Error al subir nuevas imágenes:", uploadError);
-        setErrors((prev) => ({
-          ...prev,
-          images:
-            "Error al subir nuevas imágenes. La habitación se guardó, pero las imágenes no.",
-        }));
+        toast.error(
+          "La habitación se guardó, pero hubo un error al subir las imágenes."
+        );
       }
     }
   };
@@ -276,12 +278,13 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
       return;
     try {
       await deleteBedroomImage(imageId);
+      toast.success("Imagen eliminada correctamente.");
       setExistingImages((prev) =>
         prev.filter((img) => img.idRoomImage !== imageId)
       );
     } catch (error) {
       console.error("Error al eliminar imagen existente:", error);
-      alert("Error al eliminar la imagen.");
+      toast.error("Error al eliminar la imagen.");
     }
   };
 
@@ -289,17 +292,15 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
     if (!bedroomToEdit || !bedroomToEdit.idRoom) return;
     try {
       await setPrimaryBedroomImage(bedroomToEdit.idRoom, imageId);
+      toast.success("Imagen establecida como principal.");
       setExistingImages((prev) =>
         prev.map((img) => ({ ...img, isPrimary: img.idRoomImage === imageId }))
       );
     } catch (error) {
       console.error("Error al establecer imagen principal:", error);
-      alert("Error al establecer la imagen como principal.");
+      toast.error("Error al establecer la imagen como principal.");
     }
   };
-
-  // Cálculos Derivados
-  const availableSlotsForNewImages = Math.max(0, 5 - existingImages.length);
 
   if (!isOpen) return null;
 
@@ -327,7 +328,6 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
 
         <form onSubmit={handleSubmit} className="bedroom-form-admin" noValidate>
           <div className="form-content-bedroom-admin">
-            {/* Columna Izquierda: Datos de la Habitación */}
             <fieldset className="form-inputs-bedroom-admin">
               <legend className="visually-hidden-admin">
                 Datos de la Habitación
@@ -351,7 +351,6 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   <span className="error-message-admin">{errors.name}</span>
                 )}
               </div>
-
               <div className="form-group-bedroom-admin">
                 <label
                   htmlFor="bedroom-description"
@@ -376,7 +375,6 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   </span>
                 )}
               </div>
-
               <div className="form-group-bedroom-admin">
                 <label htmlFor="bedroom-capacity" className="form-label-admin">
                   Capacidad
@@ -398,7 +396,6 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   <span className="error-message-admin">{errors.capacity}</span>
                 )}
               </div>
-
               <div className="form-group-bedroom-admin">
                 <label htmlFor="bedroom-status" className="form-label-admin">
                   Estado
@@ -408,26 +405,18 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className={`form-input-bedroom-admin ${
-                    errors.status ? "input-error-admin" : ""
-                  }`}
+                  className="form-input-bedroom-admin"
                 >
                   <option value="En Servicio">En Servicio</option>
                   <option value="Mantenimiento">En Mantenimiento</option>
                   <option value="Fuera de Servicio">Fuera de Servicio</option>
                 </select>
-                {errors.status && (
-                  <span className="error-message-admin">{errors.status}</span>
-                )}
               </div>
             </fieldset>
 
             <div className="form-column-right-bedroom-admin">
               <fieldset className="comforts-section-bedroom-admin">
                 <legend className="form-label-admin">Comodidades</legend>
-                {errors.comforts && (
-                  <span className="error-message-admin">{errors.comforts}</span>
-                )}
                 {allComforts.length > 0 ? (
                   <div className="comforts-checkbox-group-admin">
                     {allComforts.map((comfort) => (
@@ -456,239 +445,147 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                   </div>
                 ) : (
                   <p className="no-comforts-message-admin">
-                    Cargando comodidades o no hay disponibles...
+                    Cargando comodidades...
                   </p>
                 )}
               </fieldset>
 
               <fieldset className="image-upload-section-bedroom-admin">
                 <legend className="form-label-bedroom-admin">
-                  Imágenes (máx. 5) {/* Título único y simple */}
+                  Imágenes (máx. 5)
                 </legend>
                 {errors.images && (
                   <span className="error-message-admin image-error-admin">
                     {errors.images}
                   </span>
                 )}
-
                 <div className="upload-images-grid-admin">
-                  {/* Siempre un loop de 5 para representar los 5 slots visuales */}
                   {Array(5)
                     .fill(null)
                     .map((_, slotIndex) => {
-                      // slotIndex va de 0 a 4
-
-                      // Prioridad 1: Mostrar una imagen EXISTENTE si corresponde a este slot
-                      // y no hay una NUEVA imagen seleccionada para este mismo slot.
-                      const existingImageForThisSlot =
-                        bedroomToEdit &&
-                        slotIndex < existingImages.length && // Solo si el slot está dentro del rango de imágenes existentes
-                        !imagePreviews[slotIndex] // Y no hay una nueva preview para este slot
-                          ? existingImages[slotIndex]
-                          : null;
-
-                      // Prioridad 2: Mostrar una VISTA PREVIA DE IMAGEN NUEVA si existe para este slot
-                      const newImagePreviewForThisSlot =
-                        imagePreviews[slotIndex];
-
-                      if (newImagePreviewForThisSlot) {
-                        // CASO A: Hay una nueva imagen seleccionada (o reemplazando una existente)
+                      const existingImage = existingImages[slotIndex];
+                      const newImagePreview = imagePreviews[slotIndex];
+                      if (newImagePreview) {
                         return (
                           <div
-                            key={`slot-new-preview-${slotIndex}`}
+                            key={`slot-new-${slotIndex}`}
                             className="image-upload-field-bedroom-admin"
                           >
                             <figure className="image-preview-wrapper-bedroom-admin">
                               <img
-                                src={newImagePreviewForThisSlot}
+                                src={newImagePreview}
                                 alt={`Vista previa ${slotIndex + 1}`}
                                 className="preview-image-bedroom-admin"
                               />
                               <button
                                 type="button"
-                                onClick={() => handleRemoveImage(slotIndex)} // Usa tu handleRemoveImage actual
+                                onClick={() => handleRemoveImage(slotIndex)}
                                 className="image-action-btn-admin delete-btn-bedroom-admin"
-                                aria-label="Quitar imagen seleccionada"
+                                aria-label="Quitar imagen"
                               >
                                 <MdDelete />
                               </button>
                             </figure>
                           </div>
                         );
-                      } else if (existingImageForThisSlot) {
-                        // CASO B: Hay una imagen existente y no hay una nueva preview para este slot
+                      }
+                      if (existingImage) {
                         return (
                           <div
-                            key={`slot-existing-${existingImageForThisSlot.idRoomImage}`}
+                            key={`slot-existing-${existingImage.idRoomImage}`}
                             className="image-upload-field-bedroom-admin"
                           >
                             <figure className="image-preview-wrapper-bedroom-admin">
                               <img
-                                src={`http://localhost:3000/uploads/${existingImageForThisSlot.imagePath}`}
-                                alt={`Habitación ${formData.name || "imagen"} ${
-                                  slotIndex + 1
-                                }`}
+                                src={`http://localhost:3000/uploads/${existingImage.imagePath}`}
+                                alt={`Habitación ${slotIndex + 1}`}
                                 className="preview-image-bedroom-admin"
                               />
-                              <figcaption className="visually-hidden-admin">
-                                Imagen de la habitación {slotIndex + 1}
-                              </figcaption>
                               <div className="image-actions-bedroom-admin">
                                 <button
                                   type="button"
-                                  // Al borrar una existente, también debe limpiar el preview y file de ese slot
-                                  onClick={() => {
+                                  onClick={() =>
                                     handleRemoveExistingImage(
-                                      existingImageForThisSlot.idRoomImage
-                                    );
-                                    // Adicionalmente, si quieres que se convierta en un slot de carga:
-                                    handleRemoveImage(slotIndex); // Esto limpiará imageFiles[slotIndex] e imagePreviews[slotIndex]
-                                  }}
+                                      existingImage.idRoomImage
+                                    )
+                                  }
                                   className="image-action-btn-admin delete-btn-bedroom-admin"
-                                  aria-label="Eliminar imagen existente"
+                                  aria-label="Eliminar imagen"
                                 >
                                   <MdDelete />
                                 </button>
-                                {bedroomToEdit && ( // Esta condición ya la tenías, es correcta
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleSetPrimary(
-                                        existingImageForThisSlot.idRoomImage
-                                      )
-                                    }
-                                    className={`image-action-btn-admin star-btn-admin ${
-                                      existingImageForThisSlot.isPrimary
-                                        ? "primary-admin"
-                                        : ""
-                                    }`}
-                                    aria-label={
-                                      existingImageForThisSlot.isPrimary
-                                        ? "Imagen principal"
-                                        : "Establecer como principal"
-                                    }
-                                    disabled={
-                                      existingImageForThisSlot.isPrimary
-                                    }
-                                  >
-                                    {existingImageForThisSlot.isPrimary ? (
-                                      <MdStar />
-                                    ) : (
-                                      <MdStarBorder />
-                                    )}
-                                  </button>
-                                )}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleSetPrimary(existingImage.idRoomImage)
+                                  }
+                                  className={`image-action-btn-admin star-btn-admin ${
+                                    existingImage.isPrimary
+                                      ? "primary-admin"
+                                      : ""
+                                  }`}
+                                  aria-label={
+                                    existingImage.isPrimary
+                                      ? "Imagen principal"
+                                      : "Hacer principal"
+                                  }
+                                  disabled={existingImage.isPrimary}
+                                >
+                                  {existingImage.isPrimary ? (
+                                    <MdStar />
+                                  ) : (
+                                    <MdStarBorder />
+                                  )}
+                                </button>
                               </div>
+                              {existingImage.isPrimary && (
+                                <span className="primary-label-admin">
+                                  Principal
+                                </span>
+                              )}
                             </figure>
-                            {existingImageForThisSlot.isPrimary && (
-                              <span className="primary-label-admin">
-                                Principal
-                              </span>
-                            )}
                           </div>
                         );
-                      } else {
-                        // CASO C: Slot vacío, mostrar placeholder para cargar imagen
-                        // Esto solo ocurrirá si no hay existente Y no hay nueva preview para este slotIndex
-                        // Y si el número total de imágenes (existentes no borradas + nuevas seleccionadas) es menor que 5.
-                        const currentTotalImages =
-                          existingImages.length +
-                          imageFiles.filter(Boolean).length;
-                        if (
-                          currentTotalImages < 5 ||
-                          (bedroomToEdit &&
-                            slotIndex >= existingImages.length) ||
-                          !bedroomToEdit
-                        ) {
-                          // ^^^ Esta condición asegura que solo mostramos el uploader si realmente hay un slot disponible ^^^
-                          // o si estamos en un slot que va después de las imágenes existentes.
-                          // En modo "agregar", siempre se mostrarán los 5.
-                          // En modo "editar", si tienes 2 existentes y 0 nuevas, slotIndex 0 y 1 mostrarán existentes,
-                          // slotIndex 2, 3, 4 mostrarán el uploader.
-                          // Si tienes 2 existentes y seleccionas 3 nuevas, todos los slots estarán ocupados por previews o existentes.
-
-                          // Corrección: El slot de carga debería aparecer si el slotIndex es >= que el número de imágenes
-                          // existentes (que no tienen una preview nueva) y menor que 5.
-                          // O si estamos en modo crear.
-                          let showUploader = false;
-                          if (!bedroomToEdit) {
-                            showUploader = true;
-                          } else {
-                            // En modo editar, un slot es para uploader si:
-                            // 1. No hay imagen existente para este slot Y no hay preview nueva. (Esto ya lo maneja la lógica de arriba)
-                            // 2. O si el slotIndex es >= al número de imágenes existentes efectivas.
-                            //    (imágenes existentes que no tienen una preview de reemplazo)
-                            const effectiveExistingCount =
-                              existingImages.filter(
-                                (img, idx) => !imagePreviews[idx]
-                              ).length;
-                            if (slotIndex >= effectiveExistingCount) {
-                              showUploader = true;
-                            }
-                          }
-                          // Y además, el número total de imágenes (nuevas seleccionadas + existentes no reemplazadas) no debe ser 5 aun.
-                          const newFilesCount =
-                            imageFiles.filter(Boolean).length;
-                          const existingNotReplacedCount =
-                            existingImages.filter(
-                              (img, i) => !imagePreviews[i]
-                            ).length;
-
-                          if (
-                            newFilesCount + existingNotReplacedCount < 5 &&
-                            showUploader
-                          ) {
-                            return (
-                              <div
-                                key={`slot-empty-${slotIndex}`}
-                                className="image-upload-field-bedroom-admin"
-                              >
-                                <div className="upload-single-container-bedroom-admin">
-                                  <input
-                                    type="file"
-                                    ref={(el) =>
-                                      (fileInputRefs.current[slotIndex] = el)
-                                    }
-                                    onChange={(e) =>
-                                      handleImageChange(slotIndex, e)
-                                    } // handleImageChange usa slotIndex
-                                    accept="image/*"
-                                    className="file-input-bedroom-admin"
-                                    id={`bedroom-image-upload-${slotIndex}`}
-                                    aria-labelledby={`bedroom-image-label-${slotIndex}`}
-                                  />
-                                  <label
-                                    id={`bedroom-image-label-${slotIndex}`}
-                                    htmlFor={`bedroom-image-upload-${slotIndex}`}
-                                    className="upload-single-label-bedroom-admin"
-                                  >
-                                    <MdImage size={24} />
-                                    <span>Imagen {slotIndex + 1}</span>
-                                  </label>
-                                </div>
-                              </div>
-                            );
-                          } else {
-                            // Si se alcanzó el límite y este slot no tiene ni existente ni preview, no mostrar nada.
-                            // O podrías mostrar un slot "deshabilitado" visualmente. Por ahora, null.
-                            return null;
-                          }
-                        }
                       }
+                      if (
+                        existingImages.length +
+                          imageFiles.filter(Boolean).length <
+                        5
+                      ) {
+                        return (
+                          <div
+                            key={`slot-empty-${slotIndex}`}
+                            className="image-upload-field-bedroom-admin"
+                          >
+                            <div className="upload-single-container-bedroom-admin">
+                              <input
+                                type="file"
+                                ref={(el) =>
+                                  (fileInputRefs.current[slotIndex] = el)
+                                }
+                                onChange={(e) =>
+                                  handleImageChange(slotIndex, e)
+                                }
+                                accept="image/*"
+                                className="file-input-bedroom-admin"
+                                id={`bedroom-image-upload-${slotIndex}`}
+                                aria-labelledby={`bedroom-image-label-${slotIndex}`}
+                              />
+                              <label
+                                id={`bedroom-image-label-${slotIndex}`}
+                                htmlFor={`bedroom-image-upload-${slotIndex}`}
+                                className="upload-single-label-bedroom-admin"
+                              >
+                                <MdImage size={24} />
+                                <span>Imagen {slotIndex + 1}</span>
+                              </label>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
                     })}
                 </div>
-
-                {/* Mensaje de límite alcanzado (basado en conteo total) */}
-                {existingImages.filter((img, i) => !imagePreviews[i]).length +
-                  imageFiles.filter(Boolean).length >=
-                  5 && (
-                  <div
-                    className="max-images-message-bedroom-admin"
-                    role="alert"
-                  >
-                    <p>Límite máximo de 5 imágenes alcanzado.</p>
-                  </div>
-                )}
               </fieldset>
             </div>
           </div>

@@ -22,7 +22,7 @@
   font-weight: 700;
   position: relative;
   display: inline-block;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
 }
 
 .filter-title::after {
@@ -33,7 +33,7 @@
   transform: translateX(-50%);
   width: 100%;
   height: 3px;
-  background: #1e96fc;
+  background: #f1c40f;
 }
 
 .filter-nav{

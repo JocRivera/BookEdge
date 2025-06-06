@@ -5,8 +5,6 @@ const IMAGE_API_URL = "http://localhost:3000/room-images";
 
 export const getBedrooms = async () => {
   const { data } = await axios.get(API_URL);
-  console.log(data);
-  
   return data;
 };
 
@@ -15,41 +13,28 @@ export const getBedroomById = async (id) => {
   return data;
 };
 
+// <<< CORRECCIÓN: Eliminamos el try/catch para que el error de Axios se propague completo.
 export const createBedroom = async (bedroomData) => {
-  try {
-    const dataToSend = {
-      ...bedroomData,
-      capacity: bedroomData.capacity ? Number(bedroomData.capacity) : undefined
-    };
-    
-    const response = await axios.post(API_URL, dataToSend);
-    return response.data;
-  } catch (error) {
-    // Lanza el error completo de la respuesta
-    throw error.response?.data || { 
-      message: error.message || "Error al crear la habitación",
-      errors: error.response?.data?.errors // Asegúrate de pasar los errores
-    };
-  }
+  const dataToSend = {
+    ...bedroomData,
+    capacity: bedroomData.capacity ? Number(bedroomData.capacity) : undefined
+  };
+  
+  const response = await axios.post(API_URL, dataToSend);
+  return response.data;
 };
 
-// Haz lo mismo para updateBedroom
+// <<< CORRECCIÓN: Mismo cambio aquí.
 export const updateBedroom = async (id, bedroomData) => {
-  try {
-    const dataToSend = {
-      ...bedroomData,
-      capacity: bedroomData.capacity ? Number(bedroomData.capacity) : undefined
-    };
-    
-    const response = await axios.put(`${API_URL}/${id}`, dataToSend);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { 
-      message: error.message || "Error al crear la habitación",
-      errors: error.response?.data?.errors // Asegúrate de pasar los errores
-    };
-  }
+  const dataToSend = {
+    ...bedroomData,
+    capacity: bedroomData.capacity ? Number(bedroomData.capacity) : undefined
+  };
+  
+  const response = await axios.put(`${API_URL}/${id}`, dataToSend);
+  return response.data;
 };
+
 export const deleteBedroom = async (id) => {
   const { data } = await axios.delete(`${API_URL}/${id}`);
   return data;
