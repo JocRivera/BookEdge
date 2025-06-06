@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react"
 
 const useReservationForm = (initialData = null) => {
@@ -22,15 +24,15 @@ const useReservationForm = (initialData = null) => {
       initialData?.idRoom ||
       (initialData?.bedrooms && initialData.bedrooms.length > 0 ? initialData.bedrooms[0].idRoom : ""),
 
-    // ✅ SERVICIOS CON CANTIDADES
-    selectedServices: initialData?.services 
+    // Servicios con cantidades
+    selectedServices: initialData?.services
       ? initialData.services.map((s) => ({
           serviceId: s.Id_Service,
-          quantity: s.quantity || 1
+          quantity: s.quantity || 1,
         }))
       : [],
 
-    // Datos cargados del servidor (se llenarán después)
+    // Datos cargados del servidor
     users: [],
     planes: [],
     cabins: [],
@@ -43,6 +45,7 @@ const useReservationForm = (initialData = null) => {
   const [errors, setErrors] = useState({})
   const [currentStep, setCurrentStep] = useState(0)
 
+  // Función para actualizar datos del formulario
   const updateFormData = (data) => {
     if (typeof data === "function") {
       setFormData((prevData) => {
@@ -54,7 +57,21 @@ const useReservationForm = (initialData = null) => {
     }
   }
 
-  // Resto del código del hook permanece igual...
+  // Función para limpiar errores específicos
+  const clearError = (fieldName) => {
+    setErrors((prevErrors) => {
+      const newErrors = { ...prevErrors }
+      delete newErrors[fieldName]
+      return newErrors
+    })
+  }
+
+  // Función para limpiar todos los errores
+  const clearAllErrors = () => {
+    setErrors({})
+  }
+
+  // Navegación entre pasos
   const nextStep = () => {
     const newErrors = validateStep(currentStep)
     if (Object.keys(newErrors).length === 0) {
@@ -70,16 +87,35 @@ const useReservationForm = (initialData = null) => {
     setErrors({})
   }
 
+  // Función para ir a un paso específico
+  const goToStep = (step) => {
+    setCurrentStep(step)
+    setErrors({})
+  }
+
+  // Validación de pasos
   const validateStep = (step, dataToValidate = formData) => {
     const newErrors = {}
 
+    // Validación del paso 1 (información básica)
     if (step === 1 || step === 0) {
-      if (!dataToValidate.idUser) newErrors.idUser = "Cliente es requerido"
-      if (!dataToValidate.idPlan) newErrors.idPlan = "Plan es requerido"
-      if (!dataToValidate.startDate) newErrors.startDate = "Fecha de entrada es requerida"
-      if (!dataToValidate.endDate) newErrors.endDate = "Fecha de salida es requerida"
+      if (!dataToValidate.idUser) {
+        newErrors.idUser = "Cliente es requerido"
+      }
 
-      // Validación mejorada de fechas
+      if (!dataToValidate.idPlan) {
+        newErrors.idPlan = "Plan es requerido"
+      }
+
+      if (!dataToValidate.startDate) {
+        newErrors.startDate = "Fecha de entrada es requerida"
+      }
+
+      if (!dataToValidate.endDate) {
+        newErrors.endDate = "Fecha de salida es requerida"
+      }
+
+      // Validación de fechas
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
@@ -101,17 +137,29 @@ const useReservationForm = (initialData = null) => {
         }
       }
 
+      // Validación de estado
       const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"]
       if (dataToValidate.status && !validStatuses.includes(dataToValidate.status)) {
         newErrors.status = `Estado no válido. Use uno de: ${validStatuses.join(", ")}`
       }
 
+      // Validación de acompañantes
       if (dataToValidate.hasCompanions && (!dataToValidate.companionCount || dataToValidate.companionCount <= 0)) {
         newErrors.companionCount = "Debe especificar al menos 1 acompañante"
       }
 
       if (dataToValidate.hasCompanions && dataToValidate.companionCount > 6) {
         newErrors.companionCount = "Máximo 6 acompañantes permitidos"
+      }
+    }
+
+    // Validación del paso 2 (acompañantes)
+    if (step === 2 && dataToValidate.hasCompanions) {
+      const expectedCount = Number.parseInt(dataToValidate.companionCount) || 0
+      const actualCount = dataToValidate.companions?.length || 0
+
+      if (actualCount < expectedCount) {
+        newErrors.companions = `Faltan ${expectedCount - actualCount} acompañante(s) por registrar`
       }
     }
 
@@ -125,25 +173,106 @@ const useReservationForm = (initialData = null) => {
     return newErrors
   }
 
+  // Validación completa del formulario
+  const validateForm = () => {
+    const allErrors = {}
+
+    // Validar todos los pasos
+    for (let step = 0; step <= 3; step++) {
+      const stepErrors = validateStep(step, formData)
+      Object.assign(allErrors, stepErrors)
+    }
+
+    return allErrors
+  }
+
+  // Función para verificar si el formulario es válido
+  const isFormValid = () => {
+    const allErrors = validateForm()
+    return Object.keys(allErrors).length === 0
+  }
+
+  // Función para resetear el formulario
+  const resetForm = () => {
+    setFormData({
+      idUser: "",
+      idPlan: "",
+      startDate: "",
+      endDate: "",
+      status: "Pendiente",
+      hasCompanions: false,
+      companionCount: 0,
+      companions: [],
+      idCabin: "",
+      idRoom: "",
+      selectedServices: [],
+      users: [],
+      planes: [],
+      cabins: [],
+      bedrooms: [],
+      availableServices: [],
+      availableCabins: [],
+      availableBedrooms: [],
+    })
+    setErrors({})
+    setCurrentStep(0)
+  }
+
+  // Función para manejar el envío del formulario
   const handleSubmit = () => {
-    const newErrors = validateStep(2)
-    if (Object.keys(newErrors).length === 0) {
+    const allErrors = validateForm()
+
+    if (Object.keys(allErrors).length === 0) {
       setErrors({})
-      alert("Form submitted successfully!")
+      return { success: true, data: formData }
     } else {
-      setErrors(newErrors)
+      setErrors(allErrors)
+      return { success: false, errors: allErrors }
     }
   }
 
+  // Función para obtener el progreso del formulario
+  const getProgress = () => {
+    const totalSteps = formData.hasCompanions ? 4 : 3
+    return {
+      current: currentStep + 1,
+      total: totalSteps,
+      percentage: Math.round(((currentStep + 1) / totalSteps) * 100),
+    }
+  }
+
+  // Función para verificar si se puede avanzar al siguiente paso
+  const canProceedToNext = () => {
+    const stepErrors = validateStep(currentStep, formData)
+    return Object.keys(stepErrors).length === 0
+  }
+
   return {
+    // Estado
     formData,
-    updateFormData,
     errors,
     currentStep,
+
+    // Funciones de actualización
+    updateFormData,
+    clearError,
+    clearAllErrors,
+
+    // Navegación
     nextStep,
     prevStep,
-    handleSubmit,
+    goToStep,
+
+    // Validación
     validateStep,
+    validateForm,
+    isFormValid,
+    canProceedToNext,
+
+    // Utilidades
+    resetForm,
+    handleSubmit,
+    getProgress,
   }
 }
 
