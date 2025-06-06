@@ -1,7 +1,7 @@
 
 export const MODULES = {
   SERVICIOS: "servicios",
-  CLIENTES: "Clientes",
+  CLIENTES: "clientes",
   USUARIOS: "usuarios",
   RESERVAS: "reservas",
   PAGOS: "pagos",

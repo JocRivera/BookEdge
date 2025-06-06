@@ -83,7 +83,7 @@
 
 .luxury-title .title-part {
   font-weight: 800;
-  color: var(--azure);
+  color: #ffc300;
 }
 
 .video-wrapper.active ~ .luxury-overlay + .luxury-content .luxury-title {

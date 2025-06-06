@@ -245,6 +245,7 @@ function Customer() {
                             <th>EPS</th>
                             <th>Estado</th>
                             <th>Acciones</th>
+                            <th>Reservas</th>
                         </tr>
                     </thead>
                     <tbody className="customer-table-body">
@@ -274,6 +275,10 @@ function Customer() {
                                             onEdit={() => handleEdit(customer)}
                                             onDelete={() => handleDeleteCustomer(customer)}
                                         />
+                                        
+                                    </div>
+                                </td>
+                                    <td className="customer-table-cell">
                                         {usersWithReservations.includes(customer.idUser) && (
                                             <button
                                                 className="CUSTOMER-action-btn reservation-btn"
@@ -283,8 +288,7 @@ function Customer() {
                                                 Ir a reserva(s)
                                             </button>
                                         )}
-                                    </div>
-                                </td>
+                                    </td>
                             </tr>
                         ))}
                     </tbody>

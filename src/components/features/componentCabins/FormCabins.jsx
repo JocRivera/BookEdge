@@ -1,4 +1,4 @@
-// --- START OF FILE FormCabins.jsx ---
+
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import {
@@ -18,7 +18,6 @@ import {
 } from "../../../services/CabinService";
 import { getComforts } from "../../../services/ComfortService";
 
-
 const initialFormData = {
   name: "",
   description: "",
@@ -33,6 +32,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
   const [imageFiles, setImageFiles] = useState(Array(5).fill(null));
   const [imagePreviews, setImagePreviews] = useState(Array(5).fill(null));
   const [errors, setErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({}); // Para validación interactiva
   const fileInputRefs = useRef([]);
 
   // Estados para Comodidades
@@ -42,10 +42,8 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
   // Efectos
   useEffect(() => {
     if (!isOpen) return;
-
     resetForm();
     fetchComforts();
-
     if (cabinToEdit) {
       loadCabinData(cabinToEdit);
     }
@@ -94,6 +92,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
     setExistingImages([]);
     setSelectedComforts([]);
     setErrors({});
+    setTouchedFields({}); // Limpiar campos tocados
     fileInputRefs.current.forEach((input) => {
       if (input) input.value = "";
     });
@@ -113,33 +112,32 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
       case "capacity":
         if (!value) error = "La capacidad es obligatoria";
         else if (isNaN(value)) error = "Debe ser un número válido";
-        else if (value < 1 && value > 3) error= "La Capcidad debe ser Minimo 3 Maximo 8 Personas ";
         else {
           const numValue = parseInt(value);
-          if (numValue < 1) error = "La capacidad mínima es 1";
-          // Puedes añadir una capacidad máxima si es necesario
+          if (numValue < 3 || numValue > 8) {
+            error = "La capacidad debe ser entre 3 y 8 personas";
+          }
         }
         break;
-      // No se valida 'status' aquí ya que siempre tiene un valor por defecto
       default:
         break;
     }
     return error;
   };
 
-  // Manejadores de Formulario
+  // Manejadores de Formulario Mejorados
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Limpiar el error cuando el usuario empieza a escribir
     if (errors[name]) {
-      const newErrors = { ...errors };
-      delete newErrors[name];
-      setErrors(newErrors);
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
+    setTouchedFields((prev) => ({ ...prev, [name]: true }));
     const error = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
@@ -151,12 +149,13 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
         : [...prevSelected, comfortId]
     );
   };
-const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
     let formIsValid = true;
     const newErrors = {};
 
-    // Validación del frontend (como la tenías)
     Object.keys(formData).forEach((field) => {
       const error = validateField(field, formData[field]);
       if (error) {
@@ -165,16 +164,15 @@ const handleSubmit = async (e) => {
       }
     });
 
-    const totalEffectiveImages = (existingImages || []).length + imageFiles.filter(Boolean).length;
-    if (totalEffectiveImages === 0) {
-        newErrors.images = "Debes subir o mantener al menos una imagen";
-        formIsValid = false;
+    if (existingImages.length === 0 && !imageFiles.some(Boolean)) {
+      newErrors.images = "Debes subir al menos una imagen";
+      formIsValid = false;
     }
 
     setErrors(newErrors);
 
     if (!formIsValid) {
-      toast.error("Por favor, corrija los errores en el formulario."); // Toast genérico si la validación del frontend falla
+      toast.error("Por favor, corrija los errores del formulario.");
       return;
     }
 
@@ -186,70 +184,39 @@ const handleSubmit = async (e) => {
 
     try {
       let cabinId;
-      let cabinResponse; // Para obtener el nombre de la cabaña si es posible
-      let successMessage = "";
-
       if (cabinToEdit) {
-        cabinResponse = await updateCabin(cabinToEdit.idCabin, dataToSubmit);
+        await updateCabin(cabinToEdit.idCabin, dataToSubmit);
         cabinId = cabinToEdit.idCabin;
-        // Usa el nombre de la respuesta del backend si está disponible, sino el del formulario
-        successMessage = `Cabaña "${cabinResponse?.name || formData.name}" actualizada exitosamente.`;
+        toast.success(`Cabaña "${formData.name}" actualizada exitosamente.`);
       } else {
-        cabinResponse = await createCabin(dataToSubmit);
-        cabinId = cabinResponse.idCabin; // Asume que la respuesta de crear tiene el ID
-        // Usa el nombre de la respuesta del backend si está disponible, sino el del formulario
-        successMessage = `Cabaña "${cabinResponse?.name || formData.name}" creada exitosamente.`;
+        const newCabin = await createCabin(dataToSubmit);
+        cabinId = newCabin.idCabin;
+        toast.success(`Cabaña "${formData.name}" creada exitosamente.`);
       }
 
-      // Asegurarse de que cabinId tiene un valor antes de subir imágenes
-      if (!cabinId) {
-        // Este error es más grave y debería ser manejado, podría indicar un problema con la respuesta del backend
-        toast.error("Error crítico: No se pudo obtener el ID de la cabaña.");
-        setErrors((prev) => ({ ...prev, general: "No se pudo obtener el ID de la cabaña." }));
-        return; // Detener la ejecución
-      }
-
-      await uploadNewImages(cabinId); // uploadNewImages maneja sus propios toasts de error para la subida de imágenes
-
-      toast.success(successMessage); // <--- TOAST DE ÉXITO PARA LA OPERACIÓN PRINCIPAL
-
-      onSuccess(); // Llama a resetForm, onSave (que es loadCabinData en CardCabin), y onClose
+      await uploadNewImages(cabinId);
+      onSuccess();
     } catch (error) {
       console.error("Error al guardar la cabaña:", error);
-      let errorMessage = "Ocurrió un error inesperado al guardar la cabaña."; // Mensaje por defecto
-      const backendFieldErrors = {};
-
-      // Intenta extraer mensajes de error más específicos del backend
-      if (error.response && error.response.data) {
-        const errorData = error.response.data;
-        if (Array.isArray(errorData.errors) && errorData.errors.length > 0) {
-          // Si hay un array de errores (común con express-validator)
-          errorData.errors.forEach(err => {
-            if (err.path) backendFieldErrors[err.path] = err.msg; // Errores específicos de campo
-          });
-          // Usa el primer mensaje de error del array para el toast general, si existe
-          if (errorData.errors[0]?.msg) {
-            errorMessage = errorData.errors[0].msg;
+      if (error.response && error.response.data && Array.isArray(error.response.data.errors)) {
+        // Maneja errores de validación estructurados del backend
+        const backendErrors = error.response.data.errors.reduce((acc, err) => {
+          if (err.path) { // 'path' es el nombre del campo (ej: 'description')
+            acc[err.path] = err.msg; // 'msg' es el mensaje de error
           }
-        } else if (errorData.message) { // Si el backend devuelve un solo campo 'message'
-          errorMessage = errorData.message;
-        }
-      } else if (error.message) { // Errores de red u otros errores del lado del cliente
-        errorMessage = error.message;
-      }
-      
-      toast.error(errorMessage); // <--- TOAST DE ERROR PARA LA OPERACIÓN PRINCIPAL
-
-      // Asigna errores a los campos o un error general para mostrar en el formulario
-      if (Object.keys(backendFieldErrors).length > 0) {
-        setErrors(prev => ({ ...prev, ...backendFieldErrors }));
+          return acc;
+        }, {});
+        setErrors(backendErrors);
+        toast.error("Por favor, revise los errores en el formulario.");
       } else {
-        // Si no hay errores de campo específicos, muestra el error general en el formulario
-        setErrors(prev => ({ ...prev, general: errorMessage }));
+        // Fallback para errores generales o inesperados
+        const errorMessage =
+          error.response?.data?.message || "Ocurrió un error inesperado.";
+        toast.error(errorMessage);
+        setErrors((prev) => ({ ...prev, general: errorMessage }));
       }
     }
   };
-
 
   const uploadNewImages = async (cabinId) => {
     const filesToUpload = imageFiles.filter(Boolean);
@@ -258,12 +225,9 @@ const handleSubmit = async (e) => {
         await uploadCabinImages(cabinId, filesToUpload);
       } catch (uploadError) {
         console.error("Error al subir nuevas imágenes:", uploadError);
-        // Podrías querer notificar al usuario aquí también
-        setErrors((prev) => ({
-          ...prev,
-          images:
-            "Error al subir nuevas imágenes. La cabaña se guardó, pero las imágenes no.",
-        }));
+        toast.error(
+          "La cabaña se guardó, pero hubo un error al subir las imágenes."
+        );
       }
     }
   };
@@ -289,7 +253,7 @@ const handleSubmit = async (e) => {
         setImagePreviews(updatedPreviews);
       };
       reader.readAsDataURL(file);
-      if (errors.images) setErrors((prev) => ({ ...prev, images: "" })); // Limpiar error de imágenes si se añade una
+      if (errors.images) setErrors((prev) => ({ ...prev, images: "" }));
     }
   };
 
@@ -310,15 +274,17 @@ const handleSubmit = async (e) => {
   };
 
   const handleRemoveExistingImage = async (imageId) => {
-  
+    if (!window.confirm("¿Estás seguro de querer eliminar esta imagen?"))
+      return;
     try {
       await deleteCabinImage(imageId);
+      toast.success("Imagen eliminada correctamente.");
       setExistingImages((prev) =>
         prev.filter((img) => img.idCabinImage !== imageId)
       );
     } catch (error) {
       console.error("Error al eliminar imagen existente:", error);
-      alert("Error al eliminar la imagen.");
+      toast.error("Error al eliminar la imagen.");
     }
   };
 
@@ -326,17 +292,15 @@ const handleSubmit = async (e) => {
     if (!cabinToEdit || !cabinToEdit.idCabin) return;
     try {
       await setPrimaryImage(cabinToEdit.idCabin, imageId);
+      toast.success("Imagen establecida como principal.");
       setExistingImages((prev) =>
         prev.map((img) => ({ ...img, isPrimary: img.idCabinImage === imageId }))
       );
     } catch (error) {
       console.error("Error al establecer imagen principal:", error);
-      alert("Error al establecer la imagen como principal.");
+      toast.error("Error al establecer la imagen como principal.");
     }
   };
-
-  // Cálculos Derivados
-  const availableSlotsForNewImages = Math.max(0, 5 - existingImages.length);
 
   if (!isOpen) return null;
 
@@ -362,7 +326,6 @@ const handleSubmit = async (e) => {
 
         <form onSubmit={handleSubmit} className="cabin-form-admin" noValidate>
           <div className="form-content-cabin-admin">
-            {/* Columna Izquierda: Datos de la Cabaña */}
             <fieldset className="form-inputs-cabin-admin">
               <legend className="visually-hidden-admin">
                 Datos de la Cabaña
@@ -386,7 +349,6 @@ const handleSubmit = async (e) => {
                   <span className="error-message-admin">{errors.name}</span>
                 )}
               </div>
-
               <div className="form-group-cabin-admin">
                 <label htmlFor="cabin-description" className="form-label-admin">
                   Descripción
@@ -408,7 +370,6 @@ const handleSubmit = async (e) => {
                   </span>
                 )}
               </div>
-
               <div className="form-group-cabin-admin">
                 <label htmlFor="cabin-capacity" className="form-label-admin">
                   Capacidad
@@ -420,7 +381,8 @@ const handleSubmit = async (e) => {
                   value={formData.capacity}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
-                  min="1"
+                  min="3"
+                  max="8"
                   className={`form-input-cabin-admin ${
                     errors.capacity ? "input-error-admin" : ""
                   }`}
@@ -429,7 +391,6 @@ const handleSubmit = async (e) => {
                   <span className="error-message-admin">{errors.capacity}</span>
                 )}
               </div>
-
               <div className="form-group-cabin-admin">
                 <label htmlFor="cabin-status" className="form-label-admin">
                   Estado
@@ -439,25 +400,18 @@ const handleSubmit = async (e) => {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className={`form-input-cabin-admin ${
-                    errors.status ? "input-error-admin" : ""
-                  }`}
+                  className="form-input-cabin-admin"
                 >
                   <option value="En Servicio">En Servicio</option>
                   <option value="Mantenimiento">En Mantenimiento</option>
                   <option value="Fuera de Servicio">Fuera de Servicio</option>
                 </select>
-                {/* No suele haber error de 'status' si siempre tiene valor */}
               </div>
             </fieldset>
 
-            {/* Columna Derecha: Comodidades e Imágenes */}
             <div className="form-column-right-cabin-admin">
               <fieldset className="comforts-section-cabin-admin">
                 <legend className="form-label-admin">Comodidades</legend>
-                {errors.comforts && (
-                  <span className="error-message-admin">{errors.comforts}</span>
-                )}
                 {allComforts.length > 0 ? (
                   <div className="comforts-checkbox-group-admin">
                     {allComforts.map((comfort) => (
@@ -467,7 +421,7 @@ const handleSubmit = async (e) => {
                       >
                         <input
                           type="checkbox"
-                          id={`comfort-${comfort.idComfort}`}
+                          id={`comfort-cabin-${comfort.idComfort}`}
                           value={comfort.idComfort}
                           checked={selectedComforts.includes(comfort.idComfort)}
                           onChange={() =>
@@ -476,7 +430,7 @@ const handleSubmit = async (e) => {
                           className="comfort-checkbox-admin"
                         />
                         <label
-                          htmlFor={`comfort-${comfort.idComfort}`}
+                          htmlFor={`comfort-cabin-${comfort.idComfort}`}
                           className="comfort-label-admin"
                         >
                           {comfort.name}
@@ -486,13 +440,12 @@ const handleSubmit = async (e) => {
                   </div>
                 ) : (
                   <p className="no-comforts-message-admin">
-                    Cargando comodidades o no hay disponibles...
+                    Cargando comodidades...
                   </p>
                 )}
               </fieldset>
 
               <fieldset className="image-upload-section-cabin-admin">
-                {/* Título único para la sección de imágenes */}
                 <legend className="form-label-cabin-admin">
                   Imágenes (máx. 5)
                 </legend>
@@ -501,131 +454,99 @@ const handleSubmit = async (e) => {
                     {errors.images}
                   </span>
                 )}
-
                 <div className="upload-images-grid-admin">
-                  {/* Siempre un loop de 5 para representar los 5 slots */}
                   {Array(5)
                     .fill(null)
                     .map((_, slotIndex) => {
-                      // slotIndex va de 0 a 4
-
-                      // Determinar si hay una IMAGEN EXISTENTE para este slot
-                      const existingImageForThisSlot =
-                        cabinToEdit && existingImages[slotIndex]
-                          ? existingImages[slotIndex]
-                          : null;
-
-                      // Determinar si hay una VISTA PREVIA DE IMAGEN NUEVA para este slot
-                      // (Esto asume que imageFiles e imagePreviews están alineados con los slots disponibles
-                      // DESPUÉS de las existentes, lo cual necesitamos ajustar o repensar un poco
-                      // para que se alineen con el slot visual directamente).
-
-                      // --- NUEVA LÓGICA PARA imageFiles e imagePreviews ---
-                      // Necesitamos que imageFiles e imagePreviews tengan 5 elementos,
-                      // y que el índice corresponda directamente al slot visual.
-                      // Cuando se carga una imagen existente, imageFiles[slotIndex] puede ser null
-                      // si no se ha seleccionado un nuevo archivo para reemplazarla.
-
-                      const newImagePreviewForThisSlot =
-                        imagePreviews[slotIndex];
-                      const newImageFileForThisSlot = imageFiles[slotIndex]; // Para el botón de quitar
-
-                      if (
-                        existingImageForThisSlot &&
-                        !newImagePreviewForThisSlot
-                      ) {
-                        // CASO 1: Mostrar imagen existente (y no se ha intentado reemplazar)
+                      const existingImage = existingImages[slotIndex];
+                      const newImagePreview = imagePreviews[slotIndex];
+                      if (newImagePreview) {
                         return (
                           <div
-                            key={`slot-existing-${existingImageForThisSlot.idCabinImage}`}
+                            key={`slot-new-${slotIndex}`}
                             className="image-upload-field-cabin-admin"
                           >
                             <figure className="image-preview-wrapper-cabin-admin">
                               <img
-                                src={`http://localhost:3000/uploads/${existingImageForThisSlot.imagePath}`}
-                                alt={`Cabaña ${formData.name || "imagen"} ${
-                                  slotIndex + 1
-                                }`}
-                                className="preview-image-cabin-admin"
-                              />
-                              <figcaption className="visually-hidden-admin">
-                                Imagen de la cabaña {slotIndex + 1}
-                              </figcaption>
-                              <div className="image-actions-cabin-admin">
-                                {/* Botón para quitar la existente Y permitir cargar una nueva en su lugar */}
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleRemoveExistingImage(
-                                      existingImageForThisSlot.idCabinImage,
-                                      slotIndex
-                                    )
-                                  }
-                                  className="image-action-btn-admin delete-btn-cabin-admin"
-                                  aria-label="Reemplazar imagen existente"
-                                >
-                                  <MdDelete />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleSetPrimary(
-                                      existingImageForThisSlot.idCabinImage
-                                    )
-                                  }
-                                  className={`image-action-btn-admin star-btn-admin ${
-                                    existingImageForThisSlot.isPrimary
-                                      ? "primary-admin"
-                                      : ""
-                                  }`}
-                                  aria-label={
-                                    existingImageForThisSlot.isPrimary
-                                      ? "Imagen principal"
-                                      : "Establecer como principal"
-                                  }
-                                  disabled={existingImageForThisSlot.isPrimary}
-                                >
-                                  {existingImageForThisSlot.isPrimary ? (
-                                    <MdStar />
-                                  ) : (
-                                    <MdStarBorder />
-                                  )}
-                                </button>
-                              </div>
-                            </figure>
-                            {existingImageForThisSlot.isPrimary && (
-                              <span className="primary-label-admin">
-                                Principal
-                              </span>
-                            )}
-                          </div>
-                        );
-                      } else if (newImagePreviewForThisSlot) {
-                        // CASO 2: Mostrar vista previa de imagen nueva (ya sea para un slot nuevo o para reemplazar una existente)
-                        return (
-                          <div
-                            key={`slot-new-preview-${slotIndex}`}
-                            className="image-upload-field-cabin-admin"
-                          >
-                            <figure className="image-preview-wrapper-cabin-admin">
-                              <img
-                                src={newImagePreviewForThisSlot}
+                                src={newImagePreview}
                                 alt={`Vista previa ${slotIndex + 1}`}
                                 className="preview-image-cabin-admin"
                               />
                               <button
                                 type="button"
-                                onClick={() => handleRemoveNewImage(slotIndex)}
+                                onClick={() => handleRemoveImage(slotIndex)}
                                 className="image-action-btn-admin delete-btn-cabin-admin"
-                                aria-label="Quitar imagen seleccionada"
+                                aria-label="Quitar imagen"
                               >
                                 <MdDelete />
                               </button>
                             </figure>
                           </div>
                         );
-                      } else {
-                        // CASO 3: Mostrar placeholder para cargar imagen (slot vacío)
+                      }
+                      if (existingImage) {
+                        return (
+                          <div
+                            key={`slot-existing-${existingImage.idCabinImage}`}
+                            className="image-upload-field-cabin-admin"
+                          >
+                            <figure className="image-preview-wrapper-cabin-admin">
+                              <img
+                                src={`http://localhost:3000/uploads/${existingImage.imagePath}`}
+                                alt={`Cabaña ${slotIndex + 1}`}
+                                className="preview-image-cabin-admin"
+                              />
+                              <div className="image-actions-cabin-admin">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleRemoveExistingImage(
+                                      existingImage.idCabinImage
+                                    )
+                                  }
+                                  className="image-action-btn-admin delete-btn-cabin-admin"
+                                  aria-label="Eliminar imagen"
+                                >
+                                  <MdDelete />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleSetPrimary(existingImage.idCabinImage)
+                                  }
+                                  className={`image-action-btn-admin star-btn-admin ${
+                                    existingImage.isPrimary
+                                      ? "primary-admin"
+                                      : ""
+                                  }`}
+                                  aria-label={
+                                    existingImage.isPrimary
+                                      ? "Imagen principal"
+                                      : "Hacer principal"
+                                  }
+                                  disabled={existingImage.isPrimary}
+                                >
+                                  {existingImage.isPrimary ? (
+                                    <MdStar />
+                                  ) : (
+                                    <MdStarBorder />
+                                  )}
+                                </button>
+                              </div>
+                              {existingImage.isPrimary && (
+                                <span className="primary-label-admin">
+                                  Principal
+                                </span>
+                              )}
+                            </figure>
+                          </div>
+                        );
+                      }
+                      if (
+                        existingImages.length +
+                          imageFiles.filter(Boolean).length <
+                        5
+                      ) {
                         return (
                           <div
                             key={`slot-empty-${slotIndex}`}
@@ -639,7 +560,7 @@ const handleSubmit = async (e) => {
                                 }
                                 onChange={(e) =>
                                   handleImageChange(slotIndex, e)
-                                } // handleImageChange ahora toma el slotIndex directamente
+                                }
                                 accept="image/*"
                                 className="file-input-cabin-admin"
                                 id={`cabin-image-upload-${slotIndex}`}
@@ -657,25 +578,9 @@ const handleSubmit = async (e) => {
                           </div>
                         );
                       }
+                      return null;
                     })}
                 </div>
-
-                {/* Mensaje de límite se puede basar en el conteo total de imágenes efectivas */}
-                {/* (Contar existentes que no serán reemplazadas + nuevas seleccionadas) */}
-                {existingImages.filter(
-                  (img) =>
-                    !imageFiles[
-                      existingImages.findIndex(
-                        (exImg) => exImg.idCabinImage === img.idCabinImage
-                      )
-                    ]
-                ).length +
-                  imageFiles.filter(Boolean).length >=
-                  5 && (
-                  <div className="max-images-message-cabin-admin" role="alert">
-                    <p>Límite máximo de 5 imágenes alcanzado.</p>
-                  </div>
-                )}
               </fieldset>
             </div>
           </div>
