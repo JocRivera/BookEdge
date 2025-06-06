@@ -1,6 +1,6 @@
-
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useAuth } from "../../context/AuthContext"
+import { useLocation } from "react-router-dom" // <-- Agrega esto
 
 //  REUTILIZAR TODOS LOS SERVICIOS DEL ADMIN
 import {
@@ -23,6 +23,7 @@ import "./ReservationsClient.css"
 
 const ReservationsClient = () => {
   const { user } = useAuth()
+  const location = useLocation() // <-- Agrega esto
   const [reservations, setReservations] = useState([])
   const [filteredReservations, setFilteredReservations] = useState([])
   const [loading, setLoading] = useState(true)
@@ -46,6 +47,8 @@ const ReservationsClient = () => {
   const [availableCabins, setAvailableCabins] = useState([])
   const [availableBedrooms, setAvailableBedrooms] = useState([])
   const [availableServices, setAvailableServices] = useState([])
+
+  const hasOpenedAutoModal = useRef(false) // <-- Nuevo estado
 
   console.log("[ReservationsClient] Component mounted", { user, loading, error })
 
@@ -258,6 +261,8 @@ const ReservationsClient = () => {
   const handleSaveReservation = async (savedReservation) => {
     console.log("Reserva guardada:", savedReservation)
     setIsNewReservationModalOpen(false)
+    // Limpia el estado de navegación para evitar que el modal se vuelva a abrir
+    window.history.replaceState({}, document.title)
     await fetchAllData() // Recargar todos los datos
   }
 
@@ -285,6 +290,25 @@ const ReservationsClient = () => {
     const paid = calculateTotalPaid(payments)
     return total - paid
   }
+
+  // Abre el modal si viene un plan seleccionado desde la navegación
+  useEffect(() => {
+    if (
+      location.state?.selectedPlan &&
+      availablePlans.length > 0 &&
+      !hasOpenedAutoModal.current // Solo si no se ha abierto antes
+    ) {
+      const planFromList = availablePlans.find(
+        (p) => p.idPlan === (location.state.selectedPlan.Plan?.idPlan || location.state.selectedPlan.idPlan)
+      )
+      setSelectedReservation({
+        plan: planFromList || location.state.selectedPlan.Plan || location.state.selectedPlan,
+      })
+      setIsNewReservationModalOpen(true)
+      hasOpenedAutoModal.current = true // Marcar como abierto
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state, availablePlans])
 
   if (loading) {
     return (
