@@ -2,7 +2,7 @@
 
 import { toast } from "react-toastify"
 import "./componentsReservations.css"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import PropTypes from "prop-types"
 
 
@@ -284,18 +284,6 @@ const [showSuggestions, setShowSuggestions] = useState(false);
                 checked={formData.hasCompanions}
                 onChange={(e) => {
                   onChange(e)
-                  // Toast cuando se activan/desactivan acompañantes
-                  if (e.target.checked) {
-                    toast.info("Acompañantes activados. Especifica la cantidad.", {
-                      position: "top-right",
-                      autoClose: 3000,
-                    })
-                  } else {
-                    toast.info("Acompañantes desactivados", {
-                      position: "top-right",
-                      autoClose: 3000,
-                    })
-                  }
                 }}
                 disabled={loading || isReadOnly}
               />
@@ -338,7 +326,6 @@ const [showSuggestions, setShowSuggestions] = useState(false);
         )}
       </div>
 
-      {/* Tarjeta informativa cuando se seleccionan acompañantes */}
       {formData.hasCompanions && formData.companionCount > 0 && (
         <div className="companions-info-card">
           <div className="info-header">
@@ -393,6 +380,8 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
     }
     return edad;
   };
+
+  const companionFormRef = useRef(null);
 
   return (
     <div className="step-content">
@@ -464,136 +453,138 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
             </p>
           </div>
 
-          <div className="companion-form" onKeyDown={e => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    // Opcional: podrías llamar aquí a tu función de agregar acompañante si lo deseas
-  }
-}}>
-  <div className="form-row">
-    <div className="form-group">
-      <label htmlFor="name" className="form-label">
-        Nombre completo *
-      </label>
-      <input
-        type="text"
-        id="name"
-        name="name"
-        className={`form-input ${errors.name ? "error" : ""}`}
-        disabled={loading}
-        placeholder="Nombre completo del acompañante"
-      />
-      {errors.name && <span className="error-message">{errors.name}</span>}
-    </div>
+          <div
+            ref={companionFormRef}
+            className="companion-form"
+            onKeyDown={e => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+              }
+            }}
+          >
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="name" className="form-label">
+                  Nombre completo *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  className={`form-input ${errors.name ? "error" : ""}`}
+                  disabled={loading}
+                  placeholder="Nombre completo del acompañante"
+                />
+                {errors.name && <span className="error-message">{errors.name}</span>}
+              </div>
 
-    <div className="form-group">
-      <label htmlFor="documentType" className="form-label">
-        Tipo de documento *
-      </label>
-      <select id="documentType" name="documentType" className="form-input" disabled={loading}>
-        <option value="Cédula de ciudadanía">Cédula de Ciudadanía</option>
-        <option value="Tarjeta de identidad">Tarjeta de Identidad</option>
-        <option value="Cédula de extranjería">Cédula de Extranjería</option>
-        <option value="Pasaporte">Pasaporte</option>
-      </select>
-    </div>
-  </div>
+              <div className="form-group">
+                <label htmlFor="documentType" className="form-label">
+                  Tipo de documento *
+                </label>
+                <select id="documentType" name="documentType" className="form-input" disabled={loading}>
+                  <option value="Cédula de ciudadanía">Cédula de Ciudadanía</option>
+                  <option value="Tarjeta de identidad">Tarjeta de Identidad</option>
+                  <option value="Cédula de extranjería">Cédula de Extranjería</option>
+                  <option value="Pasaporte">Pasaporte</option>
+                </select>
+              </div>
+            </div>
 
-  <div className="form-row">
-    <div className="form-group">
-      <label htmlFor="documentNumber" className="form-label">
-        Número de documento *
-      </label>
-      <input
-        type="text"
-        id="documentNumber"
-        name="documentNumber"
-        className={`form-input ${errors.documentNumber ? "error" : ""}`}
-        disabled={loading}
-        placeholder="Número de documento"
-      />
-      {errors.documentNumber && <span className="error-message">{errors.documentNumber}</span>}
-    </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="documentNumber" className="form-label">
+                  Número de documento *
+                </label>
+                <input
+                  type="text"
+                  id="documentNumber"
+                  name="documentNumber"
+                  className={`form-input ${errors.documentNumber ? "error" : ""}`}
+                  disabled={loading}
+                  placeholder="Número de documento"
+                />
+                {errors.documentNumber && <span className="error-message">{errors.documentNumber}</span>}
+              </div>
 
-    <div className="form-group">
-      <label htmlFor="age" className="form-label">
-        Edad *
-      </label>
-      <input
-        type="number"
-        id="age"
-        name="age"
-        className={`form-input ${errors.age ? "error" : ""}`}
-        disabled={loading}
-        min="0"
-        max="120"
-        placeholder="Edad"
-        readOnly // Opcional: para que solo se calcule automáticamente
-      />
-      {errors.age && <span className="error-message">{errors.age}</span>}
-    </div>
-  </div>
+              <div className="form-group">
+                <label htmlFor="age" className="form-label">
+                  Edad *
+                </label>
+                <input
+                  type="number"
+                  id="age"
+                  name="age"
+                  className={`form-input ${errors.age ? "error" : ""}`}
+                  disabled={loading}
+                  min="0"
+                  max="120"
+                  placeholder="Edad"
+                  readOnly // Opcional: para que solo se calcule automáticamente
+                />
+                {errors.age && <span className="error-message">{errors.age}</span>}
+              </div>
+            </div>
 
-  <div className="form-row">
-    <div className="form-group">
-      <label htmlFor="eps" className="form-label">
-        EPS *
-      </label>
-      <input
-        type="text"
-        id="eps"
-        name="eps"
-        className={`form-input ${errors.eps ? "error" : ""}`}
-        disabled={loading}
-        placeholder="Entidad de salud"
-      />
-      {errors.eps && <span className="error-message">{errors.eps}</span>}
-    </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="eps" className="form-label">
+                  EPS *
+                </label>
+                <input
+                  type="text"
+                  id="eps"
+                  name="eps"
+                  className={`form-input ${errors.eps ? "error" : ""}`}
+                  disabled={loading}
+                  placeholder="Entidad de salud"
+                />
+                {errors.eps && <span className="error-message">{errors.eps}</span>}
+              </div>
 
-    <div className="form-group">
-      <label htmlFor="birthdate" className="form-label">
-        Fecha de nacimiento
-      </label>
-      <input
-        type="date"
-        id="birthdate"
-        name="birthdate"
-        className="form-input"
-        disabled={loading}
-        onChange={e => {
-          const form = e.target.closest('.companion-form');
-          const birthdate = e.target.value;
-          // Calcula la edad automáticamente
-          const edadCalculada = calcularEdad(birthdate);
-          // Actualiza el campo de edad en el formulario
-          form.querySelector('[name="age"]').value = edadCalculada;
-        }}
-      />
-    </div>
-  </div>
+              <div className="form-group">
+                <label htmlFor="birthdate" className="form-label">
+                  Fecha de nacimiento
+                </label>
+                <input
+                  type="date"
+                  id="birthdate"
+                  name="birthdate"
+                  className="form-input"
+                  disabled={loading}
+                  onChange={e => {
+                    const form = companionFormRef.current;
+                    const birthdate = e.target.value;
+                    const edadCalculada = calcularEdad(birthdate);
+                    form.querySelector('[name="age"]').value = edadCalculada;
+                  }}
+                />
+              </div>
+            </div>
 
-  <div className="form-actions">
-    <button
-      type="button"
-      className="submit-btn"
-      disabled={loading}
-      onClick={e => {
-        const form = e.target.closest('.payment-form');
-        const newCompanion = {
-          name: form.querySelector('[name="name"]').value,
-          documentType: form.querySelector('[name="documentType"]').value,
-          documentNumber: form.querySelector('[name="documentNumber"]').value,
-          age: form.querySelector('[name="age"]').value,
-          eps: form.querySelector('[name="eps"]').value,
-          birthdate: form.querySelector('[name="birthdate"]').value,
-        };
-        onSaveCompanion(newCompanion);
-      }}
-    >
-      {loading ? "Guardando..." : "Agregar Acompañante"}
-    </button>
-  </div>
-</div>
+            <div className="form-actions">
+              <button
+                type="button"
+                className="submit-btn"
+                disabled={loading}
+                onClick={() => {
+                  const form = companionFormRef.current;
+                  if (!form) return;
+                  const newCompanion = {
+                    name: form.querySelector('[name="name"]').value,
+                    documentType: form.querySelector('[name="documentType"]').value,
+                    documentNumber: form.querySelector('[name="documentNumber"]').value,
+                    age: form.querySelector('[name="age"]').value,
+                    eps: form.querySelector('[name="eps"]').value,
+                    birthdate: form.querySelector('[name="birthdate"]').value,
+                  };
+                  onSaveCompanion(newCompanion);
+                }}
+              >
+                {loading ? "Guardando..." : "Agregar Acompañante"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

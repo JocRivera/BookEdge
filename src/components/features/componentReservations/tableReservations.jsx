@@ -77,20 +77,13 @@ function TableReservations() {
           ...res,
           user: user || null,
           plan: plan || { name: "Plan no disponible", price: 0, salePrice: 0 },
-          // Asegúrate de tomar el precio correcto
           total: plan?.salePrice || plan?.price || res.total || 0,
         }
       })
 
       setReservations(enrichedReservations)
 
-      // Toast de éxito al cargar datos
-      toast.success(`${enrichedReservations.length} reservas cargadas correctamente`, {
-        position: "top-right",
-        autoClose: 5000,
-      })
     } catch (error) {
-      console.error("Error al cargar datos:", error)
       toast.error(`Error al cargar datos: ${error.message}`, {
         position: "top-right",
         autoClose: 6000,
@@ -283,7 +276,6 @@ function TableReservations() {
         },
       )
     } catch (error) {
-      console.error("Error al actualizar datos después de guardar:", error)
       toast.error(`Error al actualizar datos: ${error.message}`, {
         position: "top-right",
         autoClose: 6000,
@@ -342,7 +334,6 @@ function TableReservations() {
         autoClose: 5000,
       })
     } catch (error) {
-      console.error("Error al cambiar estado:", error)
       toast.error(`Error al cambiar estado: ${error.message}`, {
         position: "top-right",
         autoClose: 6000,

@@ -1,4 +1,3 @@
-
 /* Variables CSS para consistencia */
 :root {
   --availability-primary: #4e54c8;
@@ -109,214 +108,158 @@
   margin-top: 1rem;
 }
 
-/* Elementos de opción (cabañas/habitaciones) */
+/* Cards de cabañas/habitaciones (option-item) */
 .option-item {
   display: flex;
   align-items: flex-start;
-  background-color: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 2px solid var(--availability-border);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background-color: #fafbfc;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  border: 1.5px solid var(--availability-border);
+  transition: box-shadow 0.18s, border-color 0.18s, background 0.18s;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  min-height: 90px;
+  box-shadow: 0 2px 8px rgba(78, 84, 200, 0.06);
 }
 
 .option-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px var(--availability-shadow);
+  box-shadow: 0 4px 16px rgba(78, 84, 200, 0.10);
   border-color: var(--availability-primary-light);
+  background: #f4f7ff;
 }
 
 .option-item.selected {
   border-color: var(--availability-success);
-  background-color: rgba(40, 167, 69, 0.05);
-  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.2);
+  background-color: #f6fff8;
+  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.10);
 }
 
 .option-item.selected::after {
   content: "✓";
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   color: var(--availability-success);
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   font-weight: bold;
-  background: white;
-  width: 28px;
-  height: 28px;
+  background: #fff;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 1px 4px rgba(40, 167, 69, 0.10);
 }
 
-/* Selector de opciones */
-.option-selector {
-  margin-right: 1rem;
-  font-size: 1.4rem;
-  min-width: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.selected-icon {
-  color: var(--availability-success);
-  font-weight: bold;
-}
-
-.unselected-icon {
-  color: var(--availability-border);
-  font-size: 1.2rem;
-}
-
-/* Contenido de opciones */
 .option-content {
   flex: 1;
 }
 
 .option-name {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--availability-text-dark);
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
 }
 
 .option-detail {
   color: var(--availability-primary-dark);
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
 }
 
 .option-description {
   color: var(--availability-text-normal);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
 }
 
-.option-image {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-top: 1rem;
-}
-
-/* Mensaje cuando no hay opciones */
-.no-options {
-  color: var(--availability-text-light);
-  font-style: italic;
-  padding: 2rem;
-  text-align: center;
-  background-color: rgba(143, 148, 251, 0.05);
-  border-radius: 12px;
-  border: 2px dashed var(--availability-border);
-  font-size: 1rem;
-}
-
-/* ===== ESTILOS PARA SERVICIOS CON CANTIDADES ===== */
-
-/* Grid para servicios con cantidades */
-.services-grid-with-quantity {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-/* Elemento de servicio con cantidad */
+/* Cards de servicios adicionales */
 .service-item-with-quantity {
-  border: 2px solid var(--availability-border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  background: white;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1.5px solid var(--availability-border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  background: #fafbfc;
+  transition: box-shadow 0.18s, border-color 0.18s, background 0.18s;
   position: relative;
   overflow: hidden;
+  min-height: 80px;
+  box-shadow: 0 2px 8px rgba(78, 84, 200, 0.06);
 }
 
 .service-item-with-quantity:hover {
   border-color: var(--availability-primary);
-  box-shadow: 0 8px 25px var(--availability-shadow);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(78, 84, 200, 0.10);
+  background: #f4f7ff;
 }
 
 .service-item-with-quantity.selected {
   border-color: var(--availability-success);
-  background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
-  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.2);
+  background: #f6fff8;
+  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.10);
 }
 
 .service-item-with-quantity.selected::before {
   content: "✓";
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   background: var(--availability-success);
   color: white;
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 1px 4px rgba(40, 167, 69, 0.10);
 }
 
-/* Información del servicio */
 .service-info {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .service-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
-  gap: 1rem;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
 }
 
 .service-name {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--availability-text-dark);
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.2;
   flex: 1;
 }
 
 .service-price {
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: var(--availability-primary);
-  background: rgba(78, 84, 200, 0.1);
-  padding: 6px 12px;
-  border-radius: 8px;
+  background: rgba(78, 84, 200, 0.07);
+  padding: 4px 10px;
+  border-radius: 6px;
   white-space: nowrap;
   min-width: fit-content;
 }
 
 .service-description {
-  font-size: 0.9rem;
+  font-size: 0.87rem;
   color: var(--availability-text-normal);
   margin: 0;
-  line-height: 1.5;
-}
-
-/* Controles de cantidad */
-.service-quantity-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
+  line-height: 1.4;
 }
 
 /* Selector de cantidad minimalista */
@@ -325,41 +268,33 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  background: var(--availability-light);
-  border-radius: 12px;
-  padding: 6px;
+  background: #f4f7ff;
+  border-radius: 8px;
+  padding: 4px;
   width: fit-content;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 .quantity-btn {
   background: white;
   border: 1px solid var(--availability-border);
   color: var(--availability-text-normal);
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.18s;
   user-select: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 .quantity-btn:hover:not(:disabled) {
   background: var(--availability-primary);
   color: white;
   border-color: var(--availability-primary);
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(78, 84, 200, 0.3);
-}
-
-.quantity-btn:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: scale(1.04);
 }
 
 .quantity-btn:disabled {
@@ -370,37 +305,25 @@
   transform: none;
 }
 
-.quantity-btn.decrease {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: none;
-}
-
-.quantity-btn.increase {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: none;
-}
-
 .quantity-input {
   border: 1px solid var(--availability-border);
   border-left: none;
   border-right: none;
   background: white;
   text-align: center;
-  width: 60px;
-  height: 40px;
-  font-size: 16px;
+  width: 40px;
+  height: 32px;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--availability-text-dark);
   outline: none;
   border-radius: 0;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
 .quantity-input:focus {
   border-color: var(--availability-primary);
-  box-shadow: 0 0 0 3px rgba(78, 84, 200, 0.1);
+  box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.08);
 }
 
 /* Subtotal del servicio */
@@ -409,11 +332,11 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--availability-success);
-  background: rgba(40, 167, 69, 0.1);
-  padding: 8px 16px;
-  border-radius: 8px;
-  margin-top: 0.5rem;
-  border: 1px solid rgba(40, 167, 69, 0.2);
+  background: rgba(40, 167, 69, 0.07);
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-top: 0.3rem;
+  border: 1px solid rgba(40, 167, 69, 0.13);
 }
 
 /* Resumen de servicios seleccionados */
@@ -540,7 +463,6 @@
 }
 
 .error-message::before {
-  content: "⚠️";
   font-size: 1.1rem;
 }
 
@@ -595,6 +517,26 @@
 
   .services-summary {
     padding: 1rem;
+  }
+
+  .option-item,
+  .service-item-with-quantity {
+    padding: 0.7rem 0.7rem;
+    min-height: 60px;
+  }
+  .option-name,
+  .service-name {
+    font-size: 0.98rem;
+  }
+  .service-price {
+    font-size: 0.93rem;
+    padding: 3px 7px;
+  }
+  .quantity-btn,
+  .quantity-input {
+    width: 28px;
+    height: 28px;
+    font-size: 0.93rem;
   }
 }
 
