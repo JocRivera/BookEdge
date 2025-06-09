@@ -358,12 +358,23 @@ export const validateReservationForm = (formData) => {
   }
 
   // Validación de fechas
+  if (formData.startDate) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const startDate = new Date(formData.startDate)
+    startDate.setHours(0, 0, 0, 0)
+    if (startDate < today) {
+      errors.startDate = "La fecha de inicio no puede ser anterior a hoy"
+    }
+  }
+
   if (formData.startDate && formData.endDate) {
     const startDate = new Date(formData.startDate)
+    startDate.setHours(0, 0, 0, 0)
     const endDate = new Date(formData.endDate)
-
-    if (endDate <= startDate) {
-      errors.endDate = "La fecha de fin debe ser posterior a la fecha de inicio"
+    endDate.setHours(0, 0, 0, 0)
+    if (endDate < startDate) {
+      errors.endDate = "La fecha de fin no puede ser anterior a la fecha de inicio"
     }
   }
 
@@ -420,3 +431,13 @@ export const getReservationSummary = (formData) => {
     total: calculateTotal(formData, formData.planes || []),
   }
 }
+
+// Función para verificar si un plan tiene alojamiento
+export const planHasAccommodation = (plan) => {
+  return (
+    (plan?.cabins?.length > 0) ||
+    (plan?.bedrooms?.length > 0) ||
+    (plan?.cabinDistribution?.length > 0) ||
+    (plan?.bedroomDistribution?.length > 0)
+  );
+};

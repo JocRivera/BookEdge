@@ -90,7 +90,7 @@ const CompanionsView = () => {
   return (
     <div className="companions-view-container">
       <div className="companions-header">
-        <h2>Acompañantes</h2>
+        <h2> Lista de Acompañantes</h2>
         <div className="companions-controls">
           <div className="total-count">Total: {companions.length} acompañantes</div>
         </div>

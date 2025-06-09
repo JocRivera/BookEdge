@@ -4,8 +4,7 @@ import { toast } from "react-toastify"
 import "./componentsReservations.css"
 import { useState, useRef } from "react"
 import PropTypes from "prop-types"
-
-
+import { planHasAccommodation } from "./reservationUtils"
 
 // Función para formatear moneda
 const formatCurrency = (amount) => {
@@ -72,9 +71,11 @@ function QuantitySelector({ value, onChange, min = 0, max = 99, disabled = false
   )
 }
 
+// ==========================
+// PASO 1: INFORMACIÓN BÁSICA
+// ==========================
 export function BasicInfoStep({
   formData,
-  errors,
   users = [],
   planes = [],
   loading,
@@ -82,12 +83,28 @@ export function BasicInfoStep({
   onChange,
   isClientMode = false,
   clientUser = null,
+  errors = {},
+  setFieldError,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
-const [filteredUsers, setFilteredUsers] = useState([]);
-const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Mantener toda la lógica de validación de fechas original
+  // Validación en tiempo real
+  const handleFieldChange = (e) => {
+    onChange(e);
+    const { name, value } = e.target;
+    let error = "";
+
+    if (name === "idUser" && !value) error = "Cliente es requerido";
+    if (name === "idPlan" && !value) error = "Plan es requerido";
+    if (name === "startDate" && !value) error = "Fecha de inicio es requerida";
+    if (name === "endDate" && !value) error = "Fecha de fin es requerida";
+    if (name === "companionCount" && formData.hasCompanions && (!value || value < 1)) error = "Debe especificar al menos 1 acompañante";
+
+    setFieldError && setFieldError(name, error);
+  };
+
+  // Validación de fechas
   const handleDateChange = (e) => {
     const { name, value } = e.target
 
@@ -109,7 +126,7 @@ const [showSuggestions, setShowSuggestions] = useState(false);
       })
     }
 
-    onChange(e)
+    handleFieldChange(e)
 
     // If end date is before the new start date, clear it
     if (name === "startDate" && formData.endDate && value > formData.endDate) {
@@ -123,6 +140,19 @@ const [showSuggestions, setShowSuggestions] = useState(false);
     }
   }
 
+  // Generar la fecha local en formato YYYY-MM-DD
+  const todayLocal = new Date();
+  const yyyy = todayLocal.getFullYear();
+  const mm = String(todayLocal.getMonth() + 1).padStart(2, '0');
+  const dd = String(todayLocal.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+
+  const selectedPlan = planes.find(p => p.idPlan === Number(formData.idPlan));
+  const requiereAlojamiento = selectedPlan && planHasAccommodation(selectedPlan);
+
+  console.log("selectedPlan:", selectedPlan);
+  console.log("planHasAccommodation(selectedPlan):", planHasAccommodation(selectedPlan));
+
   return (
     <div className="step-content">
       {/* Primera fila - Cliente y Plan */}
@@ -131,9 +161,7 @@ const [showSuggestions, setShowSuggestions] = useState(false);
           <label htmlFor="idUser" className="form-label">
             Cliente *
           </label>
-
           {isClientMode ? (
-            // Modo cliente: Mostrar información del cliente logueado
             <div className="client-info-display">
               <div className="client-card">
                 <div className="client-avatar">{clientUser?.name?.charAt(0)?.toUpperCase() || "C"}</div>
@@ -146,11 +174,10 @@ const [showSuggestions, setShowSuggestions] = useState(false);
               </div>
             </div>
           ) : (
-            // Modo admin: Selector de cliente
             <div className="user-search-container" style={{ position: "relative" }}>
               <input
                 type="text"
-                className="user-search-input"
+                className={`user-search-input form-input${errors.idUser ? " error" : ""}`}
                 placeholder="Buscar cliente por nombre o identificación"
                 value={
                   formData.idUser
@@ -160,7 +187,8 @@ const [showSuggestions, setShowSuggestions] = useState(false);
                 onChange={e => {
                   setSearchTerm(e.target.value);
                   setShowSuggestions(true);
-                  onChange({ target: { name: "idUser", value: "" } }); // Limpia el idUser hasta que seleccione
+                  onChange({ target: { name: "idUser", value: "" } });
+                  setFieldError && setFieldError("idUser", "Cliente es requerido");
                 }}
                 onFocus={() => setShowSuggestions(true)}
                 disabled={loading || isReadOnly}
@@ -181,6 +209,7 @@ const [showSuggestions, setShowSuggestions] = useState(false);
                           onChange({ target: { name: "idUser", value: user.idUser } });
                           setSearchTerm(user.name + " - " + user.identification);
                           setShowSuggestions(false);
+                          setFieldError && setFieldError("idUser", "");
                         }}
                       >
                         {user.name} - {user.identification}
@@ -197,7 +226,6 @@ const [showSuggestions, setShowSuggestions] = useState(false);
               )}
             </div>
           )}
-
           {errors.idUser && <span className="error-message">{errors.idUser}</span>}
         </div>
 
@@ -209,21 +237,9 @@ const [showSuggestions, setShowSuggestions] = useState(false);
             id="idPlan"
             name="idPlan"
             value={formData.idPlan}
-            onChange={(e) => {
-              onChange(e)
-              // Toast cuando se selecciona un plan
-              if (e.target.value) {
-                const selectedPlan = planes.find((p) => p.idPlan === Number.parseInt(e.target.value))
-                if (selectedPlan) {
-                  toast.success(`Plan seleccionado: ${selectedPlan.name}`, {
-                    position: "top-right",
-                    autoClose: 3000,
-                  })
-                }
-              }
-            }}
+            onChange={handleFieldChange}
             disabled={loading || isReadOnly}
-            className={`form-input ${errors.idPlan ? "error" : ""}`}
+            className={`form-input${errors.idPlan ? " error" : ""}`}
           >
             <option value="">Seleccione un plan</option>
             {planes.map((plan) => (
@@ -248,9 +264,9 @@ const [showSuggestions, setShowSuggestions] = useState(false);
             name="startDate"
             value={formData.startDate}
             onChange={handleDateChange}
-            min={new Date().toISOString().split("T")[0]}
+            min={todayStr}
             disabled={loading || isReadOnly}
-            className={`form-input ${errors.startDate ? "error" : ""}`}
+            className={`form-input${errors.startDate ? " error" : ""}`}
           />
           {errors.startDate && <span className="error-message">{errors.startDate}</span>}
         </div>
@@ -259,16 +275,22 @@ const [showSuggestions, setShowSuggestions] = useState(false);
           <label htmlFor="endDate" className="form-label">
             Fecha de Fin *
           </label>
-          <input
-            type="date"
-            id="endDate"
-            name="endDate"
-            value={formData.endDate}
-            onChange={handleDateChange}
-            min={formData.startDate || new Date().toISOString().split("T")[0]}
-            disabled={loading || isReadOnly}
-            className={`form-input ${errors.endDate ? "error" : ""}`}
-          />
+          {requiereAlojamiento && (
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleDateChange}
+              min={formData.startDate || todayStr}
+              disabled={
+                loading ||
+                isReadOnly ||
+                (!!selectedPlan && !planHasAccommodation(selectedPlan))
+              }
+              className={`form-input${errors.endDate ? " error" : ""}`}
+            />
+          )}
           {errors.endDate && <span className="error-message">{errors.endDate}</span>}
         </div>
       </div>
@@ -282,9 +304,7 @@ const [showSuggestions, setShowSuggestions] = useState(false);
                 type="checkbox"
                 name="hasCompanions"
                 checked={formData.hasCompanions}
-                onChange={(e) => {
-                  onChange(e)
-                }}
+                onChange={onChange}
                 disabled={loading || isReadOnly}
               />
               <span className="checkbox-custom"></span>
@@ -305,19 +325,9 @@ const [showSuggestions, setShowSuggestions] = useState(false);
               min="1"
               max="6"
               value={formData.companionCount}
-              onChange={(e) => {
-                const count = Number(e.target.value)
-                if (count > 6) {
-                  toast.warning("Máximo 6 acompañantes permitidos", {
-                    position: "top-right",
-                    autoClose: 4000,
-                  })
-                  return
-                }
-                onChange(e)
-              }}
+              onChange={handleFieldChange}
               disabled={loading || isReadOnly}
-              className={`form-input ${errors.companionCount ? "error" : ""}`}
+              className={`form-input${errors.companionCount ? " error" : ""}`}
               placeholder="Ej: 2"
             />
             {errors.companionCount && <span className="error-message">{errors.companionCount}</span>}
@@ -353,7 +363,6 @@ const [showSuggestions, setShowSuggestions] = useState(false);
 
 BasicInfoStep.propTypes = {
   formData: PropTypes.object.isRequired,
-  errors: PropTypes.object,
   users: PropTypes.array,
   planes: PropTypes.array,
   loading: PropTypes.bool,
@@ -361,8 +370,13 @@ BasicInfoStep.propTypes = {
   onChange: PropTypes.func.isRequired,
   isClientMode: PropTypes.bool,
   clientUser: PropTypes.object,
-};
+  errors: PropTypes.object,
+  setFieldError: PropTypes.func,
+}
 
+// ==========================
+// PASO 2: ACOMPAÑANTES
+// ==========================
 export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCompanion, onDeleteCompanion }) {
   const expectedCount = Number.parseInt(formData.companionCount) || 0
   const currentCount = formData.companions?.length || 0
@@ -383,12 +397,79 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
 
   const companionFormRef = useRef(null);
 
+  const [fields, setFields] = useState({
+    name: "",
+    documentType: "Cédula de ciudadanía",
+    documentNumber: "",
+    age: "",
+    eps: "",
+    birthdate: "",
+  });
+  const [companionErrors, setCompanionErrors] = useState({});
+
+  // Validación en tiempo real
+  const validateField = (name, value) => {
+    switch (name) {
+      case "name":
+        return value.trim() === "" ? "El nombre es obligatorio" : "";
+      case "documentNumber":
+        return value.trim() === "" ? "El número de documento es obligatorio" : "";
+      case "age":
+        return !value || isNaN(value) || value <= 0 ? "Edad inválida" : "";
+      case "eps":
+        return value.trim() === "" ? "La EPS es obligatoria" : "";
+      default:
+        return "";
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    let newFields = { ...fields, [name]: value };
+
+    // Si cambia la fecha de nacimiento, calcula la edad automáticamente
+    if (name === "birthdate") {
+      const edadCalculada = calcularEdad(value);
+      newFields.age = edadCalculada;
+    }
+
+    setFields(newFields);
+
+    // Validación en tiempo real
+    setCompanionErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name, value),
+      ...(name === "birthdate" && { age: validateField("age", newFields.age) }),
+    }));
+  };
+
+  const handleSave = () => {
+    // Validar todos los campos antes de guardar
+    const newErrors = {};
+    Object.keys(fields).forEach((key) => {
+      if (key !== "birthdate") {
+        const error = validateField(key, fields[key]);
+        if (error) newErrors[key] = error;
+      }
+    });
+    setCompanionErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      onSaveCompanion(fields);
+      setFields({
+        name: "",
+        documentType: "Cédula de ciudadanía",
+        documentNumber: "",
+        age: "",
+        eps: "",
+        birthdate: "",
+      });
+      setCompanionErrors({});
+    }
+  };
+
   return (
     <div className="step-content">
-
-
-
-      {errors.companions && <div className="error-message">{errors.companions}</div>}
+      {errors?.companions && <div className="error-message">{errors.companions}</div>}
 
       {/* Lista de acompañantes */}
       <div className="companions-list">
@@ -471,18 +552,27 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
                   type="text"
                   id="name"
                   name="name"
-                  className={`form-input ${errors.name ? "error" : ""}`}
+                  className={`form-input ${companionErrors.name ? "error" : ""}`}
                   disabled={loading}
                   placeholder="Nombre completo del acompañante"
+                  value={fields.name}
+                  onChange={handleInputChange}
                 />
-                {errors.name && <span className="error-message">{errors.name}</span>}
+                {companionErrors.name && <span className="error-message">{companionErrors.name}</span>}
               </div>
 
               <div className="form-group">
                 <label htmlFor="documentType" className="form-label">
                   Tipo de documento *
                 </label>
-                <select id="documentType" name="documentType" className="form-input" disabled={loading}>
+                <select
+                  id="documentType"
+                  name="documentType"
+                  className="form-input"
+                  disabled={loading}
+                  value={fields.documentType}
+                  onChange={handleInputChange}
+                >
                   <option value="Cédula de ciudadanía">Cédula de Ciudadanía</option>
                   <option value="Tarjeta de identidad">Tarjeta de Identidad</option>
                   <option value="Cédula de extranjería">Cédula de Extranjería</option>
@@ -500,11 +590,13 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
                   type="text"
                   id="documentNumber"
                   name="documentNumber"
-                  className={`form-input ${errors.documentNumber ? "error" : ""}`}
+                  className={`form-input ${companionErrors.documentNumber ? "error" : ""}`}
                   disabled={loading}
                   placeholder="Número de documento"
+                  value={fields.documentNumber}
+                  onChange={handleInputChange}
                 />
-                {errors.documentNumber && <span className="error-message">{errors.documentNumber}</span>}
+                {companionErrors.documentNumber && <span className="error-message">{companionErrors.documentNumber}</span>}
               </div>
 
               <div className="form-group">
@@ -515,14 +607,16 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
                   type="number"
                   id="age"
                   name="age"
-                  className={`form-input ${errors.age ? "error" : ""}`}
+                  className={`form-input ${companionErrors.age ? "error" : ""}`}
                   disabled={loading}
                   min="0"
                   max="120"
                   placeholder="Edad"
                   readOnly // Opcional: para que solo se calcule automáticamente
+                  value={fields.age}
+                  onChange={handleInputChange}
                 />
-                {errors.age && <span className="error-message">{errors.age}</span>}
+                {companionErrors.age && <span className="error-message">{companionErrors.age}</span>}
               </div>
             </div>
 
@@ -535,11 +629,13 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
                   type="text"
                   id="eps"
                   name="eps"
-                  className={`form-input ${errors.eps ? "error" : ""}`}
+                  className={`form-input ${companionErrors.eps ? "error" : ""}`}
                   disabled={loading}
                   placeholder="Entidad de salud"
+                  value={fields.eps}
+                  onChange={handleInputChange}
                 />
-                {errors.eps && <span className="error-message">{errors.eps}</span>}
+                {companionErrors.eps && <span className="error-message">{companionErrors.eps}</span>}
               </div>
 
               <div className="form-group">
@@ -552,12 +648,8 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
                   name="birthdate"
                   className="form-input"
                   disabled={loading}
-                  onChange={e => {
-                    const form = companionFormRef.current;
-                    const birthdate = e.target.value;
-                    const edadCalculada = calcularEdad(birthdate);
-                    form.querySelector('[name="age"]').value = edadCalculada;
-                  }}
+                  value={fields.birthdate}
+                  onChange={handleInputChange}
                 />
               </div>
             </div>
@@ -567,19 +659,7 @@ export function CompanionsStep({ formData, errors, loading, isReadOnly, onSaveCo
                 type="button"
                 className="submit-btn"
                 disabled={loading}
-                onClick={() => {
-                  const form = companionFormRef.current;
-                  if (!form) return;
-                  const newCompanion = {
-                    name: form.querySelector('[name="name"]').value,
-                    documentType: form.querySelector('[name="documentType"]').value,
-                    documentNumber: form.querySelector('[name="documentNumber"]').value,
-                    age: form.querySelector('[name="age"]').value,
-                    eps: form.querySelector('[name="eps"]').value,
-                    birthdate: form.querySelector('[name="birthdate"]').value,
-                  };
-                  onSaveCompanion(newCompanion);
-                }}
+                onClick={handleSave}
               >
                 {loading ? "Guardando..." : "Agregar Acompañante"}
               </button>
@@ -606,8 +686,11 @@ CompanionsStep.propTypes = {
   isReadOnly: PropTypes.bool,
   onSaveCompanion: PropTypes.func.isRequired,
   onDeleteCompanion: PropTypes.func.isRequired,
-};
+}
 
+// ==========================
+// PASO 3: DISPONIBILIDAD
+// ==========================
 export function AvailabilityStep({
   formData,
   errors,
@@ -684,6 +767,8 @@ export function AvailabilityStep({
     onRoomSelect(roomId)
   }
 
+  const selectedPlan = formData.selectedPlan; // O pásalo como prop si lo tienes así
+
   return (
     <div className="step-content">
 
@@ -706,96 +791,87 @@ export function AvailabilityStep({
 
       {errors.accommodation && <div className="error-message">{errors.accommodation}</div>}
 
-      {/* Sección de cabañas */}
-      {formData.availableCabins?.length > 0 && (
-        <div className="section-container">
-          <h4 className="section-title">
-            Cabañas Disponibles ({formData.availableCabins.length})
-            {totalGuests > 4 && <span className="recommended-badge">Recomendado para {totalGuests} personas</span>}
-          </h4>
+      {planHasAccommodation(selectedPlan) && (
+        <>
+          {/* Sección de cabañas */}
+          {formData.availableCabins?.length > 0 && (
+            <div className="section-container">
+              <h4 className="section-title">
+                Cabañas Disponibles ({formData.availableCabins.length})
+                {totalGuests > 4 && <span className="recommended-badge">Recomendado para {totalGuests} personas</span>}
+              </h4>
 
-          <div className="options-grid">
-            {formData.availableCabins.map((cabin) => (
-              <div
-                key={cabin.idCabin}
-                className={`option-item ${formData.idCabin === cabin.idCabin ? "selected" : ""}`}
-                onClick={() => handleCabinSelect(cabin.idCabin)}
-              >
-                <div className="option-selector">
-                  {formData.idCabin === cabin.idCabin ? (
-                    <span className="selected-icon">✓</span>
-                  ) : (
-                    <span className="unselected-icon">○</span>
-                  )}
-                </div>
-                <div className="option-content">
-                  <h5 className="option-name">{cabin.name}</h5>
-                  <p className="option-detail">
-                    Capacidad: {cabin.capacity || 7} personas
-                    {cabin.capacity >= totalGuests && <span className="capacity-ok"> ✓</span>}
-                  </p>
-                  <p className="option-description">{cabin.description}</p>
-                </div>
+              <div className="options-grid">
+                {formData.availableCabins.map((cabin) => (
+                  <div
+                    key={cabin.idCabin}
+                    className={`option-item ${formData.idCabin === cabin.idCabin ? "selected" : ""}`}
+                    onClick={() => handleCabinSelect(cabin.idCabin)}
+                  >
+                    <div className="option-selector">
+                      {formData.idCabin === cabin.idCabin ? (
+                        <span className="selected-icon">✓</span>
+                      ) : (
+                        <span className="unselected-icon">○</span>
+                      )}
+                    </div>
+                    <div className="option-content">
+                      <h5 className="option-name">{cabin.name}</h5>
+                      <p className="option-detail">
+                        Capacidad: {cabin.capacity || 7} personas
+                        {cabin.capacity >= totalGuests && <span className="capacity-ok"> ✓</span>}
+                      </p>
+                      <p className="option-description">{cabin.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          )}
+
+          {/* Sección de habitaciones */}
+          {formData.availableBedrooms?.length > 0 && (
+            <div className="section-container">
+              <h4 className="section-title">
+                Habitaciones Disponibles ({formData.availableBedrooms.length})
+                {totalGuests <= 2 && (
+                  <span className="recommended-badge">
+                    Recomendado para {totalGuests} persona{totalGuests !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </h4>
+
+              <div className="options-grid">
+                {formData.availableBedrooms.map((bedroom) => (
+                  <div
+                    key={bedroom.idRoom}
+                    className={`option-item ${formData.idRoom === bedroom.idRoom ? "selected" : ""}`}
+                    onClick={() => handleRoomSelect(bedroom.idRoom)}
+                  >
+                    <div className="option-selector">
+                      {formData.idRoom === bedroom.idRoom ? (
+                        <span className="selected-icon">✓</span>
+                      ) : (
+                        <span className="unselected-icon">○</span>
+                      )}
+                    </div>
+                    <div className="option-content">
+                      <h5 className="option-name">Habitación {bedroom.name || bedroom.idRoom}</h5>
+                      <p className="option-detail">
+                        Capacidad: {bedroom.capacity || 2} personas
+                        {(bedroom.capacity || 2) >= totalGuests && <span className="capacity-ok"> ✓</span>}
+                      </p>
+                      <p className="option-description">{bedroom.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Sección de habitaciones */}
-      {formData.availableBedrooms?.length > 0 && (
-        <div className="section-container">
-          <h4 className="section-title">
-            Habitaciones Disponibles ({formData.availableBedrooms.length})
-            {totalGuests <= 2 && (
-              <span className="recommended-badge">
-                Recomendado para {totalGuests} persona{totalGuests !== 1 ? "s" : ""}
-              </span>
-            )}
-          </h4>
-
-          <div className="options-grid">
-            {formData.availableBedrooms.map((bedroom) => (
-              <div
-                key={bedroom.idRoom}
-                className={`option-item ${formData.idRoom === bedroom.idRoom ? "selected" : ""}`}
-                onClick={() => handleRoomSelect(bedroom.idRoom)}
-              >
-                <div className="option-selector">
-                  {formData.idRoom === bedroom.idRoom ? (
-                    <span className="selected-icon">✓</span>
-                  ) : (
-                    <span className="unselected-icon">○</span>
-                  )}
-                </div>
-                <div className="option-content">
-                  <h5 className="option-name">Habitación {bedroom.name || bedroom.idRoom}</h5>
-                  <p className="option-detail">
-                    Capacidad: {bedroom.capacity || 2} personas
-                    {(bedroom.capacity || 2) >= totalGuests && <span className="capacity-ok"> ✓</span>}
-                  </p>
-                  <p className="option-description">{bedroom.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Mensaje cuando no hay alojamiento disponible */}
-      {(!formData.availableCabins || formData.availableCabins.length === 0) &&
-        (!formData.availableBedrooms || formData.availableBedrooms.length === 0) && (
-          <div className="no-options">
-            <h4>❌ No hay alojamiento disponible</h4>
-            <p>
-              No se encontraron cabañas ni habitaciones con capacidad para {totalGuests} persona
-              {totalGuests !== 1 ? "s" : ""}.
-            </p>
-            <p>Por favor, reduce el número de acompañantes o contacta al administrador.</p>
-          </div>
-        )}
-
-      {/* Servicios adicionales */}
+      {/* Servicios adicionales siempre visibles */}
       <div className="section-container">
         <h4 className="section-title">Servicios Adicionales</h4>
 
@@ -871,11 +947,13 @@ AvailabilityStep.propTypes = {
   onServiceQuantityChange: PropTypes.func.isRequired,
 };
 
+// ==========================
+// PASO 4: PAGO
+// ==========================
 export function PaymentStep({
   totalAmount,
   reservationPayments,
   tempPayments,
-
   isReadOnly,
   loading,
   onPaymentSubmit,
@@ -892,138 +970,136 @@ export function PaymentStep({
 
   return (
     <div className="step-content">
-
       {/* Resumen de pagos */}
-
+      {/* ...tu lógica de resumen... */}
 
       {/* Formulario de pago */}
       {!isReadOnly && (
         <div className="payment-form-section">
           <div className="payment-form" onKeyDown={e => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    // Opcional: podrías llamar aquí a tu función de registrar pago si lo deseas
-  }
-}}>
-    <div className="form-row">
-      <div className="form-group">
-        <label htmlFor="paymentMethod" className="form-label">
-          Método de pago *
-        </label>
-        <select id="paymentMethod" name="paymentMethod" className="form-input" disabled={loading}>
-          <option value="">Seleccione un método</option>
-          <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
-          <option value="Tarjeta de Débito">Tarjeta de Débito</option>
-          <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-          <option value="Efectivo">Efectivo</option>
-          <option value="Otro">Otro</option>
-        </select>
-      </div>
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="paymentMethod" className="form-label">
+                  Método de pago *
+                </label>
+                <select id="paymentMethod" name="paymentMethod" className="form-input" disabled={loading}>
+                  <option value="">Seleccione un método</option>
+                  <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                  <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                  <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
 
-      <div className="form-group">
-        <label htmlFor="paymentDate" className="form-label">
-          Fecha de pago *
-        </label>
-        <input
-          type="date"
-          id="paymentDate"
-          name="paymentDate"
-          defaultValue={new Date().toISOString().split("T")[0]}
-          className="form-input"
-          disabled={loading}
-        />
-      </div>
-    </div>
+              <div className="form-group">
+                <label htmlFor="paymentDate" className="form-label">
+                  Fecha de pago *
+                </label>
+                <input
+                  type="date"
+                  id="paymentDate"
+                  name="paymentDate"
+                  defaultValue={new Date().toISOString().split("T")[0]}
+                  className="form-input"
+                  disabled={loading}
+                />
+              </div>
+            </div>
 
-    <div className="form-row">
-      <div className="form-group">
-        <label htmlFor="amount" className="form-label">
-          Monto *
-        </label>
-        <input
-          type="number"
-          id="amount"
-          name="amount"
-          className="form-input"
-          disabled={loading}
-          placeholder="0"
-          min="0"
-          step="1000"
-        />
-      </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="amount" className="form-label">
+                  Monto *
+                </label>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  className="form-input"
+                  disabled={loading}
+                  placeholder="0"
+                  min="0"
+                  step="1000"
+                />
+              </div>
 
-      <div className="form-group">
-        <label htmlFor="status" className="form-label">
-          Estado
-        </label>
-        <select id="status" name="status" defaultValue="Pendiente" className="form-input" disabled={loading}>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Confirmado">Confirmado</option>
-        </select>
-      </div>
-    </div>
+              <div className="form-group">
+                <label htmlFor="status" className="form-label">
+                  Estado
+                </label>
+                <select id="status" name="status" defaultValue="Pendiente" className="form-input" disabled={loading}>
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Confirmado">Confirmado</option>
+                </select>
+              </div>
+            </div>
 
-    <div className="form-row">
-      <div className="form-group">
-        <label htmlFor="voucher" className="form-label">
-          Comprobante de pago
-        </label>
-        <input
-          type="file"
-          id="voucher"
-          name="voucher"
-          className="form-input"
-          disabled={loading}
-          accept="image/*,.pdf"
-        />
-        <div className="input-hint">Formatos permitidos: JPG, PNG, PDF (máx. 5MB)</div>
-      </div>
-    </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="voucher" className="form-label">
+                  Comprobante de pago
+                </label>
+                <input
+                  type="file"
+                  id="voucher"
+                  name="voucher"
+                  className="form-input"
+                  disabled={loading}
+                  accept="image/*,.pdf"
+                />
+                <div className="input-hint">Formatos permitidos: JPG, PNG, PDF (máx. 5MB)</div>
+              </div>
+            </div>
 
-    <div className="form-actions">
-      <button
-        type="button"
-        className="submit-btn"
-        disabled={loading}
-        onClick={e => {
-          const form = e.target.closest('.payment-form');
-          const paymentMethod = form.querySelector('[name="paymentMethod"]').value;
-          const paymentDate = form.querySelector('[name="paymentDate"]').value;
-          const amount = form.querySelector('[name="amount"]').value;
-          const status = form.querySelector('[name="status"]').value;
-          const voucherInput = form.querySelector('[name="voucher"]');
-          const voucher = voucherInput && voucherInput.files.length > 0 ? voucherInput.files[0] : null;
+            <div className="form-actions">
+              <button
+                type="button"
+                className="submit-btn"
+                disabled={loading}
+                onClick={e => {
+                  const form = e.target.closest('.payment-form');
+                  const paymentMethod = form.querySelector('[name="paymentMethod"]').value;
+                  const paymentDate = form.querySelector('[name="paymentDate"]').value;
+                  const amount = form.querySelector('[name="amount"]').value;
+                  const status = form.querySelector('[name="status"]').value;
+                  const voucherInput = form.querySelector('[name="voucher"]');
+                  const voucher = voucherInput && voucherInput.files.length > 0 ? voucherInput.files[0] : null;
 
-          if (!paymentMethod || !paymentDate || !amount) {
-            alert("Por favor complete todos los campos obligatorios.");
-            return;
-          }
+                  if (!paymentMethod || !paymentDate || !amount) {
+                    alert("Por favor complete todos los campos obligatorios.");
+                    return;
+                  }
 
-          // Si hay comprobante, usa FormData
-          if (voucher) {
-            const formData = new FormData();
-            formData.append("paymentMethod", paymentMethod);
-            formData.append("paymentDate", paymentDate);
-            formData.append("amount", amount);
-            formData.append("status", status);
-            formData.append("voucher", voucher);
-            // Envía el FormData al handler del padre
-            onPaymentSubmit(formData);
-          } else {
-            // Si no hay comprobante, envía objeto normal
-            onPaymentSubmit({
-              paymentMethod,
-              paymentDate,
-              amount,
-              status,
-            });
-          }
-        }}
-      >
-        {loading ? "Registrando..." : "Registrar Pago"}
-      </button>
-    </div>
-  </div>
+                  // Si hay comprobante, usa FormData
+                  if (voucher) {
+                    const formData = new FormData();
+                    formData.append("paymentMethod", paymentMethod);
+                    formData.append("paymentDate", paymentDate);
+                    formData.append("amount", amount);
+                    formData.append("status", status);
+                    formData.append("voucher", voucher);
+                    // Envía el FormData al handler del padre
+                    onPaymentSubmit(formData);
+                  } else {
+                    // Si no hay comprobante, envía objeto normal
+                    onPaymentSubmit({
+                      paymentMethod,
+                      paymentDate,
+                      amount,
+                      status,
+                    });
+                  }
+                }}
+              >
+                {loading ? "Registrando..." : "Registrar Pago"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
