@@ -133,8 +133,7 @@ export const getCabins = async () => {
   }
 }
 
-const validateReservationData = (reservationData) => {
-
+const validateReservationData = (reservationData, selectedPlan) => {
   if (!reservationData) {
     throw new Error("No se proporcionaron datos de reserva")
   }
@@ -150,8 +149,8 @@ const validateReservationData = (reservationData) => {
     idUser: "number",
     idPlan: "number",
     startDate: "string",
-    endDate: "string",
     status: "string",
+    // endDate: "string", // <-- Quita de aquí, lo validamos abajo
   }
 
   Object.entries(requiredFields).forEach(([field, type]) => {
@@ -160,7 +159,6 @@ const validateReservationData = (reservationData) => {
     } else {
       const actualType = typeof reservationData[field]
       if (actualType !== type) {
-        // Intentar convertir al tipo correcto
         if (type === "number" && !isNaN(Number(reservationData[field]))) {
           // Se puede convertir a número, no es un error
         } else {
@@ -170,14 +168,38 @@ const validateReservationData = (reservationData) => {
     }
   })
 
-  // Validaciones de negocio
-  const today = new Date().toISOString().split("T")[0]
-
-  if (reservationData.startDate && reservationData.startDate < today) {
-    errors.businessErrors.push("La fecha de inicio no puede ser en el pasado")
+  // Solo exigir endDate si el plan tiene alojamiento
+  if (planHasAccommodation(selectedPlan)) {
+    if (!reservationData.endDate) {
+      errors.missingFields.push("endDate")
+    }
   }
 
-  if (reservationData.startDate && reservationData.endDate && reservationData.startDate > reservationData.endDate) {
+  // Validaciones de negocio
+  if (reservationData.startDate) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    // Compara como string para evitar problemas de zona horaria
+    if (reservationData.startDate < todayStr) {
+      errors.businessErrors.push("La fecha de inicio no puede ser en el pasado");
+    }
+    console.log("DEBUG FECHAS:", {
+      startRaw: reservationData.startDate,
+      todayStr,
+    });
+  }
+
+  // Solo validar relación de fechas si el plan tiene alojamiento
+  if (
+    planHasAccommodation(selectedPlan) &&
+    reservationData.startDate &&
+    reservationData.endDate &&
+    reservationData.startDate > reservationData.endDate
+  ) {
     errors.businessErrors.push("La fecha de fin debe ser posterior a la de inicio")
   }
 
@@ -189,13 +211,12 @@ const validateReservationData = (reservationData) => {
   return errors
 }
 
-const prepareReservationPayload = (reservationData) => {
-
+const prepareReservationPayload = (reservationData, selectedPlan) => {
   const payload = {
     idUser: Number(reservationData.idUser),
     idPlan: Number(reservationData.idPlan),
     idCabin: reservationData.idCabin ? Number(reservationData.idCabin) : null,
-    idRoom: reservationData.idRoom ? Number(reservationData.idRoom) : null, // ✅ Agregado
+    idRoom: reservationData.idRoom ? Number(reservationData.idRoom) : null,
     startDate: reservationData.startDate,
     endDate: reservationData.endDate,
     status: reservationData.status || "Reservado",
@@ -203,20 +224,23 @@ const prepareReservationPayload = (reservationData) => {
     companionCount: Array.isArray(reservationData.companions) ? reservationData.companions.length : 0,
     companions: Array.isArray(reservationData.companions) ? reservationData.companions : [],
     paymentMethod: reservationData.paymentMethod || "Efectivo",
-    services: Array.isArray(reservationData.services) ? reservationData.services : [], // ✅ Agregado
+    services: Array.isArray(reservationData.services) ? reservationData.services : [],
+  };
+
+  // Limpia endDate si el plan no tiene alojamiento
+  if (!planHasAccommodation(selectedPlan)) {
+    delete payload.endDate;
   }
 
-  return payload
-}
+  return payload;
+};
 
 export const createReservation = async (reservationData) => {
   try {
+    const planes = await getAllPlanes();
+    const selectedPlan = planes.find(p => p.idPlan === Number(reservationData.idPlan));
+    const errors = validateReservationData(reservationData, selectedPlan);
 
-
-    // Validar datos
-    const errors = validateReservationData(reservationData)
-
-    // Si hay errores, lanzar excepción
     if (errors.missingFields.length > 0 || errors.typeErrors.length > 0 || errors.businessErrors.length > 0) {
       const errorMessages = [
         errors.missingFields.length > 0 ? `Campos requeridos: ${errors.missingFields.join(", ")}` : "",
@@ -224,25 +248,35 @@ export const createReservation = async (reservationData) => {
         errors.businessErrors.length > 0 ? `Errores de negocio: ${errors.businessErrors.join(", ")}` : "",
       ]
         .filter(Boolean)
-        .join(" | ")
+        .join(" | ");
 
-      throw new Error(errorMessages)
+      throw new Error(errorMessages);
     }
 
-    // Preparar payload
-    const payload = prepareReservationPayload(reservationData)
+    if (reservationData.idRoom) {
+      const disponible = await isBedroomAvailable(
+        reservationData.idRoom,
+        reservationData.startDate,
+        reservationData.endDate
+      );
+      if (!disponible) {
+        throw new Error("La habitación ya está reservada para esas fechas.");
+      }
+    }
 
-
-    // Enviar solicitud
+    // Usa el selectedPlan aquí
+    const payload = prepareReservationPayload(reservationData, selectedPlan);
+    // ...antes de enviar la petición
+    console.log("Payload enviado al backend:", payload);
     const response = await axios.post(API_URL_RESERVATIONS, payload, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
       timeout: 5000,
-    })
+    });
 
-    return response.data
+    return response.data;
   } catch (error) {
     console.error("❌ Error en createReservation:", {
       message: error.message,
@@ -263,16 +297,15 @@ export const createReservation = async (reservationData) => {
 
 export const updateReservation = async (idReservation, reservationData) => {
   try {
-
-    // Validar ID - asegurar que sea un número entero positivo
-    const reservationId = Number(idReservation)
-
+    const reservationId = Number(idReservation);
     if (isNaN(reservationId) || !Number.isInteger(reservationId) || reservationId <= 0) {
       throw new Error("El ID de la reserva debe ser un número entero positivo")
     }
 
-    // Validar datos de la reserva
-    const errors = validateReservationData(reservationData)
+    // Busca el plan para la validación y el payload
+    const planes = await getAllPlanes();
+    const selectedPlan = planes.find(p => p.idPlan === Number(reservationData.idPlan));
+    const errors = validateReservationData(reservationData, selectedPlan);
 
     // Si hay errores, lanzar excepción
     if (errors.missingFields.length > 0 || errors.typeErrors.length > 0 || errors.businessErrors.length > 0) {
@@ -282,43 +315,40 @@ export const updateReservation = async (idReservation, reservationData) => {
         errors.businessErrors.length > 0 ? `Errores de negocio: ${errors.businessErrors.join(", ")}` : "",
       ]
         .filter(Boolean)
-        .join(" | ")
+        .join(" | ");
 
-      throw new Error(errorMessages)
+      throw new Error(errorMessages);
     }
 
     // Verificar primero si la reserva existe
     try {
-      const { data } = await axios.get(`${API_URL_RESERVATIONS}/${reservationId}`)
+      const { data } = await axios.get(`${API_URL_RESERVATIONS}/${reservationId}`);
       if (!data || !data.idReservation) {
-        throw new Error(`La reserva con ID ${reservationId} no existe`)
+        throw new Error(`La reserva con ID ${reservationId} no existe`);
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        throw new Error(`La reserva con ID ${reservationId} no existe`)
+        throw new Error(`La reserva con ID ${reservationId} no existe`);
       }
-      throw error
+      throw error;
     }
 
-    // Preparar payload
+    // Usa el selectedPlan aquí
     const payload = {
-      ...prepareReservationPayload(reservationData),
-      // Incluir el ID de la reserva en el payload si es requerido por el API
+      ...prepareReservationPayload(reservationData, selectedPlan),
       idReservation: reservationId,
-    }
+    };
 
-
-
-    // Enviar solicitud
+    console.log("Payload enviado al backend (update):", payload);
     const response = await axios.put(`${API_URL_RESERVATIONS}/${reservationId}`, payload, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
       timeout: 10000,
-    })
+    });
 
-    return response.data
+    return response.data;
   } catch (error) {
     console.error("❌ Error detallado en updateReservation:", {
       message: error.message,
@@ -514,3 +544,28 @@ export const getReservationPayments = async (reservationId) => {
     return []
   }
 }
+
+// Verifica si dos rangos de fechas se solapan
+const isDateRangeOverlap = (startA, endA, startB, endB) => {
+  return (
+    new Date(startA) <= new Date(endB) &&
+    new Date(endA) >= new Date(startB)
+  );
+};
+
+// Valida si la habitación está disponible para el rango de fechas
+export const isBedroomAvailable = async (idRoom, startDate, endDate) => {
+  const allReservations = await getReservation();
+  return !allReservations.some(res =>
+    res.idRoom === idRoom &&
+    isDateRangeOverlap(startDate, endDate, res.startDate, res.endDate)
+  );
+};
+
+const planHasAccommodation = (plan) => {
+  // Considera alojamiento si hay habitaciones o cabañas asignadas
+  return (
+    (Array.isArray(plan?.bedroomDistribution) && plan.bedroomDistribution.length > 0) ||
+    (Array.isArray(plan?.cabinDistribution) && plan.cabinDistribution.length > 0)
+  );
+};

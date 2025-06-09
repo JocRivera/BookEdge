@@ -6,16 +6,16 @@ import { X } from "lucide-react"
 import PropTypes from "prop-types"
 import "./componentsReservations.css"
 
-// Mantener todas las importaciones originales
 import useReservationForm from "./reservationHooks"
-import { calculateTotal, updateAvailability, createSelectionHandlers } from "./reservationUtils"
-import { BasicInfoStep, CompanionsStep, AvailabilityStep} from "./reservationSteps"
+import { BasicInfoStep, CompanionsStep, AvailabilityStep } from "./reservationSteps"
 import { createReservation, updateReservation, addCompanionReservation } from "../../../services/reservationsService"
 import { createCompanion, deleteCompanion } from "../../../services/companionsService"
 import { getUsers, getAllPlanes, getCabins, getBedrooms, getServices } from "../../../services/reservationsService"
 import { getReservationPayments, addPaymentToReservationWithId } from "../../../services/paymentsService"
 import { useAlert } from "../../../context/AlertContext"
 import PaymentForm from "../componentPayments/formPayments"
+import { calculateTotal } from "./reservationUtils" // <-- asegúrate de importar esto
+import { createSelectionHandlers, updateAvailability, planHasAccommodation } from "./reservationUtils" // <-- importa si son utilidades propias
 
 function FormReservation({
   reservationData = null,
@@ -25,7 +25,14 @@ function FormReservation({
   isReadOnly = false,
   preloadedData = null,
 }) {
-  // Mantener toda la lógica de estado original
+  const {
+    formData,
+    updateFormData,
+    errors,
+    setFieldError,
+    validateStep, // <-- agrégalo aquí
+  } = useReservationForm(reservationData || preloadedData)
+
   const [step, setStep] = useState(1)
   const [tempPayments, setTempPayments] = useState([])
   const [loading, setLoading] = useState(false)
@@ -33,22 +40,15 @@ function FormReservation({
   const [isAlertActive, setIsAlertActive] = useState(false)
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false)
   const [paymentsKey, setPaymentsKey] = useState(0);
+  const [planes, setPlanes] = useState([]);
   const modalRef = useRef(null)
 
   const isClientMode = preloadedData?.isClientMode || false
   const clientUser = preloadedData?.user || null
   const { showAlert } = useAlert()
 
-  // Mantener el hook original
-  const { formData, updateFormData, errors, validateStep } = useReservationForm(reservationData)
-
-  const setFormData = (newData) => {
-    if (typeof newData === "function") {
-      updateFormData(newData(formData))
-    } else {
-      updateFormData(newData)
-    }
-  }
+  // Simplemente usa updateFormData directamente
+  const setFormData = updateFormData
 
   const clearError = (fieldName) => {
     updateFormData((prev) => ({
@@ -95,99 +95,43 @@ function FormReservation({
     })
   }
 
-  // Mantener toda la lógica de handleChange original
-  const handleChange = async (e) => {
+  // Validación de campo individual (puedes moverla a utils si prefieres)
+  const validateReservationField = (name, value, data) => {
+    let error = ""
+    switch (name) {
+      case "idUser":
+        if (!value) error = "Cliente es requerido"
+        break
+      case "idPlan":
+        if (!value) error = "Plan es requerido"
+        break
+      case "startDate":
+        if (!value) error = "Fecha de inicio es requerida"
+        break
+      case "endDate":
+        if (!value) error = "Fecha de fin es requerida"
+        break
+      case "companionCount":
+        if (data.hasCompanions && (!value || value < 1)) error = "Debe especificar al menos 1 acompañante"
+        break
+
+      default:
+        break
+    }
+    return error
+  }
+
+  // Handler de cambio con validación en tiempo real
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target
+    updateFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }))
 
-    setFormData((prev) => {
-      let newData = { ...prev }
-
-      if (type === "checkbox") {
-        newData[name] = checked
-
-        if (name === "hasCompanions" && !checked) {
-          newData.companionCount = 0
-          newData.companions = []
-        } else if (name === "hasCompanions" && checked && !newData.companionCount) {
-          newData.companionCount = 1
-        }
-      } else {
-        newData[name] = value
-      }
-
-      if (name === "companionCount" || name === "hasCompanions") {
-        newData.idCabin = ""
-        newData.idRoom = ""
-
-        const MAX_COMPANIONS = 6
-        let companionCount = Number.parseInt(newData.companionCount) || 0
-
-        if (companionCount > MAX_COMPANIONS) {
-          newData.companionCount = MAX_COMPANIONS
-          toast.warning(`⚠️ El máximo de acompañantes es ${MAX_COMPANIONS}. Se ha ajustado automáticamente.`, {
-            position: "top-right",
-            autoClose: 5000,
-          })
-          companionCount = MAX_COMPANIONS
-        } else if (companionCount < 0) {
-          newData.companionCount = 0
-          companionCount = 0
-        }
-
-        newData = updateAvailability(newData)
-
-        const finalCompanionCount = Number.parseInt(newData.companionCount) || 0
-        const finalTotalPeople = finalCompanionCount + 1
-        let message = ""
-
-        if (newData.cabins && newData.bedrooms) {
-          newData.availableCabins = filterAccommodationsByCapacity(newData.cabins, finalTotalPeople, 7)
-          newData.availableBedrooms = filterAccommodationsByCapacity(newData.bedrooms, finalTotalPeople, 4)
-        }
-
-        // Mantener toda la lógica de mensajes original
-        if (finalTotalPeople <= 2) {
-          const availableRooms = newData.availableBedrooms.length
-          if (availableRooms > 0) {
-            message = `🛏️ Disponibles ${availableRooms} habitaciones para ${finalTotalPeople} persona${finalTotalPeople > 1 ? "s" : ""}`
-          } else {
-            const availableCabins = newData.availableCabins.length
-            message =
-              availableCabins > 0
-                ? `🏠 Disponibles ${availableCabins} cabañas para ${finalTotalPeople} persona${finalTotalPeople > 1 ? "s" : ""}`
-                : `❌ No hay alojamiento disponible para ${finalTotalPeople} persona${finalTotalPeople > 1 ? "s" : ""}`
-          }
-        } else if (finalTotalPeople <= 4) {
-          const availableCabins = newData.availableCabins.length
-          const availableRooms = newData.availableBedrooms.length
-
-          if (availableCabins > 0) {
-            message = `🏠 Disponibles ${availableCabins} cabañas para ${finalTotalPeople} personas`
-          } else if (availableRooms > 0) {
-            message = `🛏️ Disponibles ${availableRooms} habitaciones para ${finalTotalPeople} personas`
-          } else {
-            message = `❌ No hay alojamiento disponible para ${finalTotalPeople} personas`
-          }
-        } else {
-          const availableCabins = newData.availableCabins.length
-          message =
-            availableCabins > 0
-              ? `🏠 Disponibles ${availableCabins} cabañas para ${finalTotalPeople} personas`
-              : `❌ No hay cabañas disponibles para ${finalTotalPeople} personas`
-        }
-
-        setTimeout(() => {
-          toast.info(message, {
-            position: "top-right",
-            autoClose: 5000,
-          })
-        }, 100)
-      }
-
-      return newData
-    })
-
-    clearError(name)
+    // Validación en tiempo real
+    const error = validateReservationField(name, type === "checkbox" ? checked : value, formData)
+    setFieldError(name, error)
   }
 
   // Mantener todos los handlers originales
@@ -521,31 +465,43 @@ function FormReservation({
 
     return { results, errors }
   }
-
+console.log("Valor de endDate en formData:", formData.endDate);
   // Mantener toda la lógica de sanitización original
-  const sanitizeDataForServer = (data) => {
+  const sanitizeDataForServer = (data, planes) => {
     const payload = {
       idUser: Number(data.idUser),
       idPlan: Number(data.idPlan),
       startDate: data.startDate,
       endDate: data.endDate,
-      status: data.status || "Pendiente",
-    }
+      status: data.status || "Reservado",
+    };
 
     if (data.idCabin) {
-      payload.idCabin = Number(data.idCabin)
+      payload.idCabin = Number(data.idCabin);
     } else if (data.idRoom) {
-      payload.idRoom = Number(data.idRoom)
+      payload.idRoom = Number(data.idRoom);
     }
 
-    if (data.selectedServices && Array.isArray(data.selectedServices) && data.selectedServices.length > 0) {
+    if (
+      data.selectedServices &&
+      Array.isArray(data.selectedServices) &&
+      data.selectedServices.length > 0
+    ) {
       payload.services = data.selectedServices.map((service) => ({
         serviceId: Number(service.serviceId),
         quantity: Number(service.quantity) || 1,
-      }))
+      }));
     }
 
-    return payload
+    // Usa la lista de planes pasada como argumento
+    const selectedPlan =
+      (planes || []).find((p) => p.idPlan === Number(data.idPlan)) || {};
+
+    if (!planHasAccommodation(selectedPlan)) {
+      delete payload.endDate;
+    }
+
+    return payload;
   }
 
   // Mantener toda la lógica de submit original
@@ -560,6 +516,9 @@ function FormReservation({
       return
     }
 
+    // Agrega este log antes de armar el payload
+    console.log("Valor de endDate en formData antes de enviar:", formData.endDate);
+
     const totalAmount = calculateTotal(formData, formData.planes || [])
     const clientName = formData.users?.find((u) => u.idUser === Number(formData.idUser))?.name || "Cliente"
     const planName = formData.planes?.find((p) => p.idPlan === Number(formData.idPlan))?.name || "Plan"
@@ -573,7 +532,13 @@ function FormReservation({
         try {
           setLoading(true)
 
-          const payload = sanitizeDataForServer(formData)
+          const payload = sanitizeDataForServer(formData, formData.planes || [])
+
+          const selectedPlan = (formData.planes || []).find(p => p.idPlan === Number(formData.idPlan));
+          console.log("Planes disponibles:", formData.planes || []);
+          console.log("Plan seleccionado:", selectedPlan);
+          console.log("¿Tiene alojamiento?:", planHasAccommodation(selectedPlan));
+          console.log("Payload enviado:", payload);
 
           let resultado
           if (reservationData?.idReservation) {
@@ -627,12 +592,27 @@ function FormReservation({
           if (tempPayments.length > 0) {
             console.log("💳 Procesando pagos temporales:", tempPayments.length)
 
+            // Supón que esto va después de crear la reserva y obtener el idReservation
             const paymentResults = await Promise.allSettled(
               tempPayments.map((payment) => {
-                const cleanPayment = { ...payment }
-                delete cleanPayment.tempId
-                delete cleanPayment.isTemp
-                return addPaymentToReservationWithId(resultado.idReservation, cleanPayment)
+                const cleanPayment = { ...payment };
+                delete cleanPayment.tempId;
+                delete cleanPayment.isTemp;
+
+                // Si hay comprobante (voucher) y es un archivo, usa FormData
+                if (cleanPayment.voucher instanceof File) {
+                  const formData = new FormData();
+                  Object.entries(cleanPayment).forEach(([key, value]) => {
+                    // Solo agrega si no es undefined ni null
+                    if (value !== undefined && value !== null) {
+                      formData.append(key, value);
+                    }
+                  });
+                  // El servicio ya agrega idReservation si es necesario
+                  return addPaymentToReservationWithId(resultado.idReservation, formData);
+                } else {
+                  return addPaymentToReservationWithId(resultado.idReservation, cleanPayment);
+                }
               }),
             )
 
@@ -655,6 +635,12 @@ function FormReservation({
               })
             }
           }
+
+          if (planHasAccommodation(selectedPlan) && !formData.endDate) {
+  toast.error("La fecha de fin es obligatoria para este plan.");
+  setLoading(false);
+  return;
+}
 
           setLoading(false)
           onSave(resultado)
@@ -862,6 +848,29 @@ function FormReservation({
       })
     }
   }, [reservationData, isOpen, isClientMode, clientUser])
+
+  useEffect(() => {
+    if (isOpen && !reservationData) {
+      updateFormData({
+        idUser: "",
+        idPlan: "",
+        startDate: "",
+        endDate: "",
+        status: "Pendiente",
+        hasCompanions: false,
+        companionCount: 0,
+        companions: [],
+        idCabin: "",
+        idRoom: "",
+        selectedServices: [],
+        // Agrega aquí otros campos que uses en tu formulario
+      });
+      setFieldError({});
+      setStep(1); // Opcional: vuelve al primer paso del formulario
+      setTempPayments([]);
+      setReservationPayments([]);
+    }
+  }, [isOpen, reservationData]);
 
   if (!isOpen) return null
 

@@ -425,7 +425,7 @@ function TableReservations() {
     <div className="reservations-table-container">
       {/* Encabezado y búsqueda */}
       <div className="reservations-title-container">
-        <h2 className="reservations-table-title">Reservas</h2>
+        <h2 className="reservations-table-title"> Gestión de Reservas</h2>
       </div>
 
       <div className="reservations-container-search">

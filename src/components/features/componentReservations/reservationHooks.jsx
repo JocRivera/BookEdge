@@ -45,6 +45,7 @@ const useReservationForm = (initialData = null) => {
   const [errors, setErrors] = useState({})
   const [currentStep, setCurrentStep] = useState(0)
 
+  
   // Función para actualizar datos del formulario
   const updateFormData = (data) => {
     if (typeof data === "function") {
@@ -247,6 +248,11 @@ const useReservationForm = (initialData = null) => {
     return Object.keys(stepErrors).length === 0
   }
 
+  // NUEVO: función para actualizar un error de campo en tiempo real
+  const setFieldError = (field, error) => {
+    setErrors((prev) => ({ ...prev, [field]: error }))
+  }
+
   return {
     // Estado
     formData,
@@ -257,6 +263,7 @@ const useReservationForm = (initialData = null) => {
     updateFormData,
     clearError,
     clearAllErrors,
+    setFieldError, // <-- agrega esto
 
     // Navegación
     nextStep,

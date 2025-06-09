@@ -1,15 +1,8 @@
-
 import PropTypes from "prop-types"
 import { useState, useEffect } from "react"
 import {
-  FaCreditCard,
-  FaMoneyBillWave,
-  FaCalendarAlt,
-  FaCheckCircle,
-  FaExchangeAlt,
   FaEye,
-  FaUpload,
-  FaExclamationTriangle,
+
 } from "react-icons/fa"
 import { toast } from "react-toastify"
 import { useAlert } from "../../../context/AlertContext"
@@ -340,20 +333,6 @@ const PaymentForm = ({
     }
   }
 
-  const renderPaymentMethodIcon = () => {
-    switch (paymentData.paymentMethod) {
-      case "Tarjeta de Crédito":
-      case "Tarjeta de Débito":
-        return <FaCreditCard className="field-icon" />
-      case "Transferencia Bancaria":
-        return <FaExchangeAlt className="field-icon" />
-      case "Efectivo":
-        return <FaMoneyBillWave className="field-icon" />
-      default:
-        return <FaCreditCard className="field-icon" />
-    }
-  }
-
   const formatCOP = (value) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -433,242 +412,189 @@ const PaymentForm = ({
   }
 
   return (
-    <div
-      className={`payment-form-container ${isViewMode ? "view-mode" : ""}`}
-      onClick={(e) => {
-        // Detener la propagación de cualquier clic dentro del formulario de pago
-        e.stopPropagation()
-      }}
-    >
-      <h3 className="payment-form-title">{isViewMode ? "Detalles del Pago" : "Información de Pago"}</h3>
-
-      {/* Resumen de pago */}
-      <div className="payment-summary-card">
-        <div className="payment-total-display">
-          <span>Total a Pagar:</span>
-          <strong>{formatCOP(totalAmount)}</strong>
+    <>
+           <div className="form-row">
+        <div className="form-group">
+          <label htmlFor="paymentMethod" className="form-label">
+             Método de Pago *
+          </label>
+          {isViewMode ? (
+            <div className="form-value">{paymentData.paymentMethod || "N/A"}</div>
+          ) : (
+            <>
+              <select
+                id="paymentMethod"
+                name="paymentMethod"
+                value={paymentData.paymentMethod}
+                onChange={handleChange}
+                onBlur={() => handleBlur("paymentMethod")}
+                className={`form-input ${shouldShowError("paymentMethod") ? "error" : ""}`}
+              >
+                <option value="">Seleccione un método</option>
+                <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Otro">Otro</option>
+              </select>
+              {shouldShowError("paymentMethod") && (
+                <div className="error-message">
+                  {errors.paymentMethod}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div className="form-group">
+          <label htmlFor="amount" className="form-label">
+             Monto Pagado *
+          </label>
+          {isViewMode ? (
+            <div className="form-value">{formatCOP(Number.parseFloat(paymentData.amount || 0))}</div>
+          ) : (
+            <>
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                value={paymentData.amount}
+                onChange={handleChange}
+                onBlur={() => handleBlur("amount")}
+                min="1000"
+                step="1000"
+                placeholder="000"
+                className={`form-input ${shouldShowError("amount") ? "error" : ""}`}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isViewMode && !isSubmitting) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleSubmit(e)
+                  }
+                }}
+              />
+              {shouldShowError("amount") && (
+                <div className="error-message">
+                  {errors.amount}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
-      {/* Grid de dos columnas */}
-      <div className="payment-form-grid">
-        {/* Columna izquierda */}
-        <div className="payment-form-column">
-          {/* Campo Método de Pago */}
-          <div className="payment-field-group">
-            <label htmlFor="paymentMethod" className="payment-field-label">
-              {renderPaymentMethodIcon()} Método de Pago *
-            </label>
-            {isViewMode ? (
-              <div className="payment-field-value">{paymentData.paymentMethod || "N/A"}</div>
-            ) : (
-              <>
-                <select
-                  id="paymentMethod"
-                  name="paymentMethod"
-                  value={paymentData.paymentMethod}
-                  onChange={handleChange}
-                  onBlur={() => handleBlur("paymentMethod")}
-                  className={`payment-field-input ${shouldShowError("paymentMethod") ? "error" : ""}`}
-                >
-                  <option value="">Seleccione un método</option>
-                  <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
-                  <option value="Tarjeta de Débito">Tarjeta de Débito</option>
-                  <option value="Transferencia Bancaria">Transferencia Bancaria</option>
-                  <option value="Efectivo">Efectivo</option>
-                  <option value="Otro">Otro</option>
-                </select>
-                {shouldShowError("paymentMethod") && (
-                  <div className="payment-error-message">
-                    <FaExclamationTriangle className="error-icon" />
-                    {errors.paymentMethod}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Campo Monto */}
-          <div className="payment-field-group">
-            <label htmlFor="amount" className="payment-field-label">
-              <FaMoneyBillWave className="field-icon" /> Monto Pagado *
-            </label>
-            {isViewMode ? (
-              <div className="payment-field-value">{formatCOP(Number.parseFloat(paymentData.amount || 0))}</div>
-            ) : (
-              <>
+      <div className="form-row">
+        <div className="form-group">
+          <label htmlFor="paymentDate" className="form-label">
+             Fecha de Pago *
+          </label>
+          {isViewMode ? (
+            <div className="form-value">{paymentData.paymentDate || "N/A"}</div>
+          ) : (
+            <>
+              <input
+                type="date"
+                id="paymentDate"
+                name="paymentDate"
+                value={paymentData.paymentDate}
+                onChange={handleChange}
+                onBlur={() => handleBlur("paymentDate")}
+                max={new Date().toISOString().split("T")[0]}
+                className={`form-input ${shouldShowError("paymentDate") ? "error" : ""}`}
+              />
+              {shouldShowError("paymentDate") && (
+                <div className="error-message">
+                  {errors.paymentDate}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div className="form-group">
+          <label className="form-label">
+             Estado del Pago
+          </label>
+          {isViewMode ? (
+            <div className="form-value">{paymentData.status || "N/A"}</div>
+          ) : (
+            <div className="radio-group">
+              <label className="radio-option">
                 <input
-                  type="number"
-                  id="amount"
-                  name="amount"
-                  value={paymentData.amount}
+                  type="radio"
+                  name="status"
+                  value="Pendiente"
+                  checked={paymentData.status === "Pendiente"}
                   onChange={handleChange}
-                  onBlur={() => handleBlur("amount")}
-                  min="1000"
-                  step="1000"
-                  placeholder="000"
-                  className={`payment-field-input ${shouldShowError("amount") ? "error" : ""}`}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !isViewMode && !isSubmitting) {
-                      e.preventDefault()
-                      e.stopPropagation() // ✅ PREVENIR PROPAGACIÓN
-                      handleSubmit(e)
-                    }
-                  }}
                 />
-                {shouldShowError("amount") && (
-                  <div className="payment-error-message">
-                    <FaExclamationTriangle className="error-icon" />
-                    {errors.amount}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Columna derecha */}
-        <div className="payment-form-column">
-          {/* Campo Fecha de Pago */}
-          <div className="payment-field-group">
-            <label htmlFor="paymentDate" className="payment-field-label">
-              <FaCalendarAlt className="field-icon" /> Fecha de Pago *
-            </label>
-            {isViewMode ? (
-              <div className="payment-field-value">{paymentData.paymentDate || "N/A"}</div>
-            ) : (
-              <>
+                <span className="radio-custom"></span>
+                Pendiente
+              </label>
+              <label className="radio-option">
                 <input
-                  type="date"
-                  id="paymentDate"
-                  name="paymentDate"
-                  value={paymentData.paymentDate}
+                  type="radio"
+                  name="status"
+                  value="Confirmado"
+                  checked={paymentData.status === "Confirmado"}
                   onChange={handleChange}
-                  onBlur={() => handleBlur("paymentDate")}
-                  max={new Date().toISOString().split("T")[0]}
-                  className={`payment-field-input ${shouldShowError("paymentDate") ? "error" : ""}`}
                 />
-                {shouldShowError("paymentDate") && (
-                  <div className="payment-error-message">
-                    <FaExclamationTriangle className="error-icon" />
-                    {errors.paymentDate}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Campo Estado */}
-          <div className="payment-field-group">
-            <label className="payment-field-label">
-              <FaCheckCircle className="field-icon" /> Estado del Pago
-            </label>
-            {isViewMode ? (
-              <div className="payment-field-value">{paymentData.status || "N/A"}</div>
-            ) : (
-              <div className="payment-status-options">
-                <label className="payment-radio-label">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="Pendiente"
-                    checked={paymentData.status === "Pendiente"}
-                    onChange={handleChange}
-                  />
-                  <span className="radio-custom"></span>
-                  Pendiente
-                </label>
-                <label className="payment-radio-label">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="Confirmado"
-                    checked={paymentData.status === "Confirmado"}
-                    onChange={handleChange}
-                  />
-                  <span className="radio-custom"></span>
-                  Confirmado
-                </label>
-              </div>
-            )}
-          </div>
+                <span className="radio-custom"></span>
+                Confirmado
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Campo Comprobante - Ancho completo */}
-      <div className="payment-field-group payment-field-full-width">
-        <label htmlFor="voucher" className="payment-field-label">
-          <FaUpload className="field-icon" /> Comprobante de Pago
-        </label>
-        {!isViewMode && (
-          <input
-            type="file"
-            id="voucher"
-            name="voucher"
-            onChange={handleFileChange}
-            accept="image/*,.pdf"
-            className={`payment-field-input file-input ${shouldShowError("voucher") ? "error" : ""}`}
-          />
-        )}
-        {shouldShowError("voucher") && (
-          <div className="payment-error-message">
-            <FaExclamationTriangle className="error-icon" />
-            {errors.voucher}
-          </div>
-        )}
-        {renderVoucherPreview()}
+      <div className="form-row">
+        <div className="form-group full-width">
+          <label htmlFor="voucher" className="form-label">
+            Comprobante de Pago
+          </label>
+          {!isViewMode && (
+            <input
+              type="file"
+              id="voucher"
+              name="voucher"
+              onChange={handleFileChange}
+              accept="image/*,.pdf"
+              className={`form-input file-input ${shouldShowError("voucher") ? "error" : ""}`}
+            />
+          )}
+          {shouldShowError("voucher") && (
+            <div className="error-message">
+              {errors.voucher}
+            </div>
+          )}
+          {renderVoucherPreview()}
+        </div>
       </div>
 
-      {/* Error de envío */}
       {errors.submit && (
-        <div className="payment-error-message submit-error">
-          <FaExclamationTriangle className="error-icon" />
+        <div className="error-message submit-error">
           {errors.submit}
         </div>
       )}
 
-      {/* Botones de acción */}
-      <div className="payment-form-actions">
+      <div className="form-actions">
         {!isViewMode && onCancel && (
-          <button type="button" className="payment-cancel-btn" onClick={handleCancel} disabled={isSubmitting}>
+          <button
+            type="button"
+            className="reservation-cancel-button"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+          >
             Cancelar
           </button>
         )}
-
         <button
           type="button"
-          className={`payment-submit-btn ${isViewMode ? "view-mode" : ""} ${isSubmitting ? "loading" : ""}`}
+          className={`reservation-submit-button ${isSubmitting ? "loading" : ""}`}
           disabled={isSubmitting || isViewMode}
-          onClick={(e) => {
-            console.log("💳 PaymentForm submit button clicked")
-            // Prevenir la propagación del evento de forma más agresiva
-            e.preventDefault()
-            e.stopPropagation()
-            if (e.nativeEvent) {
-              e.nativeEvent.stopImmediatePropagation?.()
-            }
-
-            if (isViewMode) {
-              console.log("💳 PaymentForm isViewMode is true, calling onCloseView")
-              onCloseView?.()
-            } else {
-              console.log("💳 PaymentForm isViewMode is false, calling handleSubmit")
-              handleSubmit(e)
-            }
-          }}
+          onClick={handleSubmit}
         >
-          {isViewMode ? (
-            "Cerrar"
-          ) : isSubmitting ? (
-            <>
-              <span className="spinner"></span> Procesando pago...
-            </>
-          ) : (
-            "Confirmar Pago"
-          )}
+          {isViewMode ? "Cerrar" : isSubmitting ? <><span className="loading-spinner"></span> Procesando pago...</> : "Confirmar Pago"}
         </button>
       </div>
-    </div>
+    </>
   )
 }
 

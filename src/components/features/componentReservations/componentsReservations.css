@@ -82,7 +82,7 @@
 .basic-info-step-container .step-title:hover::after {
   transform: scaleX(1.1);
 }
- /* Estilos generales de pasos */
+/* Estilos generales de pasos */
 .step-title {
   font-size: 1.3rem;
   font-weight: 600;
@@ -136,9 +136,88 @@
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
 }
 
+/* Mensajes de error - TAMAÑO INTERMEDIO CORREGIDO */
+.error-message,
+.form-group .error-message,
+.basic-info-form .error-message,
+.payment-form .error-message,
+div .error-message,
+span.error-message,
+p.error-message {
+  color: #e74c3c !important;
+  font-size: 15px !important; /* Tamaño intermedio - más legible */
+  font-weight: 400 !important; /* Peso normal */
+  display: block !important;
+  text-align: left !important;
+  width: 100% !important;
+  padding: 0 !important;
+  padding-left: 0.1rem !important;
+  background: none !important;
+  border: none !important;
+  margin: 3px 0 0 0 !important; /* Margen ligeramente mayor */
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  line-height: 1.8 !important; /* Línea más cómoda para leer */
+  opacity: 1 !important; /* Sin transparencia para mejor legibilidad */
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+
+}
+
+/* Asegurar que se aplique en todos los contextos */
+.form-input.error + .error-message,
+.form-input.error ~ .error-message,
+.form-group.error .error-message,
+input.error + .error-message,
+input.error ~ .error-message {
+  color: #e74c3c !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  margin-top: 3px !important;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+  font-style: normal !important;
+}
+
+/* Para móviles - solo ligeramente más pequeño */
+@media (max-width: 768px) {
+  .error-message,
+  .form-group .error-message,
+  .basic-info-form .error-message,
+  .payment-form .error-message,
+  div .error-message,
+  span.error-message,
+  p.error-message,
+  .form-input.error + .error-message,
+  .form-input.error ~ .error-message {
+    font-size: 15px !important;
+    margin-top: 2px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-message,
+  .form-group .error-message,
+  .basic-info-form .error-message,
+  .payment-form .error-message,
+  div .error-message,
+  span.error-message,
+  p.error-message,
+  .form-input.error + .error-message,
+  .form-input.error ~ .error-message {
+    font-size: 15px !important;
+    margin-top: 2px !important;
+  }
+}
+
 .form-input.error {
-  border-color: #dc3545;
-  background-color: rgba(220, 53, 69, 0.05);
+  border-color: #e74c3c !important;
+  background-color: #fff6f6 !important;
+  padding: 0.6rem 1rem;
+}
+
+.form-input.error:focus {
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.15) !important;
 }
 
 .form-input:disabled {
@@ -190,11 +269,6 @@
   border-color: var(--reservations-primary);
   box-shadow: 0 0 0 4px rgba(78, 84, 200, 0.1);
   transform: translateY(-1px);
-}
-
-.basic-info-form .form-input.error {
-  border-color: var(--reservations-danger);
-  background-color: rgba(220, 53, 69, 0.05);
 }
 
 .basic-info-form .form-input:disabled {
@@ -316,18 +390,6 @@
 
 .checkbox-label {
   font-weight: 500;
-}
-
-/* Mensajes de error */
-/* Mensajes de error */
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #dc3545;
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-top: 0.25rem;
 }
 
 /* Hints de input */
@@ -485,11 +547,6 @@
   transform: translateY(-1px);
 }
 
-.payment-form .form-input.error {
-  border-color: var(--danger-color);
-  background-color: rgba(220, 53, 69, 0.05);
-}
-
 .payment-form .form-input:disabled {
   background-color: #f8f9fa;
   color: #6c757d;
@@ -586,21 +643,6 @@
 
 .form-input[type="file"]:hover {
   border-color: #4299e1;
-}
-
-/* Mensajes de error */
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--danger-color);
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-top: 0.25rem;
-}
-
-.error-icon {
-  font-size: 0.9rem;
 }
 
 /* Hints de input */
@@ -752,6 +794,11 @@
     text-align: center;
     gap: 0.75rem;
   }
+
+  /* Error messages más pequeños en móvil */
+  .error-message {
+    font-size: 9px; /* Aún más pequeño en móvil */
+  }
 }
 
 @media (max-width: 480px) {
@@ -786,6 +833,12 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
+  }
+
+  /* Error messages aún más pequeños en pantallas muy pequeñas */
+  .error-message {
+    font-size: 8px;
+    margin-top: 1px;
   }
 }
 
@@ -999,7 +1052,6 @@
   align-items: center;
   z-index: 3000;
   overflow-y: auto;
-  
 }
 
 .reservation-modal-container {
@@ -1096,7 +1148,6 @@
   margin: 0;
 }
 
-
 .reservation-close-button {
   border: none;
   cursor: pointer;
@@ -1111,7 +1162,6 @@
 .reservation-close-button:hover {
   color: #3e9de5;
 }
-
 
 .steps-indicator {
   display: flex;
@@ -1211,11 +1261,6 @@
   width: auto;
 }
 
-.has-error select,
-.has-error input {
-  border-color: #ff4757 !important;
-}
-
 .reservation-modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -1274,7 +1319,6 @@
   background-color: #f7fafc;
   border-color: #cbd5e0;
 }
-
 
 /* Estilos para la búsqueda */
 .reservations-container-search {
@@ -1577,7 +1621,7 @@
 .option-item.selected {
   border-color: var(--reservations-success);
   background-color: #f6fff8;
-  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.10);
+  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.1);
 }
 
 .option-name {
@@ -1631,7 +1675,7 @@
 .service-item.selected {
   border-color: var(--reservations-success);
   background: #f6fff8;
-  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.10);
+  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.1);
 }
 
 .service-header {

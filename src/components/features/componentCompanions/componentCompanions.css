@@ -305,18 +305,7 @@
   background-color: var(--companions-card-bg);
 }
 
-.has-error input,
-.has-error select {
-  border-color: #ff5252;
-  background-color: rgba(255, 82, 82, 0.05);
-}
 
-.error-message {
-  color: #ff5252;
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
-  display: block;
-}
 
 /* Botones del formulario */
 .form-actions {

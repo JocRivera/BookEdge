@@ -448,24 +448,6 @@
   animation: pulse 0.3s ease;
 }
 
-/* Estados de error */
-.error-message {
-  color: var(--availability-danger);
-  background-color: rgba(220, 53, 69, 0.05);
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-  border-left: 4px solid var(--availability-danger);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.error-message::before {
-  font-size: 1.1rem;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .availability-step {

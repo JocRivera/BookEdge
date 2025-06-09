@@ -175,45 +175,10 @@
   cursor: not-allowed;
 }
 
-/* ===== ESTADOS DE ERROR ===== */
-.payment-field-input.error {
-  border-color: var(--danger-color);
-  background-color: rgba(220, 53, 69, 0.05);
-}
 
-.payment-field-input.error:focus {
-  border-color: var(--danger-color);
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
-}
 
-/* ===== MENSAJES DE ERROR ===== */
-.payment-error-message {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background-color: rgba(220, 53, 69, 0.1);
-  border: 1px solid rgba(220, 53, 69, 0.2);
-  border-radius: calc(var(--radius) / 2);
-  color: var(--danger-color);
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-top: 0.25rem;
-  animation: slideDown 0.2s ease-out;
-}
 
-.payment-error-message .error-icon {
-  color: var(--danger-color);
-  font-size: 1rem;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-}
 
-.submit-error {
-  margin-bottom: 1rem;
-  background-color: rgba(220, 53, 69, 0.15);
-  border-color: var(--danger-color);
-}
 
 /* ===== OPCIONES DE RADIO ===== */
 .payment-status-options {
@@ -791,14 +756,6 @@
   font-size: 0.85rem;
   color: var(--payments-text-light);
   margin-bottom: 0.5rem;
-}
-
-.refresh-error {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: #dc3545;
 }
 
 .refresh-actions {
@@ -1408,19 +1365,6 @@
   box-shadow: none;
 }
 
-/* Mensajes */
-.error-message {
-  color: #ff5252;
-  background-color: rgba(255, 82, 82, 0.1);
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: fadeIn 0.3s ease-out;
-  border-left: 4px solid #ff5252;
-}
 
 .loading-message,
 .no-results {
@@ -1848,5 +1792,134 @@
   .manual-refresh-btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Contenedor principal igual que pagos */
+.reservations-table-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font-family: "Poppins", sans-serif;
+  background: var(--payments-background, #f9f9ff);
+  animation: fadeIn 0.8s ease-out;
+}
+
+.reservations-table-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--payments-text-dark, #2d3748);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.reservations-table-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #8284ca, #0910e1);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.reservations-table-title:hover::after {
+  transform: scaleX(1.1);
+}
+
+.reservations-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.reservations-table-wrapper {
+  overflow-x: auto;
+  border-radius: 16px;
+  box-shadow: 0 15px 30px var(--payments-shadow-light, rgba(78, 84, 200, 0.1));
+  background: var(--payments-card-bg, #fff);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.reservations-table-wrapper:hover {
+  box-shadow: 0 25px 50px var(--payments-shadow-dark, rgba(78, 84, 200, 0.2));
+}
+
+.reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.reservations-table thead {
+  background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
+}
+
+.reservations-table th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--payments-primary-dark, #3a3f9e);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #f0f2ff 0%, #e0e1ff 100%);
+}
+
+.reservations-table td {
+  padding: 1.2rem 1.5rem;
+  font-size: 0.95rem;
+  color: var(--payments-text-dark, #2d3748);
+  border-bottom: 1px solid var(--payments-border, #e2e8f0);
+  transition: background-color 0.3s ease;
+}
+
+.reservations-table tr:last-child td {
+  border-bottom: none;
+}
+
+.reservations-table tr:hover td {
+  background-color: var(--payments-primary-hover, #f0f2ff);
+}
+
+/* Estados de reserva (puedes adaptar los de pagos) */
+.status-badge.confirmado {
+  background: rgba(46, 213, 115, 0.9);
+  color: white;
+}
+.status-badge.pendiente {
+  background: rgba(255, 165, 2, 0.9);
+  color: white;
+}
+.status-badge.anulado {
+  background: rgba(255, 71, 87, 0.9);
+  color: white;
+}
+.status-badge.reservado {
+  background: rgba(52, 152, 219, 0.9);
+  color: white;
+}
+
+/* Responsive igual que pagos */
+@media (max-width: 768px) {
+  .reservations-table-container {
+    padding: 1rem;
+  }
+  .reservations-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .reservations-table th,
+  .reservations-table td {
+    padding: 0.8rem 1rem;
   }
 }
