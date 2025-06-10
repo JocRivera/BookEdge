@@ -2,7 +2,8 @@ import axios from 'axios';
 
 // Crear instancia de axios con configuración base
 const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'https://backendbookedge-1.onrender.com',
+  // baseURL: 'http://localhost:3000',
   withCredentials: true
 });
 
@@ -13,7 +14,7 @@ let failedQueue = [];
 
 // Procesar la cola de peticiones fallidas
 const processQueue = (error, token = null) => {
-  console.log(`Procesando cola de peticiones fallidas: ${failedQueue.length} peticiones pendientes`);
+  console.log(`Procesando cola de peticiones fallidas: ${failedQueue.length} peticiones pendientes`,token);
   failedQueue.forEach(prom => {
     if (error) {
       console.log('Rechazando petición en cola debido a error:', error.message);

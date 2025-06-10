@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import {
@@ -17,6 +16,7 @@ import {
   setPrimaryImage,
 } from "../../../services/CabinService";
 import { getComforts } from "../../../services/ComfortService";
+import api from "../../../services/api";
 
 const initialFormData = {
   name: "",
@@ -302,6 +302,8 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
     }
   };
 
+  const API_BASE_URL = api.defaults.baseURL;
+
   if (!isOpen) return null;
 
   return (
@@ -492,7 +494,7 @@ const FormCabins = ({ isOpen, onClose, onSave, cabinToEdit }) => {
                           >
                             <figure className="image-preview-wrapper-cabin-admin">
                               <img
-                                src={`http://localhost:3000/uploads/${existingImage.imagePath}`}
+                                src={`${API_BASE_URL}/uploads/${existingImage.imagePath}`}
                                 alt={`Cabaña ${slotIndex + 1}`}
                                 className="preview-image-cabin-admin"
                               />

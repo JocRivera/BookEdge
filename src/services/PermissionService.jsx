@@ -1,12 +1,9 @@
-import axios from "axios";
-
-const API_URL_PERMISSION = "http://localhost:3000/permissions";
-const API_URL_PRIVILEGE = "http://localhost:3000/privileges";
+import api from "./api";
 
 class PermissionService {
     async getPermissions() {
         try {
-            const response = await axios.get(API_URL_PERMISSION);
+            const response = await api.get("/permissions");
             return response.data;
         } catch (error) {
             console.error("Error fetching permissions:", error);
@@ -16,7 +13,7 @@ class PermissionService {
 
     async getPermissionById(id) {
         try {
-            const response = await axios.get(`${API_URL_PERMISSION}/${id}`);
+            const response = await api.get(`/permissions/${id}`);
             return response.data;
         } catch (error) {
             console.error("Error fetching permission by ID:", error);
@@ -26,7 +23,7 @@ class PermissionService {
 
     async createPermission(permissionData) {
         try {
-            const response = await axios.post(API_URL_PERMISSION, permissionData);
+            const response = await api.post("/permissions", permissionData);
             return response.data;
         } catch (error) {
             console.error("Error creating permission:", error);
@@ -36,7 +33,7 @@ class PermissionService {
 
     async updatePermission(id, permissionData) {
         try {
-            const response = await axios.put(`${API_URL_PERMISSION}/${id}`, permissionData);
+            const response = await api.put(`/permissions/${id}`, permissionData);
             return response.data;
         } catch (error) {
             console.error("Error updating permission:", error);
@@ -46,7 +43,7 @@ class PermissionService {
 
     async deletePermission(id) {
         try {
-            const response = await axios.delete(`${API_URL_PERMISSION}/${id}`);
+            const response = await api.delete(`/permissions/${id}`);
             return response.data;
         } catch (error) {
             console.error("Error deleting permission:", error);
@@ -56,7 +53,7 @@ class PermissionService {
 
     async getPrivileges() {
         try {
-            const response = await axios.get(API_URL_PRIVILEGE);
+            const response = await api.get("/privileges");
             return response.data;
         } catch (error) {
             console.error("Error fetching privileges:", error);
@@ -66,15 +63,13 @@ class PermissionService {
 
     async getPrivilegeById(id) {
         try {
-            const response = await axios.get(`${API_URL_PRIVILEGE}/${id}`);
+            const response = await api.get(`/privileges/${id}`);
             return response.data;
         } catch (error) {
             console.error("Error fetching privilege by ID:", error);
             throw error;
         }
     }
-
-    
 }
 const permissionService = new PermissionService();
 export default permissionService;
