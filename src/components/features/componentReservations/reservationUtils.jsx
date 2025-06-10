@@ -6,7 +6,6 @@ export const calculateTotal = (formData, planes) => {
   const basePrice = selectedPlan.price || selectedPlan.salePrice || selectedPlan.precio || 0
   const companionFee = 150000
 
-  // Cálculo de servicios con cantidades
   const servicesCost =
     formData.selectedServices?.reduce((total, serviceSelection) => {
       const service = formData.availableServices?.find((s) => s.Id_Service === serviceSelection.serviceId)
@@ -18,9 +17,7 @@ export const calculateTotal = (formData, planes) => {
   return basePrice + (formData.companions?.length || 0) * companionFee + servicesCost
 }
 
-// Función para obtener la capacidad de alojamiento
 const getAccommodationCapacity = (accommodation, type) => {
-  // Lista de posibles campos de capacidad en orden de prioridad
   const capacityFields = [
     accommodation.capacity,
     accommodation.maxCapacity,
@@ -28,41 +25,29 @@ const getAccommodationCapacity = (accommodation, type) => {
     accommodation.maxGuests,
     accommodation.occupancy,
   ]
-
-  // Buscar el primer valor válido
-  const capacity = capacityFields.find((field) => field !== undefined && field !== null && field > 0)
-
-  // Valores por defecto según el tipo
+  const capacity = capacityFields.find((field) => field !== undefined && field !== null && Number(field) > 0)
   const defaultCapacity = type === "cabin" ? 7 : 2
-  return capacity || defaultCapacity
+  return Number(capacity) || defaultCapacity
 }
 
-// Función para actualizar disponibilidad basada en capacidad
 export const updateAvailability = (formData) => {
-  if (!formData.cabins || !formData.bedrooms) {
-    return formData
-  }
-
-  const companionCount = formData.companionCount || 0
+  const companionCount = Number(formData.companionCount) || 0
   const totalGuests = companionCount + 1
 
-  // Filtrar cabañas disponibles
   const newAvailableCabins = formData.cabins.filter((cabin) => {
-    const capacity = getAccommodationCapacity(cabin, "cabin")
-    const isActive = cabin.status?.toLowerCase() === "en servicio"
+    const capacity = Number(getAccommodationCapacity(cabin, "cabin"))
+    const isActive = (cabin.status || "").trim().toLowerCase() === "en servicio"
     const hasCapacity = capacity >= totalGuests
     return isActive && hasCapacity
   })
 
-  // Filtrar habitaciones disponibles
   const newAvailableBedrooms = formData.bedrooms.filter((bedroom) => {
-    const capacity = getAccommodationCapacity(bedroom, "bedroom")
-    const isActive = bedroom.status?.toLowerCase() === "en servicio"
+    const capacity = Number(getAccommodationCapacity(bedroom, "bedroom"))
+    const isActive = (bedroom.status || "").trim().toLowerCase() === "en servicio"
     const hasCapacity = capacity >= totalGuests
     return isActive && hasCapacity
   })
 
-  // Verificar selecciones actuales
   const isSelectedCabinAvailable = newAvailableCabins.some((c) => c.idCabin === formData.idCabin)
   const isSelectedRoomAvailable = newAvailableBedrooms.some((b) => b.idRoom === formData.idRoom)
 
@@ -81,7 +66,6 @@ export const updateAvailability = (formData) => {
   }
 }
 
-// Función para validar capacidad de alojamiento seleccionado
 export const validateAccommodationCapacity = (formData) => {
   const totalGuests = (formData.companionCount || 0) + 1
 
@@ -102,7 +86,6 @@ export const validateAccommodationCapacity = (formData) => {
   return false
 }
 
-// Función para crear manejador de cambios en el formulario
 export const createFormChangeHandler = (formData, setFormData, clearError) => {
   return (e) => {
     const { name, value, type, checked } = e.target
@@ -148,7 +131,6 @@ export const createFormChangeHandler = (formData, setFormData, clearError) => {
   }
 }
 
-// Función para crear manejadores de selección
 export const createSelectionHandlers = (setFormData) => {
   const handleCabinSelect = (cabinId) => {
     setFormData((prev) => ({
@@ -222,7 +204,6 @@ export const createSelectionHandlers = (setFormData) => {
   }
 }
 
-// Función para validar datos de acompañante
 export const validateCompanionData = (companion) => {
   const errors = {}
 
@@ -248,7 +229,6 @@ export const validateCompanionData = (companion) => {
   }
 }
 
-// Función para formatear fechas
 export const formatDate = (dateString) => {
   if (!dateString) return ""
   const date = new Date(dateString)
@@ -259,7 +239,6 @@ export const formatDate = (dateString) => {
   })
 }
 
-// Función para calcular días entre fechas
 export const calculateDaysBetween = (startDate, endDate) => {
   if (!startDate || !endDate) return 0
   const start = new Date(startDate)
@@ -268,10 +247,8 @@ export const calculateDaysBetween = (startDate, endDate) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 }
 
-// Función para generar ID temporal
 export const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-// Función para sanitizar datos para el servidor
 export const sanitizeDataForServer = (formData) => {
   const payload = {
     idUser: Number(formData.idUser),
@@ -281,14 +258,12 @@ export const sanitizeDataForServer = (formData) => {
     status: formData.status || "Pendiente",
   }
 
-  // Agregar alojamiento
   if (formData.idCabin) {
     payload.idCabin = Number(formData.idCabin)
   } else if (formData.idRoom) {
     payload.idRoom = Number(formData.idRoom)
   }
 
-  // Servicios: formato exacto que espera el backend
   if (formData.selectedServices && formData.selectedServices.length > 0) {
     payload.services = formData.selectedServices.map((service) => ({
       serviceId: Number(service.serviceId),
@@ -299,23 +274,18 @@ export const sanitizeDataForServer = (formData) => {
   return payload
 }
 
-// Función para procesar servicios del backend al frontend
 export const processServicesFromBackend = (backendServices) => {
   if (!Array.isArray(backendServices) || backendServices.length === 0) {
     return []
   }
 
-  // Contar ocurrencias de cada servicio para obtener las cantidades
   const serviceCount = {}
   const serviceDetails = {}
 
   backendServices.forEach((service) => {
     const serviceId = service.Id_Service
-
-    // Contar cantidad
     serviceCount[serviceId] = (serviceCount[serviceId] || 0) + 1
 
-    // Guardar detalles del servicio (solo una vez)
     if (!serviceDetails[serviceId]) {
       serviceDetails[serviceId] = {
         id: service.Id_Service,
@@ -326,7 +296,6 @@ export const processServicesFromBackend = (backendServices) => {
     }
   })
 
-  // Convertir a formato frontend
   const frontendServices = Object.keys(serviceCount).map((serviceId) => ({
     serviceId: Number(serviceId),
     quantity: serviceCount[serviceId],
@@ -336,11 +305,9 @@ export const processServicesFromBackend = (backendServices) => {
   return frontendServices
 }
 
-// Función para validar formulario completo
 export const validateReservationForm = (formData) => {
   const errors = {}
 
-  // Validaciones básicas
   if (!formData.idUser) {
     errors.idUser = "Cliente es requerido"
   }
@@ -357,7 +324,6 @@ export const validateReservationForm = (formData) => {
     errors.endDate = "Fecha de fin es requerida"
   }
 
-  // Validación de fechas
   if (formData.startDate) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -378,12 +344,10 @@ export const validateReservationForm = (formData) => {
     }
   }
 
-  // Validación de alojamiento
   if (!formData.idCabin && !formData.idRoom) {
     errors.accommodation = "Debe seleccionar una cabaña o habitación"
   }
 
-  // Validación de acompañantes
   if (formData.hasCompanions) {
     if (!formData.companionCount || formData.companionCount <= 0) {
       errors.companionCount = "Debe especificar al menos 1 acompañante"
@@ -403,7 +367,6 @@ export const validateReservationForm = (formData) => {
   }
 }
 
-// Función para formatear moneda
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
@@ -413,7 +376,6 @@ export const formatCurrency = (amount) => {
   }).format(amount || 0)
 }
 
-// Función para obtener resumen de reserva
 export const getReservationSummary = (formData) => {
   const totalGuests = (formData.companionCount || 0) + 1
   const selectedPlan = formData.planes?.find((p) => p.idPlan === Number(formData.idPlan))
@@ -432,12 +394,11 @@ export const getReservationSummary = (formData) => {
   }
 }
 
-// Función para verificar si un plan tiene alojamiento
 export const planHasAccommodation = (plan) => {
   return (
     (plan?.cabins?.length > 0) ||
     (plan?.bedrooms?.length > 0) ||
     (plan?.cabinDistribution?.length > 0) ||
     (plan?.bedroomDistribution?.length > 0)
-  );
-};
+  )
+}

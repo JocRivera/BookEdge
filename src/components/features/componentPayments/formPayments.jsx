@@ -413,7 +413,7 @@ const PaymentForm = ({
 
   return (
     <>
-           <div className="form-row">
+      <div className="form-row">
         <div className="form-group">
           <label htmlFor="paymentMethod" className="form-label">
              Método de Pago *
@@ -585,13 +585,15 @@ const PaymentForm = ({
             Cancelar
           </button>
         )}
+        {/* Botón oculto para disparar desde el footer */}
         <button
           type="button"
-          className={`reservation-submit-button ${isSubmitting ? "loading" : ""}`}
+          id="confirmar-pago-btn"
+          style={{ display: "none" }}
           disabled={isSubmitting || isViewMode}
           onClick={handleSubmit}
         >
-          {isViewMode ? "Cerrar" : isSubmitting ? <><span className="loading-spinner"></span> Procesando pago...</> : "Confirmar Pago"}
+          Confirmar Pago
         </button>
       </div>
     </>
