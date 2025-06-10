@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { planHasAccommodation } from "./reservationUtils"
 
 const useReservationForm = (initialData = null) => {
   const [formData, setFormData] = useState({
@@ -27,9 +28,9 @@ const useReservationForm = (initialData = null) => {
     // Servicios con cantidades
     selectedServices: initialData?.services
       ? initialData.services.map((s) => ({
-          serviceId: s.Id_Service,
-          quantity: s.quantity || 1,
-        }))
+        serviceId: s.Id_Service,
+        quantity: s.quantity || 1,
+      }))
       : [],
 
     // Datos cargados del servidor
@@ -45,7 +46,7 @@ const useReservationForm = (initialData = null) => {
   const [errors, setErrors] = useState({})
   const [currentStep, setCurrentStep] = useState(0)
 
-  
+
   // Función para actualizar datos del formulario
   const updateFormData = (data) => {
     if (typeof data === "function") {
@@ -165,9 +166,13 @@ const useReservationForm = (initialData = null) => {
     }
 
     // Validación del paso 3 (disponibilidad)
-    if (step === 3) {
-      if (!dataToValidate.idCabin && !dataToValidate.idRoom) {
-        newErrors.accommodation = "Debe seleccionar una cabaña o habitación"
+  
+    if (step === 3 || step === 2) {
+      const selectedPlan = (dataToValidate.planes || []).find(p => p.idPlan === Number(dataToValidate.idPlan));
+      if (planHasAccommodation(selectedPlan)) {
+        if (!dataToValidate.idCabin && !dataToValidate.idRoom) {
+          newErrors.accommodation = "Debe seleccionar una cabaña o habitación";
+        }
       }
     }
 

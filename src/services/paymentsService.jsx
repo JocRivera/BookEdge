@@ -100,7 +100,8 @@ export const findReservationByPaymentId = async (paymentId) => {
             console.log("✅ Reserva encontrada:", reservation.idReservation)
             return reservation.idReservation
           }
-        } catch (err) {
+        } catch (error) {
+          console.error(`❌ Error buscando pagos para reserva ${reservation.idReservation}:`, error)
           // Continuar con la siguiente reserva si hay error
           continue
         }
@@ -452,8 +453,8 @@ export const addPaymentToReservationWithId = async (reservationId, paymentData) 
   }
 }
 
-// ✅ FUNCIÓN PARA SINCRONIZAR ESTADO DE RESERVA
-export const syncReservationStatus = async (reservationId, updatedPayment = null) => {
+
+export const syncReservationStatus = async (reservationId) => {
   try {
     console.log("🔄 === SINCRONIZANDO ESTADO DE RESERVA ===")
     console.log("🆔 Reservation ID:", reservationId)
