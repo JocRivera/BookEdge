@@ -1,10 +1,8 @@
-import axios from 'axios';
-
-const API_URL_DASHBOARD = 'http://localhost:3000/dashboard';
+import api from "./api";
 
 export const getTopPlans = async () => {
     try {
-        const response = await axios.get(`${API_URL_DASHBOARD}/topPlans`);
+        const response = await api.get("/dashboard/topPlans");
         return response.data.data;
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -14,7 +12,7 @@ export const getTopPlans = async () => {
 
 export const getDailyReservations = async () => {
     try {
-        const response = await axios.get(`${API_URL_DASHBOARD}/dailyReservations`);
+        const response = await api.get("/dashboard/dailyReservations");
         return response.data;
     } catch (error) {
         console.error('Error fetching daily reservations:', error);

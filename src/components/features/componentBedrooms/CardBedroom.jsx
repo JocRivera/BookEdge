@@ -14,6 +14,9 @@ import {
 import "./BedroomCard.css";
 import { toast } from "react-toastify"; // <--- IMPORTAR TOAST
 import { useAlert } from "../../../context/AlertContext"; // <--- IMPORTAR useAlert
+import api from "../../../services/api";
+
+const API_BASE_URL = api.defaults.baseURL;
 
 function BedroomCard() {
   // Estados
@@ -82,7 +85,7 @@ function BedroomCard() {
       .includes(searchTerm.toLowerCase())
   );
 
-  // Calcular elementos para la página actual
+  // Calcular elementos para la página current
   const currentItems = filteredBedrooms.slice(
     currentPage * itemsPerPage,
     (currentPage + 1) * itemsPerPage
@@ -228,11 +231,9 @@ function BedroomCard() {
                 {/* Clase genérica/reusable */}
                 {bedroomImages[bedroom.idRoom] ? (
                   <img
-                    src={`http://localhost:3000/uploads/${
-                      bedroomImages[bedroom.idRoom]
-                    }`}
+                    src={`${API_BASE_URL}/uploads/${bedroomImages[bedroom.idRoom]}`}
                     alt={bedroom.name}
-                    className="card-image-admin" // Clase genérica/reusable
+                    className="card-image-admin"
                     onError={handleImageError}
                   />
                 ) : (

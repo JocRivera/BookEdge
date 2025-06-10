@@ -17,6 +17,7 @@ import "./CabinCard.css";
 import { toast } from "react-toastify"; // Mantienes toast para éxito/error de operación
 import "react-toastify/dist/ReactToastify.css";
 import { useAlert } from "../../../context/AlertContext"; // <--- IMPORTAMOS useAlert
+import api from "../../../services/api";
 
 function CardCabin() {
   // Estados (como los tenías)
@@ -35,6 +36,7 @@ function CardCabin() {
   const [currentPage, setCurrentPage] = useState(0);
 
   const { showAlert } = useAlert(); // <--- OBTENEMOS showAlert
+  const API_BASE_URL = api.defaults.baseURL;
 
   // Cargar datos de cabañas e imágenes (tu lógica original)
   const loadCabinData = useCallback(async () => {
@@ -53,7 +55,6 @@ function CardCabin() {
       setLoading(false);
     }
   }, []); // Se quita loadCabinImages como dependencia si su definición no cambia
-
 
   const loadCabinImages = async (cabinsList) => {
     const imagesMap = {};
@@ -203,9 +204,7 @@ function CardCabin() {
               <div className="card-image-container-admin">
                 {cabinImages[cabin.idCabin] ? (
                   <img
-                    src={`http://localhost:3000/uploads/${
-                      cabinImages[cabin.idCabin]
-                    }`}
+                    src={`${API_BASE_URL}/uploads/${cabinImages[cabin.idCabin]}`}
                     alt={cabin.name}
                     className="card-image-admin"
                     onError={handleImageError}

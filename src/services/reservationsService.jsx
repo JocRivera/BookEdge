@@ -1,118 +1,92 @@
-import axios from "axios"
-import api from "./api"
+import api from "./api";
 
-const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
-const API_URL_PLANS = "http://localhost:3000/plan"
+const API_URL_RESERVATIONS = "/reservations";
+const API_URL_PLANS = "/plan";
 
 const validateId = (id, name = "ID") => {
-  const numId = Number(id)
+  const numId = Number(id);
   if (isNaN(numId) || numId <= 0) {
-    throw new Error(`${name} inválido: debe ser un número positivo`)
+    throw new Error(`${name} inválido: debe ser un número positivo`);
   }
-  return numId
-}
+  return numId;
+};
 
 export const getReservation = async () => {
   try {
-
-    const { data } = await axios.get(API_URL_RESERVATIONS)
-
-
-
-
-    return data
+    const { data } = await api.get(API_URL_RESERVATIONS);
+    return data;
   } catch (error) {
     console.error("❌ Error al obtener reservas:", {
       message: error.message,
       response: error.response?.data,
-    })
-    throw new Error(`Error al obtener reservas: ${error.message}`)
+    });
+    throw new Error(`Error al obtener reservas: ${error.message}`);
   }
-}
+};
 
 export const getReservationById = async (idReservation) => {
   try {
-
-    // Validar ID
-    const id = validateId(idReservation, "ID de reserva")
-
-    const { data } = await axios.get(`${API_URL_RESERVATIONS}/${id}`)
-
-    return data
+    const id = validateId(idReservation, "ID de reserva");
+    const { data } = await api.get(`${API_URL_RESERVATIONS}/${id}`);
+    return data;
   } catch (error) {
     console.error(`❌ Error al obtener reserva con ID ${idReservation}:`, {
       message: error.message,
       response: error.response?.data,
-    })
-    throw new Error(`Error al obtener reserva: ${error.message}`)
+    });
+    throw new Error(`Error al obtener reserva: ${error.message}`);
   }
-}
+};
 
 export const getReservationsByUser = async (idUser) => {
   try {
-
-    // Validar ID
-    const id = validateId(idUser, "ID de usuario")
-
-    const { data } = await axios.get(`${API_URL_RESERVATIONS}/user/${id}`)
-
-
-
-
-    return data
+    const id = validateId(idUser, "ID de usuario");
+    const { data } = await api.get(`${API_URL_RESERVATIONS}/user/${id}`);
+    return data;
   } catch (error) {
-    console.error(`❌ Error al obtener reservas para el usuario con ID ${idUser}:`, {
-      message: error.message,
-      response: error.response?.data,
-    })
-    throw new Error(`Error al obtener reservas: ${error.message}`)
+    console.error(
+      `❌ Error al obtener reservas para el usuario con ID ${idUser}:`,
+      {
+        message: error.message,
+        response: error.response?.data,
+      }
+    );
+    throw new Error(`Error al obtener reservas: ${error.message}`);
   }
-}
+};
 
 export const getUsers = async () => {
-  const response = await api.get("/user")
-  return response.data
-}
+  const response = await api.get("/user");
+  return response.data;
+};
 
 export const getServices = async () => {
-
-  const response = await api.get("/services")
-
-  return response.data
-}
+  const response = await api.get("/services");
+  return response.data;
+};
 
 export const getBedrooms = async () => {
-
-  const response = await api.get("/bedroom")
-
-  return response.data
-}
+  const response = await api.get("/bedroom");
+  return response.data;
+};
 
 export const getAllPlanes = async () => {
   try {
-
-    const { data } = await axios.get(API_URL_PLANS)
-
-
-
-
-    return data
+    const { data } = await api.get(API_URL_PLANS);
+    return data;
   } catch (error) {
     console.error("❌ Error al obtener planes:", {
       message: error.message,
       response: error.response?.data,
       config: error.config,
-    })
-    return []
+    });
+    return [];
   }
-}
+};
 
 export const getCabins = async () => {
   try {
-    const { data } = await axios.get(`${API_URL_RESERVATIONS}/cabins`)
-
-
-    // Normalizar datos
+    const { data } = await api.get(`${API_URL_RESERVATIONS}/cabins`);
     const normalizedCabins = data.map((cabin) => ({
       idCabin: cabin.idCabin,
       name: cabin.name || `Cabaña ${cabin.idCabin}`,
@@ -120,72 +94,76 @@ export const getCabins = async () => {
       status: (cabin.status || "En Servicio").trim(),
       description: cabin.description || "Sin descripción",
       price: Number(cabin.price) || 0,
-    }))
-
-    return normalizedCabins
+    }));
+    return normalizedCabins;
   } catch (error) {
     console.error("❌ Error al obtener cabañas:", {
       url: error.config?.url,
       status: error.response?.status,
       data: error.response?.data,
-    })
-    return []
+    });
+    return [];
   }
-}
+};
 
 const validateReservationData = (reservationData, selectedPlan) => {
   if (!reservationData) {
-    throw new Error("No se proporcionaron datos de reserva")
+    throw new Error("No se proporcionaron datos de reserva");
   }
 
   const errors = {
     missingFields: [],
     typeErrors: [],
     businessErrors: [],
-  }
+  };
 
-  // Validar campos requeridos y tipos
   const requiredFields = {
     idUser: "number",
     idPlan: "number",
     startDate: "string",
     status: "string",
-    // endDate: "string", // <-- Quita de aquí, lo validamos abajo
-  }
+  };
 
   Object.entries(requiredFields).forEach(([field, type]) => {
-    if (reservationData[field] === undefined || reservationData[field] === null || reservationData[field] === "") {
-      errors.missingFields.push(field)
+    if (
+      reservationData[field] === undefined ||
+      reservationData[field] === null ||
+      reservationData[field] === ""
+    ) {
+      errors.missingFields.push(field);
     } else {
-      const actualType = typeof reservationData[field]
+      const actualType = typeof reservationData[field];
       if (actualType !== type) {
         if (type === "number" && !isNaN(Number(reservationData[field]))) {
-          // Se puede convertir a número, no es un error
+          console.log(
+            `Convirtiendo ${field} a número: ${reservationData[field]}`
+          );
         } else {
-          errors.typeErrors.push(`${field} debe ser ${type}, pero es ${actualType}`)
+          errors.typeErrors.push(
+            `${field} debe ser ${type}, pero es ${actualType}`
+          );
         }
       }
     }
-  })
+  });
 
-  // Solo exigir endDate si el plan tiene alojamiento
   if (planHasAccommodation(selectedPlan)) {
     if (!reservationData.endDate) {
-      errors.missingFields.push("endDate")
+      errors.missingFields.push("endDate");
     }
   }
 
-  // Validaciones de negocio
   if (reservationData.startDate) {
     const today = new Date();
     const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
     const todayStr = `${yyyy}-${mm}-${dd}`;
 
-    // Compara como string para evitar problemas de zona horaria
     if (reservationData.startDate < todayStr) {
-      errors.businessErrors.push("La fecha de inicio no puede ser en el pasado");
+      errors.businessErrors.push(
+        "La fecha de inicio no puede ser en el pasado"
+      );
     }
     console.log("DEBUG FECHAS:", {
       startRaw: reservationData.startDate,
@@ -193,23 +171,29 @@ const validateReservationData = (reservationData, selectedPlan) => {
     });
   }
 
-  // Solo validar relación de fechas si el plan tiene alojamiento
   if (
     planHasAccommodation(selectedPlan) &&
     reservationData.startDate &&
     reservationData.endDate &&
     reservationData.startDate > reservationData.endDate
   ) {
-    errors.businessErrors.push("La fecha de fin debe ser posterior a la de inicio")
+    errors.businessErrors.push(
+      "La fecha de fin debe ser posterior a la de inicio"
+    );
   }
 
-  const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"]
-  if (reservationData.status && !validStatuses.includes(reservationData.status)) {
-    errors.businessErrors.push(`Estado no válido. Use uno de: ${validStatuses.join(", ")}`)
+  const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"];
+  if (
+    reservationData.status &&
+    !validStatuses.includes(reservationData.status)
+  ) {
+    errors.businessErrors.push(
+      `Estado no válido. Use uno de: ${validStatuses.join(", ")}`
+    );
   }
 
-  return errors
-}
+  return errors;
+};
 
 const prepareReservationPayload = (reservationData, selectedPlan) => {
   const payload = {
@@ -221,13 +205,18 @@ const prepareReservationPayload = (reservationData, selectedPlan) => {
     endDate: reservationData.endDate,
     status: reservationData.status || "Reservado",
     total: Number(reservationData.total) || 0,
-    companionCount: Array.isArray(reservationData.companions) ? reservationData.companions.length : 0,
-    companions: Array.isArray(reservationData.companions) ? reservationData.companions : [],
+    companionCount: Array.isArray(reservationData.companions)
+      ? reservationData.companions.length
+      : 0,
+    companions: Array.isArray(reservationData.companions)
+      ? reservationData.companions
+      : [],
     paymentMethod: reservationData.paymentMethod || "Efectivo",
-    services: Array.isArray(reservationData.services) ? reservationData.services : [],
+    services: Array.isArray(reservationData.services)
+      ? reservationData.services
+      : [],
   };
 
-  // Limpia endDate si el plan no tiene alojamiento
   if (!planHasAccommodation(selectedPlan)) {
     delete payload.endDate;
   }
@@ -238,14 +227,26 @@ const prepareReservationPayload = (reservationData, selectedPlan) => {
 export const createReservation = async (reservationData) => {
   try {
     const planes = await getAllPlanes();
-    const selectedPlan = planes.find(p => p.idPlan === Number(reservationData.idPlan));
+    const selectedPlan = planes.find(
+      (p) => p.idPlan === Number(reservationData.idPlan)
+    );
     const errors = validateReservationData(reservationData, selectedPlan);
 
-    if (errors.missingFields.length > 0 || errors.typeErrors.length > 0 || errors.businessErrors.length > 0) {
+    if (
+      errors.missingFields.length > 0 ||
+      errors.typeErrors.length > 0 ||
+      errors.businessErrors.length > 0
+    ) {
       const errorMessages = [
-        errors.missingFields.length > 0 ? `Campos requeridos: ${errors.missingFields.join(", ")}` : "",
-        errors.typeErrors.length > 0 ? `Errores de tipo: ${errors.typeErrors.join(", ")}` : "",
-        errors.businessErrors.length > 0 ? `Errores de negocio: ${errors.businessErrors.join(", ")}` : "",
+        errors.missingFields.length > 0
+          ? `Campos requeridos: ${errors.missingFields.join(", ")}`
+          : "",
+        errors.typeErrors.length > 0
+          ? `Errores de tipo: ${errors.typeErrors.join(", ")}`
+          : "",
+        errors.businessErrors.length > 0
+          ? `Errores de negocio: ${errors.businessErrors.join(", ")}`
+          : "",
       ]
         .filter(Boolean)
         .join(" | ");
@@ -264,11 +265,9 @@ export const createReservation = async (reservationData) => {
       }
     }
 
-    // Usa el selectedPlan aquí
     const payload = prepareReservationPayload(reservationData, selectedPlan);
-    // ...antes de enviar la petición
     console.log("Payload enviado al backend:", payload);
-    const response = await axios.post(API_URL_RESERVATIONS, payload, {
+    const response = await api.post(API_URL_RESERVATIONS, payload, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -282,37 +281,51 @@ export const createReservation = async (reservationData) => {
       message: error.message,
       response: error.response?.data,
       request: error.config?.data,
-    })
+    });
 
-    let errorMessage = error.message
+    let errorMessage = error.message;
     if (error.response?.data?.message) {
-      errorMessage = error.response.data.message
+      errorMessage = error.response.data.message;
     } else if (error.response?.data?.errors) {
-      errorMessage = error.response.data.errors.map((e) => e.msg).join("\n")
+      errorMessage = error.response.data.errors.map((e) => e.msg).join("\n");
     }
 
-    throw new Error(errorMessage)
+    throw new Error(errorMessage);
   }
-}
+};
 
 export const updateReservation = async (idReservation, reservationData) => {
   try {
     const reservationId = Number(idReservation);
-    if (isNaN(reservationId) || !Number.isInteger(reservationId) || reservationId <= 0) {
-      throw new Error("El ID de la reserva debe ser un número entero positivo")
+    if (
+      isNaN(reservationId) ||
+      !Number.isInteger(reservationId) ||
+      reservationId <= 0
+    ) {
+      throw new Error("El ID de la reserva debe ser un número entero positivo");
     }
 
-    // Busca el plan para la validación y el payload
     const planes = await getAllPlanes();
-    const selectedPlan = planes.find(p => p.idPlan === Number(reservationData.idPlan));
+    const selectedPlan = planes.find(
+      (p) => p.idPlan === Number(reservationData.idPlan)
+    );
     const errors = validateReservationData(reservationData, selectedPlan);
 
-    // Si hay errores, lanzar excepción
-    if (errors.missingFields.length > 0 || errors.typeErrors.length > 0 || errors.businessErrors.length > 0) {
+    if (
+      errors.missingFields.length > 0 ||
+      errors.typeErrors.length > 0 ||
+      errors.businessErrors.length > 0
+    ) {
       const errorMessages = [
-        errors.missingFields.length > 0 ? `Campos requeridos: ${errors.missingFields.join(", ")}` : "",
-        errors.typeErrors.length > 0 ? `Errores de tipo: ${errors.typeErrors.join(", ")}` : "",
-        errors.businessErrors.length > 0 ? `Errores de negocio: ${errors.businessErrors.join(", ")}` : "",
+        errors.missingFields.length > 0
+          ? `Campos requeridos: ${errors.missingFields.join(", ")}`
+          : "",
+        errors.typeErrors.length > 0
+          ? `Errores de tipo: ${errors.typeErrors.join(", ")}`
+          : "",
+        errors.businessErrors.length > 0
+          ? `Errores de negocio: ${errors.businessErrors.join(", ")}`
+          : "",
       ]
         .filter(Boolean)
         .join(" | ");
@@ -320,9 +333,10 @@ export const updateReservation = async (idReservation, reservationData) => {
       throw new Error(errorMessages);
     }
 
-    // Verificar primero si la reserva existe
     try {
-      const { data } = await axios.get(`${API_URL_RESERVATIONS}/${reservationId}`);
+      const { data } = await api.get(
+        `${API_URL_RESERVATIONS}/${reservationId}`
+      );
       if (!data || !data.idReservation) {
         throw new Error(`La reserva con ID ${reservationId} no existe`);
       }
@@ -333,20 +347,23 @@ export const updateReservation = async (idReservation, reservationData) => {
       throw error;
     }
 
-    // Usa el selectedPlan aquí
     const payload = {
       ...prepareReservationPayload(reservationData, selectedPlan),
       idReservation: reservationId,
     };
 
     console.log("Payload enviado al backend (update):", payload);
-    const response = await axios.put(`${API_URL_RESERVATIONS}/${reservationId}`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      timeout: 10000,
-    });
+    const response = await api.put(
+      `${API_URL_RESERVATIONS}/${reservationId}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        timeout: 10000,
+      }
+    );
 
     return response.data;
   } catch (error) {
@@ -354,218 +371,224 @@ export const updateReservation = async (idReservation, reservationData) => {
       message: error.message,
       response: error.response?.data,
       request: error.config?.data,
-    })
+    });
 
-    let errorMessage = "Error al actualizar la reserva"
+    let errorMessage = "Error al actualizar la reserva";
     if (error.response?.data?.message) {
-      errorMessage = error.response.data.message
+      errorMessage = error.response.data.message;
     } else if (error.response?.data?.errors) {
-      errorMessage = error.response.data.errors.map((e) => e.msg).join(", ")
+      errorMessage = error.response.data.errors.map((e) => e.msg).join(", ");
     } else {
-      errorMessage = error.message
+      errorMessage = error.message;
     }
 
-    throw new Error(errorMessage)
+    throw new Error(errorMessage);
   }
-}
+};
 
 export const changeReservationStatus = async (idReservation, status) => {
   try {
-
-
-    // Validar ID
-    const id = validateId(idReservation, "ID de reserva")
-
-    // Validar estado
-    const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"]
+    const id = validateId(idReservation, "ID de reserva");
+    const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"];
     if (!validStatuses.includes(status)) {
-      throw new Error(`Estado no válido. Use uno de: ${validStatuses.join(", ")}`)
+      throw new Error(
+        `Estado no válido. Use uno de: ${validStatuses.join(", ")}`
+      );
     }
 
-    // Obtener primero la reserva actual para no perder datos
-    const currentReservation = await getReservationById(id)
+    const currentReservation = await getReservationById(id);
 
     if (!currentReservation) {
-      throw new Error(`No se encontró la reserva con ID ${id}`)
+      throw new Error(`No se encontró la reserva con ID ${id}`);
     }
 
-    // Preparar payload completo con todos los datos de la reserva
-    // Asegurarse de que todos los campos necesarios estén presentes
     const payload = {
       idUser: currentReservation.idUser,
       idPlan: currentReservation.idPlan,
       idCabin: currentReservation.idCabin,
-      idRoom: currentReservation.idRoom || null, // ✅ Agregado
+      idRoom: currentReservation.idRoom || null,
       startDate: currentReservation.startDate,
       endDate: currentReservation.endDate,
-      status: status, // Actualizar solo el estado
+      status: status,
       total: currentReservation.total || 0,
-      companionCount: Array.isArray(currentReservation.companions) ? currentReservation.companions.length : 0,
-      companions: Array.isArray(currentReservation.companions) ? currentReservation.companions : [],
+      companionCount: Array.isArray(currentReservation.companions)
+        ? currentReservation.companions.length
+        : 0,
+      companions: Array.isArray(currentReservation.companions)
+        ? currentReservation.companions
+        : [],
       paymentMethod: currentReservation.paymentMethod || "Efectivo",
-      services: Array.isArray(currentReservation.services) ? currentReservation.services : [], // ✅ Agregado
-      // Incluir el ID de la reserva en el payload si es necesario
+      services: Array.isArray(currentReservation.services)
+        ? currentReservation.services
+        : [],
       idReservation: id,
-    }
+    };
 
+    const response = await api.patch(
+      `${API_URL_RESERVATIONS}/${id}/status`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        timeout: 10000,
+      }
+    );
 
-    // Usar PUT en lugar de PATCH
-    const response = await axios.patch(`${API_URL_RESERVATIONS}/${id}/status`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      timeout: 10000,
-    })
-
-    return response.data
+    return response.data;
   } catch (error) {
     console.error(`❌ Error cambiando estado de reserva ${idReservation}:`, {
       message: error.message,
       response: error.response?.data,
       config: error.config,
-    })
-
-
-
-    throw new Error(`Error al cambiar estado: ${error.message}`)
+    });
+    throw new Error(`Error al cambiar estado: ${error.message}`);
   }
-}
+};
 
 export const getReservationCompanions = async (reservationId) => {
   try {
-    // Validar ID
-    const id = validateId(reservationId, "ID de reserva")
-
-    const { data } = await axios.get(`${API_URL_RESERVATIONS}/${id}/companions`)
-
-
-
-    return data
+    const id = validateId(reservationId, "ID de reserva");
+    const { data } = await api.get(`${API_URL_RESERVATIONS}/${id}/companions`);
+    return data;
   } catch (error) {
-    console.error(`❌ Error al obtener acompañantes de reserva con ID ${reservationId}:`, {
-      message: error.message,
-      response: error.response?.data,
-    })
-    return []
+    console.error(
+      `❌ Error al obtener acompañantes de reserva con ID ${reservationId}:`,
+      {
+        message: error.message,
+        response: error.response?.data,
+      }
+    );
+    return [];
   }
-}
+};
 
 export const addCompanionReservation = async (reservationId, companionData) => {
   try {
-
-    const id = validateId(reservationId, "ID de reserva")
+    const id = validateId(reservationId, "ID de reserva");
 
     if (!companionData?.idCompanions) {
-      throw new Error("Falta el ID del acompañante")
+      throw new Error("Falta el ID del acompañante");
     }
 
     const payload = {
       idCompanions: Number(companionData.idCompanions),
-    }
+    };
 
+    const response = await api.post(
+      `${API_URL_RESERVATIONS}/${id}/companions`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const response = await axios.post(`${API_URL_RESERVATIONS}/${id}/companions`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-
-    return response.data
+    return response.data;
   } catch (error) {
     console.error("❌ Error detallado en asociación:", {
       url: error.config?.url,
       data: error.config?.data,
       status: error.response?.status,
       response: error.response?.data,
-    })
+    });
 
-    const errorMessage = error.response?.data?.message || error.message
-    throw new Error(`Error al asociar acompañante: ${errorMessage}`)
+    const errorMessage = error.response?.data?.message || error.message;
+    throw new Error(`Error al asociar acompañante: ${errorMessage}`);
   }
-}
+};
 
-export const associateCompanionToReservation = async (reservationId, companionId) => {
+export const associateCompanionToReservation = async (
+  reservationId,
+  companionId
+) => {
   try {
-    const response = await axios.post(
+    const response = await api.post(
       `/reservations/${reservationId}/companions`,
       { idCompanions: companionId },
       {
         headers: {
           "Content-Type": "application/json",
         },
-      },
-    )
-    return response.data
+      }
+    );
+    return response.data;
   } catch (error) {
     console.error("❌ Error en associateCompanionToReservation:", {
       reservationId,
       companionId,
       error: error.response?.data || error.message,
-    })
-    throw error
+    });
+    throw error;
   }
-}
+};
 
-export const deleteCompanionReservation = async (reservationId, companionId) => {
+export const deleteCompanionReservation = async (
+  reservationId,
+  companionId
+) => {
   try {
-    // Validar IDs
-    const resId = validateId(reservationId, "ID de reserva")
-    const compId = validateId(companionId, "ID de acompañante")
+    const resId = validateId(reservationId, "ID de reserva");
+    const compId = validateId(companionId, "ID de acompañante");
 
-    const { data } = await axios.delete(`${API_URL_RESERVATIONS}/${resId}/companions/${compId}`)
-    return data
+    const { data } = await api.delete(
+      `${API_URL_RESERVATIONS}/${resId}/companions/${compId}`
+    );
+    return data;
   } catch (error) {
-    console.error(`❌ Error al eliminar acompañante ${companionId} de reserva ${reservationId}:`, {
-      message: error.message,
-      response: error.response?.data,
-    })
-    throw new Error(`Error al eliminar acompañante: ${error.message}`)
+    console.error(
+      `❌ Error al eliminar acompañante ${companionId} de reserva ${reservationId}:`,
+      {
+        message: error.message,
+        response: error.response?.data,
+      }
+    );
+    throw new Error(`Error al eliminar acompañante: ${error.message}`);
   }
-}
+};
 
 export const getReservationPayments = async (reservationId) => {
   try {
-    // Validar ID
-    const id = validateId(reservationId, "ID de reserva")
-
-    const { data } = await axios.get(`${API_URL_RESERVATIONS}/${id}/payments`)
-
+    const id = validateId(reservationId, "ID de reserva");
+    const { data } = await api.get(`${API_URL_RESERVATIONS}/${id}/payments`);
     if (!Array.isArray(data)) {
-      return []
+      return [];
     }
-
-    return data
+    return data;
   } catch (error) {
-    console.error(`❌ Error al obtener pagos de reserva con ID ${reservationId}:`, {
-      message: error.message,
-      response: error.response?.data,
-    })
-    return []
+    console.error(
+      `❌ Error al obtener pagos de reserva con ID ${reservationId}:`,
+      {
+        message: error.message,
+        response: error.response?.data,
+      }
+    );
+    return [];
   }
-}
+};
 
-// Verifica si dos rangos de fechas se solapan
 const isDateRangeOverlap = (startA, endA, startB, endB) => {
   return (
-    new Date(startA) <= new Date(endB) &&
-    new Date(endA) >= new Date(startB)
+    new Date(startA) <= new Date(endB) && new Date(endA) >= new Date(startB)
   );
 };
 
-// Valida si la habitación está disponible para el rango de fechas
 export const isBedroomAvailable = async (idRoom, startDate, endDate) => {
   const allReservations = await getReservation();
-  return !allReservations.some(res =>
-    res.idRoom === idRoom &&
-    isDateRangeOverlap(startDate, endDate, res.startDate, res.endDate)
+  return !allReservations.some(
+    (res) =>
+      res.idRoom === idRoom &&
+      isDateRangeOverlap(startDate, endDate, res.startDate, res.endDate)
   );
 };
 
 const planHasAccommodation = (plan) => {
-  // Considera alojamiento si hay habitaciones o cabañas asignadas
   return (
-    (Array.isArray(plan?.bedroomDistribution) && plan.bedroomDistribution.length > 0) ||
-    (Array.isArray(plan?.cabinDistribution) && plan.cabinDistribution.length > 0)
+    (Array.isArray(plan?.bedroomDistribution) &&
+      plan.bedroomDistribution.length > 0) ||
+    (Array.isArray(plan?.cabinDistribution) &&
+      plan.cabinDistribution.length > 0)
   );
 };

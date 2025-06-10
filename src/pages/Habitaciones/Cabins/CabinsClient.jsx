@@ -9,6 +9,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import api from "../../../services/api";
+
+const API_BASE_URL = api.defaults.baseURL;
 
 function CabinsClient() {
   const [cabins, setCabins] = useState([]);
@@ -116,9 +119,7 @@ function CabinsClient() {
                 <figure className="cabin-image-container-home">
                   {cabinImagesMap[cabin.idCabin] ? (
                     <img
-                      src={`http://localhost:3000/uploads/${
-                        cabinImagesMap[cabin.idCabin]
-                      }`}
+                      src={`${API_BASE_URL}/uploads/${cabinImagesMap[cabin.idCabin]}`}
                       alt={cabin.name}
                       className="cabin-image-home"
                     />
@@ -128,7 +129,6 @@ function CabinsClient() {
                 </figure>
 
                 <div className="cabin-content-overlay-home">
-            
                   <div className="cabin-text-content">
                     <h2 className="cabin-title-home">{cabin.name}</h2>
                     {cabin.description && (

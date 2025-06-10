@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MdClose, MdPerson } from "react-icons/md";
 import { getCabinImages } from "../../../services/CabinService";
+import api from "../../../services/api";
 import "./CabinDetails.css";
 
 const CabinDetail = ({ isOpen, onClose, cabin }) => {
@@ -32,6 +33,8 @@ const CabinDetail = ({ isOpen, onClose, cabin }) => {
     }
   };
 
+  const API_BASE_URL = api.defaults.baseURL;
+
   if (!isOpen || !cabin) return null;
 
   return (
@@ -50,7 +53,7 @@ const CabinDetail = ({ isOpen, onClose, cabin }) => {
             <div className="main-image-container">
               {selectedImage ? (
                 <img
-                  src={`http://localhost:3000/uploads/${selectedImage}`}
+                  src={`${API_BASE_URL}/uploads/${selectedImage}`}
                   alt={cabin.name}
                   className="main-detail-image"
                 />
@@ -71,7 +74,7 @@ const CabinDetail = ({ isOpen, onClose, cabin }) => {
                     onClick={() => setSelectedImage(image.imagePath)}
                   >
                     <img
-                      src={`http://localhost:3000/uploads/${image.imagePath}`}
+                      src={`${API_BASE_URL}/uploads/${image.imagePath}`}
                       alt="Thumbnail"
                     />
                     {image.isPrimary && <span className="primary-badge"></span>}

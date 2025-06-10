@@ -11,6 +11,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import api from "../../../services/api";
+
+const API_BASE_URL = api.defaults.baseURL;
 
 function BedroomsClient() {
   const [rooms, setRooms] = useState([]);
@@ -131,14 +134,11 @@ function BedroomsClient() {
                 <figure className="cabin-image-container-home"> {/* Clase de CabinClient */}
                   {roomImagesMap[room.idRoom] ? (
                     <img
-                      src={`http://localhost:3000/uploads/${
-                        roomImagesMap[room.idRoom]
-                      }`}
+                      src={`${API_BASE_URL}/uploads/${roomImagesMap[room.idRoom]}`}
                       alt={room.name || 'Habitación'}
-                      className="cabin-image-home" // Clase de CabinClient
+                      className="cabin-image-home"
                     />
                   ) : (
-                    // Placeholder consistente con CabinClient
                     <div className="no-image-placeholder">Sin Imagen</div>
                   )}
                 </figure>

@@ -1,11 +1,11 @@
-import axios from "axios";
+import api from "./api";
 
-const API_URL_ROL = "http://localhost:3000/roles";
+const API_URL_ROL = "/roles";
 
 class RolesService {
   async getRoles() {
     try {
-      const response = await axios.get(API_URL_ROL);
+      const response = await api.get(API_URL_ROL);
       return response.data;
     } catch (error) {
       console.error("Error fetching roles:", error);
@@ -15,7 +15,7 @@ class RolesService {
 
   async getRoleById(id) {
     try {
-      const response = await axios.get(`${API_URL_ROL}/${id}`);
+      const response = await api.get(`${API_URL_ROL}/${id}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching role by ID:", error);
@@ -25,7 +25,7 @@ class RolesService {
 
   async createRole(roleData) {
     try {
-      const response = await axios.post(API_URL_ROL, roleData);
+      const response = await api.post(API_URL_ROL, roleData);
       return response.data;
     } catch (error) {
       throw error.response?.data?.errors?.[0]?.msg;
@@ -34,7 +34,7 @@ class RolesService {
 
   async updateRole(id, roleData) {
     try {
-      const response = await axios.put(`${API_URL_ROL}/${id}`, roleData);
+      const response = await api.put(`${API_URL_ROL}/${id}`, roleData);
       return response.data;
     } catch (error) {
       console.error("Error updating role:", error);
@@ -44,7 +44,7 @@ class RolesService {
 
   async deleteRole(id) {
     try {
-      const response = await axios.delete(`${API_URL_ROL}/${id}`);
+      const response = await api.delete(`${API_URL_ROL}/${id}`);
       return response.data;
     } catch (error) {
       console.error("Error deleting role:", error);
@@ -54,14 +54,13 @@ class RolesService {
 
   async changeStatus(id, status) {
     try {
-      const response = await axios.patch(`${API_URL_ROL}/${id}`, { status });
+      const response = await api.patch(`${API_URL_ROL}/${id}`, { status });
       return response.data;
     } catch (error) {
       console.error("Error changing role status:", error);
       throw error;
     }
   }
-
 }
 
 const rolesService = new RolesService();

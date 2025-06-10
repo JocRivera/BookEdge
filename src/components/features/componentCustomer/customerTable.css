@@ -328,14 +328,14 @@
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 0.2rem 0.5rem;
+    padding: 0.1rem 1
+    |rem;
     font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     box-shadow: 0 2px 4px rgba(78, 84, 200, 0.15);
 }
 
