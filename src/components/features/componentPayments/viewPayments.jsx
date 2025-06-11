@@ -1,3 +1,4 @@
+"use client"
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import PropTypes from "prop-types"
@@ -36,34 +37,99 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
   const [refreshError, setRefreshError] = useState(null)
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true)
   const intervalRef = useRef(null)
-  const refreshInterval = 30000 // 30 segundos
+  const refreshInterval = 45000 // 45 segundos para evitar solapamiento
 
   // Usar el contexto de alertas
   const { showAlert } = useAlert()
 
-  // Función para cargar pagos
-  const fetchPayments = useCallback(async () => {
-    try {
-      setError(null)
-      const paymentsData = idReservation ? await getReservationPayments(idReservation) : await getAllPayments()
-      setPayments(Array.isArray(paymentsData) ? paymentsData : [])
-      return true
-    } catch (error) {
-      console.error("Error al cargar pagos:", error)
-      setError(`Error al cargar pagos: ${error.message}`)
-      setRefreshError(`Error al cargar pagos: ${error.message}`)
-      throw error
-    }
-  }, [idReservation])
+  // Referencia para cancelar peticiones en curso
+  const abortControllerRef = useRef(null)
 
-  // Función para ejecutar el refresh
+  // ✅ FUNCIÓN MEJORADA para cargar pagos con mejor manejo de errores
+  const fetchPayments = useCallback(
+    async (showToast = false) => {
+      try {
+        // Cancelar petición anterior si existe
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort()
+        }
+
+        // Crear nuevo controlador para esta petición
+        abortControllerRef.current = new AbortController()
+
+        setError(null)
+        setRefreshError(null)
+
+        // Usar un timeout más largo para casos extremos
+        const timeoutId = setTimeout(() => {
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+          }
+        }, 40000) // 40 segundos de timeout máximo
+
+        const paymentsData = idReservation ? await getReservationPayments(idReservation) : await getAllPayments()
+
+        clearTimeout(timeoutId)
+
+        const paymentsArray = Array.isArray(paymentsData) ? paymentsData : []
+
+        setPayments(paymentsArray)
+
+        if (showToast && paymentsArray.length > 0) {
+          console.log("✅ Pagos actualizados:", paymentsArray.length)
+        }
+
+        return paymentsArray
+      } catch (error) {
+        // No mostrar error si fue cancelado intencionalmente
+        if (error.name === "AbortError" || error.name === "CanceledError") {
+          console.log("Petición cancelada por una nueva petición")
+          return []
+        }
+        console.error("Error al cargar pagos:", error)
+        const errorMessage = `Error al cargar pagos: ${error.message}`
+        setError(errorMessage)
+        setRefreshError(errorMessage)
+        throw error
+      }
+    },
+    [idReservation],
+  )
+
+  // ✅ FUNCIÓN DE REFRESH INMEDIATO - Nueva función específica para actualizaciones inmediatas
+  const immediateRefresh = useCallback(
+    async (reason = "cambio") => {
+      console.log(`🔄 Ejecutando refresh inmediato por: ${reason}`)
+      try {
+        setIsRefreshing(true)
+        const updatedPayments = await fetchPayments(true)
+        setLastRefresh(new Date())
+        console.log(`✅ Refresh inmediato completado - ${updatedPayments.length} pagos cargados`)
+        return updatedPayments
+      } catch (error) {
+        console.error("❌ Error en refresh inmediato:", error)
+        toast.error(`Error al actualizar: ${error.message}`)
+      } finally {
+        setIsRefreshing(false)
+      }
+    },
+    [fetchPayments],
+  )
+
+  // Función para ejecutar el refresh automático (cada 45s)
   const executeRefresh = useCallback(
     async (isManual = false) => {
+      // Evitar múltiples peticiones simultáneas
       if (isRefreshing && !isManual) return
 
       try {
         setIsRefreshing(true)
         setRefreshError(null)
+
+        // Agregar un pequeño retraso para evitar problemas de concurrencia
+        if (!isManual) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
 
         await fetchPayments()
         setLastRefresh(new Date())
@@ -73,10 +139,14 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
         }
       } catch (error) {
         console.error("Error en auto-refresh:", error)
-        setRefreshError(error.message)
 
-        if (isManual) {
-          toast.error(`Error al actualizar: ${error.message}`)
+        // No mostrar errores de cancelación
+        if (error.name !== "AbortError" && error.name !== "CanceledError") {
+          setRefreshError(error.message)
+
+          if (isManual) {
+            toast.error(`Error al actualizar: ${error.message}`)
+          }
         }
       } finally {
         setIsRefreshing(false)
@@ -102,6 +172,12 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
   // Configurar el intervalo automático
   useEffect(() => {
     if (autoRefreshEnabled && refreshInterval > 0) {
+      // Limpiar intervalo anterior si existe
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+
+      // Crear nuevo intervalo con un tiempo más largo (45 segundos)
       intervalRef.current = setInterval(() => {
         executeRefresh(false)
       }, refreshInterval)
@@ -124,6 +200,15 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
+      }
+    }
+  }, [])
+
+  // Limpiar controlador de aborto al desmontar
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
       }
     }
   }, [])
@@ -177,11 +262,9 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
 
       // Estrategia: Intentar IDs de reserva secuencialmente
       let foundReservation = null
-      let attempts = 0
       const maxAttempts = 50
 
       for (let reservationId = 1; reservationId <= maxAttempts; reservationId++) {
-        attempts++
         try {
           const reservation = await getReservationById(reservationId)
 
@@ -209,7 +292,7 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
     }
   }
 
-  // Cambiar estado con auto-refresh y confirmación
+  // ✅ CAMBIAR ESTADO CON REFRESH INMEDIATO
   const handleStatusChange = async (paymentId, newStatus) => {
     if (!paymentId || !newStatus) return
 
@@ -252,8 +335,9 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
           // Cambiar estado del pago
           const updatedPayment = await changePaymentStatus(paymentId, newStatus)
 
-          // Actualizar el estado local
-          setPayments((prev) => prev.map((p) => (p.idPayments === updatedPayment.idPayments ? updatedPayment : p)))
+          // ✅ REFRESH INMEDIATO después del cambio
+          console.log("🔄 Ejecutando refresh inmediato después de cambio de estado")
+          await immediateRefresh("cambio de estado")
 
           // Mostrar mensaje de éxito
           toast.success(`Pago ${newStatus.toLowerCase()} correctamente`)
@@ -327,6 +411,22 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
       setLoadingReservationData(false)
     }
   }
+
+  // ✅ NUEVA FUNCIÓN: Callback para cuando se agrega un pago exitosamente
+  // ✅ FUNCIÓN DE CALLBACK: Disponible para componentes que agreguen pagos
+  // eslint-disable-next-line no-unused-vars
+  const handlePaymentSuccess = useCallback(
+    async (newPayment) => {
+      console.log("💰 Pago agregado exitosamente, ejecutando refresh inmediato:", newPayment)
+
+      // Ejecutar refresh inmediato
+      await immediateRefresh("nuevo pago agregado")
+
+      // Opcional: Mostrar notificación adicional
+      toast.success("Vista actualizada automáticamente")
+    },
+    [immediateRefresh],
+  )
 
   // Calcular totales específicos de la reserva seleccionada
   const getReservationSummary = () => {
@@ -476,7 +576,7 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
             onChange={toggleAutoRefresh}
             style={{ display: "none" }}
           />
-          <span>Auto-actualizar cada 30s</span>
+          <span>Auto-actualizar cada 45s</span>
         </label>
       </div>
 
@@ -548,79 +648,47 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
             ) : selectedReservationData ? (
               <div className="modal-payments-summary">
                 <div className="summary-item">
-                  <span>Reserva #{selectedReservationData.idReservation}:</span>
-                  <strong>{formatCurrency(reservationSummary.totalReservation)}</strong>
-                </div>
-                <div className="summary-item">
-                  <span>Cliente:</span>
-                  <strong>
-                    {selectedReservationData.user?.name || selectedReservationData.user?.identification || "N/A"}
-                  </strong>
-                </div>
-                <div className="summary-item">
-                  <span>Total Pagado:</span>
-                  <strong>{formatCurrency(reservationSummary.totalPaid)}</strong>
-                </div>
-                <div className="summary-item">
-                  <span>Saldo Pendiente:</span>
-                  <strong>{formatCurrency(reservationSummary.remainingBalance)}</strong>
+                  <div className="summary-item-content reservation-number">
+                    <span>Reserva: </span>
+                    <strong>#{selectedReservationData.idReservation}</strong>
+                  </div>
+                  <div className="summary-item-content client-info">
+                    <span>Cliente: </span>
+                    <strong>
+                      {selectedReservationData.user?.name || selectedReservationData.user?.identification || "N/A"}
+                    </strong>
+                  </div>
+                  <div className="summary-item-content total-paid">
+                    <span>Total Pagado: </span>
+                    <strong>{formatCurrency(reservationSummary.totalPaid)}</strong>
+                  </div>
+                  <div className="summary-item-content pending-balance">
+                    <span>Saldo Pendiente: </span>
+                    <strong>{formatCurrency(reservationSummary.remainingBalance)}</strong>
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="modal-payments-summary">
-                <div className="summary-item">
-                  <span>❌ No se encontró reserva asociada</span>
-                  <strong>-</strong>
-                </div>
+                <div className="loading-summary">❌ No se encontró reserva asociada</div>
               </div>
             )}
 
             <div className="modal-body-payments">
               <div className="payment-details-grid">
-                <div className="detail-group">
-                  <label>ID del Pago:</label>
-                  <p>{selectedPayment.idPayments || selectedPayment.id || "N/A"}</p>
-                </div>
-
-                {selectedReservationData && (
-                  <div className="detail-group">
-                    <label>ID de Reserva:</label>
-                    <p>#{selectedReservationData.idReservation}</p>
-                  </div>
-                )}
 
                 <div className="detail-group">
-                  <label>Método de Pago:</label>
-                  <p>{selectedPayment.paymentMethod || "N/A"}</p>
-                </div>
-
-                <div className="detail-group">
-                  <label>Fecha:</label>
+                  <label>Fecha de pago :</label>
                   <p>{formatDate(selectedPayment.paymentDate)}</p>
                 </div>
 
                 <div className="detail-group">
-                  <label>Monto:</label>
+                  <label>Monto Pagado:</label>
                   <p className="amount">{formatCurrency(selectedPayment.amount)}</p>
-                </div>
-
-                <div className="detail-group">
-                  <label>Estado:</label>
-                  <div className="status-badge-container">
-                    <span className={`status-badge ${selectedPayment.status?.toLowerCase() || "pendiente"}`}>
-                      {selectedPayment.status || "Pendiente"}
-                    </span>
-                  </div>
                 </div>
 
                 {selectedReservationData && (
                   <>
-                    {selectedReservationData.user && (
-                      <div className="detail-group">
-                        <label>Cliente:</label>
-                        <p>{selectedReservationData.user.name || selectedReservationData.user.identification}</p>
-                      </div>
-                    )}
 
                     <div className="detail-group">
                       <label>Fechas de Reserva:</label>
@@ -639,24 +707,15 @@ const ViewPayments = ({ idReservation = null, isReadOnly = false }) => {
                     )}
                   </>
                 )}
-
                 <div className="detail-group">
-                  <label>Comprobante:</label>
-                  <p>
-                    {selectedPayment.voucher ? (
-                      <a
-                        href={selectedPayment.voucher}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="proof-link"
-                      >
-                        Ver comprobante
-                      </a>
-                    ) : (
-                      "N/A"
-                    )}
-                  </p>
+                  <label>Estado: </label>
+                  <div className="status-badge-container">
+                    <span className={`status-badge ${selectedPayment.status?.toLowerCase() || "pendiente"}`}>
+                      {selectedPayment.status || "Pendiente"}
+                    </span>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -670,6 +729,8 @@ ViewPayments.propTypes = {
   idReservation: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   totalAmount: PropTypes.number,
   isReadOnly: PropTypes.bool,
+  onPaymentSuccess: PropTypes.func, // Callback disponible para uso externo
 }
 
-export default ViewPayments
+// ✅ EXPORTAR COMPONENTE - handlePaymentSuccess disponible internamente para uso futuro
+export { ViewPayments as default }

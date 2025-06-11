@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import PropTypes from "prop-types"
 import { FaDownload, FaTimes, FaExclamationTriangle } from "react-icons/fa"
@@ -94,16 +93,31 @@ const TablePayments = ({ payments, onDetailPayment, onStatusChange, isLoading })
     <div className="payments-table-container">
       {/* Modal de vista previa mejorado */}
       {previewImage && (
-        <div className="voucher-preview-modal">
-          <div className="voucher-preview-content">
-            <div className="voucher-preview-header">
-              <h3>Comprobante de Pago</h3>
-              <button className="close-preview-btn" onClick={closePreview}>
+        <div className="voucher-preview-modal" onClick={closePreview}>
+          <div className="voucher-preview-content" onClick={(e) => e.stopPropagation()} style={{
+            width: '85%',
+            maxWidth: '800px',
+            maxHeight: '95vh',
+            overflow: 'hidden'
+          }}>
+            {/* Aquí está el cambio: h3 contiene tanto el título como el botón de cerrar */}
+            <h3>
+              Comprobante de Pago
+              <button
+                className="close-preview-btn"
+                onClick={closePreview}
+                title="Cerrar"
+              >
                 <FaTimes />
               </button>
-            </div>
+            </h3>
 
-            <div className="voucher-image-container">
+            <div className="voucher-image-container" style={{
+              overflow: 'hidden',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
               {previewImage.toLowerCase().endsWith(".pdf") ? (
                 // Manejo de PDFs
                 <iframe
@@ -130,8 +144,8 @@ const TablePayments = ({ payments, onDetailPayment, onStatusChange, isLoading })
                       onError={handleImageError}
                       onLoad={handleImageLoad}
                       style={{
-                        maxWidth: "100%",
-                        maxHeight: "70vh",
+                        maxWidth: "55%",
+                        maxHeight: "500vh",
                         objectFit: "contain",
                         display: imageLoadError ? "none" : "block",
                       }}

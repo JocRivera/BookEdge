@@ -6,13 +6,13 @@ const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
 // Configuración común de axios para todas las solicitudes
 const api = axios.create({
   baseURL: API_URL_PAYMENTS,
-  timeout: 10000, // 10 segundos de timeout
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
 })
 
-export const getAllPayments = async (params = {}) => {
+export const getAllPayments = async (params = {}, retryCount = 0) => {
   try {
     const response = await api.get("/", {
       params: {
@@ -29,6 +29,13 @@ export const getAllPayments = async (params = {}) => {
     return response.data
   } catch (error) {
     console.error("Error fetching payments:", error)
+    // Implementar lógica de reintentos (máximo 2 reintentos)
+    if (retryCount < 2 && (error.code === "ECONNABORTED" || !error.response)) {
+      console.log(`Reintentando petición (${retryCount + 1}/2)...`)
+      // Esperar un tiempo antes de reintentar (backoff exponencial)
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)))
+      return getAllPayments(params, retryCount + 1)
+    }
 
     // Personalizar mensajes de error según el tipo de error
     if (error.response) {
@@ -41,7 +48,10 @@ export const getAllPayments = async (params = {}) => {
       // Error en la configuración de la solicitud
       throw new Error("Error al configurar la solicitud de pagos")
     }
+
   }
+
+
 }
 
 export const getPaymentById = async (id) => {
@@ -238,13 +248,21 @@ export const changePaymentStatus = async (id, status) => {
 }
 
 // Servicio para operaciones relacionadas con reservas
-export const getReservationPayments = async (idReservation) => {
+export const getReservationPayments = async (idReservation, retryCount = 0) => {
   try {
-    const response = await axios.get(`${API_URL_PAYMENTS}/reservations/${idReservation}/payments`)
-    // Asegurar que siempre devuelva un array
+   const response = await axios.get(`${API_URL_PAYMENTS}/reservations/${idReservation}/payments`, {
+  timeout: 30000
+})
+  
     return Array.isArray(response?.data) ? response.data : []
   } catch (error) {
     console.error(`Error getting payments for reservation ${idReservation}:`, error)
+    // Implementar lógica de reintentos
+if (retryCount < 2 && (error.code === "ECONNABORTED" || !error.response)) {
+  console.log(`Reintentando obtener pagos para reserva ${idReservation} (${retryCount + 1}/2)...`)
+  await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)))
+  return getReservationPayments(idReservation, retryCount + 1)
+}
     return [] // Devuelve array vacío en caso de error
   }
 }

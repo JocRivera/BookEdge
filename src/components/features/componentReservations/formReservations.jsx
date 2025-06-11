@@ -86,7 +86,7 @@ function FormReservation({
       const selectedPlan = (formData.planes || []).find(
         (p) => p.idPlan === Number(formData.idPlan)
       );
-      // Ejemplo: tu plan especial tiene idPlan === 99 (ajusta según tu base de datos)
+     
       const isPlanEspecial = selectedPlan && selectedPlan.capacidadMaxima === 30; // o usa un idPlan específico
       const maxAcompanantes = isPlanEspecial ? 30 : 6;
       if (Number(value) > maxAcompanantes) {
@@ -361,10 +361,13 @@ function FormReservation({
     }
     return { results, errors }
   }
+  console.log("🧪 ID de usuario justo antes de enviar:", formData.idUser);
+
 
   const sanitizeDataForServer = (data, planes) => {
     const payload = {
-      idUser: Number(data.idUser),
+      idUser: data.idUser ? Number(data.idUser) : undefined,
+
       idPlan: Number(data.idPlan),
       startDate: data.startDate,
       endDate: data.endDate,
@@ -583,15 +586,19 @@ function FormReservation({
     }
   }, [isOpen, loading, isAlertActive, isPaymentProcessing, step, formData.hasCompanions])
 
-  useEffect(() => {}, [tempPayments])
-  useEffect(() => {}, [reservationPayments])
+  useEffect(() => { }, [tempPayments])
+  useEffect(() => { }, [reservationPayments])
+  
 
   useEffect(() => {
+    
     const loadInitialData = async () => {
+      
       try {
         setLoading(true)
         if (preloadedData) {
           updateFormData((prevData) => {
+            
             const newData = {
               ...prevData,
               users: preloadedData.users || (isClientMode ? [clientUser] : []),
@@ -600,7 +607,10 @@ function FormReservation({
               bedrooms: preloadedData.bedrooms || [],
               availableServices: preloadedData.services || [],
               idUser: isClientMode ? clientUser?.idUser || "" : prevData.idUser,
-            }
+              isClientMode,
+              
+            };
+            
             setAllCabins(preloadedData.cabins || [])
             setAllBedrooms(preloadedData.bedrooms || [])
             const updatedWithAvailability = updateAvailability(newData)
@@ -614,6 +624,7 @@ function FormReservation({
             getBedrooms(),
             getServices(),
           ])
+          
           setAllCabins(cabinsData || [])
           setAllBedrooms(bedroomsData || [])
           const activeCabins = cabinsData?.filter((cabin) => cabin.status?.toLowerCase() === "en servicio") || []
@@ -644,7 +655,7 @@ function FormReservation({
             console.error(error)
             setReservationPayments([])
             toast.warning("No se pudieron cargar los pagos existentes", {
-            
+
               position: "top-right",
               autoClose: 4000,
             })
@@ -684,9 +695,9 @@ function FormReservation({
           (reservationData.bedrooms && reservationData.bedrooms.length > 0 ? reservationData.bedrooms[0].idRoom : ""),
         selectedServices: reservationData.services
           ? reservationData.services.map((s) => ({
-              serviceId: s.Id_Service,
-              quantity: s.quantity || 1,
-            }))
+            serviceId: s.Id_Service,
+            quantity: s.quantity || 1,
+          }))
           : [],
       })
     }
@@ -694,8 +705,9 @@ function FormReservation({
 
   useEffect(() => {
     if (isOpen && !reservationData) {
-      updateFormData({
-        idUser: "",
+      updateFormData((prev)=> ({
+        ...prev,
+        idUser:  isClientMode && clientUser?.idUser ? clientUser.idUser : "",
         idPlan: "",
         startDate: "",
         endDate: "",
@@ -706,7 +718,7 @@ function FormReservation({
         idCabin: "",
         idRoom: "",
         selectedServices: [],
-      })
+      }))
       setFieldError({})
       setStep(1)
       setTempPayments([])
@@ -762,10 +774,10 @@ function FormReservation({
               loading
                 ? "Guardando datos..."
                 : isAlertActive
-                ? "Hay una alerta activa"
-                : isPaymentProcessing
-                ? "Procesando pago..."
-                : "Cerrar"
+                  ? "Hay una alerta activa"
+                  : isPaymentProcessing
+                    ? "Procesando pago..."
+                    : "Cerrar"
             }
           >
             {loading ? "..." : <X size={24} />}
@@ -830,6 +842,21 @@ function FormReservation({
                 <PaymentForm
                   totalAmount={totalAmount}
                   onPaymentSubmit={handleAddPayment}
+                  onPaymentSuccess={async (newPayment) => {
+                    console.log("💰 Pago agregado exitosamente, refrescando datos:", newPayment.idPayments || newPayment.tempId)
+                    // Recargar pagos de la reserva si existe
+                    if (reservationData?.idReservation) {
+                      try {
+                        const updatedPayments = await getReservationPayments(reservationData.idReservation)
+                        setReservationPayments(Array.isArray(updatedPayments) ? updatedPayments : [])
+                        setPaymentsKey(prev => prev + 1)
+                      } catch (error) {
+                        console.error("Error al recargar pagos:", error)
+                      }
+                    }
+                  }}
+                  reservationData={reservationData} // ✅ NUEVO
+                  existingPayments={[...reservationPayments, ...tempPayments]} // ✅ NUEVO
                   isViewMode={isReadOnly}
                   key={paymentsKey}
                 />
@@ -896,8 +923,8 @@ function FormReservation({
                   {step === 1
                     ? "Verificar Disponibilidad"
                     : step === (formData.hasCompanions ? 3 : 2)
-                    ? "Ir a Pagos"
-                    : "Siguiente"}
+                      ? "Ir a Pagos"
+                      : "Siguiente"}
                 </button>
               )}
             </div>

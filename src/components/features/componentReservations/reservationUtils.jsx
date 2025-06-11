@@ -402,3 +402,79 @@ export const planHasAccommodation = (plan) => {
     (plan?.bedroomDistribution?.length > 0)
   )
 }
+
+// ✅ NUEVAS FUNCIONES PARA LÓGICA DE PAGOS 50%
+export const getPaymentInfo = (reservationData, existingPayments = []) => {
+  if (!reservationData) {
+    return {
+      totalReservation: 0,
+      validPayments: [],
+      canAddPayment: true,
+      nextPaymentType: "first",
+      nextPaymentAmount: 0,
+      isComplete: false,
+    }
+  }
+
+  // Calcular total de la reserva
+  const planPrice = reservationData.plan?.salePrice || reservationData.plan?.price || 0
+  const servicesTotal = (reservationData.services || []).reduce((sum, service) => sum + (service.Price || 0), 0)
+  const totalReservation = planPrice + servicesTotal
+
+  // Filtrar pagos válidos (no anulados)
+  const validPayments = existingPayments.filter((payment) => payment.status !== "Anulado")
+
+  // Calcular montos de pago
+  const firstPaymentAmount = Math.round(totalReservation * 0.5) // 50%
+  const secondPaymentAmount = totalReservation - firstPaymentAmount // Restante
+
+  // Determinar estado actual
+  const paymentCount = validPayments.length
+  const canAddPayment = paymentCount < 2
+  const isComplete = paymentCount >= 2
+
+  let nextPaymentType = "first"
+  let nextPaymentAmount = firstPaymentAmount
+
+  if (paymentCount === 1) {
+    nextPaymentType = "second"
+    nextPaymentAmount = secondPaymentAmount
+  }
+
+  return {
+    totalReservation,
+    validPayments,
+    canAddPayment,
+    nextPaymentType,
+    nextPaymentAmount,
+    firstPaymentAmount,
+    secondPaymentAmount,
+    isComplete,
+    paymentCount,
+  }
+}
+
+export const validatePaymentAmount = (amount, reservationData, existingPayments = []) => {
+  if (!reservationData) {
+    // Validaciones generales para casos sin reserva específica
+    if (amount < 1000) {
+      return "El monto mínimo es $1,000 COP"
+    }
+    return null
+  }
+
+  const paymentInfo = getPaymentInfo(reservationData, existingPayments)
+  
+  if (!paymentInfo.canAddPayment) {
+    return "Esta reserva ya tiene los 2 pagos requeridos (50% + 50%)"
+  }
+
+  const expectedAmount = paymentInfo.nextPaymentAmount
+
+  if (amount !== expectedAmount) {
+    const paymentType = paymentInfo.nextPaymentType === "first" ? "primer" : "segundo"
+    return `El ${paymentType} pago debe ser exactamente ${formatCurrency(expectedAmount)}`
+  }
+
+  return null
+}

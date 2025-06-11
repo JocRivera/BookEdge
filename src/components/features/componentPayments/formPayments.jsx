@@ -1,9 +1,8 @@
+"use client"
+
 import PropTypes from "prop-types"
 import { useState, useEffect } from "react"
-import {
-  FaEye,
-
-} from "react-icons/fa"
+import { FaEye, FaInfoCircle } from "react-icons/fa"
 import { toast } from "react-toastify"
 import { useAlert } from "../../../context/AlertContext"
 import "./componentPayments.css"
@@ -19,8 +18,12 @@ const PaymentForm = ({
   onCloseView = null,
   onCancel = null,
   keepFormOpen = false,
+  onPaymentSuccess = null,
+  reservationData = null, // ✅ NUEVO: Datos completos de la reserva
+  existingPayments = [], // ✅ NUEVO: Pagos existentes de la reserva
 }) => {
-  console.log("💳 PaymentForm RENDER - keepFormOpen:", keepFormOpen)
+  console.log("💳 PaymentForm RENDER - reservationData:", reservationData)
+  console.log("💳 PaymentForm RENDER - existingPayments:", existingPayments)
 
   useEffect(() => {
     console.log("💳 PaymentForm MOUNTED - keepFormOpen:", keepFormOpen)
@@ -29,10 +32,71 @@ const PaymentForm = ({
     }
   }, [keepFormOpen])
 
+  // ✅ CALCULAR INFORMACIÓN DE PAGOS
+  const getPaymentInfo = () => {
+    if (!reservationData) {
+      return {
+        totalReservation: totalAmount || 0,
+        validPayments: [],
+        canAddPayment: true,
+        nextPaymentType: "first",
+        nextPaymentAmount: 0,
+        isComplete: false,
+      }
+    }
+
+    // Calcular total de la reserva
+    const planPrice = reservationData.plan?.salePrice || reservationData.plan?.price || 0
+    const servicesTotal = (reservationData.services || []).reduce((sum, service) => sum + (service.Price || 0), 0)
+    const totalReservation = planPrice + servicesTotal
+
+    // Filtrar pagos válidos (no anulados)
+    const validPayments = existingPayments.filter((payment) => payment.status !== "Anulado")
+
+    // ✅ CALCULAR TOTAL YA PAGADO
+    const totalPaid = validPayments.reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0)
+
+    // Calcular montos de pago
+    const firstPaymentAmount = Math.round(totalReservation * 0.5) // 50%
+
+    // ✅ EL SEGUNDO PAGO ES EXACTAMENTE LO QUE FALTA POR PAGAR
+    const remainingAmount = totalReservation - totalPaid
+    const secondPaymentAmount = remainingAmount
+
+    // Determinar estado actual
+    const paymentCount = validPayments.length
+    const canAddPayment = paymentCount < 2 && remainingAmount > 0
+    const isComplete = totalPaid >= totalReservation
+
+    let nextPaymentType = "first"
+    let nextPaymentAmount = firstPaymentAmount
+
+    if (paymentCount === 1) {
+      nextPaymentType = "second"
+      nextPaymentAmount = secondPaymentAmount // Usar el monto restante exacto
+    }
+
+    return {
+      totalReservation,
+      validPayments,
+      canAddPayment,
+      nextPaymentType,
+      nextPaymentAmount,
+      firstPaymentAmount,
+      secondPaymentAmount,
+      isComplete,
+      paymentCount,
+      totalPaid, // ✅ AGREGAR TOTAL PAGADO
+      remainingAmount, // ✅ AGREGAR MONTO RESTANTE
+    }
+  }
+
+  const paymentInfo = getPaymentInfo()
+
   const [paymentData, setPaymentData] = useState({
     paymentMethod: initialData.paymentMethod || "",
     paymentDate: initialData.paymentDate || new Date().toISOString().split("T")[0],
-    amount: initialData.amount || "",
+    amount: initialData.amount || paymentInfo.nextPaymentAmount.toString(),
     status: initialData.status || "Pendiente",
     voucher: initialData.voucher || null,
   })
@@ -45,11 +109,29 @@ const PaymentForm = ({
   // Usar el contexto de alertas
   const { showAlert } = useAlert()
 
+  // ✅ ACTUALIZAR MONTO CUANDO CAMBIE LA INFORMACIÓN DE PAGOS
+  useEffect(() => {
+    if (!isViewMode && paymentInfo.canAddPayment) {
+      setPaymentData((prev) => ({
+        ...prev,
+        amount: paymentInfo.nextPaymentAmount.toString(),
+      }))
+    }
+  }, [paymentInfo.nextPaymentAmount, paymentInfo.canAddPayment, isViewMode])
+
   const handleChange = (e) => {
     if (isViewMode) return
 
     const { name, value } = e.target
     console.log("💳 PaymentForm handleChange - field:", name, "value:", value)
+
+    // ✅ BLOQUEAR CAMBIOS EN EL MONTO - debe ser exacto
+    if (name === "amount" && reservationData) {
+      toast.warning(
+        `El monto debe ser exactamente ${formatCOP(paymentInfo.nextPaymentAmount)} para el ${paymentInfo.nextPaymentType === "first" ? "primer" : "segundo"} pago`,
+      )
+      return
+    }
 
     setPaymentData((prev) => ({
       ...prev,
@@ -128,12 +210,36 @@ const PaymentForm = ({
       return "El monto debe ser mayor a 0"
     }
 
-    if (amount < 1000) {
-      return "El monto mínimo es $1,000 COP"
-    }
+    // ✅ VALIDACIÓN ESPECÍFICA PARA RESERVAS CON LÓGICA DE 50%
+    if (reservationData && paymentInfo.canAddPayment) {
+      const expectedAmount = paymentInfo.nextPaymentAmount
 
-    if (totalAmount && amount > Number.parseFloat(totalAmount)) {
-      return "El monto no puede ser mayor al total a pagar"
+      if (amount !== expectedAmount) {
+        const paymentType = paymentInfo.nextPaymentType === "first" ? "primer" : "segundo"
+
+        // ✅ MENSAJE MÁS ESPECÍFICO PARA EL SEGUNDO PAGO
+        if (paymentInfo.nextPaymentType === "second") {
+          return `El ${paymentType} pago debe ser exactamente ${formatCOP(expectedAmount)} (monto restante por pagar)`
+        } else {
+          return `El ${paymentType} pago debe ser exactamente ${formatCOP(expectedAmount)}`
+        }
+      }
+
+      // ✅ VALIDACIÓN ADICIONAL: NO PERMITIR QUE EL TOTAL EXCEDA EL MONTO DE LA RESERVA
+      const totalAfterThisPayment = paymentInfo.totalPaid + amount
+      if (totalAfterThisPayment > paymentInfo.totalReservation) {
+        const maxAllowed = paymentInfo.totalReservation - paymentInfo.totalPaid
+        return `El monto excede el total de la reserva. Máximo permitido: ${formatCOP(maxAllowed)}`
+      }
+    } else {
+      // Validaciones generales para casos sin reserva específica
+      if (amount < 1000) {
+        return "El monto mínimo es $1,000 COP"
+      }
+
+      if (totalAmount && amount > Number.parseFloat(totalAmount)) {
+        return "El monto no puede ser mayor al total a pagar"
+      }
     }
 
     return null
@@ -191,6 +297,12 @@ const PaymentForm = ({
 
     const errors = {}
 
+    // ✅ VALIDAR SI SE PUEDEN AGREGAR MÁS PAGOS
+    if (!paymentInfo.canAddPayment) {
+      errors.submit = "Esta reserva ya tiene los 2 pagos requeridos (50% + 50%)"
+      return errors
+    }
+
     if (!paymentData.paymentMethod) {
       errors.paymentMethod = "Método de pago es requerido"
     }
@@ -235,13 +347,17 @@ const PaymentForm = ({
     const validationErrors = validateForm()
 
     if (Object.keys(validationErrors).length === 0) {
-      // Mostrar alerta de confirmación antes de procesar el pago
+      // ✅ MENSAJE DE CONFIRMACIÓN ESPECÍFICO
+      const paymentType = paymentInfo.nextPaymentType === "first" ? "primer" : "segundo"
+      const paymentDescription =
+        paymentInfo.nextPaymentType === "first" ? "primer pago (50%)" : "segundo pago (50% restante)"
+
       console.log("💳 PaymentForm showing confirmation alert")
       showAlert({
         type: "confirm-edit",
         title: "Confirmar Pago",
-        message: `¿Está seguro de registrar este pago por ${formatCOP(paymentData.amount)}?`,
-        confirmText: "Sí, Registrar Pago",
+        message: `¿Está seguro de registrar el ${paymentDescription} por ${formatCOP(paymentData.amount)}?`,
+        confirmText: `Sí, Registrar ${paymentType} Pago`,
         onConfirm: async () => {
           console.log("💳 PaymentForm alert confirmed, starting payment submission")
           try {
@@ -284,8 +400,20 @@ const PaymentForm = ({
               }
             }
 
-            toast.success("Pago registrado correctamente")
+            // ✅ MENSAJE DE ÉXITO ESPECÍFICO
+            const successMessage =
+              paymentInfo.nextPaymentType === "first"
+                ? "Primer pago (50%) registrado correctamente"
+                : "Segundo pago (50% restante) registrado correctamente. ¡Reserva completamente pagada!"
+
+            toast.success(successMessage)
             console.log("💳 PaymentForm payment registered successfully")
+
+            // ✅ NUEVO: Notificar al componente padre sobre el éxito
+            if (onPaymentSuccess) {
+              console.log("💳 PaymentForm calling onPaymentSuccess callback")
+              onPaymentSuccess(savedPayment)
+            }
 
             // Solo resetear el formulario para permitir agregar otro pago
             console.log("💳 PaymentForm resetting form data")
@@ -411,12 +539,55 @@ const PaymentForm = ({
     }
   }
 
+  // ✅ SI NO SE PUEDEN AGREGAR MÁS PAGOS, MOSTRAR MENSAJE INFORMATIVO
+  if (!paymentInfo.canAddPayment && !isViewMode) {
+    return (
+      <div className="payment-complete-message">
+        <div className="payment-complete-icon">
+          <FaInfoCircle size={48} color="#28a745" />
+        </div>
+        <h3>Pagos Completados</h3>
+        <p>Esta reserva ya tiene los 2 pagos requeridos:</p>
+        <ul>
+          <li>✅ Primer pago (50%): {formatCOP(paymentInfo.firstPaymentAmount)}</li>
+          <li>✅ Segundo pago (50%): {formatCOP(paymentInfo.secondPaymentAmount)}</li>
+        </ul>
+        <p>
+          <strong>Total pagado: {formatCOP(paymentInfo.totalReservation)}</strong>
+        </p>
+
+        {onCancel && (
+          <button type="button" className="reservation-cancel-button" onClick={onCancel}>
+            Cerrar
+          </button>
+        )}
+      </div>
+    )
+  }
+
   return (
     <>
+      {/* ✅ INFORMACIÓN DE PAGO ACTUAL */}
+      {reservationData && paymentInfo.canAddPayment && (
+        <div className="payment-info-banner">
+          <FaInfoCircle className="info-icon" />
+          <div className="payment-info-content">
+            <h4>{paymentInfo.nextPaymentType === "first" ? "Primer Pago (50%)" : `Segundo Pago (Monto Restante)`}</h4>
+            <p>
+              Monto requerido: <strong>{formatCOP(paymentInfo.nextPaymentAmount)}</strong>
+            </p>
+            <small>
+              Total reserva: {formatCOP(paymentInfo.totalReservation)} | Ya pagado: {formatCOP(paymentInfo.totalPaid)} |
+              Restante: {formatCOP(paymentInfo.remainingAmount)} | Pagos: {paymentInfo.paymentCount}/2
+            </small>
+          </div>
+        </div>
+      )}
+
       <div className="form-row">
         <div className="form-group">
           <label htmlFor="paymentMethod" className="form-label">
-             Método de Pago *
+            Método de Pago *
           </label>
           {isViewMode ? (
             <div className="form-value">{paymentData.paymentMethod || "N/A"}</div>
@@ -429,6 +600,7 @@ const PaymentForm = ({
                 onChange={handleChange}
                 onBlur={() => handleBlur("paymentMethod")}
                 className={`form-input ${shouldShowError("paymentMethod") ? "error" : ""}`}
+                disabled={!paymentInfo.canAddPayment}
               >
                 <option value="">Seleccione un método</option>
                 <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
@@ -437,17 +609,13 @@ const PaymentForm = ({
                 <option value="Efectivo">Efectivo</option>
                 <option value="Otro">Otro</option>
               </select>
-              {shouldShowError("paymentMethod") && (
-                <div className="error-message">
-                  {errors.paymentMethod}
-                </div>
-              )}
+              {shouldShowError("paymentMethod") && <div className="error-message">{errors.paymentMethod}</div>}
             </>
           )}
         </div>
         <div className="form-group">
           <label htmlFor="amount" className="form-label">
-             Monto Pagado *
+            Monto Pagado *
           </label>
           {isViewMode ? (
             <div className="form-value">{formatCOP(Number.parseFloat(paymentData.amount || 0))}</div>
@@ -464,19 +632,22 @@ const PaymentForm = ({
                 step="1000"
                 placeholder="000"
                 className={`form-input ${shouldShowError("amount") ? "error" : ""}`}
+                disabled={!paymentInfo.canAddPayment || (reservationData && true)} // Deshabilitar si hay reserva específica
+                readOnly={reservationData && true} // Solo lectura si hay reserva específica
+                title={
+                  reservationData
+                    ? `Monto fijo para ${paymentInfo.nextPaymentType === "first" ? "primer" : "segundo"} pago`
+                    : ""
+                }
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !isViewMode && !isSubmitting) {
+                  if (e.key === "Enter" && !isViewMode && !isSubmitting && paymentInfo.canAddPayment) {
                     e.preventDefault()
                     e.stopPropagation()
                     handleSubmit(e)
                   }
                 }}
               />
-              {shouldShowError("amount") && (
-                <div className="error-message">
-                  {errors.amount}
-                </div>
-              )}
+              {shouldShowError("amount") && <div className="error-message">{errors.amount}</div>}
             </>
           )}
         </div>
@@ -485,7 +656,7 @@ const PaymentForm = ({
       <div className="form-row">
         <div className="form-group">
           <label htmlFor="paymentDate" className="form-label">
-             Fecha de Pago *
+            Fecha de Pago *
           </label>
           {isViewMode ? (
             <div className="form-value">{paymentData.paymentDate || "N/A"}</div>
@@ -500,51 +671,13 @@ const PaymentForm = ({
                 onBlur={() => handleBlur("paymentDate")}
                 max={new Date().toISOString().split("T")[0]}
                 className={`form-input ${shouldShowError("paymentDate") ? "error" : ""}`}
+                disabled={!paymentInfo.canAddPayment}
               />
-              {shouldShowError("paymentDate") && (
-                <div className="error-message">
-                  {errors.paymentDate}
-                </div>
-              )}
+              {shouldShowError("paymentDate") && <div className="error-message">{errors.paymentDate}</div>}
             </>
           )}
         </div>
-        <div className="form-group">
-          <label className="form-label">
-             Estado del Pago
-          </label>
-          {isViewMode ? (
-            <div className="form-value">{paymentData.status || "N/A"}</div>
-          ) : (
-            <div className="radio-group">
-              <label className="radio-option">
-                <input
-                  type="radio"
-                  name="status"
-                  value="Pendiente"
-                  checked={paymentData.status === "Pendiente"}
-                  onChange={handleChange}
-                />
-                <span className="radio-custom"></span>
-                Pendiente
-              </label>
-              <label className="radio-option">
-                <input
-                  type="radio"
-                  name="status"
-                  value="Confirmado"
-                  checked={paymentData.status === "Confirmado"}
-                  onChange={handleChange}
-                />
-                <span className="radio-custom"></span>
-                Confirmado
-              </label>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="form-row">
+        <div className="form-row">
         <div className="form-group full-width">
           <label htmlFor="voucher" className="form-label">
             Comprobante de Pago
@@ -557,31 +690,22 @@ const PaymentForm = ({
               onChange={handleFileChange}
               accept="image/*,.pdf"
               className={`form-input file-input ${shouldShowError("voucher") ? "error" : ""}`}
+              disabled={!paymentInfo.canAddPayment}
             />
           )}
-          {shouldShowError("voucher") && (
-            <div className="error-message">
-              {errors.voucher}
-            </div>
-          )}
+          {shouldShowError("voucher") && <div className="error-message">{errors.voucher}</div>}
           {renderVoucherPreview()}
         </div>
       </div>
+      </div>
 
-      {errors.submit && (
-        <div className="error-message submit-error">
-          {errors.submit}
-        </div>
-      )}
+      
+
+      {errors.submit && <div className="error-message submit-error">{errors.submit}</div>}
 
       <div className="form-actions">
         {!isViewMode && onCancel && (
-          <button
-            type="button"
-            className="reservation-cancel-button"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-          >
+          <button type="button" className="reservation-cancel-button" onClick={handleCancel} disabled={isSubmitting}>
             Cancelar
           </button>
         )}
@@ -590,7 +714,7 @@ const PaymentForm = ({
           type="button"
           id="confirmar-pago-btn"
           style={{ display: "none" }}
-          disabled={isSubmitting || isViewMode}
+          disabled={isSubmitting || isViewMode || !paymentInfo.canAddPayment}
           onClick={handleSubmit}
         >
           Confirmar Pago
@@ -609,6 +733,8 @@ PaymentForm.propTypes = {
   onCancel: PropTypes.func,
   onPaymentSuccess: PropTypes.func,
   keepFormOpen: PropTypes.bool,
+  reservationData: PropTypes.object, // ✅ NUEVO
+  existingPayments: PropTypes.array, // ✅ NUEVO
 }
 
 export default PaymentForm
