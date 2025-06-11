@@ -157,7 +157,7 @@ function Plan() {
                             <div className="bookEdge-plans-card-image-container">
                                 {plan.image ? (
                                     <img
-                                        src={`https://backendbookedge-1.onrender.com${plan.image}`}
+                                        src={`http://localhost:3000${plan.image}`}
                                         alt={plan.name}
                                         className="bookEdge-plans-card-img"
                                         onError={handleImageError}

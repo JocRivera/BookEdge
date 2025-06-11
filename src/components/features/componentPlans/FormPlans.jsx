@@ -655,7 +655,7 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                                                     localFormData.imageFile
                                                         ? URL.createObjectURL(localFormData.imageFile)
                                                         : (typeof localFormData.image === "string" && localFormData.image)
-                                                            ? `https://backendbookedge-1.onrender.com${localFormData.image}`
+                                                            ? `http://localhost:3000${localFormData.image}`
                                                             : "https://via.placeholder.com/220x160?text=Sin+imagen"
                                                 }
                                                 alt="Vista previa"
