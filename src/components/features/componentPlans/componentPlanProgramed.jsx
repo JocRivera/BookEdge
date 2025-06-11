@@ -568,7 +568,7 @@ const PlanProgramed = () => {
                                         {detailPlan.planDetails.image && (
                                             <div className="calendar-plan-detail-image">
                                                 <img
-                                                    src={`https://backendbookedge-1.onrender.com${detailPlan.planDetails.image}`}
+                                                    src={`http://localhost:3000${detailPlan.planDetails.image}`}
                                                     alt={detailPlan.planDetails.name}
                                                     onError={e => {
                                                         e.target.style.objectFit = "contain";

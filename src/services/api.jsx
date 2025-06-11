@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // Crear instancia de axios con configuración base
 const api = axios.create({
-  baseURL: 'https://backendbookedge-1.onrender.com',
-  // baseURL: 'http://localhost:3000',
+  baseURL: 'http://localhost:3000',
+  // baseURL: 'http://localhost:30e00',
   withCredentials: true
 });
 
