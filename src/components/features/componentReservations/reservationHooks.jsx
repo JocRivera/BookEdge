@@ -95,11 +95,11 @@ const useReservationForm = (initialData = null) => {
     setErrors({})
   }
 
-  // Validación de pasos
+
   const validateStep = (currentStep, dataToValidate = formData) => {
     const newErrors = {}
 
-    // Paso 1: Validación de información básica
+
     if (currentStep === 1) {
      if (!dataToValidate.idUser && !dataToValidate.isClientMode) {
   newErrors.idUser = "Cliente es requerido"

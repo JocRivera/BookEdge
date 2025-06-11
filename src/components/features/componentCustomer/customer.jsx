@@ -285,7 +285,7 @@ function Customer() {
                                                 onClick={() => handleGoToReservations(customer)}
                                                 title="Ir a reserva(s)"
                                             >
-                                                Ir a reserva(s)
+                                                reserva(s)
                                             </button>
                                         )}
                                     </td>

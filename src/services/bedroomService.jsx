@@ -1,70 +1,61 @@
-import axios from "axios";
+import api from "./api";
 
-const API_URL = "http://localhost:3000/bedroom"; 
-const IMAGE_API_URL = "http://localhost:3000/room-images"; 
-
+// Servicios para habitaciones
 export const getBedrooms = async () => {
-  const { data } = await axios.get(API_URL);
+  const { data } = await api.get("/bedroom");
   return data;
 };
 
 export const getBedroomById = async (id) => {
-  const { data } = await axios.get(`${API_URL}/${id}`);
+  const { data } = await api.get(`/bedroom/${id}`);
   return data;
 };
 
-// <<< CORRECCIÓN: Eliminamos el try/catch para que el error de Axios se propague completo.
 export const createBedroom = async (bedroomData) => {
   const dataToSend = {
     ...bedroomData,
     capacity: bedroomData.capacity ? Number(bedroomData.capacity) : undefined
   };
-  
-  const response = await axios.post(API_URL, dataToSend);
+  const response = await api.post("/bedroom", dataToSend);
   return response.data;
 };
 
-// <<< CORRECCIÓN: Mismo cambio aquí.
 export const updateBedroom = async (id, bedroomData) => {
   const dataToSend = {
     ...bedroomData,
     capacity: bedroomData.capacity ? Number(bedroomData.capacity) : undefined
   };
-  
-  const response = await axios.put(`${API_URL}/${id}`, dataToSend);
+  const response = await api.put(`/bedroom/${id}`, dataToSend);
   return response.data;
 };
 
 export const deleteBedroom = async (id) => {
-  const { data } = await axios.delete(`${API_URL}/${id}`);
+  const { data } = await api.delete(`/bedroom/${id}`);
   return data;
 };
 
 export const getBedroomImages = async (bedroomId) => {
-  const { data } = await axios.get(`${IMAGE_API_URL}/${bedroomId}`);
+  const { data } = await api.get(`/room-images/${bedroomId}`);
   return data;
 };
 
 export const uploadBedroomImages = async (bedroomId, imageFiles) => {
   const formData = new FormData();
-  
   imageFiles.forEach(file => {
     formData.append("images", file);
   });
-  
-  const { data } = await axios.post(`${IMAGE_API_URL}/${bedroomId}`, formData, {
+  const { data } = await api.post(`/room-images/${bedroomId}`, formData, {
     headers: { "Content-Type": "multipart/form-data" }
   });
-  
   return data;
 };
 
 export const deleteBedroomImage = async (imageId) => {
-  const { data } = await axios.delete(`${IMAGE_API_URL}/${imageId}`);
+  const { data } = await api.delete(`/room-images/${imageId}`);
   return data;
 };
 
 export const setPrimaryBedroomImage = async (bedroomId, imageId) => {
-  const { data } = await axios.put(`${IMAGE_API_URL}/${bedroomId}/primary/${imageId}`);
+  const { data } = await api.put(`/room-images/${bedroomId}/primary/${imageId}`);
   return data;
 };

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { getCabinImages } from "../../../services/CabinService";
 import { X, ChevronLeft, ChevronRight, Users, CheckCircle } from "lucide-react";
 import "./CabinClient.css";
+import api from "../../../services/api";
+
+const API_BASE_URL = api.defaults.baseURL;
 
 const CabinDetailClient = ({ cabin, isOpen, onClose }) => {
   const [images, setImages] = useState([]);
@@ -77,7 +80,7 @@ const CabinDetailClient = ({ cabin, isOpen, onClose }) => {
               <>
                 <div className="cabin-details-main-image-container">
                   <img
-                    src={`http://localhost:3000/uploads/${images[currentImageIndex].imagePath}`}
+                    src={`${API_BASE_URL}/uploads/${images[currentImageIndex].imagePath}`}
                     alt={`${cabin.name} - Vista ${currentImageIndex + 1}`}
                     className="cabin-details-image"
                   />
@@ -120,7 +123,7 @@ const CabinDetailClient = ({ cabin, isOpen, onClose }) => {
                           aria-label={`Ver imagen ${index + 1}`}
                         >
                           <img
-                            src={`http://localhost:3000/uploads/${image.imagePath}`}
+                            src={`${API_BASE_URL}/uploads/${image.imagePath}`}
                             alt={`Miniatura ${index + 1}`}
                           />
                         </button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   MdClose,
@@ -17,6 +16,7 @@ import {
 } from "../../../services/BedroomService";
 import { toast } from "react-toastify";
 import { getComforts } from "../../../services/ComfortService";
+import api from "../../../services/api";
 
 const initialFormData = {
   name: "",
@@ -302,6 +302,8 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
     }
   };
 
+  const API_BASE_URL = api.defaults.baseURL;
+
   if (!isOpen) return null;
 
   return (
@@ -497,7 +499,7 @@ const FormBedrooms = ({ isOpen, onClose, onSave, bedroomToEdit }) => {
                           >
                             <figure className="image-preview-wrapper-bedroom-admin">
                               <img
-                                src={`http://localhost:3000/uploads/${existingImage.imagePath}`}
+                                src={`${API_BASE_URL}/uploads/${existingImage.imagePath}`}
                                 alt={`Habitación ${slotIndex + 1}`}
                                 className="preview-image-bedroom-admin"
                               />

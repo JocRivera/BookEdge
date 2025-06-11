@@ -1,11 +1,8 @@
-import axios from "axios";
-
-const API_URL_COMPANIONS = "http://localhost:3000/companions";
-//const API_URL_RESERVATIONSCOMPANIONS = "https://localhost:3000/reservationscompanions"
+import api from "./api";
 
 export const getAllCompanions = async () => {
   try {
-    const { data } = await axios.get(`${API_URL_COMPANIONS}`);
+    const { data } = await api.get("/companions");
     return data;
   } catch (error) {
     console.error('Error fetching companions:', error);
@@ -16,7 +13,7 @@ export const getAllCompanions = async () => {
 
 /*export const getCompanionsReservations = async (idReservation) => {
   try {
-    const {idReservation} = await axios.get(`${API_URL_RESERVATIONSCOMPANIONS}`)
+    const {idReservation} = await api.get(`/reservationscompanions`)
     return;
   }catch(error){
     console.error("Error al obtener el id de la reserva")
@@ -26,7 +23,7 @@ export const getAllCompanions = async () => {
 
 export const getCompanionById = async (id) => {
   try {
-    const response = await axios.get(`${API_URL_COMPANIONS}/${id}`);
+    const response = await api.get(`/companions/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error obteniendo acompañante con ID ${id}:`, error);
@@ -39,7 +36,7 @@ export const createCompanion = async (companionData) => {
   try {
     console.log("Enviando datos de acompañante al backend:", companionData);
     
-    const response = await axios.post(API_URL_COMPANIONS, companionData, {
+    const response = await api.post("/companions", companionData, {
       headers: {
         "Content-Type": "application/json"
       }
@@ -73,7 +70,7 @@ export const createCompanion = async (companionData) => {
 };
 export const updateCompanion = async (id, companionData) => {
   try {
-    const response = await axios.put(`${API_URL_COMPANIONS}/${id}`, companionData);
+    const response = await api.put(`/companions/${id}`, companionData);
     return response.data;
   } catch (error) {
     console.error(`Error actualizando acompañante con ID ${id}:`, error);
@@ -83,7 +80,7 @@ export const updateCompanion = async (id, companionData) => {
 
 export const deleteCompanion = async (id) => {
   try {
-    await axios.delete(`${API_URL_COMPANIONS}/${id}`);
+    await api.delete(`/companions/${id}`);
   } catch (error) {
     console.error(`Error eliminando acompañante con ID ${id}:`, error);
     throw error;

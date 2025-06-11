@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MdClose, MdPerson } from "react-icons/md";
 import "./BedroomDetails.css";
 import { getBedroomImages } from "../../../services/BedroomService";
+import api from "../../../services/api";
 
 const BedroomDetail = ({ isOpen, onClose, bedroom, loading }) => {
   const [images, setImages] = useState([]);
@@ -32,6 +33,8 @@ const BedroomDetail = ({ isOpen, onClose, bedroom, loading }) => {
     }
   };
 
+  const API_BASE_URL = api.defaults.baseURL;
+
   if (!isOpen || !bedroom) return null;
 
   return (
@@ -59,13 +62,13 @@ const BedroomDetail = ({ isOpen, onClose, bedroom, loading }) => {
               <div className="main-image-container">
                 {selectedImage ? (
                   <img
-                    src={`http://localhost:3000/uploads/${selectedImage}`}
+                    src={`${API_BASE_URL}/uploads/${selectedImage}`}
                     alt={bedroom.name}
                     className="main-detail-image"
                   />
                 ) : bedroom.imagen ? (
                   <img
-                    src={`http://localhost:3000/uploads/${bedroom.imagen}`}
+                    src={`${API_BASE_URL}/uploads/${bedroom.imagen}`}
                     alt={bedroom.name}
                     className="main-detail-image"
                   />
@@ -86,7 +89,7 @@ const BedroomDetail = ({ isOpen, onClose, bedroom, loading }) => {
                       onClick={() => setSelectedImage(image.imagePath)}
                     >
                       <img
-                        src={`http://localhost:3000/uploads/${image.imagePath}`}
+                        src={`${API_BASE_URL}/uploads/${image.imagePath}`}
                         alt="Thumbnail"
                       />
                       {image.isPrimary && <span className="primary-badge"></span>}

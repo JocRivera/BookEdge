@@ -1,20 +1,10 @@
-import axios from "axios"
+import api from "./api"
 
-const API_URL_PAYMENTS = "http://localhost:3000/payments"
-const API_URL_RESERVATIONS = "http://localhost:3000/reservations"
-
-// Configuración común de axios para todas las solicitudes
-const api = axios.create({
-  baseURL: API_URL_PAYMENTS,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-})
+const API_URL_RESERVATIONS = "/reservations"
 
 export const getAllPayments = async (params = {}, retryCount = 0) => {
   try {
-    const response = await api.get("/", {
+    const response = await api.get("/payments", {
       params: {
         // Parámetros opcionales para filtrado, paginación, etc.
         ...params,
@@ -61,7 +51,7 @@ export const getPaymentById = async (id) => {
       throw new Error("Se requiere un ID de pago válido")
     }
 
-    const response = await api.get(`/${id}`)
+    const response = await api.get(`/payments/${id}`)
 
     // Validar que la respuesta tenga datos
     if (!response.data) {
@@ -89,7 +79,7 @@ export const findReservationByPaymentId = async (paymentId) => {
     console.log("💳 Payment ID:", paymentId)
 
     // Estrategia 1: Buscar en todas las reservas
-    const allReservations = await axios.get(API_URL_RESERVATIONS)
+    const allReservations = await api.get(API_URL_RESERVATIONS)
 
     if (Array.isArray(allReservations.data)) {
       for (const reservation of allReservations.data) {
@@ -113,6 +103,7 @@ export const findReservationByPaymentId = async (paymentId) => {
         } catch (error) {
           console.error(`❌ Error buscando pagos para reserva ${reservation.idReservation}:`, error)
           // Continuar con la siguiente reserva si hay error
+          console.log(`⚠️ Error buscando pagos para reserva ${reservation.idReservation}:`, err)
           continue
         }
       }
@@ -141,7 +132,7 @@ export const createPayment = async (paymentData) => {
     if (paymentData.voucher) formData.append("voucher", paymentData.voucher)
     if (paymentData.idReservation) formData.append("idReservation", paymentData.idReservation)
 
-    const response = await axios.post(API_URL_PAYMENTS, formData, {
+    const response = await api.post("/payments", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -166,7 +157,7 @@ export const updatePayment = async (id, paymentData) => {
     if (paymentData.confirmationDate) formData.append("confirmationDate", paymentData.confirmationDate)
     if (paymentData.voucher) formData.append("voucher", paymentData.voucher)
 
-    const response = await axios.put(`${API_URL_PAYMENTS}/${id}`, formData, {
+    const response = await api.put(`/payments/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -181,7 +172,7 @@ export const updatePayment = async (id, paymentData) => {
 
 export const deletePayment = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL_PAYMENTS}/${id}`)
+    const response = await api.delete(`/payments/${id}`)
     return response.data
   } catch (error) {
     console.error(`Error deleting payment with ID ${id}:`, error)
@@ -207,7 +198,7 @@ export const changePaymentStatus = async (id, status) => {
     const associatedReservationId = await findReservationByPaymentId(id)
 
     // 2. Actualizar el estado del pago
-    const response = await axios.patch(`${API_URL_PAYMENTS}/${id}/status`, { status })
+    const response = await api.patch(`/payments/${id}/status`, { status })
     const updatedPayment = response.data
 
     console.log("✅ Estado de pago actualizado:", updatedPayment)
@@ -250,10 +241,15 @@ export const changePaymentStatus = async (id, status) => {
 // Servicio para operaciones relacionadas con reservas
 export const getReservationPayments = async (idReservation, retryCount = 0) => {
   try {
+<<<<<<< HEAD
    const response = await axios.get(`${API_URL_PAYMENTS}/reservations/${idReservation}/payments`, {
   timeout: 30000
 })
   
+=======
+    const response = await api.get(`/payments/reservations/${idReservation}/payments`)
+    // Asegurar que siempre devuelva un array
+>>>>>>> ce0362b5bd2611957ad49205d9a9d9bb8a34b3cb
     return Array.isArray(response?.data) ? response.data : []
   } catch (error) {
     console.error(`Error getting payments for reservation ${idReservation}:`, error)
@@ -335,7 +331,7 @@ export const addPaymentToReservation = async (paymentData) => {
 
         console.log("📤 Enviando FormData con archivo a:", `${API_URL_RESERVATIONS}/${reservationId}/payments`)
 
-        const response = await axios.post(`${API_URL_RESERVATIONS}/${reservationId}/payments`, formDataToSend, {
+        const response = await api.post(`${API_URL_RESERVATIONS}/${reservationId}/payments`, formDataToSend, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -359,7 +355,7 @@ export const addPaymentToReservation = async (paymentData) => {
         console.log("📤 Enviando JSON sin archivo a:", `${API_URL_RESERVATIONS}/${reservationId}/payments`)
         console.log("📊 Datos JSON a enviar:", processedData)
 
-        const response = await axios.post(`${API_URL_RESERVATIONS}/${reservationId}/payments`, processedData, {
+        const response = await api.post(`${API_URL_RESERVATIONS}/${reservationId}/payments`, processedData, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -412,7 +408,7 @@ export const addPaymentToReservation = async (paymentData) => {
     console.log("🌐 URL de envío:", `${API_URL_RESERVATIONS}/${reservationId}/payments`)
 
     // ✅ ENVIAR DATOS PROCESADOS COMO JSON
-    const response = await axios.post(`${API_URL_RESERVATIONS}/${reservationId}/payments`, processedData, {
+    const response = await api.post(`${API_URL_RESERVATIONS}/${reservationId}/payments`, processedData, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -517,6 +513,7 @@ export const syncReservationStatus = async (reservationId) => {
     const updatedReservation = await changeReservationStatus(reservationId, newReservationStatus)
 
     console.log("✅ Estado de reserva actualizado exitosamente")
+    console.log("📋 Pago actualizado:", updatedPayment)
     return updatedReservation
   } catch (error) {
     console.error("❌ Error en syncReservationStatus:", error)
@@ -529,7 +526,7 @@ export const checkExpiredPayments = async () => {
   try {
     console.log("⏰ === VERIFICANDO PAGOS EXPIRADOS ===")
 
-    const response = await axios.post(`${API_URL_PAYMENTS}/check-expired`)
+    const response = await api.post("/payments/check-expired")
 
     console.log("✅ Verificación de pagos expirados completada:", response.data)
     return response.data

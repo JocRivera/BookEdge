@@ -5,6 +5,7 @@ import {
   getBedroomImages,
 } from "../../../services/BedroomService";
 import { X, ChevronLeft, ChevronRight, Users, CheckCircle } from "lucide-react";
+import api from "../../../services/api";
 
 import "./BedroomClient.css";
 
@@ -13,6 +14,8 @@ const BedroomDetailClient = ({ room, isOpen, onClose }) => {
   const [loading, setLoading] = useState([]);
   const [error, setError] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const API_BASE_URL = api.defaults.baseURL;
 
   useEffect(() => {
     const fetchRoomData = async () => {
@@ -75,7 +78,7 @@ const BedroomDetailClient = ({ room, isOpen, onClose }) => {
               <>
                 <div className="rooms-details-main-image-container">
                   <img
-                    src={`http://localhost:3000/uploads/${images[currentImageIndex].imagePath}`}
+                    src={`${API_BASE_URL}/uploads/${images[currentImageIndex].imagePath}`}
                     alt={`${room.name} - Vista ${currentImageIndex + 1}`}
                     className="rooms-details-image"
                   />
@@ -118,7 +121,7 @@ const BedroomDetailClient = ({ room, isOpen, onClose }) => {
                           aria-label={`Ver imagen ${index + 1}`}
                         >
                           <img
-                            src={`http://localhost:3000/uploads/${image.imagePath}`}
+                            src={`${API_BASE_URL}/uploads/${image.imagePath}`}
                             alt={`Miniatura ${index + 1}`}
                           />
                         </button>
