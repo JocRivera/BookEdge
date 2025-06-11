@@ -19,7 +19,7 @@
 .reservations-client-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 100px 20px 20px; /* Aumentado el padding-top de 20px a 100px */
+  padding: 100px 20px 20px;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
@@ -285,7 +285,7 @@
   color: #1f2937;
 }
 
-/* ===== FOOTER DE LA TARJETA ===== */
+/* ===== FOOTER DE LA TARJETA CON BOTONES ===== */
 .reservation-card-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--card-border);
@@ -293,30 +293,82 @@
   justify-content: space-between;
   align-items: center;
   background: var(--card-light);
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .reservation-price {
   font-weight: 700;
   font-size: 1.1rem;
   color: var(--card-success);
+  flex-shrink: 0;
 }
 
-.btn-details {
-  background: transparent;
-  color: var(--card-primary);
-  border: 1px solid var(--card-primary);
+.reservation-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-details,
+.btn-cancel,
+.btn-pay {
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.8rem;
   cursor: pointer;
   transition: var(--card-transition);
+  border: 1px solid;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.btn-details {
+  background: transparent;
+  color: var(--card-primary);
+  border-color: var(--card-primary);
 }
 
 .btn-details:hover {
   background: var(--card-primary);
   color: white;
   transform: translateY(-2px);
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--card-danger);
+  border-color: var(--card-danger);
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: var(--card-danger);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--card-gray);
+  border-color: var(--card-gray);
+}
+
+.btn-pay {
+  background: var(--card-success);
+  color: white;
+  border-color: var(--card-success);
+}
+
+.btn-pay:hover {
+  background: #059669;
+  border-color: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 /* ===== ESTADOS ESPECIALES ===== */
@@ -463,6 +515,116 @@
   padding: 24px;
 }
 
+/* ===== FORMULARIO DE PAGO ===== */
+.payment-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.payment-form-group {
+  margin-bottom: 20px;
+}
+
+.payment-form-group label {
+  display: block;
+  font-weight: 600;
+  color: var(--card-gray);
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.payment-form-input,
+.payment-form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--card-border);
+  border-radius: calc(var(--card-radius) - 4px);
+  background: white;
+  font-size: 0.875rem;
+  transition: var(--card-transition);
+}
+
+.payment-form-input:focus,
+.payment-form-select:focus {
+  outline: none;
+  border-color: var(--card-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.payment-summary {
+  background: var(--card-light);
+  padding: 20px;
+  border-radius: calc(var(--card-radius) - 4px);
+  margin-bottom: 20px;
+}
+
+.payment-summary h4 {
+  margin: 0 0 16px 0;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.payment-row:last-child {
+  margin-bottom: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border);
+  font-weight: 700;
+}
+
+.payment-amount {
+  font-weight: 600;
+  color: var(--card-success);
+}
+
+.payment-amount.pending {
+  color: var(--card-warning);
+}
+
+.payment-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.btn-payment-cancel,
+.btn-payment-submit {
+  padding: 12px 24px;
+  border-radius: calc(var(--card-radius) - 4px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--card-transition);
+  border: none;
+}
+
+.btn-payment-cancel {
+  background: transparent;
+  color: var(--card-gray);
+  border: 1px solid var(--card-border);
+}
+
+.btn-payment-cancel:hover {
+  background: var(--card-border);
+}
+
+.btn-payment-submit {
+  background: var(--card-success);
+  color: white;
+}
+
+.btn-payment-submit:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
   .reservations-list {
@@ -472,7 +634,7 @@
 
 @media (max-width: 768px) {
   .reservations-client-container {
-    padding: 90px 16px 16px; /* Aumentado el padding-top para móviles */
+    padding: 90px 16px 16px;
   }
 
   .reservations-header {
@@ -490,11 +652,28 @@
   .filters-row {
     grid-template-columns: 1fr;
   }
+
+  .reservation-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .reservation-actions {
+    justify-content: center;
+  }
+
+  .btn-details,
+  .btn-cancel,
+  .btn-pay {
+    flex: 1;
+    min-width: auto;
+  }
 }
 
 @media (max-width: 480px) {
   .reservations-client-container {
-    padding: 80px 12px 12px; /* Ajustado para pantallas muy pequeñas */
+    padding: 80px 12px 12px;
   }
 
   .reservations-list {
@@ -505,6 +684,10 @@
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
+  }
+
+  .reservation-actions {
+    flex-direction: column;
   }
 }
 
@@ -534,4 +717,128 @@
 
 .reservation-card:nth-child(3n + 3) {
   animation-delay: 0.3s;
+}
+/* ==== RESUMEN HORIZONTAL Y COLUMNAS ==== */
+.reservation-summary-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-light);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 18px 28px 12px 28px;
+  margin-bottom: 18px;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.summary-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 120px;
+}
+.summary-title {
+  font-size: 1.15em;
+  font-weight: 700;
+  color: var(--card-primary);
+}
+.summary-dates, .summary-days {
+  font-size: 0.98em;
+  color: #555;
+}
+.pretty-icon.big {
+  font-size: 2.1em;
+  margin-right: 10px;
+}
+.reservation-details-columns {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.reservation-details-col {
+  flex: 1 1 0;
+  min-width: 240px;
+  max-width: 370px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  .reservation-summary-horizontal {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 10px 8px 10px;
+  }
+  .reservation-details-columns {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .reservation-details-col {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+/* ==== DETALLE MINIMALISTA DE RESERVA ==== */
+.minimal-details {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.minimal-section {
+  background: var(--card-light);
+  border-radius: 12px;
+  box-shadow: none;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--card-border);
+  min-width: 210px;
+  max-width: 320px;
+}
+.minimal-header {
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.pretty-icon {
+  font-size: 1.2rem;
+  padding: 4px;
+}
+.minimal-list {
+  gap: 5px;
+  font-size: 0.98em;
+}
+.pretty-label {
+  font-weight: 600;
+  color: var(--card-primary);
+  margin-right: 3px;
+  font-size: 0.97em;
+}
+.pretty-status {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.92em;
+}
+.pretty-value.completed {
+  color: var(--card-success);
+}
+.pretty-value.pending {
+  color: var(--card-warning);
+}
+.pretty-status-complete {
+  color: var(--card-success);
+}
+.pretty-status-pending {
+  color: var(--card-warning);
+}
+@media (max-width: 900px) {
+  .minimal-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .minimal-section {
+    max-width: 100%;
+    min-width: 0;
+  }
 }

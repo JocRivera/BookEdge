@@ -278,26 +278,35 @@ export function BasicInfoStep({
         </div>
 
         <div className="form-group">
-          <label htmlFor="endDate" className="form-label">
-            Fecha de Fin *
-          </label>
-          {requiereAlojamiento && (
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleDateChange}
-              min={formData.startDate || todayStr}
-              disabled={
-                loading ||
-                isReadOnly ||
-                (!!selectedPlan && !planHasAccommodation(selectedPlan))
-              }
-              className={`form-input${errors.endDate ? " error" : ""}`}
-            />
+          {requiereAlojamiento ? (
+            <>
+              <label htmlFor="endDate" className="form-label">
+                Fecha de Fin *
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleDateChange}
+                min={formData.startDate || todayStr}
+                disabled={
+                  loading ||
+                  isReadOnly ||
+                  (!!selectedPlan && !planHasAccommodation(selectedPlan))
+                }
+                className={`form-input${errors.endDate ? " error" : ""}`}
+              />
+              {errors.endDate && <span className="error-message">{errors.endDate}</span>}
+            </>
+          ) : (
+            <>
+              <label className="form-label">Fecha de Fin</label>
+              <div className="form-input-disabled">
+                No aplica para este plan
+              </div>
+            </>
           )}
-          {errors.endDate && <span className="error-message">{errors.endDate}</span>}
         </div>
       </div>
 
@@ -932,7 +941,7 @@ export function PaymentStep({
           }}>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="paymentMethod" className="form-label">
+                <label className="form-label">
                   Método de pago *
                 </label>
                 <select id="paymentMethod" name="paymentMethod" className="form-input" disabled={loading}>
