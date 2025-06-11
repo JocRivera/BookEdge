@@ -1,10 +1,9 @@
-// --- START OF FILE Loginform.jsx ---
 
 import { useAuth } from "../../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import logo from "../../../assets/logo.png";
-import "./login.css"; // Asegúrate que este archivo también se actualice
+import "./login.css"; 
 import imagen1 from "../../../assets/lagos4.png";
 import imagen2 from "../../../assets/lagos1.png";
 import imagen3 from "../../../assets/lagos2.png";
@@ -159,7 +158,8 @@ export default function LoginForm() {
                       className="login-form__input"
                       value={credentials.email}
                       onChange={handleInputChange}
-                      // ... (otros props)
+                      onFocus={() => handleFocus("email")}
+                      onBlur={handleBlur}
                     />
                     {/* El error ahora irá debajo del input, estilizado por CSS */}
                     {formErrors.email && (
@@ -194,7 +194,8 @@ export default function LoginForm() {
                       className="login-form__input"
                       value={credentials.password}
                       onChange={handleInputChange}
-                      // ... (otros props)
+                      onFocus={() => handleFocus("password")}
+                      onBlur={handleBlur}
                     />
                     {formErrors.password && (
                       <p className="login-form__error-message"> {/* Eliminamos --beside o lo ignoramos en CSS */}

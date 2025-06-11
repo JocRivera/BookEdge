@@ -154,6 +154,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Redirigir a la ruta adecuada según el rol del usuario autenticado
+  useEffect(() => {
+    if (isAuthenticated && user?.role?.name === "Cliente") {
+      navigate("/");
+    }
+  }, [isAuthenticated, user, navigate]);
+
   return (
     <AuthContext.Provider
       value={{
