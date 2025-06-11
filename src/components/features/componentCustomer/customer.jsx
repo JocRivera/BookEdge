@@ -60,7 +60,7 @@ function Customer() {
         }
     }
 
-    const {showAlert} = useAlert();
+    const { showAlert } = useAlert();
 
     const fecthRoles = async () => {
         try {
@@ -232,69 +232,77 @@ function Customer() {
             </div>
 
             <div className="customer-table-wrapper">
-                <table className="customer-table">
-                    <thead className="customer-table-head">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Tipo Identificación</th>
-                            <th>Identificación</th>
-                            <th>Correo Electrónico</th>
-                            <th>Teléfono</th>
-                            <th>Dirección</th>
-                            <th>EPS</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                            <th>Reservas</th>
-                        </tr>
-                    </thead>
-                    <tbody className="customer-table-body">
-                        {currentItems.map((customer, index) => (
-                            <tr
-                                key={customer.idUser}
-                                className={index % 2 === 0 ? "customer-table-row-even" : "customer-table-row-odd"}
-                            >
-                                <td className="customer-table-cell">{customer.idUser}</td>
-                                <td className="customer-table-cell">{customer.name}</td>
-                                <td className="customer-table-cell">{customer.identificationType}</td>
-                                <td className="customer-table-cell">{customer.identification}</td>
-                                <td className="customer-table-cell">{customer.email}</td>
-                                <td className="customer-table-cell">{customer.cellphone}</td>
-                                <td className="customer-table-cell">{customer.address}</td>
-                                <td className="customer-table-cell">{customer.eps}</td>
-                                <td className="customer-table-cell">
-                                    <Switch
-                                        isOn={customer.status === true}
-                                        handleToggle={() => handleChangeStatus(customer)}
-                                        id={`status-${customer.idUser}`}
-                                    />
-                                </td>
-                                <td className="customer-table-cell">
-                                    <div className="action-buttons-container">
-                                        <ActionButtons
-                                            onEdit={() => handleEdit(customer)}
-                                            onDelete={() => handleDeleteCustomer(customer)}
-                                        />
-                                        
-                                    </div>
-                                </td>
-                                    <td className="customer-table-cell">
-                                        {usersWithReservations.includes(customer.idUser) && (
-                                            <button
-                                                className="CUSTOMER-action-btn reservation-btn"
-                                                onClick={() => handleGoToReservations(customer)}
-                                                title="Ir a reserva(s)"
-                                            >
-                                                reserva(s)
-                                            </button>
-                                        )}
-                                    </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {/* PAGINADOR */}
-                <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+                {isLoading && customers.length === 0 ? (
+                    <div className="loading-indicator">
+                        <div className="loading-spinner"></div>
+                        <p>Cargando clientes...</p>
+                    </div>
+                ) : (
+                    <>
+                        <table className="customer-table">
+                            <thead className="customer-table-head">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Tipo Identificación</th>
+                                    <th>Identificación</th>
+                                    <th>Correo Electrónico</th>
+                                    <th>Teléfono</th>
+                                    <th>Dirección</th>
+                                    <th>EPS</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                    <th>Reservas</th>
+                                </tr>
+                            </thead>
+                            <tbody className="customer-table-body">
+                                {currentItems.map((customer, index) => (
+                                    <tr
+                                        key={customer.idUser}
+                                        className={index % 2 === 0 ? "customer-table-row-even" : "customer-table-row-odd"}
+                                    >
+                                        <td className="customer-table-cell">{customer.idUser}</td>
+                                        <td className="customer-table-cell">{customer.name}</td>
+                                        <td className="customer-table-cell">{customer.identificationType}</td>
+                                        <td className="customer-table-cell">{customer.identification}</td>
+                                        <td className="customer-table-cell">{customer.email}</td>
+                                        <td className="customer-table-cell">{customer.cellphone}</td>
+                                        <td className="customer-table-cell">{customer.address}</td>
+                                        <td className="customer-table-cell">{customer.eps}</td>
+                                        <td className="customer-table-cell">
+                                            <Switch
+                                                isOn={customer.status === true}
+                                                handleToggle={() => handleChangeStatus(customer)}
+                                                id={`status-${customer.idUser}`}
+                                            />
+                                        </td>
+                                        <td className="customer-table-cell">
+                                            <div className="action-buttons-container">
+                                                <ActionButtons
+                                                    onEdit={() => handleEdit(customer)}
+                                                    onDelete={() => handleDeleteCustomer(customer)}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="customer-table-cell">
+                                            {usersWithReservations.includes(customer.idUser) && (
+                                                <button
+                                                    className="CUSTOMER-action-btn reservation-btn"
+                                                    onClick={() => handleGoToReservations(customer)}
+                                                    title="Ir a reserva(s)"
+                                                >
+                                                    reserva(s)
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {/* PAGINADOR */}
+                        <Pagination pageCount={pageCount} onPageChange={handlePageClick} />
+                    </>
+                )}
             </div>
         </div>
     );

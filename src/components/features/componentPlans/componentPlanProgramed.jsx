@@ -217,7 +217,11 @@ const PlanProgramed = () => {
 
         if (!formData.startDate) {
             errors.startDate = "La fecha de inicio es requerida"
-        } else if (isBefore(startDate, today)) {
+        } else if (
+            // Solo validar si NO estamos editando un plan con fecha pasada
+            !(isEditMode && selectedProgramedPlan && isBefore(selectedProgramedPlan.startDate, today)) &&
+            isBefore(startDate, today)
+        ) {
             errors.startDate = "La fecha de inicio no puede ser anterior a hoy"
         }
 
@@ -251,7 +255,7 @@ const PlanProgramed = () => {
                     }
 
                     // Caso 3: El nuevo plan envuelve completamente un plan existente
-                    if ((isBefore(startDate, planStartDate) && isAfter(endDate, planEndDate)) || isSameDay(startDate, planStartDate) && isSameDay(endDate,planEndDate)) {
+                    if ((isBefore(startDate, planStartDate) && isAfter(endDate, planEndDate)) || isSameDay(startDate, planStartDate) && isSameDay(endDate, planEndDate)) {
                         return true;
                     }
 
@@ -401,13 +405,19 @@ const PlanProgramed = () => {
     const getPositionInWeek = (date) => {
         return date.getDay()
     }
-    
+
     const getPlanNameById = (idPlan) => {
         const plan = availablePlans.find((p) => p.idPlan === idPlan)
         return plan ? plan.name : "Plan desconocido"
     }
 
     const today = startOfDay(new Date()); // Define el día de hoy al inicio del componente
+
+    // Nuevo: ¿El campo de fecha de inicio debe estar inhabilitado?
+    const disableStartDate =
+        isEditMode &&
+        selectedProgramedPlan &&
+        isBefore(selectedProgramedPlan.startDate, today);
 
     return (
         <div className="calendar-container">
@@ -558,11 +568,11 @@ const PlanProgramed = () => {
                                         {detailPlan.planDetails.image && (
                                             <div className="calendar-plan-detail-image">
                                                 <img
-                                                    src={`http://localhost:3000${detailPlan.planDetails.image}`}
+                                                    src={`https://backendbookedge-1.onrender.com${detailPlan.planDetails.image}`}
                                                     alt={detailPlan.planDetails.name}
-                                                    onError={(e) => {
-                                                        e.target.onerror = null
-                                                        e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible"
+                                                    onError={e => {
+                                                        e.target.style.objectFit = "contain";
+                                                        e.target.onerror = null;
                                                     }}
                                                 />
                                             </div>
@@ -716,6 +726,7 @@ const PlanProgramed = () => {
                                             onChange={handleInputChange}
                                             min={format(new Date(), "yyyy-MM-dd")}
                                             className={formErrors.startDate ? "calendar-error" : ""}
+                                            disabled={disableStartDate} // Nuevo: Deshabilitar campo si es necesario
                                         />
                                         {formErrors.startDate && <div className="calendar-error-message">{formErrors.startDate}</div>}
                                     </div>

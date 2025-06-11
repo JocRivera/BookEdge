@@ -50,7 +50,7 @@ const PlanDetail = ({ plan, isOpen, onClose }) => {
                             <div className="bookGEYS-plan-details-main-image-container">
                                 {planDetails.plan.image ? (
                                     <img
-                                        src={`http://localhost:3000${planDetails.plan.image}`}
+                                        src={`https://backendbookedge-1.onrender.com${planDetails.plan.image}`}
                                         alt={planDetails.plan.name}
                                         className="bookGEYS-plan-details-image"
                                     />

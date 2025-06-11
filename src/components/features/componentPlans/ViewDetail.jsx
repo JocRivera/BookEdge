@@ -19,11 +19,11 @@ const ViewDetail = ({ plan, isOpen, onClose }) => {
                             <div className="bookEdge-planDetail-imageContainer">
                                 {plan.image ? (
                                     <img
-                                        src={`http://localhost:3000${plan.image}`}
+                                        src={`https://backendbookedge-1.onrender.com${plan.image}`}
                                         alt={plan.name}
-                                        onError={(e) => {
-                                            e.target.onerror = null
-                                            e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible"
+                                        onError={e => {
+                                            e.target.style.objectFit = "contain";
+                                            e.target.onerror = null;
                                         }}
                                     />
                                 ) : (
