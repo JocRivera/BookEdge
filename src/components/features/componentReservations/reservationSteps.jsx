@@ -89,6 +89,9 @@ export function BasicInfoStep({
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const companionCount = Number(formData.companionCount) || 0;
+  const totalGuests = companionCount + 1;
+
   // Validación en tiempo real
   const handleFieldChange = (e) => {
     onChange(e);
@@ -150,8 +153,11 @@ export function BasicInfoStep({
   const selectedPlan = planes.find(p => p.idPlan === Number(formData.idPlan));
   const requiereAlojamiento = selectedPlan && planHasAccommodation(selectedPlan);
 
+  console.log("Cabins:", formData.availableCabins);
+  console.log("Bedrooms:", formData.availableBedrooms);
   console.log("selectedPlan:", selectedPlan);
   console.log("planHasAccommodation(selectedPlan):", planHasAccommodation(selectedPlan));
+  console.log("totalGuests:", totalGuests);
 
   return (
     <div className="step-content">
@@ -220,8 +226,8 @@ export function BasicInfoStep({
                       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                       (user.identification && user.identification.toLowerCase().includes(searchTerm.toLowerCase()))
                   ).length === 0 && (
-                    <li className="no-suggestions">No hay resultados</li>
-                  )}
+                      <li className="no-suggestions">No hay resultados</li>
+                    )}
                 </ul>
               )}
             </div>
@@ -272,26 +278,35 @@ export function BasicInfoStep({
         </div>
 
         <div className="form-group">
-          <label htmlFor="endDate" className="form-label">
-            Fecha de Fin *
-          </label>
-          {requiereAlojamiento && (
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleDateChange}
-              min={formData.startDate || todayStr}
-              disabled={
-                loading ||
-                isReadOnly ||
-                (!!selectedPlan && !planHasAccommodation(selectedPlan))
-              }
-              className={`form-input${errors.endDate ? " error" : ""}`}
-            />
+          {requiereAlojamiento ? (
+            <>
+              <label htmlFor="endDate" className="form-label">
+                Fecha de Fin *
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                name="endDate"
+                value={formData.endDate}
+                onChange={handleDateChange}
+                min={formData.startDate || todayStr}
+                disabled={
+                  loading ||
+                  isReadOnly ||
+                  (!!selectedPlan && !planHasAccommodation(selectedPlan))
+                }
+                className={`form-input${errors.endDate ? " error" : ""}`}
+              />
+              {errors.endDate && <span className="error-message">{errors.endDate}</span>}
+            </>
+          ) : (
+            <>
+              <label className="form-label">Fecha de Fin</label>
+              <div className="form-input-disabled">
+                No aplica para este plan
+              </div>
+            </>
           )}
-          {errors.endDate && <span className="error-message">{errors.endDate}</span>}
         </div>
       </div>
 
@@ -698,177 +713,120 @@ export function AvailabilityStep({
   onRoomSelect,
   onServiceQuantityChange,
 }) {
-  const companionCount = formData.companionCount || 0
-  const totalGuests = companionCount + 1
+  const companionCount = Number(formData.companionCount) || 0;
+  const totalGuests = companionCount + 1;
+  const selectedPlan = (formData.planes || []).find(p => p.idPlan === Number(formData.idPlan));
 
-  // Función para obtener la cantidad actual de un servicio
-  const getServiceQuantity = (serviceId) => {
-    const service = formData.selectedServices?.find((s) => s.serviceId === serviceId)
-    return service ? service.quantity : 0
+  const hasAccommodation = planHasAccommodation(selectedPlan);
+
+  const showBedrooms = hasAccommodation && totalGuests <= 2;
+  const showCabins = hasAccommodation && totalGuests >= 3;
+
+  function getServiceQuantity(serviceId) {
+    const found = formData.selectedServices?.find(s => s.serviceId === serviceId);
+    return found ? found.quantity : 0;
   }
 
-  // Función para manejar cambios de cantidad con toasts
-  const handleQuantityChange = (serviceId, newQuantity) => {
-    const service = formData.availableServices?.find((s) => s.Id_Service === serviceId)
-    const serviceName = service?.name || "Servicio"
-
-    if (newQuantity === 0) {
-      toast.info(`${serviceName} eliminado de la selección`, {
-        position: "top-right",
-        autoClose: 3000,
-      })
-    } else if (getServiceQuantity(serviceId) === 0) {
-      toast.success(`${serviceName} agregado (x${newQuantity})`, {
-        position: "top-right",
-        autoClose: 3000,
-      })
-    }
-
-    onServiceQuantityChange(serviceId, newQuantity)
+  function handleQuantityChange(serviceId, newQuantity) {
+    onServiceQuantityChange(serviceId, newQuantity);
   }
-
-  // Función para manejar selección de cabaña con toast
-  const handleCabinSelect = (cabinId) => {
-    const cabin = formData.availableCabins?.find((c) => c.idCabin === cabinId)
-    const cabinName = cabin?.name || `Cabaña ${cabinId}`
-
-    if (formData.idCabin === cabinId) {
-      toast.info(`${cabinName} deseleccionada`, {
-        position: "top-right",
-        autoClose: 3000,
-      })
-    } else {
-      toast.success(`${cabinName} seleccionada`, {
-        position: "top-right",
-        autoClose: 3000,
-      })
-    }
-
-    onCabinSelect(cabinId)
-  }
-
-  // Función para manejar selección de habitación con toast
-  const handleRoomSelect = (roomId) => {
-    const room = formData.availableBedrooms?.find((r) => r.idRoom === roomId)
-    const roomName = room?.name || `Habitación ${roomId}`
-
-    if (formData.idRoom === roomId) {
-      toast.info(`${roomName} deseleccionada`, {
-        position: "top-right",
-        autoClose: 3000,
-      })
-    } else {
-      toast.success(`${roomName} seleccionada`, {
-        position: "top-right",
-        autoClose: 3000,
-      })
-    }
-
-    onRoomSelect(roomId)
-  }
-
-  const selectedPlan = formData.selectedPlan; // O pásalo como prop si lo tienes así
 
   return (
     <div className="step-content">
-
-
       <div className="guest-info">
         <p>
           <strong>Huéspedes totales:</strong> {totalGuests} persona{totalGuests !== 1 ? "s" : ""}
         </p>
         <p>
           <strong>Alojamiento disponible:</strong>
-          {formData.availableCabins?.length > 0 && formData.availableBedrooms?.length > 0
-            ? "Cabañas y habitaciones"
-            : formData.availableCabins?.length > 0
-              ? "Solo cabañas"
-              : formData.availableBedrooms?.length > 0
-                ? "Solo habitaciones"
-                : "Sin disponibilidad"}
+          {!hasAccommodation
+            ? "Solo servicios"
+            : totalGuests <= 2
+              ? "Habitaciones"
+              : "Cabañas"}
         </p>
       </div>
 
       {errors.accommodation && <div className="error-message">{errors.accommodation}</div>}
 
-      {planHasAccommodation(selectedPlan) && (
-        <>
-          {/* Sección de cabañas */}
-          {formData.availableCabins?.length > 0 && (
-            <div className="section-container">
-              <h4 className="section-title">
-                Cabañas Disponibles ({formData.availableCabins.length})
-                {totalGuests > 4 && <span className="recommended-badge">Recomendado para {totalGuests} personas</span>}
-              </h4>
-
-              <div className="options-grid">
-                {formData.availableCabins.map((cabin) => (
-                  <div
-                    key={cabin.idCabin}
-                    className={`option-item ${formData.idCabin === cabin.idCabin ? "selected" : ""}`}
-                    onClick={() => handleCabinSelect(cabin.idCabin)}
-                  >
-                    <div className="option-selector">
-                      {formData.idCabin === cabin.idCabin ? (
-                        <span className="selected-icon">✓</span>
-                      ) : (
-                        <span className="unselected-icon">○</span>
-                      )}
-                    </div>
-                    <div className="option-content">
-                      <h5 className="option-name">{cabin.name}</h5>
-                      <p className="option-detail">
-                        Capacidad: {cabin.capacity || 7} personas
-                        {cabin.capacity >= totalGuests && <span className="capacity-ok"> ✓</span>}
-                      </p>
-                      <p className="option-description">{cabin.description}</p>
-                    </div>
+      {/* Mostrar solo habitaciones */}
+      {showBedrooms && (
+        <div className="section-container">
+          <h4 className="section-title">
+            Habitaciones Disponibles ({formData.availableBedrooms?.length || 0})
+            <span className="recommended-badge">
+              Recomendado para {totalGuests} persona{totalGuests !== 1 ? "s" : ""}
+            </span>
+          </h4>
+          {formData.availableBedrooms?.length > 0 ? (
+            <div className="options-grid">
+              {formData.availableBedrooms.map((bedroom) => (
+                <div
+                  key={bedroom.idRoom}
+                  className={`option-item ${formData.idRoom === bedroom.idRoom ? "selected" : ""}`}
+                  onClick={() => onRoomSelect(bedroom.idRoom)}
+                >
+                  <div className="option-selector">
+                    {formData.idRoom === bedroom.idRoom ? (
+                      <span className="selected-icon">✓</span>
+                    ) : (
+                      <span className="unselected-icon">○</span>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Sección de habitaciones */}
-          {formData.availableBedrooms?.length > 0 && (
-            <div className="section-container">
-              <h4 className="section-title">
-                Habitaciones Disponibles ({formData.availableBedrooms.length})
-                {totalGuests <= 2 && (
-                  <span className="recommended-badge">
-                    Recomendado para {totalGuests} persona{totalGuests !== 1 ? "s" : ""}
-                  </span>
-                )}
-              </h4>
-
-              <div className="options-grid">
-                {formData.availableBedrooms.map((bedroom) => (
-                  <div
-                    key={bedroom.idRoom}
-                    className={`option-item ${formData.idRoom === bedroom.idRoom ? "selected" : ""}`}
-                    onClick={() => handleRoomSelect(bedroom.idRoom)}
-                  >
-                    <div className="option-selector">
-                      {formData.idRoom === bedroom.idRoom ? (
-                        <span className="selected-icon">✓</span>
-                      ) : (
-                        <span className="unselected-icon">○</span>
-                      )}
-                    </div>
-                    <div className="option-content">
-                      <h5 className="option-name">Habitación {bedroom.name || bedroom.idRoom}</h5>
-                      <p className="option-detail">
-                        Capacidad: {bedroom.capacity || 2} personas
-                        {(bedroom.capacity || 2) >= totalGuests && <span className="capacity-ok"> ✓</span>}
-                      </p>
-                      <p className="option-description">{bedroom.description}</p>
-                    </div>
+                  <div className="option-content">
+                    <h5 className="option-name">Habitación {bedroom.name || bedroom.idRoom}</h5>
+                    <p className="option-detail">
+                      Capacidad: {bedroom.capacity || 2} personas
+                      {(bedroom.capacity || 2) >= totalGuests && <span className="capacity-ok"> ✓</span>}
+                    </p>
+                    <p className="option-description">{bedroom.description}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
+          ) : (
+            <p className="no-options">No hay habitaciones disponibles para este número de huéspedes.</p>
           )}
-        </>
+        </div>
+      )}
+
+      {/* Mostrar solo cabañas */}
+      {showCabins && (
+        <div className="section-container">
+          <h4 className="section-title">
+            Cabañas Disponibles ({formData.availableCabins?.length || 0})
+            <span className="recommended-badge">Recomendado para {totalGuests} personas</span>
+          </h4>
+          {formData.availableCabins?.length > 0 ? (
+            <div className="options-grid">
+              {formData.availableCabins.map((cabin) => (
+                <div
+                  key={cabin.idCabin}
+                  className={`option-item ${formData.idCabin === cabin.idCabin ? "selected" : ""}`}
+                  onClick={() => onCabinSelect(cabin.idCabin)}
+                >
+                  <div className="option-selector">
+                    {formData.idCabin === cabin.idCabin ? (
+                      <span className="selected-icon">✓</span>
+                    ) : (
+                      <span className="unselected-icon">○</span>
+                    )}
+                  </div>
+                  <div className="option-content">
+                    <h5 className="option-name">{cabin.name}</h5>
+                    <p className="option-detail">
+                      Capacidad: {cabin.capacity || 7} personas
+                      {cabin.capacity >= totalGuests && <span className="capacity-ok"> ✓</span>}
+                    </p>
+                    <p className="option-description">{cabin.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="no-options">No hay cabañas disponibles para este número de huéspedes.</p>
+          )}
+        </div>
       )}
 
       {/* Servicios adicionales siempre visibles */}
@@ -983,7 +941,7 @@ export function PaymentStep({
           }}>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="paymentMethod" className="form-label">
+                <label className="form-label">
                   Método de pago *
                 </label>
                 <select id="paymentMethod" name="paymentMethod" className="form-input" disabled={loading}>

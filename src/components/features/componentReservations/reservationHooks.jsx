@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { planHasAccommodation } from "./reservationUtils"
 
 const useReservationForm = (initialData = null) => {
   const [formData, setFormData] = useState({
@@ -27,9 +28,9 @@ const useReservationForm = (initialData = null) => {
     // Servicios con cantidades
     selectedServices: initialData?.services
       ? initialData.services.map((s) => ({
-          serviceId: s.Id_Service,
-          quantity: s.quantity || 1,
-        }))
+        serviceId: s.Id_Service,
+        quantity: s.quantity || 1,
+      }))
       : [],
 
     // Datos cargados del servidor
@@ -45,7 +46,7 @@ const useReservationForm = (initialData = null) => {
   const [errors, setErrors] = useState({})
   const [currentStep, setCurrentStep] = useState(0)
 
-  
+
   // Función para actualizar datos del formulario
   const updateFormData = (data) => {
     if (typeof data === "function") {
@@ -95,25 +96,28 @@ const useReservationForm = (initialData = null) => {
   }
 
   // Validación de pasos
-  const validateStep = (step, dataToValidate = formData) => {
+  const validateStep = (currentStep, dataToValidate = formData) => {
     const newErrors = {}
 
-    // Validación del paso 1 (información básica)
-    if (step === 1 || step === 0) {
-      if (!dataToValidate.idUser) {
-        newErrors.idUser = "Cliente es requerido"
-      }
-
+    // Paso 1: Validación de información básica
+    if (currentStep === 1) {
+     if (!dataToValidate.idUser && !dataToValidate.isClientMode) {
+  newErrors.idUser = "Cliente es requerido"
+}
       if (!dataToValidate.idPlan) {
         newErrors.idPlan = "Plan es requerido"
       }
 
-      if (!dataToValidate.startDate) {
-        newErrors.startDate = "Fecha de entrada es requerida"
+      const selectedPlan = (dataToValidate.planes || []).find(p => p.idPlan === Number(dataToValidate.idPlan))
+
+      if (dataToValidate.idPlan && selectedPlan && planHasAccommodation(selectedPlan)) {
+        if (!dataToValidate.endDate) {
+          newErrors.endDate = "Fecha de salida es requerida"
+        }
       }
 
-      if (!dataToValidate.endDate) {
-        newErrors.endDate = "Fecha de salida es requerida"
+      if (!dataToValidate.startDate) {
+        newErrors.startDate = "Fecha de entrada es requerida"
       }
 
       // Validación de fechas
@@ -132,13 +136,12 @@ const useReservationForm = (initialData = null) => {
       if (dataToValidate.startDate && dataToValidate.endDate) {
         const startDate = new Date(dataToValidate.startDate)
         const endDate = new Date(dataToValidate.endDate)
-
         if (endDate <= startDate) {
-          newErrors.endDate = "La fecha de salida debe ser posterior a la fecha de inicio"
+          newErrors.endDate = "La fecha de salida debe ser posterior a la de entrada"
         }
       }
 
-      // Validación de estado
+      // Validación del estado
       const validStatuses = ["Confirmado", "Pendiente", "Anulado", "Reservado"]
       if (dataToValidate.status && !validStatuses.includes(dataToValidate.status)) {
         newErrors.status = `Estado no válido. Use uno de: ${validStatuses.join(", ")}`
@@ -148,31 +151,33 @@ const useReservationForm = (initialData = null) => {
       if (dataToValidate.hasCompanions && (!dataToValidate.companionCount || dataToValidate.companionCount <= 0)) {
         newErrors.companionCount = "Debe especificar al menos 1 acompañante"
       }
-
-      if (dataToValidate.hasCompanions && dataToValidate.companionCount > 6) {
-        newErrors.companionCount = "Máximo 6 acompañantes permitidos"
-      }
     }
 
-    // Validación del paso 2 (acompañantes)
-    if (step === 2 && dataToValidate.hasCompanions) {
-      const expectedCount = Number.parseInt(dataToValidate.companionCount) || 0
+    // Paso 2: Validación de acompañantes
+    if (currentStep === 2 && dataToValidate.hasCompanions) {
+      const expectedCount = Number(dataToValidate.companionCount) || 0
       const actualCount = dataToValidate.companions?.length || 0
-
       if (actualCount < expectedCount) {
         newErrors.companions = `Faltan ${expectedCount - actualCount} acompañante(s) por registrar`
       }
     }
 
-    // Validación del paso 3 (disponibilidad)
-    if (step === 3) {
-      if (!dataToValidate.idCabin && !dataToValidate.idRoom) {
-        newErrors.accommodation = "Debe seleccionar una cabaña o habitación"
+    // Paso 3: Validación de disponibilidad
+    if (currentStep === 3) {
+      const selectedPlan = (dataToValidate.planes || []).find(p => p.idPlan === Number(dataToValidate.idPlan))
+      if (selectedPlan && planHasAccommodation(selectedPlan)) {
+        if (!dataToValidate.idCabin && !dataToValidate.idRoom) {
+          newErrors.accommodation = "Debe seleccionar una cabaña o habitación"
+        }
       }
     }
 
+    // 🔍 DEBUG: Ver los errores en consola
+    console.log("🔎 VALIDACIÓN Paso:", currentStep, "\nErrores:", newErrors, "\nDatos:", dataToValidate)
+
     return newErrors
   }
+
 
   // Validación completa del formulario
   const validateForm = () => {

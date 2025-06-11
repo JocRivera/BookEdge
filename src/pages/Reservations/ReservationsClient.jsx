@@ -1,6 +1,8 @@
+"use client"
+
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "../../context/AuthContext"
-import { useLocation } from "react-router-dom" // <-- Agrega esto
+import { useLocation } from "react-router-dom"
 
 //  REUTILIZAR TODOS LOS SERVICIOS DEL ADMIN
 import {
@@ -9,21 +11,28 @@ import {
   getCabins,
   getBedrooms,
   getServices,
+  updateReservation,
 } from "../../services/reservationsService.jsx"
-import { getReservationPayments } from "../../services/paymentsService"
+import { getReservationPayments, addPaymentToReservation, syncReservationStatus } from "../../services/paymentsService"
 
 //  REUTILIZAR COMPONENTES EXISTENTES DEL ADMIN
 import FormReservation from "../../components/features/componentReservations/formReservations"
 import TableCompanions from "../../components/features/componentCompanions/tableCompanions"
 
-// REUTILIZAR UTILIDADES EXISTENTES
-import { formatDate, calculateDaysBetween } from "../../components/features/componentReservations/reservationUtils"
+// REUTILIZAR UTILIDADES EXISTENTES DEL ADMIN
+import {
+  formatDate,
+  calculateDaysBetween,
+  getPaymentInfo,
+  validatePaymentAmount,
+} from "../../components/features/componentReservations/reservationUtils"
 
 import "./ReservationsClient.css"
+import PaymentForm from "../../components/features/componentPayments/formPayments"
 
 const ReservationsClient = () => {
   const { user } = useAuth()
-  const location = useLocation() // <-- Agrega esto
+  const location = useLocation()
   const [reservations, setReservations] = useState([])
   const [filteredReservations, setFilteredReservations] = useState([])
   const [loading, setLoading] = useState(true)
@@ -40,6 +49,7 @@ const ReservationsClient = () => {
   const [selectedReservation, setSelectedReservation] = useState(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [isNewReservationModalOpen, setIsNewReservationModalOpen] = useState(false)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
 
   // ✅ REUTILIZAR TODOS LOS DATOS DEL ADMIN
   const [currentPayments, setCurrentPayments] = useState([])
@@ -48,10 +58,7 @@ const ReservationsClient = () => {
   const [availableBedrooms, setAvailableBedrooms] = useState([])
   const [availableServices, setAvailableServices] = useState([])
 
-  const hasOpenedAutoModal = useRef(false) // <-- Nuevo estado
-
-  console.log("[ReservationsClient] Component mounted", { user, loading, error })
-
+  const hasOpenedAutoModal = useRef(false)
   useEffect(() => {
     if (user?.idUser) {
       fetchAllData()
@@ -63,12 +70,12 @@ const ReservationsClient = () => {
   }, [reservations, filters])
 
   // ✅ CARGAR TODOS LOS DATOS NECESARIOS
+  // Modificar la función fetchAllData para cargar también los pagos de cada reserva
   const fetchAllData = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      console.log("[ReservationsClient] Fetching all data for user:", user?.idUser)
 
       // Cargar datos en paralelo
       const [userReservations, plans, cabins, bedrooms, services] = await Promise.all([
@@ -79,15 +86,30 @@ const ReservationsClient = () => {
         getServices(),
       ])
 
-      console.log("[ReservationsClient] Data loaded:", {
-        reservations: userReservations?.length || 0,
-        plans: plans?.length || 0,
-        cabins: cabins?.length || 0,
-        bedrooms: bedrooms?.length || 0,
-        services: services?.length || 0,
-      })
 
-      setReservations(Array.isArray(userReservations) ? userReservations : [])
+      // Cargar los pagos para cada reserva
+      if (Array.isArray(userReservations) && userReservations.length > 0) {
+        const reservationsWithPayments = await Promise.all(
+          userReservations.map(async (reservation) => {
+            try {
+              const payments = await getReservationPayments(reservation.idReservation)
+              return {
+                ...reservation,
+                payments: Array.isArray(payments) ? payments : [],
+              }
+            } catch (error) {
+              console.error(`Error loading payments for reservation ${reservation.idReservation}:`, error)
+              return reservation
+            }
+          }),
+        )
+        // AGREGA ESTE LOG:
+        console.log("[DEBUG] Reservas con pagos:", reservationsWithPayments)
+        setReservations(reservationsWithPayments)
+      } else {
+        setReservations([])
+      }
+
       setAvailablePlans(Array.isArray(plans) ? plans : [])
       setAvailableCabins(Array.isArray(cabins) ? cabins : [])
       setAvailableBedrooms(Array.isArray(bedrooms) ? bedrooms : [])
@@ -160,7 +182,6 @@ const ReservationsClient = () => {
       const bedroom = reservation.bedrooms[0]
       return {
         type: "bedroom",
-        icon: "🛏️",
         label: "Habitación",
         name: bedroom.name || `Habitación ${bedroom.idRoom}`,
         capacity: bedroom.capacity || "2 personas",
@@ -234,6 +255,7 @@ const ReservationsClient = () => {
     try {
       setSelectedReservation(reservation)
       const payments = await getReservationPayments(reservation.idReservation)
+      console.log("Pagos cargados:", payments) // Agregar log para depuración
       setCurrentPayments(Array.isArray(payments) ? payments : [])
       setIsDetailModalOpen(true)
     } catch (error) {
@@ -266,14 +288,46 @@ const ReservationsClient = () => {
     await fetchAllData() // Recargar todos los datos
   }
 
+  // ✅ FUNCIÓN PARA CANCELAR RESERVA
   const handleCancelReservation = async (reservation) => {
+    // Verificar si la reserva está confirmada
+    if (reservation.status?.toLowerCase() === "confirmado") {
+      alert("No se puede cancelar una reserva confirmada. Contacte al administrador.")
+      return
+    }
+
     if (window.confirm("¿Estás seguro de que deseas cancelar esta reserva?")) {
       try {
         console.log("Cancelando reserva:", reservation.idReservation)
-        await fetchAllData()
+
+        // Actualizar el estado de la reserva a "anulado"
+        const updatedReservation = {
+          ...reservation,
+          status: "anulado",
+        }
+
+        await updateReservation(reservation.idReservation, updatedReservation)
+        await fetchAllData() // Recargar datos
+
+        alert("Reserva cancelada exitosamente")
       } catch (error) {
         console.error("Error cancelando reserva:", error)
+        alert("Error al cancelar la reserva. Inténtalo de nuevo.")
       }
+    }
+  }
+
+  // ✅ FUNCIÓN PARA ABRIR MODAL DE PAGO
+  const handleOpenPayment = async (reservation) => {
+    try {
+      setSelectedReservation(reservation)
+      const payments = await getReservationPayments(reservation.idReservation)
+      setCurrentPayments(Array.isArray(payments) ? payments : [])
+
+      setIsPaymentModalOpen(true)
+    } catch (error) {
+      console.error("Error cargando información de pagos:", error)
+      alert("Error al cargar información de pagos")
     }
   }
 
@@ -281,14 +335,45 @@ const ReservationsClient = () => {
     return calculateDaysBetween(startDate, endDate)
   }
 
+  // ✅ USAR FUNCIONES DEL ADMINISTRADOR PARA CÁLCULOS DE PAGO
   const calculateTotalPaid = (payments) => {
-    return Array.isArray(payments) ? payments.reduce((sum, payment) => sum + (Number(payment?.amount) || 0), 0) : 0
+    if (!Array.isArray(payments) || payments.length === 0) return 0
+
+    return payments.reduce((sum, payment) => {
+      // Solo sumar pagos que no estén anulados
+      if (payment.status?.toLowerCase() !== "anulado") {
+        const amount = Number(payment?.amount) || 0
+        return sum + amount
+      }
+      return sum
+    }, 0)
   }
 
   const calculatePendingBalance = (reservation, payments) => {
     const total = reservation.total || reservation.plan?.salePrice || reservation.plan?.price || 0
     const paid = calculateTotalPaid(payments)
     return total - paid
+  }
+
+  // ✅ FUNCIÓN PARA OBTENER INFORMACIÓN DETALLADA DE PAGOS USANDO LÓGICA DEL ADMIN
+  const getReservationPaymentInfo = (reservation) => {
+    if (!reservation) return null
+
+    const payments = reservation.payments || []
+    const paymentInfo = getPaymentInfo(reservation, payments)
+
+    return {
+      ...paymentInfo,
+      totalPaid: calculateTotalPaid(payments),
+      pendingBalance: calculatePendingBalance(reservation, payments),
+      paymentProgress:
+        paymentInfo.totalReservation > 0 ? (calculateTotalPaid(payments) / paymentInfo.totalReservation) * 100 : 0,
+    }
+  }
+
+  // ✅ VERIFICAR SI SE PUEDE CANCELAR LA RESERVA
+  const canCancelReservation = (reservation) => {
+    return reservation.status?.toLowerCase() !== "confirmado" && reservation.status?.toLowerCase() !== "anulado"
   }
 
   // Abre el modal si viene un plan seleccionado desde la navegación
@@ -299,7 +384,7 @@ const ReservationsClient = () => {
       !hasOpenedAutoModal.current // Solo si no se ha abierto antes
     ) {
       const planFromList = availablePlans.find(
-        (p) => p.idPlan === (location.state.selectedPlan.Plan?.idPlan || location.state.selectedPlan.idPlan)
+        (p) => p.idPlan === (location.state.selectedPlan.Plan?.idPlan || location.state.selectedPlan.idPlan),
       )
       setSelectedReservation({
         plan: planFromList || location.state.selectedPlan.Plan || location.state.selectedPlan,
@@ -423,6 +508,9 @@ const ReservationsClient = () => {
             const days = calculateDays(reservation.startDate, reservation.endDate)
             const total = reservation.total || reservation.plan?.salePrice || reservation.plan?.price || 0
 
+            // ✅ USAR INFORMACIÓN DE PAGOS DEL ADMINISTRADOR
+            const paymentInfo = getReservationPaymentInfo(reservation)
+
             return (
               <div
                 key={reservation.idReservation}
@@ -443,7 +531,6 @@ const ReservationsClient = () => {
                   <h4 className="plan-name">{reservation.plan?.name || "Plan no disponible"}</h4>
 
                   <div className="date-range">
-                    <div className="date-range-icon">📅</div>
                     <div className="date-range-dates">
                       <div className="date-range-start">
                         Entrada: <span>{formatDate(reservation.startDate)}</span>
@@ -458,13 +545,44 @@ const ReservationsClient = () => {
                     <span className="accommodation-icon">{accommodationInfo.icon}</span>
                     <span className="accommodation-name">{accommodationInfo.name}</span>
                   </div>
+
+                  {/* ✅ INFORMACIÓN DE PAGOS MEJORADA CON LÓGICA DEL ADMIN */}
+                  {paymentInfo && (
+                    <div className="payment-info-card">
+                      <div className="payment-info-details">
+                        {paymentInfo.isComplete && <div className="payment-status-complete">✅ Pagos completados</div>}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="reservation-card-footer">
                   <div className="reservation-price">{formatCurrency(total)}</div>
-                  <button className="btn-details" onClick={() => handleViewDetails(reservation)}>
-                    Ver detalles
-                  </button>
+                  <div className="reservation-actions">
+                    <button className="btn-details" onClick={() => handleViewDetails(reservation)}>
+                      Ver detalles
+                    </button>
+                    <button
+                      className="btn-cancel"
+                      onClick={() => handleCancelReservation(reservation)}
+                      disabled={!canCancelReservation(reservation)}
+                      title={
+                        !canCancelReservation(reservation)
+                          ? "No se puede cancelar una reserva confirmada"
+                          : "Cancelar reserva"
+                      }
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      className="btn-pay"
+                      onClick={() => handleOpenPayment(reservation)}
+                      disabled={paymentInfo?.isComplete}
+                      title={paymentInfo?.isComplete ? "Pagos completados" : "Realizar pago"}
+                    >
+                      {paymentInfo?.isComplete ? "Pagado" : "Pagar"}
+                    </button>
+                  </div>
                 </div>
               </div>
             )
@@ -484,144 +602,273 @@ const ReservationsClient = () => {
             </div>
 
             <div className="modal-body">
-              <div className="reservation-details-container">
-                <div className="reservation-main-column">
-                  <div className="reservation-card-detail">
-                    <h3>Información Principal</h3>
-                    <div className="info-grid">
-                      <div className="info-group">
-                        <label>Plan</label>
-                        <p>{selectedReservation.plan?.name || "Plan no disponible"}</p>
-                      </div>
-                      <div className="info-group">
-                        <label>Precio del plan</label>
-                        <p className="plan-price">
-                          {formatCOP(selectedReservation.plan?.price || selectedReservation.plan?.salePrice || 0)}
-                        </p>
-                      </div>
-                      <div className="info-group">
-                        <label>Fechas</label>
-                        <p>
-                          {formatDate(selectedReservation.startDate)} - {formatDate(selectedReservation.endDate)}
-                        </p>
-                      </div>
-                      <div className="info-group">
-                        <label>Duración</label>
-                        <p>{calculateDays(selectedReservation.startDate, selectedReservation.endDate)} días</p>
-                      </div>
-                      <div className="info-group">
-                        <label>Total</label>
-                        <p className="total-amount">
-                          {formatCurrency(
-                            selectedReservation.total ||
-                              selectedReservation.plan?.salePrice ||
-                              selectedReservation.plan?.price ||
-                              0,
-                          )}
-                        </p>
-                      </div>
+              {/* Tarjeta horizontal arriba */}
+              <div className="reservation-summary-horizontal">
+                <div className="summary-section">
+                  <span className="pretty-icon big">📄</span>
+                  <div>
+                    <div className="summary-title">{selectedReservation.plan?.name || "N/A"}</div>
+                    <div className="summary-dates">
+                      {formatDate(selectedReservation.startDate)} - {formatDate(selectedReservation.endDate)}
                     </div>
-                  </div>
-
-                  <div className="reservation-card-detail">
-                    <h3>Alojamiento</h3>
-                    {(() => {
-                      const accommodationInfo = getAccommodationInfo(selectedReservation)
-                      return (
-                        <div className="accommodation-details">
-                          <div className="accommodation-header">
-                            <span className="accommodation-icon">{accommodationInfo.icon}</span>
-                            <div className="accommodation-main-info">
-                              <h4 className="accommodation-title">{accommodationInfo.name}</h4>
-                              <span className="accommodation-type">{accommodationInfo.label}</span>
-                            </div>
-                          </div>
-                          <div className="accommodation-specs">
-                            <div className="spec-item">
-                              <label>Capacidad:</label>
-                              <span>{accommodationInfo.capacity}</span>
-                            </div>
-                          </div>
-                          {accommodationInfo.description && (
-                            <div className="accommodation-description">
-                              <label>Descripción:</label>
-                              <p>{accommodationInfo.description}</p>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })()}
-                  </div>
-
-                  <div className="reservation-card-detail">
-                    <h3>Servicios Adicionales</h3>
-                    {(() => {
-                      const services = getServicesInfo(selectedReservation)
-                      return services.length > 0 ? (
-                        <div className="services-list-detail">
-                          {services.map((service) => (
-                            <div key={service.id} className="service-item-detail">
-                              <div className="service-header">
-                                <h4 className="service-name">
-                                  {service.name} {service.quantity > 1 && `(x${service.quantity})`}
-                                </h4>
-                                <span className="service-price">{formatCOP(service.price * service.quantity)}</span>
-                              </div>
-                              {service.description && <p className="service-description">{service.description}</p>}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="no-services">No se han agregado servicios adicionales</p>
-                      )
-                    })()}
-                  </div>
-                </div>
-
-                <div className="reservation-secondary-column">
-                  <div className="reservation-card-detail">
-                    <h3>Acompañantes</h3>
-                    {Array.isArray(selectedReservation.companions) && selectedReservation.companions.length > 0 ? (
-                      <div className="companions-list-detail">
-                        <TableCompanions
-                          companions={selectedReservation.companions}
-                          compact={true}
-                          showActions={false}
-                        />
-                      </div>
-                    ) : (
-                      <p className="no-companions">No hay acompañantes registrados</p>
-                    )}
-                  </div>
-
-                  <div className="reservation-card-detail">
-                    <h3>Información de Pagos</h3>
-                    <div className="payment-summary">
-                      <div className="payment-row">
-                        <span>Total pagado:</span>
-                        <span className="payment-amount">{formatCurrency(calculateTotalPaid(currentPayments))}</span>
-                      </div>
-                      <div className="payment-row">
-                        <span>Saldo pendiente:</span>
-                        <span className="payment-amount pending">
-                          {formatCurrency(calculatePendingBalance(selectedReservation, currentPayments))}
-                        </span>
-                      </div>
+                    <div className="summary-days">
+                      {calculateDays(selectedReservation.startDate, selectedReservation.endDate)} días
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="modal-footer">
-                <div className="reservation-status-final">
+                <div className="summary-section">
+                  <span className="pretty-label">Estado:</span>
                   <span
-                    className="status-badge-large"
-                    style={{ backgroundColor: getStatusColor(selectedReservation.status) }}
+                    className="pretty-status"
+                    style={{
+                      background: getStatusColor(selectedReservation.status),
+                      fontSize: "0.95em",
+                      padding: "2px 12px",
+                    }}
                   >
                     {getStatusText(selectedReservation.status)}
                   </span>
                 </div>
+                <div className="summary-section">
+                  <span className="pretty-label">Total:</span>
+                  <span className="pretty-total">
+                    {formatCurrency(selectedReservation.total || selectedReservation.plan?.salePrice || selectedReservation.plan?.price || 0)}
+                  </span>
+                </div>
               </div>
+
+              {/* Secciones en dos columnas */}
+              <div className="reservation-details-columns">
+                <div className="reservation-details-col">
+                  {/* Alojamiento */}
+                  <div className="pretty-section minimal-section">
+                    <div className="pretty-section-header minimal-header">
+                      <span className="pretty-icon">🏨</span>
+                      <h3>Alojamiento</h3>
+                    </div>
+                    {(() => {
+                      const acc = getAccommodationInfo(selectedReservation)
+                      return (
+                        <div className="pretty-info-list minimal-list">
+                          <div><span className="pretty-label">Tipo:</span> <span>{acc.label}</span></div>
+                          <div><span className="pretty-label">Nombre:</span> <span>{acc.name}</span></div>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                  {/* Pagos */}
+                  <div className="pretty-section minimal-section">
+                    <div className="pretty-section-header minimal-header">
+                      <span className="pretty-icon">💳</span>
+                      <h3>Pagos</h3>
+                    </div>
+                    {(() => {
+                      const info = getReservationPaymentInfo(selectedReservation)
+                      if (!info) return <p style={{ fontSize: "0.95em" }}>Sin pagos</p>
+                      return (
+                        <div className="pretty-info-list minimal-list">
+                          <div><span className="pretty-label">Total:</span> <span>{formatCurrency(info.totalReservation)}</span></div>
+                          <div><span className="pretty-label">Pagado:</span> <span>{formatCurrency(info.totalPaid)}</span></div>
+                          <div>
+                            <span className="pretty-label">Pendiente:</span>
+                            <span className={info.pendingBalance <= 0 ? "pretty-value completed" : "pretty-value pending"}>
+                              {formatCurrency(info.pendingBalance)}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: "0.95em", marginTop: 4 }}>
+                            {info.isComplete ? <span className="pretty-status-complete">✅ Completo</span> : <span className="pretty-status-pending">⏳ Pendiente</span>}
+                          </div>
+                        </div>
+                      )
+                    })()}
+                  </div>
+                </div>
+                <div className="reservation-details-col">
+                  {/* Acompañantes */}
+                  <div className="pretty-section minimal-section">
+                    <div className="pretty-section-header minimal-header">
+                      <span className="pretty-icon">👥</span>
+                      <h3>Acompañantes</h3>
+                    </div>
+                    {Array.isArray(selectedReservation.companions) && selectedReservation.companions.length > 0 ? (
+                      <div style={{ fontSize: "0.95em" }}>
+                        <TableCompanions companions={selectedReservation.companions} compact={true} showActions={false} />
+                      </div>
+                    ) : (
+                      <p className="no-companions" style={{ fontSize: "0.95em" }}>Ninguno</p>
+                    )}
+                  </div>
+                  {/* Servicios */}
+                  <div className="pretty-section minimal-section">
+                    <div className="pretty-section-header minimal-header">
+                      <span className="pretty-icon">🛎️</span>
+                      <h3>Servicios</h3>
+                    </div>
+                    {(() => {
+                      const services = getServicesInfo(selectedReservation)
+                      return services.length > 0 ? (
+                        <ul className="pretty-services-list minimal-list">
+                          {services.map((service) => (
+                            <li key={service.id} style={{ fontSize: "0.95em" }}>
+                              <span>{service.name}</span>
+                              {service.quantity > 1 && <span className="pretty-qty"> x{service.quantity}</span>}
+                              <span style={{ marginLeft: 6 }}>{formatCOP(service.price * service.quantity)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="no-services" style={{ fontSize: "0.95em" }}>Ninguno</p>
+                      )
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <div className="reservation-status-final">
+                <span
+                  className="status-badge-large"
+                  style={{ backgroundColor: getStatusColor(selectedReservation.status) }}
+                >
+                  {getStatusText(selectedReservation.status)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Pago */}
+      {isPaymentModalOpen && selectedReservation && (
+        <div className="reservations-modal-overlay">
+          <div className="reservations-modal-container">
+            <div className="modal-header">
+              <h2>Realizar Pago - Reserva #{selectedReservation.idReservation}</h2>
+              <button className="close-button" onClick={() => setIsPaymentModalOpen(false)} aria-label="Cerrar">
+                &times;
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <PaymentForm
+                totalAmount={
+                  selectedReservation.total ||
+                  selectedReservation.plan?.salePrice ||
+                  selectedReservation.plan?.price ||
+                  0
+                }
+                onPaymentSubmit={async (formData) => {
+                  try {
+                    // Crear objeto de pago a partir del FormData
+                    const paymentPayload = {
+                      idReservation: selectedReservation.idReservation,
+                      amount: formData.get("amount"),
+                      paymentMethod: formData.get("paymentMethod"),
+                      paymentDate: formData.get("paymentDate"),
+                      status: formData.get("status") || "Pendiente",
+                      voucher: formData.get("voucher"),
+                    }
+
+                    // Validar el monto usando la lógica del administrador
+                    const validationError = validatePaymentAmount(
+                      Number(paymentPayload.amount),
+                      selectedReservation,
+                      currentPayments,
+                    )
+
+                    if (validationError) {
+                      throw new Error(validationError)
+                    }
+
+                    // Registrar el pago
+                    const savedPayment = await addPaymentToReservation(paymentPayload)
+
+                    // Sincronizar estado de reserva si es necesario
+                    if (savedPayment && savedPayment.idReservation) {
+                      try {
+                        await syncReservationStatus(savedPayment.idReservation, savedPayment)
+                      } catch (syncError) {
+                        console.error("Error al sincronizar estado de reserva:", syncError)
+                        alert("El pago se registró pero hubo un error al sincronizar el estado de la reserva")
+                      }
+                    }
+
+                    return savedPayment
+                  } catch (error) {
+                    console.error("Error al procesar el pago:", error)
+                    throw new Error("No se pudo procesar el pago. Inténtalo de nuevo.")
+                  }
+                }}
+                onCancel={() => setIsPaymentModalOpen(false)}
+                onPaymentSuccess={async () => {
+                  setIsPaymentModalOpen(false)
+                  await fetchAllData()
+                  // Si el modal de detalles está abierto, actualiza la reserva seleccionada con los datos más recientes
+                  if (isDetailModalOpen && selectedReservation) {
+                    // Busca la reserva actualizada en el nuevo array de reservas
+                    const updated = reservations.find(r => r.idReservation === selectedReservation.idReservation)
+                    if (updated) setSelectedReservation(updated)
+                  }
+                }}
+                reservationData={selectedReservation}
+                existingPayments={currentPayments}
+                keepFormOpen={false}
+              />
+            </div>
+
+            {/* Footer del modal con botón de confirmar pago */}
+            <div
+              className="modal-footer"
+              style={{
+                padding: "16px 24px",
+                borderTop: "1px solid var(--card-border)",
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "12px",
+                background: "var(--card-light)",
+              }}
+            >
+              <button
+                type="button"
+                className="btn-payment-cancel"
+                onClick={() => setIsPaymentModalOpen(false)}
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "calc(var(--card-radius) - 4px)",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "var(--card-transition)",
+                  background: "transparent",
+                  color: "var(--card-gray)",
+                  border: "1px solid var(--card-border)",
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn-payment-submit"
+                onClick={() => {
+                  // Activar el botón oculto del formulario de pagos
+                  const hiddenButton = document.getElementById("confirmar-pago-btn")
+                  if (hiddenButton) {
+                    hiddenButton.click()
+                  }
+                }}
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "calc(var(--card-radius) - 4px)",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "var(--card-transition)",
+                  border: "none",
+                  background: "var(--card-success)",
+                  color: "white",
+                }}
+              >
+                Confirmar Pago
+              </button>
             </div>
           </div>
         </div>
