@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom"; 
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./context/AuthContext";
@@ -10,7 +10,6 @@ import Homepage from "./pages/Landingpage";
 import Loginform from "./components/features/componentAuth/Loginform";
 import RegisterForm from "./components/features/componentAuth/register";
 import RecoveryPassword from "./components/features/componentAuth/recoveryPassword";
-import Emailcode from "./components/features/componentAuth/Emailcode";
 import DashboardManagement from "./components/features/componentDashboard/main";
 import TableUser from "./components/features/componentClients/tableClients";
 import Customer from "./components/features/componentCustomer/customer";
@@ -24,12 +23,12 @@ import CompanionsView from "./components/features/componentCompanions/companions
 import ViewPayments from "./components/features/componentPayments/viewPayments";
 import Plan from "./components/features/componentPlans/componentPlan";
 import PlanProgramed from "./components/features/componentPlans/componentPlanProgramed";
-import ReseservationClient from "./pages/Reservations/ReservationsClient"
+import ReseservationClient from "./pages/Reservations/ReservationsClient";
 import Error401 from "./components/common/401&404/401";
 import Error404 from "./components/common/401&404/404";
 import "../src/components/features/componentPlans/componentPlan.css";
 import { AlertProvider } from "./context/AlertContext";
-import ResetPassword from "./components/features/componentAuth/Emailcode";
+import ResetPassword from "./components/features/componentAuth/Resetpassword";
 export default function App() {
   return (
     <BrowserRouter>
@@ -38,18 +37,18 @@ export default function App() {
           <Routes>
             {/* --- RUTAS PÚBLICAS --- */}
             <Route path="/" element={<MainLayout />}>
-            <Route path="/my-reservations" element={<ReseservationClient />} />
+              <Route
+                path="/my-reservations"
+                element={<ReseservationClient />}
+              />
               <Route index element={<Homepage />} />
             </Route>
             <Route path="/login" element={<Loginform />} />
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/recoveryPassword" element={<RecoveryPassword />} />
-            <Route path="/Emailcode" element={<Emailcode />} />
+            <Route path="/reset-password" element={<ResetPassword />} />{" "}
             <Route path="/unauthorized" element={<Error401 />} />
-
             {/* --- RUTAS PÚBLICAS DEL CLIENTE --- */}
-            
-
             {/* --- RUTAS PROTEGIDAS DEL PANEL DE ADMINISTRADOR --- */}
             <Route
               element={
@@ -195,9 +194,7 @@ export default function App() {
                 }
               />
             </Route>
-
             <Route path="*" element={<Error404 />} />
-            <Route path="/restablecer" element={<ResetPassword/>}/>
           </Routes>
           <ToastContainer position="top-right" autoClose={3000} />
         </AlertProvider>

@@ -1,14 +1,13 @@
-// --- START OF FILE ResetPassword.jsx ---
-// (Si el archivo se llama Emailcode.jsx, renómbralo a ResetPassword.jsx)
+
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react"; // Añadido useEffect
+import { useState, useEffect } from "react"; 
 import { resetPassword } from "../../../services/authService";
 import logo from "../../../assets/logo.png";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./resetPassword.css"; // Nuevo archivo CSS
+import "./resetPassword.css"; 
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -25,17 +24,16 @@ export default function ResetPassword() {
 
   const [token, setToken] = useState(null);
 
-  // useEffect(() => {
-  //   const queryParams = new URLSearchParams(location.search);
-  //   const extractedToken = queryParams.get("token");
-  //   if (!extractedToken) {
-  //     toast.error("Token inválido o no proporcionado. Serás redirigido.", { autoClose: 3000 });
-  //     setTimeout(() => navigate("/login"), 3500);
-  //   } else {
-  //     setToken(extractedToken);
-  //   }
-  // }, [location.search, navigate]);
-
+ useEffect(() => {
+  const queryParams = new URLSearchParams(location.search);
+  const extractedToken = queryParams.get("token");
+  if (!extractedToken) {
+    toast.error("Token inválido o no proporcionado. Serás redirigido.", { autoClose: 3000 });
+    setTimeout(() => navigate("/login"), 3500);
+  } else {
+    setToken(extractedToken);
+  }
+}, [location.search, navigate]);
 
   const validatePassword = (password) => {
     if (!password.trim()) return "La nueva contraseña es obligatoria.";
@@ -69,11 +67,11 @@ export default function ResetPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if (!token) {
-    //   setGeneralError("Token no disponible para restablecer la contraseña.");
-    //   toast.error("Token no disponible.");
-    //   return;
-    // }
+    if (!token) {
+      setGeneralError("Token no disponible para restablecer la contraseña.");
+      toast.error("Token no disponible.");
+      return;
+    }
 
     setNewPasswordError("");
     setConfirmPasswordError("");
@@ -212,4 +210,3 @@ export default function ResetPassword() {
     </div>
   );
 }
-// --- END OF FILE ResetPassword.jsx ---

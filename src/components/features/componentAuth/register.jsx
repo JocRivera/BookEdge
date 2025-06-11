@@ -1,18 +1,15 @@
-// --- START OF FILE register.jsx ---
-// (El código JSX que proporcionaste ya está bastante bien para esto)
-// Solo me aseguro de que los botones del ojo estén correctamente dentro del .password-input-container
-// y que el input tenga espacio para el ojo si es necesario (manejado por CSS)
-
 import { Link, useNavigate } from "react-router-dom";
 import "./register.css"; // Tu CSS existente
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { register } from "../../../services/AuthService";
+import { register,getUserData } from "../../../services/AuthService";
 import logo from "../../../assets/logo.png";
 import { IoEye, IoEyeOff } from "react-icons/io5";
+import { useAuth } from "../../../context/authContext";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
+  const { setUser, setIsAuthenticated,isLoadingAuth} = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -170,11 +167,7 @@ export default function RegisterForm() {
 
     try {
       await register(dataToSend);
-      toast.success("¡Usuario registrado exitosamente! Serás redirigido.", {
-        position: "top-right",
-        autoClose: 2500,
-        onClose: () => navigate("/login"), 
-      });
+      window.location.href = "/";
     } catch (error) {
       if (
         error.response &&
@@ -207,6 +200,14 @@ export default function RegisterForm() {
       setIsSubmitting(false);
     }
   };
+
+    if (isLoadingAuth) {
+    return (
+      <div className="loading-screen">
+        <h2>Cargando...</h2>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -123,12 +123,12 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
       ...formData,
       idRol: formData.idRol || formData.role?.idRol || 0,
     };
+    delete dataToSubmit.role; // <--- Esto es clave
+    delete dataToSubmit.confirmPassword;
 
     if (userData && !dataToSubmit.password) {
       delete dataToSubmit.password;
     }
-
-    delete dataToSubmit.confirmPassword;
 
     try {
       await onSave(dataToSubmit);
@@ -578,7 +578,7 @@ const FormUser = ({ isOpen, onClose, userData = null, onSave }) => {
                   <label htmlFor="confirmPassword">
                     {userData
                       ? "Confirmar Contraseña (si cambia)"
-                      : "Confirmar Contraseña "}
+                      : "Contraseña "}
                   </label>
                   <input
                     type="password"
