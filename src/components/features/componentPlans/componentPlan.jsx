@@ -14,16 +14,23 @@ function Plan() {
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [data, setData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isLoading, setIsLoading] = useState(true); // NUEVO: estado de carga
+    const [error, setError] = useState(null); // NUEVO: estado de error
     const { showAlert } = useAlert();
 
     const fetchData = async () => {
+        setIsLoading(true);
+        setError(null);
         try {
             const response = await getAllPlans();
             setData(response);
         } catch (error) {
-            console.error("Error al obtener los planes:", error);
+            setError(error.message || "Error al obtener los planes");
+        } finally {
+            setIsLoading(false);
         }
     };
+
     useEffect(() => {
         fetchData();
     }, [isModalOpen]);
@@ -95,6 +102,11 @@ function Plan() {
             .includes(searchTerm.toLowerCase())
     );
 
+    const handleImageError = (e) => {
+        e.target.style.objectFit = "contain";
+        e.target.onerror = null;
+    };
+
     return (
         <section className="bookEdge-plans-container">
             <div className="bookEdge-plans-title-wrapper">
@@ -122,7 +134,18 @@ function Plan() {
             </div>
 
             <div className="bookEdge-plans-grid-container">
-                {filteredPlans.length === 0 ? (
+                {isLoading ? (
+                    <div className="loading-indicator-admin">
+                        <div className="loading-spinner-admin"></div>
+                        <p>Cargando planes...</p>
+                    </div>
+                ) : error ? (
+                    <div className="error-message">
+                        {searchTerm
+                            ? `No se encontraron resultados para "${searchTerm}"`
+                            : "Error al cargar los planes"}
+                    </div>
+                ) : filteredPlans.length === 0 ? (
                     <div className="empty-state-admin">
                         {searchTerm
                             ? `No se encontraron resultados para "${searchTerm}"`
@@ -134,13 +157,10 @@ function Plan() {
                             <div className="bookEdge-plans-card-image-container">
                                 {plan.image ? (
                                     <img
-                                        src={`http://localhost:3000${plan.image}`}
+                                        src={`https://backendbookedge-1.onrender.com${plan.image}`}
                                         alt={plan.name}
                                         className="bookEdge-plans-card-img"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = "https://via.placeholder.com/300x200?text=Imagen+no+disponible";
-                                        }}
+                                        onError={handleImageError}
                                     />
                                 ) : (
                                     <div className="bookEdge-plans-card-placeholder">

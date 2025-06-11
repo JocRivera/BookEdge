@@ -652,21 +652,22 @@ const FormPlans = ({ isOpen, onClose, onSave, planToEdit }) => {
                                         <div className="plan-image-preview plan-image-preview--exclusive">
                                             <img
                                                 src={
-                                                    typeof localFormData.image === "string" && localFormData.image
-                                                        ? `http://localhost:3000${localFormData.image}`
-                                                        : localFormData.imageFile
-                                                            ? URL.createObjectURL(localFormData.imageFile)
+                                                    localFormData.imageFile
+                                                        ? URL.createObjectURL(localFormData.imageFile)
+                                                        : (typeof localFormData.image === "string" && localFormData.image)
+                                                            ? `https://backendbookedge-1.onrender.com${localFormData.image}`
                                                             : "https://via.placeholder.com/220x160?text=Sin+imagen"
                                                 }
                                                 alt="Vista previa"
+                                                onError={e => {
+                                                    e.target.style.objectFit = "contain";
+                                                    e.target.onerror = null;
+                                                }}
                                             />
                                         </div>
                                     ) : (
                                         <div className="plan-image-preview plan-image-preview--exclusive">
-                                            <img
-                                                src="https://via.placeholder.com/220x160?text=Sin+imagen"
-                                                alt="Sin imagen"
-                                            />
+                                            <span>Sin imagen</span>
                                         </div>
                                     )}
                                 </div>

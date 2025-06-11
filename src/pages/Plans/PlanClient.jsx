@@ -159,7 +159,7 @@ function EnhancedPlanClient() {
                                 <div className="enhanced-plans-image-wrapper">
                                     {plan.Plan.image ? (
                                         <img
-                                            src={`http://localhost:3000${plan.Plan.image}`}
+                                            src={`https://backendbookedge-1.onrender.com${plan.Plan.image}`}
                                             alt={plan.Plan.name}
                                             className="enhanced-plans-image"
                                             loading="lazy"
