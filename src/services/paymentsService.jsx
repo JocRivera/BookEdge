@@ -241,25 +241,21 @@ export const changePaymentStatus = async (id, status) => {
 // Servicio para operaciones relacionadas con reservas
 export const getReservationPayments = async (idReservation, retryCount = 0) => {
   try {
-<<<<<<< HEAD
-   const response = await axios.get(`${API_URL_PAYMENTS}/reservations/${idReservation}/payments`, {
-  timeout: 30000
-})
-  
-=======
-    const response = await api.get(`/payments/reservations/${idReservation}/payments`)
+    const response = await api.get(
+      `/payments/reservations/${idReservation}/payments`,
+      { timeout: 30000 }
+    );
     // Asegurar que siempre devuelva un array
->>>>>>> ce0362b5bd2611957ad49205d9a9d9bb8a34b3cb
-    return Array.isArray(response?.data) ? response.data : []
+    return Array.isArray(response?.data) ? response.data : [];
   } catch (error) {
-    console.error(`Error getting payments for reservation ${idReservation}:`, error)
+    console.error(`Error getting payments for reservation ${idReservation}:`, error);
     // Implementar lógica de reintentos
-if (retryCount < 2 && (error.code === "ECONNABORTED" || !error.response)) {
-  console.log(`Reintentando obtener pagos para reserva ${idReservation} (${retryCount + 1}/2)...`)
-  await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)))
-  return getReservationPayments(idReservation, retryCount + 1)
-}
-    return [] // Devuelve array vacío en caso de error
+    if (retryCount < 2 && (error.code === "ECONNABORTED" || !error.response)) {
+      console.log(`Reintentando obtener pagos para reserva ${idReservation} (${retryCount + 1}/2)...`);
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (retryCount + 1)));
+      return getReservationPayments(idReservation, retryCount + 1);
+    }
+    return []; // Devuelve array vacío en caso de error
   }
 }
 
