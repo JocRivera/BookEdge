@@ -65,10 +65,7 @@ const FormService = ({ isOpen, onClose, service, onSave }) => {
             newError.name = 'El nombre debe tener al menos 3 caracteres';
             isValid = false;
         }
-        if (!formData.name.match(/^[a-zA-Z\s]+$/)) {
-            newError.name = 'El nombre solo puede contener letras y espacios';
-            isValid = false;
-        }
+
         if (!formData.Description) {
             newError.Description = 'La descripción es requerida';
             isValid = false;
