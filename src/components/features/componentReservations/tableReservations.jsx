@@ -208,7 +208,7 @@ function TableReservations() {
             : []),
         ]
 
-        return searchFields.some((field) => field.includes(safeSearchTerm))
+        return searchFields.some((field) => (field|| "").includes(safeSearchTerm))
       })
   }, [reservations, searchTerm, showAnuladas, clienteId])
 

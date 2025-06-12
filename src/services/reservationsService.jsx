@@ -271,8 +271,7 @@ export const createReservation = async (reservationData) => {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-      },
-      timeout: 5000,
+      }
     });
 
     return response.data;

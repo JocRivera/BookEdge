@@ -3,7 +3,7 @@ import "./Footer.css";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="footer">
       <div className="footer-content">
@@ -16,7 +16,7 @@ export default function Footer() {
             <li>
               <a href="tel:+541112345678">+57 3021456987</a>
             </li>
-            <li>Av El morro dobla la esquina por el sancocho zona Premium</li>
+            <li>Km 30 vía Vereda el Cortado – Barbosa – Medellín (Antioquia) – Colombia</li>
           </ul>
         </div>
 
@@ -41,7 +41,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      
+
       <div className="copyright">
         &copy; {currentYear} Hosteria Los Lagos. Todos los derechos reservados.
       </div>

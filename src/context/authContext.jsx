@@ -107,10 +107,10 @@ export const AuthProvider = ({ children }) => {
       const errorMessages = Array.isArray(error.response?.data?.errors)
         ? error.response.data.errors.map((err) => err.msg) // Si tu backend devuelve array de errores detallados
         : [
-            error.response?.data?.message ||
-              error.message ||
-              "Error al iniciar sesión. Inténtalo de nuevo.",
-          ];
+          error.response?.data?.message ||
+          error.message ||
+          "Error al iniciar sesión. Inténtalo de nuevo.",
+        ];
       setErrors(errorMessages);
       setLoading(false);
       throw error; // Re-lanzar para que el handleSubmit en LoginForm pueda saber que falló
@@ -154,12 +154,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Redirigir a la ruta adecuada según el rol del usuario autenticado
-  useEffect(() => {
-    if (isAuthenticated && user?.role?.name === "Cliente") {
-      navigate("/");
-    }
-  }, [isAuthenticated, user, navigate]);
+
 
   return (
     <AuthContext.Provider
