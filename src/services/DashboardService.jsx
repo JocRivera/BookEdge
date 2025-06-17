@@ -19,3 +19,13 @@ export const getDailyReservations = async () => {
         throw new Error('Error al obtener las reservas diarias');
     }
 }
+
+export const getLeastBusyMonths = async () => {
+    try {
+        const response = await api.get("/dashboard/leastBusyMonths");
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching least busy months:', error);
+        throw new Error('Error al obtener los meses menos concurridos');
+    }
+}
